@@ -1,0 +1,1966 @@
+\setchapterimage[6cm]{seaside}
+\setchapterpreamble[u]{\margintoc}
+\chapter{Synthetic Cubical Homotopy Theory}
+\labch{homotopy}
+
+In recent years HoTT has been developed axiomatically using various
+proof assistants. Indeed, all of the major proof assistants based on
+type theory have HoTT libraries: \texttt{HoTT-Agda} \sidecite{hottagda}, \texttt{Coq-HoTT}
+\sidecite{hottcoq}, \texttt{Lean-HoTT} \sidecite{hottlean}, \texttt{UniMath}
+\sidecite{UniMath}. Many impressive results can be found in these
+libraries, for example, the formalization of computations of many
+homotopy groups of spheres~\sidecite{pi1s1,pinsn,Brunerie16}, the
+Seifert-van Kampen theorem~\sidecite{seifertvankampen}, Blakers-Massey
+theorem~\sidecite{BlakersMassey} % , the Gysin sequence~\sidecite{Brunerie16}
+% \anders{I don't think this has been mechanized?}
+and Serre's spectral sequence \sidecite{vanDoorn18}. However, despite
+these successes some constructions have turned out to be surprisingly
+difficult. An example of this is the proof that the torus is
+equivalent to the product of two circles: the first version required
+an impressive amount of complicated path algebra, worked out by
+\sidecitet{Sojakova16Torus}. The proof was later simplified by
+\sidecitet{LicataBrunerie15} using cubical ideas, but it was still highly
+nontrivial. The main reason for the difficulties in formalizing this
+proof is the complicated path algebra arising from the fact that many
+equalities do not hold definitionally. These problems can be traced
+back to univalence and HITs being axiomatically added in HoTT; in
+particular, the computation rules for the higher constructors of HITs
+are typically postulated and do not hold definitionally.
+
+These issues have been resolved in a uniform way by the recent
+invention of \emph{cubical} type theories
+\sidecite{CCHM,AngiuliHouHarper18,ABCFHL}. This is a family of type
+theories with native support for all of the notions of HoTT, in
+particular univalence and HITs. The fundamental idea underlying
+cubical type theory is to take the homotopical intuitions from HoTT
+seriously and incorporate them in the judgmental framework of the type
+theory. As these homotopical notions are built into the theory, they
+have computational meaning, which simplifies many proofs. Indeed, many
+proofs that involve complicated path algebra in HoTT may simply be
+proved by reflexivity in cubical type theory. For instance, the proof
+that the torus is equivalent to the product of two circles is trivial
+to prove in cubical type theory using pattern matching and reflexivity
+as shown in~\cref{sec:torus}.
+
+There are multiple variations and implementations of cubical type
+theory---the original formulation of \sidecitet{CCHM} used an interval
+endowed with the structure of a \emph{De Morgan algebra} while the
+more recent \emph{cartesian} cubical type theories use an interval
+with less structure~\sidecite{AngiuliHouHarper18,ABCFHL}. All of the
+results in this paper have been formalized\footnote{The developments
+  can be found in the \textsc{agda/cubical} library located
+  at:\\ \url{https://github.com/agda/cubical}} using the recent
+cubical extension \sidecite{cubicalagda} of the \Agda{} proof assistant
+\sidecite{Agda} that is based on the De Morgan variation of cubical type
+theory. However, despite some technical differences between the
+underlying theories, all of the proofs could be carried with similar
+complexity in a system based on cartesian cubical type theory, like
+\redtt{}~\sidecite{redtt}.
+
+While the proofs in cubical type theory often resemble the original
+HoTT proofs some work is typically required to make them more
+``cubical'' in order to take full advantage of the cubical
+primitives. In particular, the use of path-induction that is
+ubiquitous in HoTT is kept to a minimum, and one typically instead
+uses the more elementary operations of cubical type theory such as
+transport and composition. This results in a new way of mechanizing
+synthetic homotopy theory, leading to (arguably) more direct and
+elegant proofs that closely resemble the homotopical arguments.
+
+\paragraph{Contributions/Outline}
+
+The main goal of this chapter is to show the practical gains of using a
+system with native support for univalence and higher inductive types
+for formalizing synthetic homotopy theory. We exemplify this by
+formalizing the following results from HoTT:
+%
+\begin{itemize}
+\item The equivalence of the torus and two circles together with the
+  computation of their respective fundamental groups
+  (\cref{sec:torus}).
+\item The equivalence between direct definitions of low dimensional
+  spheres, and alternative definitions using iterated suspensions
+  (\cref{sec:susp}).
+\item Definition of pushout together with a direct proof of the ``$3
+  \times 3$ lemma'' (\cref{sec:pushout}).
+\item Definition of the join of two types and a proof that it is
+  associative (\cref{sec:join}). Using this we get two proofs, one
+  inspired by HoTT and a new direct cubical proof, that $\Sp^3$ is
+  equivalent to the join of two circles.
+\item Definitions of the Hopf fibration and a proof that its total
+  space is $\Sp^3$ (\cref{sec:hopf}).
+\end{itemize}
+
+The paper ends with some discussions of future work and a comparison
+with related work in the HoTT libraries of the major proof assistants
+based on type theory (\cref{sec:conclusions}).
+
+\section{Cubical Agda}
+
+The cubical type theory that \texttt{Cubical Agda} is based on is
+heavily inspired by the one of \sidecitet{CCHM}, more precisely on the
+variation outlined by \sidecitet{CHM} that is well-suited for HITs. The
+goal of this section is to give sufficient background for readers not
+familiar with cubical type theory and \texttt{Cubical Agda} to be able
+to understand the examples in this paper. Readers who are familiar
+with \texttt{Cubical Agda} can hence skip this section and we refer
+curious readers to the paper of \sidecitet{cubicalagda} for a
+comprehensive technical treatment of all of the features of
+\texttt{Cubical Agda}.
+
+\subsection{The Interval and Path Types}
+
+The first addition to make \texttt{Agda} \emph{cubical} is an interval
+type \func{I} with endpoints \con{i0} and \con{i1}. This plays the
+role of the real interval $[0,1] \subset \mathbb{R}$ in homotopy
+theory, however in \texttt{Cubical Agda} this is a purely formal
+object. A variable \var{i} : \func{I} represents a point varying
+continuously between the two endpoints. The interval is equipped with
+three basic operations: \emph{minimum} (\func{\_∧\_} : \func{I} $\to$
+\func{I} $\to$ \func{I}), \emph{maximum} (\func{\_∨\_} : \func{I}
+$\to$ \func{I} $\to$ \func{I}) and \emph{reversal} (\func{∼{}\_} :
+\func{I} $\to$ \func{I}). These operations form a \emph{De Morgan
+  algebra}, that is, a bounded distributive lattice
+$(\con{i0},\con{i1},\func{\_∧\_},\func{\_∨\_})$ with a De Morgan
+involution \func{∼{}\_}.
+
+A function out of the interval into one of \texttt{Agda}'s universes
+of types (\func{Set} \var{ℓ}) represents a line between two types. By
+iterating this we obtain squares, cubes and hypercubes of types making
+\texttt{Agda} inherently \emph{cubical}. It is often useful to specify
+the endpoints of a line, which is done via \emph{path types} (we omit
+the quantification of the universe level \var{ℓ} for readability):
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{PathP}
+%
+Paths are introduced by lambda abstractions
+\[
+  \symb{λ} \var{i} \to t : \func{PathP}\;\var{A}\;t[\substnop {i}
+  {\con{i0}}]\;t[\substnop {i} {\con{i1}}]
+\]
+provided that $t : A\;i$ for $i: \func{I}$. Given
+$\var{p} : \func{PathP}\;\var{A}\;\var{a}_0\;\var{a}_1$ we can apply
+it to $\var{r} : \func{I}$ and obtain
+$\var{p}\;\var{r} : \var{A}\;\var{r}$. Also, we always have that
+$\var{p}\;\con{i0}$ reduces to $a_0$ and $\var{p}\;\con{i1}$ reduces
+to $a_1$.
+
+The \func{PathP} types should be thought of as representing
+heterogeneous equalities since the two endpoints are in different
+types; this is similar to the dependent paths in
+HoTT~\sidecite[][Sect. 6.2]{HottBook13}. We define the type of non-dependent
+paths/equalities in terms of \func{PathP} as follows:
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{Path} %
+%
+The syntax $\{\var{A} = A\}$ tells \texttt{Agda} to bind the hidden
+argument \var{A} (first \var{A}) to a variable $A$ (second $A$) that
+can be used on the right hand side of the definition. Viewing
+equalities as paths allows us to reason about equality; for
+instance, the constant path represents a proof of reflexivity.
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{refl}
+
+% We can also directly apply a function to a path in order to prove that
+% dependent functions respect path equality, as shown in the definition
+% of \func{cong} below.  Simply by computation \func{cong} satisfies
+% some new definitional equalities compared to the corresponding
+% definition for the inductive equality type à la \sidecitet{MartinLoef75}.
+% For instance, \func{cong} is functorial by definition: we can prove
+% \func{congId} and \func{congComp} by plain reflexivity (\func{refl}).
+% %
+% \ExecuteMetaData[chapters/literate-agda/Code.tex]{cong}
+
+Path types also let us prove new things that are not provable in
+standard \texttt{Agda}. For example, function extensionality, stating
+that pointwise equal functions are equal themselves, has a very simple
+proof:
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{funext}
+
+The proof of function extensionality for dependent and $n$-ary
+functions is equally direct. Since $\func{funExt}$ is a
+\emph{definable notion} in \texttt{Cubical Agda} it has computational
+content: it simply swaps the arguments to \var{p}.
+
+We can also use the basic operations on \func{I} to construct various
+useful operations, for example the reversal of a path is defined
+using \func{∼{}\_} and represents the fact that \func{≡} is symmetric.
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{sym}
+
+\subsection{Transport and Composition}
+
+One of the key operations with type theoretic equality is
+\emph{transport}: given an equality/path between types we get a
+function between these types. In \texttt{Cubical Agda} this is defined
+using another primitive called \func{transp}. However, for the
+examples in this paper the \func{transport} function suffices.
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{transport}
+%
+% The more general \func{transp} operation lets us specify where the
+% transport is the identity function. In particular, when the second
+% argument to \func{transp} is \con{i1} it will reduce to \var{a}, which
+% let us prove that \func{transp}\;\var{A}\;\var{r}\;\var{a} is always
+% path equal to \var{a}.
+% \loic{This remark seems too technical. Hopefully we can get rid of
+%   transp in this paper...}
+% \anders{Yeah, I agree. Hopefully we can drop the actual definition of
+%   transport and pretend like it's the only operation.}
+% However, for the examples in this paper the \func{transport} function
+% will be sufficient.
+% \anders{Double check that this is true.}
+
+The substitution principle is an instance of \func{transport}.
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{subst}
+%
+This function invokes \func{transport} with a proof that the family
+$B$ respects the equality $p$:
+\[
+  \lambda\;i \to B\;(p\;i) : B\;x\;\func{≡}\;B\;y
+\]
+
+By combining the transport and minimum operations we can define an
+induction principle for paths that resemble the eliminator for
+Martin-Löf's inductively defined identity types~\sidecite{MartinLoef75}.
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{J}
+
+However, an important difference between the cubical path types and
+Martin-Löf's identity types (and the path types in HoTT) is that
+cubical path types do not behave like inductive types.
+In particular, the above definition does not definitionally satisfy
+the computation rule when applied to \func{refl}. Nevertheless, we can
+still prove that it holds up to a path:
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{Jrefl}
+
+This is a subtle, but important difference between cubical type theory
+and HoTT. Readers familiar with HoTT might be worried that the failure
+of this equality holding definitionally complicates many proofs,
+however in our experience this is rarely the case because many proofs
+that require path induction in HoTT can be proved in more direct ways
+using cubical primitives. Furthermore, for closed terms (potentially
+depending on interval variables) the lack of this definitional
+equality in cubical type theory does not affect canonicity, in
+particular any closed term of type natural numbers is definitionally
+equal to a numeral as proved by~\sidecitet{Huber16}.
+
+\texttt{Cubical Agda} also has a primitive operation for composing
+paths and, more generally, for composing higher dimensional
+cubes. This operation is called \emph{homogeneous composition} and to
+describe it we need to be able to write partially specified
+$n$-dimensional cubes, i.e., cubes where some faces are missing. For
+this \texttt{Cubical Agda} has partial cubical types, written
+\func{Partial}~\var{r}~\var{A}. The idea is that
+\func{Partial}~\var{r}~\var{A} is the type of cubes in \var{A} that
+are only defined when (\var{r} = \con{i1}) holds. For example,
+\func{Partial}~(\var{i}~\func{∨}~\func{∼{}}~\var{i})~\var{A} is a type
+that is only defined when \var{i} is \con{i1} or \con{i0} (this means
+that it corresponds to the two endpoints of a line). Elements of these
+partial cubical types are introduced using pattern matching
+lambdas. For this purpose \texttt{Cubical Agda} supports a new form of
+patterns, here $(\var{i} = \con{i1})$ and $(\var{i} = \con{i0})$, that
+specify the cases of a partial element:
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{partialBool'}
+
+The term \func{partialBool} should be thought of as a boolean
+depending on \var{i} with different values when \var{i} is \con{i1}
+and when \var{i} is \con{i0}.
+This is only defined on the two endpoints of \func{I} and there is no
+way to extend this partial type to a regular dependent boolean, since
+\con{true} is not equal to \con{false}.
+
+\texttt{Cubical Agda} also has cubical subtypes as in~\sidecitet{CCHM};
+given \var{A} : \func{Set}~\var{ℓ}, \var{r} : \func{I} and
+\var{u}~:~\func{Partial}~\var{r}~\var{A} we can form the type
+\var{A}~\func{[}~\var{r}~\func{↦}~\var{u}~\func{]}.  A term \var{v} of
+this type is a term of type \var{A} that is definitionally equal to
+\var{u} when (\var{r} = \con{i1}) is satisfied. Any term \var{u} :
+\var{A} can be seen as a term of type
+\var{A}~\func{[}~\var{r}~\func{↦}~\var{u}~\func{]} that agrees with
+itself when (\var{r} = \con{i1}):
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{inc}
+
+We can also forget that a partial element agrees with \var{u} when
+(\var{r} = \con{i1}):
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{ouc}
+
+These two operations are inverse to each other when well-typed. Using
+this cubical infrastructure we can now give the type of the
+homogeneous composition operation.
+% that generalizes binary composition of paths so that we can compose
+% multiple composable cubes.
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{hcomp}
+
+When calling \func{hcomp} \{r = \var{r}\} \var{u} \var{u₀},
+\texttt{Cubical Agda} makes sure that \var{u₀} agrees with \var{u}
+\con{i0} on \var{r}; this is specified in the type of \var{u₀}. The
+idea is that \var{u₀} is the base and \var{u} specifies the sides of
+an open box where the side opposite of \var{u₀} is missing. The
+\func{hcomp} operation then gives us the missing side.
+For example binary composition of paths can be written as:
+%
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{compPath}
+
+Pictorially we are given \var{p} : \var{x} \ \func{≡}\  \var{y} and
+\var{q} : \var{y} \ \func{≡}\  \var{z}, and the composite of the two paths
+is obtained by computing the dashed top of the following square.
+%
+\begin{mathpar}
+  \vcenter{\hbox{\begin{tikzpicture}[baseline=40,->, scale=0.8]
+    \node [anchor=west] (x) at (0, 1) {\footnotesize \( j \)};
+    \node [anchor=north] (y) at (1, 0) {\footnotesize \( i \)};
+    \draw (0,0) -- (0,1);
+    \draw (0,0) -- (1,0);
+  \end{tikzpicture}}}
+  \and %
+  \qquad
+    \begin{tikzpicture}[baseline=30,xscale=2,yscale=2]
+    \node (A01) at (0,1) {\var{x}};
+    \node (A11) at (1,1) {\var{z}};
+    \node (A00) at (0,0) {\var{x}};
+    \node (A10) at (1,0) {\var{y}};
+    \path[->,font=\scriptsize,>=angle 90]
+      (A00) edge node[left]{\var{x}} (A01)
+      (A10) edge node[right]{\var{q} \var{j}} (A11)
+      (A00) edge node[below]{\func{inS} (\var{p} \var{i})} (A10);
+    \path[->,font=\scriptsize,>=angle 90,dashed]
+      (A01) edge node[above]{} (A11);
+  \end{tikzpicture}
+
+\end{mathpar}
+
+% As we are constructing a path from \var{x} to \var{z} along \var{i}
+% we have \var{i} : \func{I} in context and put \func{inS} (\var{p}
+% \var{i}) as bottom. The direction \var{j} is abstracted in the first
+% argument to \func{hcomp} and we use pattern matching to specify the
+% sides.
+
+% We can also define homogeneous filling of open boxes as
+% %
+% \ExecuteMetaData[chapters/literate-agda/Code.tex]{hfill}
+% % \andreas{Starting here, I cannot comprehend the definitions any more.
+% % There are now three dimensions involved: $r$, $i$, $j$, and I do not
+% % know how to map this to the picture.}
+
+% When \var{i} is \con{i0} this is \func{outS}~\var{u₀} and when \var{i}
+% is \con{i1} it is \func{hcomp} ($\lambda$ \var{j} $\to$ $\lambda$ \{
+% (\var{r} = \con{i1}) $\to$ \var{u} \var{j} \func{1=1} \} \var{u₀} as
+% the absurd faces (\con{i0} = \con{i1}) gets filtered out. By the extensionality of
+% partial elements this hence gives a line along \var{i}
+% between \func{outS}~\var{u₀} and \func{hcomp} \var{u} \var{u₀} which
+% geometrically corresponds to the filling of an open box as it connects
+% the base with the lid computed using \func{hcomp}. %
+% %% \anders{Is this clearer now?} %
+% %% \andreas{It is plausible that there is a beta rule $\func{outS} \circ
+% %%   \func{inS}
+% %%   = \func{id}$, however, it should be mentioned in the
+% %%   subsection before.  Is there also an eta rule?  Otherwise, how do you
+% %%   reason? And if there is eta, under which condition does it hold?
+% %%   Should be added to the previous subsection.} %
+% In the special case when \var{q} is \func{refl} the filler of the
+% above square gives us a direct cubical proof that composing \var{p}
+% with \func{refl} is \var{p}.
+% %
+% \ExecuteMetaData[chapters/literate-agda/Code.tex]{compPathRefl}
+
+By composing paths and higher cubes using \func{hcomp}, we can reason
+about equalities/paths in a very direct way, avoiding the use of path
+induction.
+
+\subsection{Higher Inductive Types}
+\label{sec:hits}
+
+The fact that \texttt{Cubical Agda} has native support for HITs means that we
+can define the circle HIT using an \texttt{Agda} \keyw{data} declaration.
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{s1}
+
+% \begin{minipage}{0.4\linewidth}
+% \ExecuteMetaData[chapters/literate-agda/Torus.tex]{s1}
+% \end{minipage}
+% \begin{minipage}{0.6\linewidth}
+% \begin{center}
+% \begin{tikzpicture}
+%   \draw[->,thick,draw=black,solid,line width=0.3mm]
+%   (0:0) node[above]{\con{base}} arc[radius=0.6, start angle=90, end
+%   angle=-265];
+%   \node[] at (0,0) (b) {$\bullet$};
+%   \node[] at (1,-0.58) (b) {\con{loop}};
+% \end{tikzpicture}
+% \\\ \\
+% \end{center}
+% \end{minipage}
+
+This is a type with a point constructor \con{base} and a nontrivial
+equality/path constructor \con{loop} connecting \con{base} to itself
+as shown in the drawing below.
+
+\begin{center}
+\begin{tikzpicture}
+  \draw[->,thick,draw=black,solid,line width=0.3mm]
+  (0:0) node[above]{\con{base}} arc[radius=0.6, start angle=90, end
+  angle=-265];
+  \node[] at (0,0) (b) {$\bullet$};
+  \node[] at (1,-0.58) (b) {\con{loop}};
+\end{tikzpicture}
+\end{center}
+
+Functions out of HITs are written using normal \texttt{Agda} pattern
+matching equations. The following function wraps the circle twice
+around itself, by composing the \con{loop} constructor with itself:
+%
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{double}
+
+The second case defines a \emph{definitional} equality, while in HoTT
+this would have had to be defined using the postulated recursion
+principle for the circle. This means that in HoTT \func{double}
+applied to \con{loop} would not reduce automatically, but a
+proof of equality would instead have to be applied
+manually. This leads to rather bureaucratic proofs as one then has to
+handle these explicit applications of the computation rule when
+reasoning about \func{double}. Furthermore, this is not very natural
+if one wants to use HITs for programming.
+
+In order for the circle to be the free type generated by \con{base}
+and \con{loop} it also needs to have elements of the form \con{loop}
+$\cdot$ \con{loop} as in the above definition of \func{double}. In
+general, for HITs
+$\func{hcomp}\;(\lambda\,i\to\lambda~\{~(r = \io) \to u\})\;u_0$ only
+reduces to u[\substnop i {\io}] when $r$ is $\io$, and is to be
+considered a canonical element otherwise. The circle hence has
+constructors of the form $\hcompcon~u~u_0$ in addition to \con{base}
+and \con{loop}. When typechecking definitions like the one for
+\func{double}, \texttt{Cubical Agda} checks that the boundary of all
+cases are correct, in particular that the defining equation
+\[
+  \func{double}~(\con{loop}~\var{i}) = (\con{loop} \cdot \con{loop})~\var{i}
+\]
+agrees with \( \func{double}\ \con{base} \) when \var{i} is \iz{} or
+\io{}.
+
+% \[
+%   \func{double}~(\con{loop}~\iz) = \func{double}~\con{base} = \con{base}
+% \]
+% is the same as
+% \[
+%   \func{double}~(\con{loop}~\iz) = (\con{loop} \cdot \con{loop})~\iz = (\hcompcon~...~...)~\iz = \con{base}
+% \]
+% and similarly when \var{i} is \io.
+% \loic{I think this could be more clear, we should spell out that these are
+%   two different ways to rewrite the same term or something.}
+% \anders{I agree. Maybe we don't even have to say it in this much detail.}
+
+\subsection{Glue Types and Univalence}
+
+The final extension of \texttt{Cubical Agda} relevant for this paper
+are the \func{Glue} types of \sidecitet{CCHM} that let us give
+computational content to univalence. Given that a type in cubical type
+theory represents a higher dimensional cube, \func{Glue} types let us
+construct a cube where some sides have been replaced by equivalent
+types.
+% This is analogous to how \func{hcomp} lets us replace some
+% faces of a cube by composing it with other cubes, however for
+% \func{Glue} types we can compose with equivalences instead of paths.
+% \anders{Ok, if you have some better way of explaining Glue informally
+%   please do so! Maybe we don't really have to talk about Glue in any
+%   detail though if the only thing we use is ua...}  \loic{I was only
+%   saying this for the \func{hcomp} analogy which is less clear, this
+%   is a good description of glue imo. And we do need it for Hopf.}
+
+There are many ways to define the notion of ``equivalence of types''
+in HoTT; \texttt{Cubical Agda} uses the definition that two types are
+equivalent if there is a function between them with
+\emph{``contractible fibers''} following the terminology of
+\sidecitet{Voevodsky15} and the HoTT book~\sidecite{HottBook13}. Spelled out,
+a map $f : A \to B$ is an equivalence if the preimage of any point in
+\var{B} is a singleton type. We write \var{A} \func{≃} \var{B} if
+there is a chosen equivalence $f : A \to B$ between \var{A} and
+\var{B}. A key result is that isomorphisms, in the sense of a
+section-retraction pair of functions, give rise to equivalences.
+In particular, the identity function is an equivalence:
+$\func{idEquiv}~\var{A}~:~\var{A}~\func{≃}~\var{A}$.
+
+The \func{Glue} types take a partial family of types \var{A} that are
+equivalent to the base type \var{B}. These types are then ``glued''
+onto \var{B} and the equivalence data gets packaged up into a new
+type.
+%
+\ExecuteMetaData[chapters/literate-agda/Glue.tex]{Glue}
+%
+% When \var{r} is \con{i1} the type \func{Glue}\;\var{B}\;\var{Ae}
+% reduces to \var{Ae}\;\func{1=1}\;\proj{fst}.
+
+These types are introduced using the \func{glue} constructor and
+eliminated using the \func{unglue} operation. Examples of this will be
+discussed in the proof of \cref{thm:hopf}. Using \func{Glue} types we
+can turn an equivalence of types into a path:
+%
+\ExecuteMetaData[chapters/literate-agda/Glue.tex]{ua}
+
+The idea is that we glue \var{A} onto \var{B} when \var{i} is \con{i0}
+using \var{e} and \var{B} onto itself when \var{i} is \con{i1} using
+the identity equivalence. The term \func{ua} \var{e} is a path from
+\var{A} to \var{B} as the \func{Glue} type reduces when the face
+conditions are satisfied---when \var{i} is \con{i0} this reduces to
+\var{A} and when \var{i} is \con{i1} it reduces to \var{B}. %
+Pictorially we can describe \func{ua} \var{e} as the dashed top line
+in:
+%
+\begin{mathpar}
+  \begin{tikzpicture}[xscale=2.5,yscale=2]
+    \node (A01) at (0,1) {\var{A}};
+    \node (A11) at (1,1) {\var{B}};
+    \node (A00) at (0,0) {\var{B}};
+    \node (A10) at (1,0) {\var{B}};
+    \path[->,font=\scriptsize,>=angle 90]
+      (A01) edge node[left]{\var{e}} node[right]{\reflectbox{\rotatebox[origin=c]{90}{$\simeq$}}} (A00)
+      (A11) edge node[left]{\reflectbox{\rotatebox[origin=c]{90}{$\simeq$}}} node[right]{\func{idEquiv}~\var{B}} (A10)
+      (A00) edge node[below]{\var{B}} (A10);
+    \path[->,font=\scriptsize,>=angle 90,dashed]
+      (A01) edge node[above]{$ $} (A11);
+  \end{tikzpicture}
+\end{mathpar}
+
+This lets us prove the standard formulation of the univalence axiom,
+however, for all of the examples in this paper the \func{ua} function
+suffices.
+
+% A consequence is that whenever we have an equivalence
+% $e : A\;\func{≃}\;B$ we have that
+% $\func{transport}\;(\symb{λ}\;i\;\func{→}\;F\;(\func{ua}\;e\;i))$ is
+% an equivalence as well. This ability to lift equivalences through
+% arbitrary type operators $F$ is an easily overlooked benefit of a
+% language with computational univalence.
+
+\section{The Circle and Torus}
+\label{sec:torus}
+
+We already gave the definition of the circle as a HIT in
+\cref{sec:hits}. To define the torus as a datatype in \texttt{Cubical Agda} we write the following:
+%
+\ExecuteMetaData[chapters/literate-agda/Torus.tex]{torus}
+
+The idea is that the \func{Torus} has a base \con{point} with two
+nontrivial path constructors connecting it to itself and a
+\con{square} relating the two paths. This square can be illustrated
+by:
+%
+\begin{center}
+\begin{tikzpicture}[xscale=2,yscale=2]
+  \draw [thin,->] (-1.55,0) -- (-1.55,0.4) ;
+  \draw [thin,->] (-1.55,0) -- (-1.15,0) ;
+  \node [anchor=north] (x) at (-1.15, 0) {\footnotesize \( i \)};
+  \node [anchor=west] (y) at (-1.55, 0.4) {\footnotesize \( j \)};
+
+  \node (A01) at (0,1) {\con{point}};
+  \node (A11) at (1,1) {\con{point}};
+  \node (A00) at (0,0) {\con{point}};
+  \node (A10) at (1,0) {\con{point}};
+  \node (C) at (0.5,0.5) {\con{square}};
+  \path[->,>=angle 90]
+    (A01) edge node[above]{\con{line1}} (A11)
+    (A00) edge node[left]{\con{line2}} (A01)
+    (A10) edge node[right]{\con{line2}} (A11)
+    (A00) edge node[below]{\con{line1}} (A10);
+\end{tikzpicture}
+\end{center}
+
+The type of the \con{square} constructor captures this by identifying
+\con{line2} with itself \emph{over} \con{line1}.  In order to see that
+this represents a torus imagine \con{square} being made of a piece of
+paper that is folded so that the opposite sides are matched up.  The
+proof that the \func{Torus} type is equivalent to two circles in
+\texttt{Cubical Agda} was given by \sidecitet[][Section 2.4.1]{cubicalagda},
+but we recall it here for completeness. We first write a function from
+the torus to two circles using pattern matching.
+%
+\ExecuteMetaData[chapters/literate-agda/Torus.tex]{t2c}
+% \noindent\begin{minipage}[t]{0.55\linewidth}
+%   \ExecuteMetaData[chapters/literate-agda/Torus.tex]{t2c}
+% \end{minipage}
+% \begin{minipage}[t]{0.5\linewidth}
+%   \ExecuteMetaData[chapters/literate-agda/Torus.tex]{c2t}
+% \end{minipage}
+
+To prove that this is an equivalence we need to define its inverse
+\func{c2t} : \func{S¹} \func{×} \func{S¹} → \func{Torus}. This
+function is also defined by pattern matching in the obvious
+way. Proving that the two maps cancel is then simply done by
+pattern matching with \func{refl} in all cases.
+%
+\ExecuteMetaData[chapters/literate-agda/Torus.tex]{c2tt2c}
+% \begin{center}
+% \begin{minipage}[t]{1.0\linewidth}
+% \begin{minipage}[t]{0.5\linewidth}
+%   \ExecuteMetaData[chapters/literate-agda/Torus.tex]{c2tt2c}
+% \end{minipage}
+% \begin{minipage}[t]{0.5\linewidth}
+%   \ExecuteMetaData[chapters/literate-agda/Torus.tex]{t2cc2t}
+% \end{minipage}
+% \end{minipage}
+% \end{center}
+
+The converse, \func{t2c-c2t} : (\var{p} : \func{S¹} \func{×}
+\func{S¹}) → \func{t2c} (\func{c2t} \var{p}) \ \func{≡}\  \var{p}, is
+equally trivial to prove. We can then package this up as an equality
+using \func{isoToPath} which combines \func{ua} with the proof that
+any isomorphism is an equivalence.
+%
+\ExecuteMetaData[chapters/literate-agda/Torus.tex]{teqs1s1}
+
+The simplicity of this cubical proof relies on the computation rules
+for all constructors of HITs holding definitionally in \texttt{Cubical
+  Agda}. In HoTT the computation rules for the higher constructors
+would have to be postulated which means that they do not hold
+definitionally. This is exactly what makes the proofs of
+\func{c2t-t2c} and \func{t2c-c2t} surprisingly nontrivial in HoTT.
+
+\subsection{The Loop Spaces of the Circle and Torus}
+
+The loop spaces of the circle and torus are defined as follows:
+%
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{Os1}
+\ExecuteMetaData[chapters/literate-agda/Torus.tex]{omegatorus}
+
+The goal of this section is to prove that \func{ΩS¹} is equivalent to
+the integers. This proof is a cubical adaptation of the proof of
+\sidecitet{pi1s1}. We can then combine this with the above equivalence
+between the torus and two circles to also compute the loop space of
+the torus. Note that we are computing loop spaces and not fundamental
+groups. However, as the fundamental group is defined as the
+set-truncation of the loop space and these loop spaces are both sets,
+we get that they coincide with the fundamental groups.
+
+The first step in computing the loop space of the circle is to define
+a function computing ``winding numbers'', i.e. the net number of times
+an element of \func{ΩS¹} goes around the circle clockwise.
+To do this we first prove that the successor function on the integers,
+\func{Int}, is an equivalence (its inverse is the predecessor
+function). By applying \func{ua} we then get a nontrivial
+equality/path from \func{Int} to \func{Int} that we call
+\func{sucPathInt}. Using this we can define:
+%
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{windings1}
+
+Applying the \func{winding} function to an element of \func{ΩS¹} will
+compute its winding number. For example, we can compute the winding
+numbers $+3$ and $-1$ as follows:
+%
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{exwindings1}
+
+The term \con{negsuc} \var{n} represents the number $- (n+1)$, so that
+\con{negsuc} \anum{0} is indeed $-1$. Note that none of these examples
+would have reduced to a numeral in HoTT as they would have been stuck
+on transporting along \func{ua}. The proofs of these would hence not
+be proved by \func{refl}, but rather by manually rewriting with the
+postulated computation rules for univalence.
+
+In order to prove that \func{ΩS¹} \ \func{≡}\ \func{Int} we just have
+to define an inverse function to \func{winding}. This is easily done
+via pattern matching.
+%
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{loopn}
+
+% and we call the resulting function \func{loopn} :
+% \func{Int} → \func{ΩS¹}.
+
+It is then easy to prove that the \func{winding} number of an $n$-fold
+\con{loop} is $n$.
+%
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{windingloopn}
+
+Note that we parameterize by \var{i} in the second and fourth case of
+\func{winding-loopn}. The reason for this is that we are constructing
+an element of \func{≡}, i.e. a function out of \func{I}. This use of
+interval variables hence lets us inline \func{cong}/\func{ap}.
+
+However, when trying to prove the other composition one quickly
+realizes that it is not as easy as there is no direct induction
+principle for \func{ΩS¹}.
+Luckily there is an ingenious solution to
+this offered by HoTT in the form of the \emph{encode-decode method}
+\sidecite[][Section 8.9]{HottBook13}. The trick is to generalize the
+\func{loopn} and \func{winding} functions as follows:
+%
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{encode}
+% TODO: There is a bit much space here. Fix if necessary.
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{decode}
+
+Note that \func{decode} \con{base} is \func{loopn} and that
+\func{encode} \con{base} is \func{winding} definitionally. The
+\con{loop} case of \func{decode} is a bit longer to define and we omit
+it due to space constraints. However, it is fairly direct to define
+using the cubical primitives and we refer the interested reader to the
+formalization. The main reason for generalizing the functions as above
+is that we can now use path induction to prove the following:
+%
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{decodeEncode}
+
+The special case \func{decodeEncode} \con{base} proves the desired
+composition, i.e. that
+$\func{loopn}~(\func{winding}~\var{x})~\func{≡}~\var{x}$ for all
+\var{x} : \func{ΩS¹}. We may then package this up to get the desired
+equality:
+%
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{omegas1}
+
+By combining this result with the equality between the torus and two
+circles we obtain:
+%
+\ExecuteMetaData[chapters/literate-agda/Torus.tex]{omegatorusintint}
+
+% Once again we omit the definition due to space constraints.
+It is now possible to transport along this equality to compute winding
+numbers on the torus. However, this will not result in the most
+efficient function possible and we can easily write a more direct
+function for computing these numbers as follows.
+%
+\ExecuteMetaData[chapters/literate-agda/Torus.tex]{windingTorus}
+
+Just like \func{winding} this function also computes as expected:
+%
+\ExecuteMetaData[chapters/literate-agda/Torus.tex]{exwindingTorus}
+
+\section{Suspension, Spheres and Pushouts}
+
+In this section we discuss various results about spheres, culminating
+in two proofs that the 3-dimensional sphere is equal to the join of
+two circles --- a result that we will need when computing the total
+space of the Hopf fibration later on. On the way to this result we
+introduce the pushout and join HITs. We also prove some useful results
+about these, including the ``$3 \times 3$ lemma'' for pushouts and
+associativity of the join.
+
+\subsection{Suspension}
+\label{sec:susp}
+
+The suspension of a type \var{A} is built from two distinguished
+points \con{north} and \con{south}, along with a path from \con{north}
+to \con{south} for every point of \var{A} (and a homotopy square for
+every path in \var{A}, etc.):
+%
+\ExecuteMetaData[chapters/literate-agda/Susp.tex]{susp}
+
+The suspension of a type $A$ is depicted below.
+
+%\tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt
+\begin{center}
+\begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1.2,xscale=1.2]
+  %Shape: Circle
+  \draw  [line width=0.75] (10,60) .. controls (10,43.43) and (23.43,30) .. (40,30) .. controls (56.57,30) and (70,43.43) .. (70,60) .. controls (70,76.57) and (56.57,90) .. (40,90) .. controls (23.43,90) and (10,76.57) .. (10,60) -- cycle ;
+  \node (A1) at (65, 90) {$A$};
+%  \node (A1) at (55, 45) {$A$};
+  %Arrow
+  \draw [line width=0.75] (90,60) -- (138,60) ;
+  \draw [shift={(140,60)}, rotate = 180] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+  \node (S) at (110,50) {\func{Susp}};
+  %Shape: Ellipse
+  \draw  [line width=0.75][dash pattern={on 4.5pt off 4.5pt}] (160,60) .. controls (160,54.48) and (173.43,50) .. (190,50) .. controls (206.57,50) and (220,54.48) .. (220,60) .. controls (220,65.52) and (206.57,70) .. (190,70) .. controls (173.43,70) and (160,65.52) .. (160,60) -- cycle ;
+  \node (A2) at (200,75) {$A$};
+  %Curve Lines
+  \draw [line width=0.75] (160,60) .. controls (160,80) and (170,90) .. (190,110) ;
+  \draw [line width=0.75] (190,110) .. controls (210,90) and (220,80) .. (220,60) ;
+  \draw [line width=0.75] (160,60) .. controls (160,40) and (170,30) .. (190,10) ;
+  \draw [line width=0.75] (190,10) .. controls (210,30) and (220,40) .. (220,60) ;
+  %Poles
+  \node (N) at (190,10) {$\bullet$};
+  \node (N2) at (190,-5) {$\con{north}$};
+  \node (S) at (190,110) {$\bullet$};
+  \node (S2) at (190,120) {$\con{south}$};
+  %Meridians
+  \node (M) at (240,30) {$\con{merid}\,\var{a}$};
+\end{tikzpicture}
+\end{center}
+
+In this drawing $A$ is a circle, in which case the suspension is a
+sphere. This generalizes well, and we can define the higher spheres as
+iterated suspensions starting from the booleans.
+%
+\ExecuteMetaData[chapters/literate-agda/Susp.tex]{nsphere}
+
+We may now prove that our initial definition for the circle is equal
+to the suspension of the booleans.
+
+\begin{lemma} \label{lem:susps1}
+  The (\anum{1})\func{-sphere} is equal to the circle \func{S¹}.
+\end{lemma}
+\begin{proof}
+  We will prove this by constructing an isomorphism and then
+  converting it to an equality using univalence. We first define a map
+  from (\anum{1})\func{-sphere} to \( \func{S¹} \) in the following
+  way, collapsing \( \con{merid}\,\con{false} \) to \( \con{base} \):
+  %
+  \ExecuteMetaData[chapters/literate-agda/Susp.tex]{s2c}
+
+  In the other direction, we use composition to go around the
+  (\anum{1})\func{-sphere} in one go.
+  %
+  \ExecuteMetaData[chapters/literate-agda/Susp.tex]{c2s}
+
+  To construct the first canceling homotopy, we have to find a
+  homotopy between \func{s2c}\,(\func{c2s}\,\con{loop}) =
+  \con{loop}\,\func{∙}\,\func{refl} and \con{loop}. This is proved in
+  one of the lemmas in the cubical library that says that \func{refl}
+  is the right unit for \func{\_∙\_}.
+  %
+  \ExecuteMetaData[chapters/literate-agda/Susp.tex]{s2c-c2s}
+
+  The second homotopy is slightly more involved.  After going back and
+  forth, \( \con{merid}\ \con{false} \) has been collapsed to the
+  \con{north} pole, while \( \con{merid}\ \con{true} \) has been
+  stretched to go around the whole circle. As such, we need to move
+  the \con{south} pole back into place along \(
+  \con{merid}\ \con{false} \), and deform the two meridians
+  accordingly:
+  %
+  \ExecuteMetaData[chapters/literate-agda/Susp.tex]{c2s-s2c}
+
+  We need \func{h1} to be a homotopy from the constant path at
+  \con{north} to the original path \( \con{merid}\ \con{false} \),
+  such that the restriction to \( (\var{i} = \con{i1}) \) matches
+  \( \con{merid}\ \con{false}\ \var{j} \) and the restriction to
+  \( (\var{i} = \con{i0}) \) matches \con{north}. This is easily
+  achieved using \func{\_∧\_}:
+  %
+  \ExecuteMetaData[chapters/literate-agda/Susp.tex]{h1}
+
+  \sloppy
+  On the other hand, \func{h2} has to be a homotopy from
+  \( \con{merid}\ \con{true}\ \func{∙}\ \con{merid}\ \con{false}\ \func{⁻¹} \)
+  to \( \con{merid}\ \con{true} \), with the same condition on the
+  restrictions to \( (\var{i} = \con{i0}) \) and
+  \( (\var{i} = \con{i1}) \). We can do that using \func{hcomp} to paste
+  several homotopies together:
+
+  \ExecuteMetaData[chapters/literate-agda/Susp.tex]{h2}
+
+  The composition can be pictured as follows, showing both the outer
+  edge constraints and the inner faces we used:
+
+  \begin{center}
+    \begin{tikzpicture}[xscale=1,yscale=1]
+      \draw [thin, -latex'] (0.9,0.9) -- (2.1,0.9) ;
+      \draw [thin, -latex'] (2.1,0.9) -- (2.1,2.1) ;
+      \draw [thin, -latex'] (0.9,2.1) -- (2.1,2.1) ;
+      \draw [thin, -latex'] (0.9,0.9) -- (0.9,2.1) ;
+
+      \draw [thin, -latex'] (0.9,0.9) -- (0,0) ;
+      \draw [thin, -latex'] (0.9,2.1) -- (0,3) ;
+      \draw [thin, -latex'] (2.1,0.9) -- (3,0) ;
+      \draw [thin, -latex'] (2.1,2.1) -- (3,3) ;
+
+      \draw [thin, -latex'] (3,0) -- (3,3) ;
+      \draw [thin, -latex', dashed] (0,0) -- (3,0) ;
+      \draw [thin, -latex'] (0,3) -- (3,3) ;
+      \draw [thin, -latex'] (0,0) -- (0,3) ;
+
+      %% \node (top) at (1,-0.25) {\footnotesize \( \con{inl}\,(\con{push}\,(\field{f12}\, a)\, i) \)};
+      %% \node (bot) at (1,2.25) {\footnotesize \( \con{inr}\,(\con{push}\,(\field{f32}\, a)\, i) \)};
+
+      %% % is this bad practice? I dont know how local this change is.
+      \setlength{\baselineskip}{8pt}
+      %% \node[align=left] at (-1.2,1) {\footnotesize{\( \func{A□0-A○□} \)}\\\quad\footnotesize{\( (\func{f□1}\, (\con{push}\, a\, j)) \)}};
+      %% \node[align=left] (rgt) at (3.2,1) {\footnotesize \( \func{A□4-A○□} \)\\\quad\footnotesize{\( \,(\func{f□3}\, (\con{push}\, a\, j)) \)}};
+
+      \node (s2) at (0.45, 1.5) {\footnotesize \con{north}};
+      \node[align=center] (s3) at (2.55, 1.5) {\footnotesize{\con{merid}} \\ \footnotesize{\( \con{false} \)} \\ \footnotesize{\( (j\ \func{∨}\ \func{\textasciitilde} k) \)} };
+      \node[align=center] (s4) at (1.5, 2.55) {\footnotesize{\con{merid}} \\ \footnotesize{\( \con{true}\ i \)}};
+      \node[align=center] (s5) at (1.5, 1.5) {\footnotesize{\con{merid}} \\ \footnotesize{\( \con{true}\ i \)}};
+
+      \node [anchor=south] at (1.5,3) {\footnotesize \( \con{merid}\ \con{true}\ i \)};
+      \node [anchor=north, rotate=90] at (3,1.5) {\footnotesize \( \con{merid}\ \con{false}\ j \)};
+      \node [anchor=south, rotate=90] at (0,1.5) {\footnotesize \( \con{north}\ \)};
+      \node [anchor=north] at (1.5,0) {\footnotesize  \( (\con{merid}\ \con{true}\ \func{∙}\ \con{merid}\ \con{false}\ \func{⁻¹})\ i \)};
+
+      \draw [thin,->] (-2.5,0.5) -- (-2.5,1.3) ;
+      \draw [thin,->] (-2.5,0.5) -- (-1.7,0.5) ;
+      \draw [thin,->] (-2.5,0.5) -- (-2.9,0.15) ;
+      \node [anchor=north] (x) at (-1.7, 0.5) {\footnotesize \( i \)};
+      \node [anchor=west] (y) at (-2.5, 1.3) {\footnotesize \( j \)};
+      \node [anchor=south] (z) at (-2.9, 0.15) {\footnotesize \( k \)};
+      %\draw [thin,->] (-3.5,0) -- (-3.2,0.3) ;
+    \end{tikzpicture}
+  \end{center}
+
+  The \( (\var{j} = \con{i0}) \) face of the open cube matches the square used
+  to define the composition
+  \( \con{merid}\ \con{true}\ \func{∙}\ \con{merid}\ \con{false}\ \func{⁻¹} \)
+  --- this breaks the composition into \func{refl},
+  \( \con{merid}\ \con{true} \), and
+  \( \con{merid}\ \con{false}\ \func{⁻¹} \) on the inner edges.
+  Thus, we use the \( (\var{i} = \con{i1}) \) face to retract the
+  \( \con{merid}\ \con{false}\ \func{⁻¹} \) part into the \con{south}
+  pole, using a connection. The other faces are just constant in
+  directions \( \var{j} \) and \( \var{k} \). From there, \func{hcomp} provides
+  us with the front face of the cube, which is the homotopy we need.
+
+  This completes the definition of \func{c2s-s2c}, providing us with
+  an isomorphism than can be converted into an equality with
+  \func{ua}.
+  %% \loic{This is a bit difficult to follow. I can add details, but then
+  %%   again this is not the focus of the paper...}  \anders{As you are
+  %%   showing quite a bit more complicated hcomp's later it might be
+  %%   good to explain this one in detail. Maybe we can drop some details
+  %%   later.}  This gives use the desired isomorphism between the
+  %% (\anum{1})\func{-sphere} and \func{S¹}, and thus an equality thanks
+  %% to univalence.
+\end{proof}
+
+Inspired by the direct definition of \func{S¹} we can also give direct
+definitions of some higher spheres, for example \func{S²} and
+\func{S³} are defined as follows.
+%
+\ExecuteMetaData[chapters/literate-agda/Susp.tex]{s2}
+% \anders{There is no need to use PathP here, but I think I only
+%   introduced Path as \func{≡}}
+
+As expected we can prove that these are equal to the definitions using
+iterated suspensions. The proof of this lemma is very similar to the
+one of \cref{lem:susps1} so we omit it.
+%
+\begin{lemma} \label{lem:susps23}
+  The (\anum{2})\func{-sphere} is equal to \func{S²} and the
+  (\anum{3})\func{-sphere} is equal to \func{S³}.
+\end{lemma}
+
+One might wonder if we can also give a direct definition of
+\func{S$^n$} in a similar fashion and prove that it is equal to the
+(\anum{n-1})\func{-sphere}. However, it is currently not possible to
+write the higher constructor corresponding to \con{surfₙ} in \texttt{Cubical
+Agda} as this kind of HIT is not supported by any of the proposed
+schemas for cubical HITs~\sidecite{CHM,CavalloHarper19}. Interestingly it
+is in fact possible to \emph{postulate} this HIT in HoTT or cubical
+type theory, and prove properties about it --- for instance
+\sidecitet{pinsn} prove that $\pi_n(\Sp^n) = \ZZ$ using this direct
+definition.
+
+\subsection{Pushouts and the 3 × 3 Lemma}
+\label{sec:pushout}
+
+Suppose we are given a span of types:
+
+\begin{center}
+\begin{tikzpicture}[xscale=1.5,yscale=2]
+  \node (B) at (0,0) {\var{B}};
+  \node (A) at (1,0) {\var{A}};
+  \node (C) at (2,0) {\var{C}};
+  \path[thin,->,>=angle 90]
+  (A) edge node[above]{\footnotesize \var{f}} (B)
+  (A) edge node[above]{\footnotesize \var{g}} (C);
+\end{tikzpicture}
+\end{center}
+
+Then the homotopical pushout of this span is a type that contains both
+a copy of \var{B} and a copy of \var{C}, and a path identifying
+\var{f}\,\var{a} and \var{g}\,\var{a} for every \var{a} in \var{A}.
+It can be defined as a HIT in the following way.
+
+\ExecuteMetaData[chapters/literate-agda/Pushout.tex]{pushout}
+
+A generic homotopical pushout is illustrated below: it consists of an
+embedded copy of \var{B} and \var{C}, and a copy of
+\( \var{A} \times \func{I} \) whose ends have been identified with
+corresponding points in \var{B} and \var{C} according to \var{f} and
+\var{g}.
+
+\begin{center}
+\begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1.2]
+
+%Shape: Ellipse
+  %\draw  [line width=0.75][fill={rgb, 255:red, 205; green, 205; blue, 205 }  ,fill opacity=1 ][dash pattern={on 4.5pt off 4.5pt}] (100,70.2) .. controls (100,53.52) and (104.48,40) .. (110,40) .. controls (115.52,40) and (120,53.52) .. (120,70.2) .. controls (120,86.88) and (115.52,100.4) .. (110,100.4) .. controls (104.48,100.4) and (100,86.88) .. (100,70.2) -- cycle ;
+\draw  [line width=0.75][fill={rgb, 255:red, 205; green, 205; blue, 205 }  ,fill opacity=1 ][dash pattern={on 4.5pt off 4.5pt}] (110.76,69.92) .. controls (110.76,53.54) and (114.2,40.26) .. (118.43,40.26) .. controls (122.66,40.26) and (126.1,53.54) .. (126.1,69.92) .. controls (126.1,86.31) and (122.66,99.59) .. (118.43,99.59) .. controls (114.2,99.59) and (110.76,86.31) .. (110.76,69.92) -- cycle ;
+
+
+%Curve Lines
+\draw  [line width=0.75] (145.68,92.76) .. controls (150.68,103.56) and (158.68,109.76) .. (170,110) ;
+\draw  [line width=0.75] (40,110) .. controls (51.27,110.18) and (59.93,103.07) .. (65.04,92.18) ;
+\draw  [line width=0.75] (49.85,49.9) .. controls (64.18,49.93) and (79.83,39.53) .. (110,40) ;
+\draw  [line width=0.75] (50,90) .. controls (59.83,89.03) and (90.18,100.93) .. (109.85,100.4) ;
+\draw  [line width=0.75] (110,40) .. controls (140.33,41.03) and (149.68,51.43) .. (159.35,50.9) ;
+\draw  [line width=0.75] (109.85,100.4) .. controls (129.68,100.43) and (149.33,89.53) .. (160,90) ;
+\draw  [line width=0.75] (50,90) .. controls (37.3,89.9) and (36.15,50.3) .. (49.85,49.9) ;
+\draw  [line width=0.75] (159.35,50.9) .. controls (172.85,50.9) and (173.8,89.9) .. (160,90) ;
+\draw  [line width=0.75] (40,20) .. controls (55.04,19.94) and (63.93,32.17) .. (67.93,46.17) ;
+\draw  [line width=0.75] (40,20) .. controls (-0.1,20.24) and (-0.1,109.91) .. (40,110) ;
+\draw  [line width=0.75] (170,20) .. controls (209.85,20.27) and (211.35,110.27) .. (170,110) ;
+\draw  [line width=0.75] (170,20) .. controls (156.28,19.76) and (146.08,32.36) .. (142.48,45.76) ;
+\draw  [line width=0.75] (50.85,66.9) .. controls (82.85,56.4) and (124.85,54.9) .. (159.35,66.4) ;
+
+\node (push) at (90,67) {\footnotesize \( \con{push}\,\var{a} \)};
+\node (st) at (50.85,66.9) {\( \bullet \)};
+\node [fill=white,inner sep=1,text height=6] (stl) at (40,76) {\footnotesize \( \con{inl}\,(\var{f\,a}) \)};
+\node (nd) at (159.35,66.4) {\( \bullet \)};
+\node [fill=white,inner sep=1,text height=5] (ndl) at (175,75) {\footnotesize \( \con{inr}\,(\var{g\,a}) \)};
+
+\node (B) at (34,40) {$\var{B}$};
+\node (A) at (118,72) {$\var{A}$};
+\node (C) at (176,40) {$\var{C}$};
+
+%Curve Lines [id:da3249943688792978]
+\draw  [line width=0.75][dash pattern={on 0.8pt off 1.25pt}]  (67.93,46.17) .. controls (72.23,63.27) and (69.93,80.4) .. (65.04,92.18) ;
+\draw  [line width=0.75][dash pattern={on 0.8pt off 1.25pt}]  (49.85,49.9) .. controls (61.73,50.11) and (62.28,90.21) .. (50,90) ;
+\draw  [line width=0.75][dash pattern={on 0.8pt off 1.25pt}]  (159.35,50.9) .. controls (146.65,50.8) and (147.3,89.9) .. (160,90) ;
+\draw  [line width=0.75][dash pattern={on 0.8pt off 1.25pt}]  (142.48,45.76) .. controls (137.08,63.16) and (140.48,81.96) .. (145.68,92.76) ;
+\end{tikzpicture}
+\end{center}
+%% \anders{I'm still a bit confused by this drawing. For example
+%%   $\con{inl} (f~a)$ is not in B... Is the pushout supposed to be the
+%%   tube? It's also bad style to have pictures that are not mentioned
+%%   anywhere in the text.}
+%% \loic{The pushout is the whole thing. This is the general picture of
+%%   a homotopy pushout (in any ``nice enough'' model cat, including
+%%   cubical sets) : one embedded copy of \( B \), one embedded copy of
+%%   \( C \), and a copy of \( A \times I \) with extremities glued along
+%%   \( f \) and \( g \). How should I illustrate this? Just drop the
+%%   picture altogether? I like pictures :(}
+%% \anders{I like the picture as well. It just need some explanation in
+%%   the text similar to what you have written in the comment.}
+
+Pushouts can be used to construct various classical objects such as
+suspensions, joins and many more---hence their importance.  For
+instance, the suspension of a type \( A \) is the homotopical pushout
+of the following span:
+
+\begin{center}
+\begin{tikzpicture}[xscale=1.5,yscale=2]
+  \node (B) at (0,0) {\( 1 \)};
+  \node (A) at (1,0) {\var{A}};
+  \node (C) at (2,0) {\( 1 \)};
+  \path[thin,->,>=angle 90]
+  (A) edge (B)
+  (A) edge (C);
+\end{tikzpicture}
+\end{center}
+where \( 1 \) is the inductive type with only one constructor, and the
+arrows are the unique maps to \( 1 \).
+
+Pushouts are often nested, and when dealing with them a fact known as
+the \( 3 \times 3 \) lemma comes in very handy.
+%% \loic{cite Brunerie, Finster?}
+%% \anders{We do that later so probably fine like this here}
+Suppose we are given a double span of types
+
+\begin{center}
+\begin{tikzpicture}[xscale=2,yscale=-2]
+  \node (A00) at (0,0) {\( \func{A00} \)};
+  \node (A20) at (1,0) {\( \func{A20} \)};
+  \node (A40) at (2,0) {\( \func{A40} \)};
+  \node (A02) at (0,1) {\( \func{A02} \)};
+  \node (A22) at (1,1) {\( \func{A22} \)};
+  \node (A42) at (2,1) {\( \func{A42} \)};
+  \node (A04) at (0,2) {\( \func{A04} \)};
+  \node (A24) at (1,2) {\( \func{A24} \)};
+  \node (A44) at (2,2) {\( \func{A44} \)};
+  \path[thin,->,>=angle 90]
+  (A20) edge node[fill=white]{\footnotesize \( \field{f10} \)} (A00)
+  (A20) edge node[fill=white]{\footnotesize \( \field{f30} \)} (A40)
+  (A22) edge node[fill=white]{\footnotesize \( \field{f12} \)} (A02)
+  (A22) edge node[fill=white]{\footnotesize \( \field{f32} \)} (A42)
+  (A24) edge node[fill=white]{\footnotesize \( \field{f14} \)} (A04)
+  (A24) edge node[fill=white]{\footnotesize \( \field{f34} \)} (A44)
+  (A02) edge node[fill=white]{\footnotesize \( \field{f01} \)} (A00)
+  (A02) edge node[fill=white]{\footnotesize \( \field{f03} \)} (A04)
+  (A22) edge node[fill=white]{\footnotesize \( \field{f21} \)} (A20)
+  (A22) edge node[fill=white]{\footnotesize \( \field{f23} \)} (A24)
+  (A42) edge node[fill=white]{\footnotesize \( \field{f41} \)} (A40)
+  (A42) edge node[fill=white]{\footnotesize \( \field{f43} \)} (A44);
+  \draw[-implies,thin,double distance=3pt] (0.65,0.35) -- (0.35,0.65);
+  \node (H11) at (0.35,0.35) {\footnotesize \( \field{H11} \)};
+  \draw[-implies,thin,double distance=3pt] (1.35,0.35) -- (1.65,0.65);
+  \node (H31) at (1.65,0.35) {\footnotesize \( \field{H31} \)};
+  \draw[-implies,thin,double distance=3pt] (0.65,1.65) -- (0.35,1.35);
+  \node (H13) at (0.35,1.65) {\footnotesize \( \field{H13} \)};
+  \draw[-implies,thin,double distance=3pt] (1.35,1.65) -- (1.65,1.35);
+  \node (H33) at (1.65,1.65) {\footnotesize \( \field{H33} \)};
+\end{tikzpicture}
+\end{center}
+% \anders{I don't understand the numbering. Why isn't the top line
+%   $A_{00}$, $A_{10}$ and $A_{20}$, etc?}
+% \loic{This numbering is due to Guillaume, in his thesis. He uses even
+%   numbers for types so that the numbering of maps is more natural.}
+where the \( \field{Hij} \) are homotopies ensuring the commutativity of
+the diagram: for instance, \( \field{H11} \) is of type
+\( \field{f10}\,\func{∘}\,\field{f21} \ \func{≡}\  \field{f01}\,\func{∘}\,\field{f12} \).
+% \anders{Maybe write this equality point-free? (i.e. without
+%   quantifying over x)}
+% \loic{Sure, if we are fine with assuming composition is defined.}
+
+Then, there are two canonical ways to build a type from this diagram
+out of pushouts.
+Indeed, one can start by taking the pushouts of the three rows, to get
+the following (vertical) span
+%
+\begin{equation} \label{span1}
+\begin{tikzpicture}[xscale=2,yscale=2]
+  \node (B) at (0,0) {\( \func{A□0} \)};
+  \node (A) at (1,0) {\( \func{A□2} \)};
+  \node (C) at (2,0) {\( \func{A□4} \)};
+  \path[thin,->,>=angle 90]
+  (A) edge node[above]{\footnotesize \( \func{f□1} \)} (B)
+  (A) edge node[above]{\footnotesize \( \func{f□3} \)} (C);
+\end{tikzpicture}
+\end{equation}
+in which we write \( \func{A□0} \), \( \func{A□2} \) and \( \func{A□4} \) for
+the three pushouts of the rows. The maps between them, \( \func{f□1}
+\) and \( \func{f□3} \), are then defined using pattern matching.
+%
+\ExecuteMetaData[chapters/literate-agda/Pushout.tex]{fx1}
+%% \loic{Should I add more detail here?}
+%% \anders{I think that if you add more explanations of the hcomp in
+%%   \func{c2s-s2c} then you don't need any more details here as this one
+%%   is simpler.}
+
+Finally, we write \( \func{A□○} \) for the pushout of the span in
+(\ref{span1}). Similarly, we could have started by taking the pushout
+of the columns and then computed the pushout \( \func{A○□} \) of the
+resulting ``vertical'' span. The \( 3\times3 \) lemma for pushouts
+then states that the results of these two constructions are equal.
+
+\begin{lemma}{(\( 3\times3 \) lemma)}\label{3x3}
+  The two pushouts \( \func{A□○} \) and \( \func{A○□} \) are equal.
+\end{lemma}
+\begin{proof}
+In order to prove this we construct an isomorphism via pattern
+matching and apply univalence. To define a map \( \func{A□○} \to
+\func{A○□} \), we will first need maps for the two sides of our
+pushout span:
+%
+\ExecuteMetaData[chapters/literate-agda/Pushout.tex]{forward-l}
+
+The map \func{A□4-A○□} is defined analogously. Using these maps we
+can define one of the main maps:
+%
+\ExecuteMetaData[chapters/literate-agda/Pushout.tex]{forward}
+Note how we did not define a map \func{A□2-A○□} to handle the
+\con{push} case, but instead proceeded via nested pattern matching.
+The reason is that when \texttt{Agda} checks boundary constraints, it does not
+perform \( \eta \)-expansion on its own so we have to force it in the
+function definition.
+%% \anders{This remark is very technical and Agda specific. Maybe drop if
+%%   we run out of space?}
+%% \loic{Agreed. Maybe a footnote?}
+%% \anders{Maybe, let's see how we are doing with space.}
+%% \anders{Actually I think this remark is fine to keep.}
+
+\sloppy
+Most cases boil down to swapping the constructors, but this
+straightforward strategy will not be sufficient to handle the last
+case (which has been temporarily called \func{filler}).
+Indeed, we need to construct a square inside \( \func{A○□} \) with a
+prescribed boundary. To do this, the most natural guess would be
+\( \con{push}\,(\con{push}\,a\,i)\,j \), but its boundary for
+\( i = \con{i0} \) is
+\( \con{push}\, (\con{inl}\, (\field{f21}\,a))\, j \), which is not
+definitionally equal to the prescribed
+\( \func{A□0-A○□} (\func{f□1}\, (\con{push}\, a\, j)) \).
+In order to fix this, we will use \func{hcomp} to glue the four
+squares $s1$--$s4$ around our candidate in order to ensure it matches
+the dashed boundary:
+
+\begin{center}
+\begin{tikzpicture}[xscale=1,yscale=1]
+  \draw [thin, -latex'] (0.6,0.6) -- (1.4,0.6) ;
+  \draw [thin, -latex'] (1.4,0.6) -- (1.4,1.4) ;
+  \draw [thin, -latex'] (0.6,1.4) -- (1.4,1.4) ;
+  \draw [thin, -latex'] (0.6,0.6) -- (0.6,1.4) ;
+
+  \draw [thin, -latex'] (0.6,0.6) -- (0,0) ;
+  \draw [thin, -latex'] (0.6,1.4) -- (0,2) ;
+  \draw [thin, -latex'] (1.4,0.6) -- (2,0) ;
+  \draw [thin, -latex'] (1.4,1.4) -- (2,2) ;
+
+  \draw [thin, -latex', densely dashed] (0,0) -- (2,0) ;
+  \draw [thin, -latex', densely dashed] (2,0) -- (2,2) ;
+  \draw [thin, -latex', densely dashed] (0,2) -- (2,2) ;
+  \draw [thin, -latex', densely dashed] (0,0) -- (0,2) ;
+
+  \node (top) at (1,-0.25) {\footnotesize \( \con{inl}\,(\con{push}\,(\field{f12}\, a)\, i) \)};
+  \node (bot) at (1,2.25) {\footnotesize \( \con{inr}\,(\con{push}\,(\field{f32}\, a)\, i) \)};
+
+  \setlength{\baselineskip}{8pt}
+  \node[align=left] at (-1.2,1) {\footnotesize{\( \func{A□0-A○□} \)}\\\quad\footnotesize{\( (\func{f□1}\, (\con{push}\, a\, j)) \)}};
+  \node[align=left] (rgt) at (3.2,1) {\footnotesize \( \func{A□4-A○□} \)\\\quad\footnotesize{\( \,(\func{f□3}\, (\con{push}\, a\, j)) \)}};
+
+  \node (s1) at (1, 0.3) {\footnotesize s3};
+  \node (s2) at (0.3, 1) {\footnotesize s1};
+  \node (s3) at (1.7, 1) {\footnotesize s2};
+  \node (s4) at (1, 1.7) {\footnotesize s4};
+  \node (s5) at (1, 1) {\footnotesize s5};
+
+  \draw [thin,->] (-3.5,0) -- (-3.5,0.8) ;
+  \draw [thin,->] (-3.5,0) -- (-2.7,0) ;
+  \node [anchor=north] (x) at (-2.7, 0) {\footnotesize \( i \)};
+  \node [anchor=west] (y) at (-3.5, 0.8) {\footnotesize \( j \)};
+  %\draw [thin,->] (-3.5,0) -- (-3.2,0.3) ;
+\end{tikzpicture}
+\end{center}
+
+To do this we hence need to construct the squares $s1$--$s5$, in
+this order.
+
+To construct $s1$, we unfold \( \func{f□1}\, (\con{push}\, a\, j) \) on
+the left side, obtaining a composition of three paths. But functions
+commute with \func{hcomp}'s up to a homotopy, so \func{A□0-A○□} applied to
+the composition is homotopic to the composition of the images of the
+paths. That is, we can find a square with the following boundary:
+\begin{center}
+\begin{tikzpicture}[xscale=1,yscale=1]
+  \draw [thin, -latex'] (0.3,0.3) -- (1.7,0.3) ;
+  \draw [thin, -latex'] (1.7,0.3) -- (1.7,1.7) ;
+  \draw [thin, -latex'] (0.3,1.7) -- (1.7,1.7) ;
+  \draw [thin, -latex'] (0.3,0.3) -- (0.3,1.7) ;
+
+  \node (top) at (1,0.1) {\footnotesize{\( \func{A□0-A○□}\,(\con{push}\,(\field{f21}\, a)\,j) \)}};
+  \node (bot) at (1,1.9) {\footnotesize{\( \func{A□0-A○□}\, (\func{hcomp}\, ...) \)}};
+  \setlength{\baselineskip}{8pt}
+  \node[align=left] (lft) at (-1,1) {\footnotesize{\( \func{A□0-A○□} \)}\\\quad\footnotesize{\( (\con{inl}\, (\field{H11}\,a\,(\func{\textasciitilde} i))) \)}};
+  \node[align=left] (rgt) at (3,1) {\footnotesize{\( \func{A□0-A○□} \)}\\\quad\footnotesize{\( (\con{inl}\, (\field{H31}\,a\,(\func{\textasciitilde} i))) \)}};
+
+  \draw [thin,->] (-3.5,0.2) -- (-3.5,1) ;
+  \draw [thin,->] (-3.5,0.2) -- (-2.7,0.2) ;
+  \node [anchor=north] (x) at (-2.7, 0.2) {\footnotesize \( j \)};
+  \node [anchor=west] (y) at (-3.5, 1) {\footnotesize \( i \)};
+\end{tikzpicture}
+\end{center}
+Once rotated counter-clockwise, we can use this square for $s1$ and
+the analogue for $s2$. After simplifying the applications of
+\func{A□0-A○□}, we are left with the following boundary:
+%
+\begin{center}
+\begin{tikzpicture}[xscale=1,yscale=1]
+  \draw [thin, -latex'] (0.6,0.6) -- (1.4,0.6) ;
+  \draw [thin, -latex'] (1.4,0.6) -- (1.4,1.4) ;
+  \draw [thin, -latex'] (0.6,1.4) -- (1.4,1.4) ;
+  \draw [thin, -latex'] (0.6,0.6) -- (0.6,1.4) ;
+
+  \draw [thin, -latex'] (0,0) -- (0.6,0.6);
+  \draw [thin, -latex'] (0.6,1.4) -- (0,2) ;
+  \draw [thin, -latex'] (2,0) -- (1.4,0.6) ;
+  \draw [thin, -latex'] (1.4,1.4) -- (2,2) ;
+
+  \draw [thin, -latex'] (0,0) -- (2,0) ;
+  \draw [thin, -latex'] (0,2) -- (2,2) ;
+
+  \node (top) at (1,-0.25) {\footnotesize \( \con{inl}\,(\con{push}\,(\field{f12}\, a)\, i) \)};
+  \node (bot) at (1,2.25) {\footnotesize \( \con{inr}\,(\con{push}\,(\field{f32}\, a)\, i) \)};
+  \node (lft) at (-0.6,1) {\footnotesize \( \con{push}\, (\con{inl}\, (\field{f21}\,a))\, j \)};
+  \node (lft1) at (-0.9,0.4) {\footnotesize \( \con{inl}\, (\con{inl}\, (\field{H11}\,a\,j)) \)};
+  \node (lft2) at (-0.9,1.6) {\footnotesize \( \con{inr}\, (\con{inl}\, (\field{H31}\,a\, j)) \)};
+  \node (rgt) at (2.6,1) {\footnotesize \( \con{push}\, (\con{inr}\, (\field{f21}\,a))\, j \)};
+  \node (rgt1) at (2.9,0.4) {\footnotesize \( \con{inl}\, (\con{inr}\, (\field{H13}\,a\, j)) \)};
+  \node (rgt2) at (2.9,1.6) {\footnotesize \( \con{inr}\, (\con{inr}\, (\field{H33}\,a\, j)) \)};
+
+  \node (s1) at (1, 0.3) {\footnotesize s3};
+  \node (s4) at (1, 1.7) {\footnotesize s4};
+  \node (s5) at (1, 1) {\footnotesize s5};
+
+  \draw [thin,->] (-3.5,0) -- (-3.5,0.8) ;
+  \draw [thin,->] (-3.5,0) -- (-2.7,0) ;
+  \node [anchor=north] (x) at (-2.7, 0) {\footnotesize \( i \)};
+  \node [anchor=west] (y) at (-3.5, 0.8) {\footnotesize \( j \)};
+\end{tikzpicture}
+\end{center}
+
+%% \loic{should I go 3D with the axes? when writing the actual
+%%   \func{hcomp}, there is a \( k \) dimension but it is impractical
+%%   to tikz...}
+%% \anders{It might be nice to have at least tips on the arrows in the diagram}
+%% \loic{I tried it, but I'm not very enthusiastic about them. What do you think?}
+%% \anders{It doesn't look good when the tips overlap. Apart from that I think they are helpful}
+
+Just like before, we can use the functoriality of \con{inl} to get
+a square with the following boundary:
+
+\begin{center}
+\begin{tikzpicture}[xscale=1,yscale=1]
+  \draw [thin, -latex'] (0.3,0.3) -- (1.7,0.3) ;
+  \draw [thin, -latex'] (1.7,0.3) -- (1.7,1.7) ;
+  \draw [thin, -latex'] (0.3,1.7) -- (1.7,1.7) ;
+  \draw [thin, -latex'] (0.3,0.3) -- (0.3,1.7) ;
+
+  \setlength{\baselineskip}{10pt}
+  \node (top) at (1,0.1) {\footnotesize{\( \con{inl}\,(\con{push}\,(\field{f12}\, a)\,i) \)}};
+  \node[align=center] (bot) at (1,2.1) {\footnotesize{\( \con{inl}\,(\func{f1□}\, (\con{push}\, a\, i)) \)}\\\footnotesize{\( = \con{inl}\,(\func{hcomp}\,...) \)}};
+  \node (lft) at (-0.8,1) {\footnotesize{\( \con{inl}\, (\con{inl}\, (\field{H11}\,a\,j)) \)}};
+  \node (rgt) at (2.8,1) {\footnotesize{\( \con{inl}\, (\con{inr}\, (\field{H13}\,a\,j)) \)}};
+
+  \draw [thin,->] (-3.5,0.2) -- (-3.5,1) ;
+  \draw [thin,->] (-3.5,0.2) -- (-2.7,0.2) ;
+  \node [anchor=north] (x) at (-2.7, 0.2) {\footnotesize \( i \)};
+  \node [anchor=west] (y) at (-3.5, 1) {\footnotesize \( j \)};
+\end{tikzpicture}
+\end{center}
+We use this square for $s3$ and the appropriate analogue for $s4$. The
+only square left to construct now is
+%
+\begin{center}
+\begin{tikzpicture}[xscale=1,yscale=1]
+  \draw [thin, -latex'] (0.6,0.6) -- (1.4,0.6) ;
+  \draw [thin, -latex'] (1.4,0.6) -- (1.4,1.4) ;
+  \draw [thin, -latex'] (0.6,1.4) -- (1.4,1.4) ;
+  \draw [thin, -latex'] (0.6,0.6) -- (0.6,1.4) ;
+
+  \node (top) at (1,0.4) {\footnotesize \( \con{inl}\,(\func{f1□}\, (\con{push}\, a\, i))\)};
+  \node (bot) at (1,1.6) {\footnotesize \( \con{inr}\,(\func{f3□}\, (\con{push}\, a\, i))\)};
+  \node (lft) at (-0.6,1) {\footnotesize \( \con{push}\, (\con{inl}\, (\field{f21}\,a))\, j \)};
+  \node (rgt) at (2.6,1) {\footnotesize \( \con{push}\, (\con{inr}\, (\field{f21}\,a))\, j \)};
+
+  \node (s5) at (1, 1) {\footnotesize s5};
+
+  \draw [thin,->] (-3.5,0.5) -- (-3.5,1.3) ;
+  \draw [thin,->] (-3.5,0.5) -- (-2.7,0.5) ;
+  \node [anchor=north] (x) at (-2.7, 0.5) {\footnotesize \( i \)};
+  \node [anchor=west] (y) at (-3.5, 1.3) {\footnotesize \( j \)};
+\end{tikzpicture}
+\end{center}
+which we can fill with \( \con{push}\,(\con{push}\,a\,i)\,j \).
+By combining these five squares using \func{hcomp} we obtain the
+definition of \func{filler}, and thus of our first map.
+
+The opposite direction, \( \func{A○□} \to \func{A□○} \), is the same
+up to a transposition of the \( 3\times3 \) span. The proofs that
+these maps cancel are also similar, but the central fillers are more
+difficult to illustrate as they require one more dimension. We refer
+the interested reader to the formalization. By combining all of this
+we obtain the desired equality between \( \func{A□○} \) and
+\( \func{A○□} \).
+\end{proof}
+
+The formal proof of the $3 \times 3$ lemma is under $200$ lines of
+code~(LOC) in \texttt{Cubical Agda}. The
+corresponding result in \texttt{HoTT-Agda} is about $3000$ LOC.\footnote{This number has been calculated by counting the number of lines (excluding comments) in:
+  \url{https://github.com/HoTT/HoTT-Agda/tree/master/theorems/homotopy/3x3}}
+These numbers should of course be taken with a grain of salt as those
+files are not self-contained and rely on other results in the
+library. Regardless of this we still believe that it indicates the
+complexity of the involved path algebra in the HoTT proof compared to
+the cubical one.
+
+%% We will also need the following auxiliary lemma about pushouts further on:
+%% \begin{lemma}\label{pushoutId}
+%%   The pushout of
+%%   \begin{center}
+%%     \begin{tikzpicture}[xscale=1.5,yscale=2]
+%%       \node (B) at (0,0) {\var{A}};
+%%       \node (A) at (1,0) {\var{A}};
+%%       \node (C) at (2,0) {\var{C}};
+%%       \path[thin,->,>=angle 90]
+%%       (A) edge node[above]{\footnotesize \func{id}} (B)
+%%       (A) edge node[above]{\footnotesize \var{g}} (C);
+%%     \end{tikzpicture}
+%%   \end{center}
+%%   is equal to A.
+%% \end{lemma}
+%% \loic{Should I inline this in the proof of join associativity?}
+%% \anders{Maybe, it could just be a short remark there.}
+
+\subsection{The Join and \func{S³}}
+\label{sec:join}
+
+Another interesting example of a pushout is the join. The main
+importance of this HIT in this paper is that it gives us another
+characterization of \func{S³} as the join of two circles which will be
+useful when proving that the total space of the Hopf fibration is
+\func{S³}. However, this construction also has many other interesting
+uses in HoTT as explored by \sidecitet{Rijke17}.
+
+The join of two types \var{A} and \var{B} is built from one copy of
+\var{A}, one copy of \var{B}, and a path from every \( a\,:\,A \) to
+every \( b\,:\,B \).
+%
+\ExecuteMetaData[chapters/literate-agda/Join.tex]{join}
+
+It is easy to see that \( \func{Join}\ A\ B \) can alternatively be
+defined as the pushout of the following span---the inductive
+definitions only differ by currying.
+%
+\begin{center}
+\begin{tikzpicture}[xscale=2.5,yscale=2]
+  \node (B) at (0,0) {\( A \)};
+  \node (A) at (1,0) {\( A \times B\)};
+  \node (C) at (2,0) {\( B \)};
+  \path[thin,->,>=angle 90]
+  (A) edge node[above]{\footnotesize \( \func{fst} \)} (B)
+  (A) edge node[above]{\footnotesize \( \func{snd} \)} (C);
+\end{tikzpicture}
+\end{center}
+
+We now proceed by proving a few lemmas relating joins and spheres.
+
+\begin{lemma}\label{joinbool}
+  \( \func{Join}\ \func{Bool}\ A \ \func{≡}\  \func{Susp}\ A \).
+\end{lemma}
+\begin{proof}
+  In \func{Join}\ \func{Bool}\ \var{A} the two points \con{inr}\
+  \con{true} and \con{inr}\ \con{false} play the role of \con{north}
+  and \con{south}, with a path connecting them to every point
+  \con{inl}\ \var{a}.
+\end{proof}
+%% \loic{Should this proof be left as an exercise, like in the HoTT book?
+%%   It is roughly similar to
+%%   \( \func{Susp}\ \func{Bool} \ \func{≡}\  \func{S¹} \) in size.}
+%% \anders{I like this short proof, so let's keep it if we have space}
+
+The proof of the following result is taken from \sidecitet[][Proposition
+1.8.6]{Brunerie16}, as such we will only sketch it here.
+
+\begin{lemma}\label{joinassoc}
+  \func{Join} is associative:
+  \[ \func{Join}\ A\ (\func{Join}\ B\ C) \ \func{≡}\ \func{Join}\
+    (\func{Join}\ A\ B)\ C \]
+\end{lemma}
+\begin{proof}
+  %% \anders{I would refactor this a bit by moving the remark attributing
+  %%   the proof to Brunerie outside and then giving a quite compact
+  %%   proof.}
+  %% \loic{I don't quite understand what you mean, do you think this
+  %%   proof is too long?}
+  %% \anders{I mean that we can say above the proof that it is due to
+  %%   Brunerie and the proof should then be very short or just a
+  %%   reference to where it can be found in his thesis. There are no new
+  %%   cubical ideas in it so I don't think it is worth spending too much
+  %%   space on it. Maybe just ``Apply the 3x3 lemma to the the following
+  %%   diagram ... where all the arrows are the obvious projections and
+  %%   the homotopies are refl's'' would be sufficient. If something is
+  %%   unclear it can be found in Brunerie's thesis.}
+
+  One starts by applying the \(3 \times 3\) lemma to the following
+  diagram.
+  %
+  \begin{center}
+    \begin{tikzpicture}[xscale=2,yscale=-1.3]
+      \node (A00) at (0,0) {\( \var{A} \)};
+      \node (A20) at (1,0) {\( \var{A}\times\var{B} \)};
+      \node (A40) at (2,0) {\( \var{B} \)};
+      \node (A02) at (0,1) {\( \var{A}\times\var{C} \)};
+      \node (A22) at (1,1) {\( \var{A}\times\var{B}\times\var{C} \)};
+      \node (A42) at (2,1) {\( \var{B}\times\var{C} \)};
+      \node (A04) at (0,2) {\( \var{A}\times\var{C} \)};
+      \node (A24) at (1,2) {\( \var{A}\times\var{C} \)};
+      \node (A44) at (2,2) {\( \var{C} \)};
+      \path[thin,->,>=angle 90]
+      (A20) edge (A00)
+      (A20) edge (A40)
+      (A22) edge (A02)
+      (A22) edge (A42)
+      (A24) edge (A04)
+      (A24) edge (A44)
+      (A02) edge (A00)
+      (A02) edge (A04)
+      (A22) edge (A20)
+      (A22) edge (A24)
+      (A42) edge (A40)
+      (A42) edge (A44);
+    \end{tikzpicture}
+  \end{center}
+
+  All of the arrows in the diagram are the obvious projections, and
+  the homotopies are \func{refl}'s. One can then show that
+  \( \func{A□○} \ \func{≡}\ \func{Join}\ (\func{Join}\ A\ B)\ C \),
+  and that
+  \( \func{A○□} \ \func{≡}\ \func{Join}\ A\ (\func{Join}\ B\ C) \),
+  which implies the desired result.
+\end{proof}
+
+We now have all of the ingredients to relate \func{S³} and the
+\func{Join} of two circles.
+
+\begin{lemma}\label{joins1s1}
+  \( \func{Join}\ \func{S¹}\ \func{S¹} \ \func{≡}\  \func{S³} \)
+\end{lemma}
+\begin{proof}
+This is a composition of equalities we already proved.
+\begin{align*}
+  \func{Join}\ \func{S¹}\ \func{S¹} \
+  & \func{≡}\ \func{Join}\ (\func{Susp}\ \func{Bool})\ \func{S¹}
+  & (\ref{lem:susps1})\\
+  & \func{≡}\ \func{Join}\ (\func{Join}\ \func{Bool}\ \func{Bool})\ \func{S¹}
+  & (\ref{joinbool})\\
+  & \func{≡}\ \func{Join}\ \func{Bool}\ (\func{Join}\ \func{Bool}\ \func{S¹})
+  & (\ref{joinassoc})\\
+  & \func{≡}\ \func{Susp}\ (\func{Susp}\ \func{S¹})
+  & (\ref{joinbool})\\
+  & \func{≡}\ \func{S³}
+  &&\qedhere
+\end{align*}
+\end{proof}
+
+The above proof is an elegant application of the \( 3\times3 \) lemma,
+but it results in rather complicated maps between \func{Join}
+\func{S¹} \func{S¹} and \func{S³}. Evan Cavallo has found a more
+direct cubical proof that \( \func{Join}\ \func{S¹}\ \func{S¹}
+\ \func{≡}\ \func{S³} \) by simply defining the maps directly and
+proving that they cancel.\footnote{For details see the \redtt{} proof
+  at:\\ \url{https://github.com/RedPRL/redtt/blob/master/library/cool/s3-to-join.red}}
+We have ported his proof to \texttt{Cubical Agda} and the resulting
+proof is very short ($\sim60$ LOC). However, the proofs that the maps
+cancel require a $5$-dimensional(!)  composition making it rather
+difficult to visualize.
+
+\section{The Hopf Fibration}
+\label{sec:hopf}
+
+In this section we define the Hopf fibration:
+\( \func{Hopf}\,:\,\func{S²} \to \func{Set} \). It is a fibration over
+the sphere whose fibers are equal to \func{S¹} and whose total space
+is equal to \func{S³}. It is a very useful construction that allows
+one to compute homotopical properties of \func{S³} from the properties
+of \func{S²} and \func{S¹}.
+
+%% \loic{Should we get rid of this and replace it with pushout stuff only?}
+%% \anders{No, it is fine}
+We begin by motivating the definition using some geometry while
+keeping in mind that we are actually working synthetically. Since the
+two hemispheres of \func{S²} are contractible, the fibration is
+trivial on each and the important datum is how to glue the fibers at
+the equator. Therefore, we have to pick an equivalence
+\( \func{S¹} \to \func{S¹} \) at every point of the equator.  Since
+the equator is equal to \func{S¹}, it amounts to defining a map
+\( \func{S¹} \to \func{S¹} \to \func{S¹} \). A natural choice is the
+binary product we get on \( \func{S¹} \) when seeing it as the set of
+unitary complex numbers:
+%% \anders{what is $U(1)$?}
+%% \loic{Standard notation for the complex unit circle, from differential geometry.
+%%   We dont really need it though.}
+\[
+e^{2i\pi \theta} \cdot e^{2i\pi \phi} = e^{2i\pi (\theta + \phi)}
+\]
+%% \loic{Am I getting too far off-topic? I think it is important to
+%%   insist on how visual this is, but on the other hand...}
+%% \anders{I think this is good, maybe point out that this is the
+%%   point-set topological (or ``real'') intuition behind what is going
+%%   on but that we are working synthetically.}
+This is defined in \texttt{Cubical Agda} as follows:
+%
+\ExecuteMetaData[chapters/literate-agda/Circle.tex]{rot}
+
+The final case can be illustrated by the following diagram, where we
+only annotated the edges and reduced the (constant) central face to
+a tiny square:
+%
+\begin{center}
+\begin{tikzpicture}[xscale=1,yscale=1]
+  \draw [thin, -latex'] (1,1) -- (0,0) ;
+  \draw [thin, -latex'] (1,1.4) -- (0,2.4) ;
+  \draw [thin, -latex'] (1.4,1) -- (2.4,0) ;
+  \draw [thin, -latex'] (1.4,1.4) -- (2.4,2.4) ;
+
+  \draw [thin, -latex'] (0,0) -- (2.4,0) ;
+  \draw [thin, -latex'] (2.4,0) -- (2.4,2.4) ;
+  \draw [thin, -latex'] (0,2.4) -- (2.4,2.4) ;
+  \draw [thin, -latex'] (0,0) -- (0,2.4) ;
+
+  \draw [thin] (1,1) -- (1.4,1) ;
+  \draw [thin] (1.4,1) -- (1.4,1.4) ;
+  \draw [thin] (1,1.4) -- (1.4,1.4) ;
+  \draw [thin] (1,1) -- (1,1.4) ;
+
+  \node (top) at (1.2,-0.25) {\footnotesize \( \con{loop}\ j \)};
+  \node (bot) at (1.2,2.65) {\footnotesize \( \con{loop}\ j \)};
+  \node [rotate=90] (left) at (2.65,1.2) {\footnotesize \( \con{loop}\ k \)};
+  \node [rotate=90] (right) at (-0.25,1.2) {\footnotesize \( \con{loop}\ k \)};
+  \node [rotate=45, fill=white, inner sep=0,text height=6] (nw) at (0.55,0.55) {\footnotesize \( \con{loop}\ (\func{\textasciitilde} l) \)};
+  \node [rotate=45, fill=white] (se) at (1.9,1.9) {\footnotesize \( \con{loop}\ l \)};
+  \node [rotate=315, fill=white] (ne) at (1.9,0.5) {\footnotesize \( \con{base} \)};
+  \node [rotate=315, fill=white] (sw) at (0.5,1.9) {\footnotesize \( \con{base} \)};
+
+  \draw [thin,->] (-2.5,0.5) -- (-2.5,1.3) ;
+  \draw [thin,->] (-2.5,0.5) -- (-1.7,0.5) ;
+  \draw [thin,->] (-2.5,0.5) -- (-2.9,0.15) ;
+  \node [anchor=north] (x) at (-1.7, 0.5) {\footnotesize \( j \)};
+  \node [anchor=west] (y) at (-2.5, 1.3) {\footnotesize \( j \)};
+  \node [anchor=south] (z) at (-2.9, 0.15) {\footnotesize \( l \)};
+\end{tikzpicture}
+\end{center}
+
+Indeed, our intuition from the complex numbers tells us that
+\( \func{rot}\ (\con{loop}\ j)\ (\con{loop}\ k) \) is analogous to
+\( e^{2i\pi (j + k)} \). So it is only natural that the \( j+k=1 \)
+diagonal is constant at \con{base}, and the \( j = k \) diagonal
+follows \con{loop} twice.
+%% \anders{I'm still confused by the refl diagonal...}
+%% \loic{refl diagonals correspond to \( i+j=1 \). It is only normal
+%%   that they are constant at base since \( e^{2i\pi} \) is 1. Should I
+%%   write \con{base} instead of \func{refl} ?}
+%% \loic{Should I keep this figure?}
+%% \anders{I don't understand the diagonals... The point imo is that we
+%%   need a square that is loop on all sides. It is nice that this has such
+%%   a direct cubical proof.}
+
+This results in a binary operation on \func{S¹}, that we often write
+as \( \_\func{*}\_ \) instead of \func{rot}. We can even get a
+complete (higher) abelian group structure on \func{S¹}, with an
+inverse operation that we call \func{inv}.
+% -- the inverse being induced by path reversal.
+%
+\begin{lemma}
+  % There is term \func{rotIsEquiv} of type\\ \( {(\var{a}:\func{S¹})
+  % \to \func{isEquiv}\ (\func{rot}\ \var{a})} \).
+
+  For every \var{x} : \func{S¹} we have an equivalence \func{rotEquiv}
+  \var{x} : \func{S¹} \func{≃} \func{S¹} given by \func{rot} \var{x}.
+\end{lemma}
+\begin{proof}
+  The inverse is induced by path reversal.
+\end{proof}
+
+We now define the Hopf fibration using \( \func{Susp}\ \func{S¹} \)
+(which is equivalent to \func{S²} by \cref{lem:susps23}) as our base
+space, using \func{Glue} to glue the fibers as discussed
+above. However, we have to depart slightly from the topological
+intuition as there is no actual equator in
+\( \func{Susp}\ \func{S¹} \). As instead, we use \func{rot} to glue
+the fibers around the \con{north} pole, and the identity to glue them
+around the \con{south} pole:
+%
+\ExecuteMetaData[chapters/literate-agda/Hopf.tex]{hopf}
+
+In fact, we could have directly defined the Hopf fibration for
+\func{S²} by gluing on the identity equivalence on three of the sides
+of the 2-cell and the \func{rot} equivalence on the fourth side.
+%
+\ExecuteMetaData[chapters/literate-agda/Hopf.tex]{hopfs2}
+
+However, it turns out that the version using \func{Susp} \func{S¹} is
+easier to work with as we have more wiggle room with the
+constructors.
+
+We can now form the total space of the \func{Hopf} fibration
+using a \func{Σ}-type:
+\( \func{Σ}\ \func{Hopf} = \sum_{x : \func{Susp}\ \func{S¹}} \func{Hopf}\ x \).
+Our main theorem can be stated as:
+%
+\begin{theorem} \label{thm:hopf}
+  The total space of the Hopf fibration is \func{S³}, that is,
+  \( \func{Σ}\ \func{Hopf}\ \func{≡}\ \func{S³} \).
+\end{theorem}
+\begin{proof}
+  By \cref{joins1s1}, which states that
+  \( \func{S³}\ \func{≡}\ \func{Join}\ \func{S¹}\ \func{S¹} \), it
+  suffices to prove that
+  \( \func{Σ}\ \func{Hopf}\ \func{≡}\ \func{Join}\ \func{S¹}\ \func{S¹} \). From the
+  topological intuition of the Hopf fibration, the union of the fibers
+  at the equator form a torus
+  \( \func{S¹}\ \func{×}\ \func{S¹} \)---the first coordinate being
+  the longitude in \func{S²}, the second parameterizing the fiber.
+  When transporting along the meridian \( \con{merid}\ \var{x} \), the
+  fiber above \con{north} will transform into the fiber above the
+  equator according to \( \func{rot}\ \var{x} \),
+  %% \anders{What is the inverse operations here? Is it the normal sym or
+  %%   the one defined by cases?}
+  and the one above \con{south} will be transported to the equator
+  according to the identity. Conversely, transporting fibers from the
+  equator to the \con{north} (resp. \con{south}) pole will transform
+  them according to \( \func{rot}\ (\func{inv}\ \var{x} \))
+  (resp. the identity).
+  This informal observation relates \( \func{Σ}\ \func{Hopf} \) to the
+  pushout of the following span:
+
+  \begin{center}
+    \begin{tikzpicture}[xscale=3,yscale=2]
+      \node (B) at (0,0) {\func{S¹}};
+      \node (A) at (1,0) {\( \func{S¹} \func{×}\ \func{S¹} \)};
+      \node (C) at (2,0) {\func{S¹}};
+      \path[thin,->,>=angle 90]
+      (A) edge node[above]{\footnotesize \func{rot'}} (B)
+      (A) edge node[above]{\footnotesize \( \pi_2 \)} (C);
+    \end{tikzpicture}
+  \end{center}
+  where \( \func{rot'}\ (x , y) = \func{inv}\ x\ \func{*}\ y \).
+
+  But recall that \( \func{Join}\ \func{S¹}\ \func{S¹} \) is the
+  pushout of the following span:
+  \begin{center}
+    \begin{tikzpicture}[xscale=3,yscale=2]
+      \node (B) at (0,0) {\func{S¹}};
+      \node (A) at (1,0) {\( \func{S¹} \func{×}\ \func{S¹} \)};
+      \node (C) at (2,0) {\func{S¹}};
+      \path[thin,->,>=angle 90]
+      (A) edge node[above]{\footnotesize \( \pi_1 \)} (B)
+      (A) edge node[above]{\footnotesize \( \pi_2 \)} (C);
+    \end{tikzpicture}
+  \end{center}
+
+  We will now describe a span isomorphism (that is, a natural
+  equivalence between these two spans) and use it as intuition to
+  build a formal isomorphism between the two types.
+  %% \anders{I'm a bit confused by this remark; why do we talk about
+  %%   natural equivalences as opposed to just isomorphisms?}
+  %% \loic{is this better?}
+  %% \anders{Yes!}
+
+  To go from \( \func{Join}\ \func{S¹}\ \func{S¹} \) to
+  \( \func{Σ}\ \func{Hopf} \), we want to mimic the
+  following natural equivalence:
+  %%\anders{Now we suddenly talk about natural isos... }
+
+  \begin{center}
+    \begin{tikzpicture}[xscale=3,yscale=-2]
+      \node (B1) at (0,0) {\func{S¹}};
+      \node (A1) at (1,0) {\( \func{S¹} \func{×}\ \func{S¹} \)};
+      \node (C1) at (2,0) {\func{S¹}};
+      \node (B2) at (0,1) {\func{S¹}};
+      \node (A2) at (1,1) {\( \func{S¹} \func{×}\ \func{S¹} \)};
+      \node (C2) at (2,1) {\func{S¹}};
+
+      \path[thin,->,>=angle 90]
+      (A2) edge node[below]{\footnotesize \func{rot'}} (B2)
+      (A1) edge node[above]{\footnotesize \( \pi_2 \)} (C1)
+      (A1) edge node[above]{\footnotesize \( \pi_1 \)} (B1)
+      (A2) edge node[below]{\footnotesize \( \pi_2 \)} (C2)
+      (A1) edge node[fill=white, align=center]{\footnotesize \( (x, y) \mapsto \) \footnotesize \( (\func{rot'}\ x\ y, y) \)} (A2)
+      (B1) edge node[left]{\footnotesize \( \func{id} \)} (B2)
+      (C1) edge node[right]{\footnotesize \( \func{id} \)} (C2);
+    \end{tikzpicture}
+  \end{center}
+  %\anders{Why not use \func{rot'} in the downwards mapsto?}
+
+  We can use this intuition to construct the following map:
+  %
+  \ExecuteMetaData[chapters/literate-agda/Hopf.tex]{backward}
+
+  Here, \( x \) is the point in the fiber above \con{north}, \( y \)
+  is the point in the fiber above \con{south}, and
+  \( \var{p}\ \var{i} \) is the point in the fiber above
+  \( \con{merid}\ (\func{rot'}\ (x , y))\ i \).  However, as
+  $\func{Hopf}\ (\con{merid}\ (\func{rot'}\ (x , y))\ i)$ is
+  $\func{ua}\ (\func{rotEquiv}\ (\con{merid}\ (\func{rot'}\ (x , y)))\
+  i)$ which in turn is a \func{Glue} type we need to use the
+  \func{glue} constructor to package it up into a well-typed term.
+  The term \func{lem-rot'} \var{x} \var{y} proves that
+  $\func{rot'}\ (x\ \con{,}\ y)\ \func{*}\ \var{x}\ \func{≡}\ \var y$,
+  that is, \( \func{inv}\ x\ \func{*}\ y\ \func{*}\ x\ \func{≡}\ y \).
+  This equality is clearly true and we prove it by induction on
+  \var{x} and \var{y}.
+
+  Conversely, to go from \( \func{Σ}\ \func{Hopf} \) to
+  \( \func{Join}\ \func{S¹}\ \func{S¹} \), we use the following
+  natural isomorphism:
+  %
+  \begin{center}
+    \begin{tikzpicture}[xscale=3,yscale=-2]
+      \node (B1) at (0,0) {\func{S¹}};
+      \node (A1) at (1,0) {\( \func{S¹} \func{×}\ \func{S¹} \)};
+      \node (C1) at (2,0) {\func{S¹}};
+      \node (B2) at (0,1) {\func{S¹}};
+      \node (A2) at (1,1) {\( \func{S¹} \func{×}\ \func{S¹} \)};
+      \node (C2) at (2,1) {\func{S¹}};
+
+      \path[thin,->,>=angle 90]
+      (A1) edge node[above]{\footnotesize \func{rot'}} (B1)
+      (A1) edge node[above]{\footnotesize \( \pi_2 \)} (C1)
+      (A2) edge node[below]{\footnotesize \( \pi_1 \)} (B2)
+      (A2) edge node[below]{\footnotesize \( \pi_2 \)} (C2)
+      (A1) edge node[fill=white, align=center]{\footnotesize \( (x, y) \mapsto \) \footnotesize \( (\func{rot'}\ x\ y, y) \)} (A2)
+      (B1) edge node[left]{\footnotesize \( \func{id} \)} (B2)
+      (C1) edge node[right]{\footnotesize \( \func{id} \)} (C2);
+    \end{tikzpicture}
+  \end{center}
+  %\anders{Use \func{rot'} in the mapsto?}
+
+  To do this we need to map out of a \func{Glue} type. This is made
+  possible through the \func{unglue} primitive in \texttt{Cubical Agda}. Given
+  $\var{y} : \func{ua}\ (\func{rotEquiv}\ \var{x})\ i$ the term
+  $\func{unglue}\ (\var{i}\ \func{∨}\ \func{∼{}}\ \var{i})\ \var{y}$
+  is an element of \func{S¹} that is $\var{x}\ \func{*}\ \var{y}$ when
+  \var{i} is \con{i0} and \var{y} when \var{i} is \con{i1}. Using this
+  we can write the inverse map.
+  %
+  \ExecuteMetaData[chapters/literate-agda/Hopf.tex]{forward}
+
+  The lemma \func{lem-rot-inv} proves that
+  $x\ \func{*}\ y\ \func{*}\ \func{inv}\ x\ \func{≡}\ y$ for all
+  $\var{x}, \var{y} : \func{S¹}$. This hence defines the second
+  map.
+  Proving that they cancel requires some rather involved path algebra,
+  and we refer the interested reader to the formalization.
+  %% However, as far as the computational content of the Hopf fibration
+  %% is concerned, only the (very simple!) definitions of \func{h2j} and
+  %% \func{j2h} are relevant. \loic{Reviewer 3 disagrees. investigate.}
+  %% \anders{what to say? we can't go into too much
+  %%   detail, but we can at least mention that it uses connectedness of
+  %%   S1 (right?) and ...?}
+  %% \loic{I think this is more of a hack to avoid annoying path algebra,
+  %%   and that it is possible to do it without using any sort of
+  %%   abstract stuff...}
+  %% \loic{Maybe mention that these two maps is pretty much all of the
+  %%   relevant computational content.}
+\end{proof}
+
+This hence concludes our direct cubical proof that \func{Hopf} is
+indeed the Hopf fibration.
+
+\section{Conclusions and Future Work}
+\label{sec:conclusions}
+
+We have in this paper shown how some of the main results in synthetic
+homotopy theory can be formalized in cubical type theory. We have used
+a variation of cubical type theory implemented by the \texttt{Cubical
+  Agda} system, however it would have been possible to formalize all
+of these examples with comparable complexity in other cubical
+systems. Indeed, many of these examples have also been formalized in
+the \redtt{} system \sidecite{redtt} and in the precursor of
+\texttt{Cubical Agda} called \cubicaltt{} \sidecite{Cubicaltt}.
+
+One might wonder to what extent the lack of reversals and connections
+in \redtt{}, which is based on cartesian cubical type
+theory~\sidecite{AngiuliHouHarper18,ABCFHL}, affects the length of
+proofs. In our experience the lack of this additional structure on the
+interval is often made up for by the more powerful composition
+operations of cartesian cubical type theory. For instance, the direct
+proof that
+\( \func{Join}\ \func{S¹}\ \func{S¹} \ \func{≡}\ \func{S³} \) is of
+more or less exactly the same complexity as the \texttt{Cubical Agda}
+proof. However, in order to draw any definite conclusions more
+experiments are necessary.
+
+The results in this paper have also been formalized in the various
+HoTT libraries available in the major proof assistants based on type
+theory: \texttt{HoTT-Agda} \sidecite{hottagda}, \texttt{Coq-HoTT} \sidecite{hottcoq}, \texttt{Lean-HoTT}
+\sidecite{hottlean}.\footnote{We omit the \texttt{UniMath} library as it does not
+  focus on synthetic homotopy theory.} It is very difficult to make an
+accurate quantitative comparison of the complexity between the
+formalized results as they have been performed in different systems
+based on different type theories. However, it is interesting to note
+that all of these HoTT libraries contain cubical sublibraries for
+conveniently reasoning about squares and cubes inspired by the work of
+\sidecitet{LicataBrunerie15}. In a cubical system like \texttt{Cubical
+  Agda} we do not need to write such a library as the cubical
+primitives provide us with it for free.
+
+Despite the difficulty of comparing the complexity of formal proofs
+between different systems we have made some estimates of the size of
+some of the proofs (in terms of lines of code) in
+\cref{table}.\footnote{The numbers in the table have been computed
+  from the \texttt{master} branches of the following libraries on
+  2019-12-16:\\ \url{https://github.com/HoTT/HoTT-Agda}\\
+  \url{https://github.com/HoTT/HoTT/}\\
+  \url{https://github.com/leanprover/lean2/tree/master/hott}}
+Some of the libraries contain multiple proofs of the relevant results
+and in such cases we picked the one that most closely resemble the
+cubical proof. We only include those examples where we can make
+reasonably accurate estimates of the proof size, but the numbers in
+the table should still be taken with a large grain of salt as they do
+not count self-contained proofs and many of the results rely on
+cubical sublibraries that are not necessary in \texttt{Cubical Agda}. The line
+count also involve relevant comments and we haven't counted the
+definitions of the involved HITs. The length and style of proofs also
+vary quite a bit between the various systems in general, for instance,
+both \texttt{Coq} and \texttt{Lean} proofs are written using tactics while \texttt{Agda} proofs
+are typically not.
+
+\begin{table}[h!]
+  \centering
+  \caption{Results in the HoTT libraries}
+  \begin{tabular}{c|cccc}
+    & \texttt{Agda} & \texttt{Coq} & \texttt{Lean} & \texttt{Cubical} \\
+    \hline \hline
+    $\Omega(\Sp^1)=\mathbb{Z}$
+      & 90 % https://github.com/HoTT/HoTT-Agda/blob/master/theorems/homotopy/LoopSpaceCircle.agda
+      & 160 % https://github.com/HoTT/HoTT/blob/fcd7a652b0be286ae0ca42640a3c5443495400cb/theories/HIT/Circle.v#L178
+      & 80 % https://github.com/leanprover/lean2/blob/227fcad22ab2bc27bb7471be7911075d101ba3f9/hott/homotopy/circle.hlean#L281
+      & 50 % https://github.com/agda/cubical/blob/master/Cubical/HITs/S1/Base.agda
+      \\
+    $\mathbb{T} = \Sp^1 \times \Sp^1$
+      & 150 % https://github.com/HoTT/HoTT-Agda/blob/e48a16bcd719e2fcb409d79e3f7df6c6b81223bb/theorems/stash/homotopy/TorusIsProductCircles.agda
+      & 150 % https://github.com/HoTT/HoTT/blob/75d819356dc33defadeed31846f7d06d672bc74f/theories/Spaces/Torus/TorusEquivCircles.v
+      & - % can't find
+      & 25 % https://github.com/agda/cubical/blob/master/Cubical/HITs/Torus/Base.agda
+      \\
+    % Susp(B)=S1, Susp(S1) = S2, Susp(S2) = S3 & 4 & 5 & 6 \\
+    $3 \times 3$ lemma
+      & 3000 % https://github.com/HoTT/HoTT-Agda/tree/master/theorems/homotopy/3x3
+      & - % can't find
+      & - % can't find
+      & 200 % https://github.com/agda/cubical/blob/master/Cubical/HITs/Pushout/Properties.agda
+      \\
+    \func{Join} assoc. via $3 \times 3$
+    & 320 % https://github.com/HoTT/HoTT-Agda/blob/master/theorems/homotopy/JoinAssoc3x3.agda
+      & - % can't find
+      & -
+      & 240 % https://github.com/agda/cubical/blob/master/Cubical/HITs/Join/Properties.agda
+    \\
+    \func{Join} assoc. direct
+    & 210 % https://github.com/HoTT/HoTT-Agda/blob/master/theorems/homotopy/JoinAssocCubical.agda
+      & - % can't find
+      & 230 % https://github.com/leanprover/lean2/blob/14c8fbfea30d217657f40c0cf91197cc4f1770b6/hott/homotopy/join.hlean#L263
+      & 90 % https://github.com/agda/cubical/blob/master/Cubical/HITs/Join/Properties.agda
+      \\
+    % $\Sp^3 = \Sp^1 * \Sp^1$
+    %   & - % Anders: can't find.
+    %   & ?
+    %   & ?
+    %   \\
+    %% $\Sigma Hopf = \Sp^3$
+    %%   & $\checkmark$ % https://github.com/HoTT/HoTT-Agda/blob/master/theorems/homotopy/Hopf.agda
+    %%   & ?
+    %%   & ?
+    %%   & ?
+  \end{tabular}
+  \label{table}
+\end{table}
+
+The table indicates that not too much is gained in the proof that the
+loop space of the circle is the integers by doing it cubically, while
+the proof that the torus is equivalent to two circles is about $6$
+times longer in \texttt{HoTT-Agda} and \texttt{Coq-HoTT} compared to the cubical proof
+presented here. The major difference is for the $3 \times 3$ lemma for
+pushouts where the \texttt{HoTT-Agda} proof is about $15$ times longer than the
+cubical proof. This result is not yet formalized in \texttt{Coq-HoTT} and
+\texttt{Lean-HoTT}, however a \texttt{Coq-HoTT} formalization is currently underway. The
+\texttt{HoTT-Agda} library has two proofs that \func{Join} is associative. The
+longer one, 320 lines, is more or less the same as the one we
+discussed in this paper and relies on the $3 \times 3$ lemma for
+pushouts. There is very little gain from the cubical machinery in this
+proof as it is simply a matter of reorganizing data so that we can
+apply an already proved result. The other \texttt{HoTT-Agda} and \texttt{Lean-HoTT}
+proofs are more direct and construct the maps in an ingenious way
+following~\sidecitet[][Theorem 4.21]{Cavallo15}. Evan Cavallo has recently
+proved this result directly in \texttt{Cubical Agda} as well, leading to a
+proof in only 90 lines of code.
+
+Another interesting observation is that when working in a cubical
+system we often state the theorems as paths while in HoTT one often
+instead just uses equivalences. These are of course equivalent by
+univalence, but by invoking the univalence axiom in HoTT one hides the
+computational content of these equivalences making them harder to work
+with. In a cubical system where univalence has computational content
+this is not the case and it is in fact often more convenient to
+convert the equivalences into paths using univalence as we may then
+use the cubical primitives to manipulate them. This indicates that
+cubical type theory might be better suited for doing \emph{univalent}
+mathematics than HoTT.
+
+A crucial property when doing synthetic mathematics is the existence
+of interesting models of the theory. Ideally we would like to be able
+to interpret all of the results in this paper in topological spaces or
+even any (Grothendieck) $\infty$-topos. Currently these questions have
+not been fully resolved for the various cubical type theories that
+have been considered. In fact, it has been shown that the standard
+model of \texttt{Cubical Agda} is \emph{not} equivalent\footnote{By
+  ``equivalent'' we mean that the notion of fibration in the cubical
+  set model gives rise to a model structure that is Quillen equivalent
+  to the Quillen model structure on spaces.} to spaces
+\sidecite{sattlertalk}. However, if one drops the reversal operation
+(\func{∼{}\_}) from \texttt{Cubical Agda} any internal result about homotopy
+groups of spheres corresponds to a result about the homotopy groups of
+spheres in spaces.\footnote{For further details and discussions about
+  this result see:
+  \url{https://groups.google.com/forum/\#!topic/homotopytypetheory/imPb56IqxOI}}
+Furthermore, there has been recent progress on an ``equivariant''
+cubical set model that is equivalent to spaces \sidecite{riehltalk}.  We
+are hence very optimistic that these issues will be resolved in the
+near future. Furthermore, as soon as a satisfactory cubical type
+theory with a model in spaces has been developed we expect it to be
+straightforward to adapt the formalizations in this paper to that
+theory. Indeed, the main features that we rely on---computational
+univalence and higher inductive types with definitional computation
+rules for all constructors---should also be satisfied by that cubical
+type theory.

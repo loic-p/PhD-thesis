@@ -1,0 +1,365 @@
+% Notations from synthetic cubical homotopy theory
+
+% For inlining code
+\newcommand{\lst}{\lstinline[mathescape=true]}
+
+\newcommand{\po}{\mathsf{po}}
+
+\newcommand{\Fill}{\mathsf{fill}}
+\newcommand{\elim}{\mathsf{elim}}
+
+%%% EVERGREENS
+\newcommand{\IH}{IH}
+\newcommand{\SIH}{SIH}
+\newcommand{\der}{\vdash}
+\newcommand{\co}{\colon}
+
+\newcommand{\case}{\emph{Case}}
+\newcommand{\subcase}{\emph{Subcase}}
+
+\newcommand{\all}{\forall}
+\newcommand{\ex}{\exists}
+
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+
+% \newcommand{\id}{\mathrm{id}}
+
+\newcommand{\set}[1]{\{#1\}}
+
+\newcommand{\cf}{{cf.}}
+
+
+% \newcommand{\land}{\wedge}
+% \newcommand{\lor}{\vee}
+\newcommand{\limp}{\rightarrow}
+\newcommand{\liff}{\leftrightarrow}
+\newcommand{\falsum}{\bot}
+\newcommand{\verum}{\top}
+
+\newcommand{\Imp}{\Rightarrow}
+\newcommand{\Iff}{\Leftrightarrow}
+
+\newcommand{\D}{\mathcal{D}}
+
+%\renewcommand{\phi}{\varphi}
+\def\phi{\varphi}
+
+\newcommand{\is}{\vec i}
+\newcommand{\js}{\vec j}
+\newcommand{\rs}{\vec r}
+
+\newcommand{\us}{\vec u}
+\renewcommand{\vs}{\vec v}
+\newcommand{\ws}{\vec w}
+\newcommand{\xs}{\vec x}
+\newcommand{\ys}{\vec y}
+\newcommand{\zs}{\vec z}
+\newcommand{\ps}{\vec p}
+\newcommand{\thetas}{\vec \theta}
+
+\newcommand{\As}{\vec A}
+\newcommand{\Bs}{\vec B}
+\newcommand{\Cs}{\vec C}
+\newcommand{\Ps}{\vec P}
+
+\newcommand{\length}[1]{\lvert #1 \rvert}      % length of a vector/list
+
+
+%%% CUBICAL SETS
+
+\newcommand{\dM}{\mathsf{dM}}
+%%\newcommand{\II}{\mathbb{I}}
+\newcommand{\FF}{\mathbb{F}}
+
+%\renewcommand{\deg}{s}
+\def\deg{s}
+
+
+
+%%% TYPE THEORY
+\newcommand{\su}[2]{#1/#2}
+% \newcommand{\subst}[2]{(\su #1 #2)}
+\newcommand{\esubst}[3]{(#1, \su #2 #3)} % (f, i/r)
+\newcommand{\substnop}[2]{{#2}\, / \,{#1}}
+
+
+
+% \newcommand{\emptyctx}{{\diamond}} % empty context
+\newcommand{\pp}{\mathsf{p}}       % first projection (substitution)
+\newcommand{\qq}{\mathsf{q}}       % second projection (variable)
+
+%%\newcommand{\J}{\mathcal{J}}       % a generic judgment
+\newcommand{\Judg}{\mathcal{J}}       % a generic judgment
+
+% Nat
+\newcommand{\N}{\mathsf{N}}
+% \newcommand{\suc}{\mathsf{S}}
+% \newcommand{\natrec}{\mathsf{natrec}}
+\newcommand{\pred}{\mathsf{pred}}
+\newcommand{\num}[1]{\underline{#1}} % numeral
+
+% Misc
+
+% \newcommand{\unit}{\mathsf{t\!t}}         % canonical inhabitant of unit
+\newcommand{\bigci}{\raisebox{0.2ex}{\scriptsize \( \bigcirc \)}}
+
+% Path
+\renewcommand{\Path}{\mathsf{Path}}
+\newcommand{\nabs}[1]{\langle #1 \rangle}
+
+\newcommand{\tabs}[1]{[ #1 ]}
+
+\newcommand{\fib}{\mathsf{fib}}
+
+% Systems
+\newcommand{\smap}{~}
+
+% Compositions
+\newcommand{\comp}{\mathsf{comp}}
+\newcommand{\Comp}{\mathsf{fill}}
+
+%%\newcommand{\hcomp}{\mathsf{hcomp}}
+\newcommand{\ghcomp}{\mathsf{ghcomp}}
+\newcommand{\hComp}{\mathsf{hfill}}
+
+% \newcommand{\transport}{\mathsf{transport}}
+
+% I hope using renewcommand here is not dangerous wrt sigplan style!
+%\renewcommand{\transp}{\mathsf{trans}}
+\def\transp{\mathsf{trans}}
+\newcommand{\ctransp}{\mathsf{ctrans}}
+
+\newcommand{\Transp}{\mathsf{transFill}}
+\newcommand{\cTransp}{\mathsf{ctransFill}}
+
+
+% Glue
+\newcommand{\Glue}{\mathsf{Glue}} % Glue type
+\newcommand{\glue}{\mathsf{glue}} % element of a Glue type
+\newcommand{\unglue}{\mathsf{unglue}}
+
+\ifxetex
+    \renewcommand{\Equiv}{\mathsf{Equiv}}
+\else
+  \ifluatex
+    \renewcommand{\Equiv}{\mathsf{Equiv}}
+  \else
+    \newcommand{\Equiv}{\mathsf{Equiv}}
+  \fi
+\fi
+
+
+\newcommand{\eq}{\mathsf{equiv}}
+\newcommand{\pres}{\mathsf{pres}}
+
+% Universes
+\newcommand{\UU}{\mathsf{U}}
+\newcommand{\ptoeq}{\mathsf{equiv}} % a path in U to an equivalence
+
+% % pushouts
+
+% \newcommand{\Push}{\mathsf{P}} % type former
+% \newcommand{\inl}{\mathsf{inl}}
+% \newcommand{\inr}{\mathsf{inr}}
+% \newcommand{\push}{\mathsf{push}} % path constructor
+% \newcommand{\PushElim}{\mathsf{Pelim}}
+
+\newcommand{\fresh}{\mathsf{fresh}}
+\newcommand{\squeeze}{\mathsf{squeeze}}
+% \newcommand{\transhit}{\mathsf{transp}}
+%\newcommand{\hcomp}{\mathsf{hcomp}}
+\newcommand{\fwd}{\mathsf{fwd}}
+\newcommand{\cfwd}{\mathsf{cfwd}}
+\newcommand{\Fwd}{\mathsf{fillFwd}}
+
+
+
+
+%%% SEMANTICS
+
+\newcommand{\Set}{\mathbf{Set}}
+\newcommand{\CC}{\mathcal{C}}
+\newcommand{\Ty}{Ty}
+\newcommand{\Ter}{Ter}
+
+% not sure if we need Trans and HComp
+\newcommand{\Trans}{Trans} % transport structures
+\newcommand{\HComp}{HComp} % homogeneous composition structures
+\newcommand{\Fib}{\mathsf{Fibrant}} % fibrant objects
+\newcommand{\FTy}{FTy} % fibrant types (or KTy? Kan types)
+\newcommand{\Hom}{Hom}
+\newcommand{\yoneda}{\mathbf{y}}
+\newcommand{\app}{app}
+
+\newcommand{\scomp}{\mathsf{c}} % semantic composition
+\newcommand{\sfill}{\mathsf{f}} % semantic fill
+\newcommand{\CompStr}{\mathsf{Comp}} % composition structures
+\newcommand{\HCompStr}{\mathsf{HComp}} % hcomposition structures
+\newcommand{\FillStr}{\mathsf{Fill}} % fill structures
+
+
+\newcommand{\indep}[1][]{\mathrel{\#_{#1}}} % degenerate; subscript is
+                                % optional arg
+
+\newcommand{\strans}{t}      % generic semantic transport
+\newcommand{\shcomp}{h}    % generic semantic hcomp
+% \newcommand{\op}{\mathrm{op}}
+
+\newcommand{\El}{\mathsf{El}}
+\newcommand{\Ucode}[1]{\ulcorner #1 \urcorner}
+
+
+%% Comment macros
+\definecolor{dkblue}{rgb}{0,0.1,0.5}
+\definecolor{lightblue}{rgb}{0,0.5,0.5}
+\definecolor{dkgreen}{rgb}{0,0.4,0}
+\definecolor{dk2green}{rgb}{0.4,0,0}
+\definecolor{dkviolet}{rgb}{0.6,0,0.8}
+
+%% SUBMISSION: turn off all comments
+%% \newcommand{\mycomment}[3]{}
+\newcommand{\mycomment}[3]{\textcolor{#1}{[#2#3]}}
+% \newcommand{\todo}[1]{\mycomment{red}{todo: }{#1}}
+\newcommand{\anders}[1]{\mycomment{dkviolet}{Anders: }{#1}}
+\newcommand{\loic}[1]{\mycomment{blue}{Loïc: }{#1}}
+
+%% Circle
+\newcommand{\Sp}{\mathbb{S}}
+\newcommand{\base}{{\sf base}}
+\newcommand{\LOOP}{{\sf loop}}
+\newcommand{\Spelim}[2]{\Sp^#1\textsf{-elim}_{#2}\,}
+
+%% Suspension
+\newcommand{\susp}{\mathsf{Susp}}
+\newcommand{\SUSP}{\mathsf{Susp}}
+\newcommand{\north}{{\sf N}}
+\newcommand{\south}{{\sf S}}
+\newcommand{\merid}{{\sf merid}}
+\newcommand{\suspelim}[2]{\mathsf{Susp}\textsf{-elim}^{#1}_{#2}\,}
+
+%% Bool
+\newcommand{\BB}{\mathbb{B}}
+
+%% Torus
+\newcommand{\TT}{{\mathbb T}}
+\newcommand{\tb}{{\sf b}}
+\newcommand{\tp}{{\sf tp}}
+\newcommand{\tq}{{\sf tq}}
+\newcommand{\tsurf}{{\sf surf}}
+\newcommand{\TTelim}[1]{\TT\textsf{-elim}_{#1}\,}
+
+%% Torus_F
+\newcommand{\TTF}{\TT_{\sf F}}
+\newcommand{\tfb}{{\sf \tb_{\sf F}}}
+\newcommand{\tfp}{{\sf \tp_{\sf F}}}
+\newcommand{\tfq}{{\sf \tq_{\sf F}}}
+\newcommand{\tfsurf}{\tsurf_{\sf F}}
+\newcommand{\TTFelim}[1]{\TTF\textsf{-elim}_{#1}\,}
+
+%% Propositional truncation
+\newcommand{\inh}[1]{\lVert#1\rVert}
+\newcommand{\inc}{\mathsf{inc}}
+% \newcommand{\squash}{\mathsf{sq}}
+\newcommand{\ptelim}{\textsf{ptrunc-elim}}
+
+%% James construction
+\newcommand{\james}[1]{J_#1}
+\newcommand{\Jelim}{J\textsf{-elim}}
+
+%% f-localization
+\newcommand{\loc}{\textsf{loc}}
+\newcommand{\ext}{\textsf{ext}}
+\newcommand{\rtr}{\textsf{rtr}}
+
+%% Pushouts
+\newcommand{\pushA}{A}
+\newcommand{\pushB}{B}
+\newcommand{\pushC}{C}
+\newcommand{\pushf}{u}
+\newcommand{\pushg}{v}
+\newcommand{\Push}{\pushA \sqcup_\pushC \pushB}
+\newcommand{\inl}{\mathsf{inl}}
+\newcommand{\inr}{\mathsf{inr}}
+\newcommand{\push}{\mathsf{push}} % path constructor
+\newcommand{\PushElim}{\mathsf{Pelim}}
+
+%% W-quotients
+\newcommand{\WQ}{\mathsf{W}}
+\newcommand{\pointw}{\mathsf{point}}
+\newcommand{\cellw}{\mathsf{cell}}
+\newcommand{\Welim}{\mathsf{Welim}}
+
+%% Schema
+\newcommand{\gD}{\mathsf{D}}     % generic hit
+\newcommand{\gc}{\mathsf{c}}     % generic constructor
+\newcommand{\gf}{\mathsf{f}}     % generic pattern match
+
+\definecolor{Revolutionary}{RGB}{232,70,68}
+\newcommand{\redtt}{\textbf{\texttt{{\color{Revolutionary}red}tt}}}
+
+
+\newcommand{\anum}[1]{\AgdaNumber{#1}}
+\newcommand{\symb}[1]{\AgdaSymbol{#1}}
+\newcommand{\data}[1]{{\AgdaDatatype{#1}}}
+\newcommand{\record}[1]{{\AgdaRecord{#1}}}
+\newcommand{\func}[1]{{\AgdaFunction{#1}}}
+\newcommand{\prim}[1]{{\AgdaPrimitive{#1}}}
+\newcommand{\primty}[1]{{\AgdaPrimitiveType{#1}}}
+\newcommand{\II}[0]{{\primty{\ensuremath{\mathbb{I}}}}}
+\newcommand{\iz}[0]{\con{i0}}
+\newcommand{\io}[0]{\con{i1}}
+\newcommand{\pretype}[0]{\omega}
+\newcommand{\setl}[1]{{\prim{Set}_{#1}}}
+\newcommand{\pathp}[2]{\primty{PathP}\;(\lambda {#1} .\, {#2})}
+\newcommand{\hcomp}{\prim{hcomp}}
+\newcommand{\hcompcon}{\con{hcomp}}
+\newcommand{\hc}{\con{hc}}
+\newcommand{\var}[1]{{\AgdaBound{#1}}}
+\newcommand{\keyw}[1]{{\AgdaKeyword{#1}}}
+\newcommand{\con}[1]{{\AgdaInductiveConstructor{\ensuremath{\mathsf{#1}}}}}
+\newcommand{\field}[1]{{\AgdaField{\ensuremath{\mathsf{#1}}}}}
+\newcommand{\proj}[1]{.\field{#1}}
+\newcommand{\papp}[2]{@_{#1,#2}}
+
+% \newcommand{\Id}[1]{\mathrel{{\AgdaPrimitiveType{\ensuremath{\equiv}}}_{#1}}}
+\newcommand{\Leq}{\mathrel{\AgdaDatatype{\ensuremath{\leq}}}}
+\newcommand{\Simeq}{\mathrel{\AgdaRecord{\ensuremath{\simeq}}}}
+\newcommand{\sumtype}{\mathrel{\AgdaDatatype{\ensuremath{\uplus}}}}
+\newcommand{\prodtype}{\mathrel{\AgdaDatatype{\ensuremath{\times}}}}
+
+% \newcommand{\Nat}{\data{\textbb{N}}}
+\newcommand{\Int}{\data{\textbb{Z}}}
+\newcommand{\toptype}{\data{\ensuremath{\top}}}
+\newcommand{\bottomtype}{\data{\ensuremath{\bot}}}
+\newcommand{\sigmatype}{\data{\ensuremath{\Sigma}}}
+% \newcommand{\Bool}{\data{Bool}}
+
+\newcommand{\Fin}{\data{Fin}}
+\newcommand{\fzero}{\con{fzero}}
+\newcommand{\fsuc}{\con{fsuc}}
+\newcommand{\lezero}{\con{lz}}
+\newcommand{\lesuc}{\con{ls}}
+% \newcommand{\refl}{\con{refl}}
+\newcommand{\reflbar}{\overline{\con{refl}}}
+% \newcommand{\zero}{\con{zero}}
+% \newcommand{\suc}{\con{suc}}
+\newcommand{\true}{\con{true}}
+\newcommand{\false}{\con{false}}
+% \newcommand{\J}{\prim{J}}
+\newcommand{\K}{\prim{K}}
+
+\newcommand{\fundecl}[2]{\begin{array}{l}
+\begin{array}{l} #1 \end{array}  \\
+\begin{array}{lll} #2 \end{array} \\
+\end{array}}
+
+\newcommand{\datadecl}[2]{\begin{array}{l}
+\keyw{data} \; #1 \; \keyw{where} \\
+\quad  \begin{array}{lll} #2 \end{array} \\
+\end{array}}
+
+\newcommand{\recorddecl}[2]{\begin{array}{l}
+\keyw{record} \; #1 \; \keyw{where} \\
+\quad  \begin{array}{lll} #2 \end{array} \\
+\end{array}}

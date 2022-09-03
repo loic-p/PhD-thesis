@@ -1,0 +1,291 @@
+\setchapterimage[6cm]{seaside}
+\setchapterpreamble[u]{\margintoc}
+\chapter{Prefascist Sets}
+\labch{prefascist}
+
+\shepherd{If some  Presheaves.
+
+In particular, presheaves will turn out to be especially useful to
+build models of type theory.}
+
+In this section, we will use a bit of categorical jargon, but the reader
+who is not too well versed in this dark art shall rest assured:
+we only assume some basic knowledge about functors and limits.
+
+\section{Set-theoretical Presheaves}\label{sec:categorical-reminders}
+
+In this section, we recall the definition of presheaves and go over 
+some of their uses. 
+% 
+We work in an extensional meta-theory such as constructive set theory --
+intensional and type theoretical considerations will wait until section 
+\ref{sec:intensional-problems}.
+
+Given any category \( \cat{C} \), the category 
+\( \catPsh{\cat{C}} \) of \emph{presheaves} on \( \cat{C} \) is the category 
+of functors from the opposite category \( \op{\cat{C}} \) to the category of 
+small sets.
+\sideremark{In this definition, the \( \mathrm{Hom}_\catCat \) notation should 
+    be understood in the 2-categorical sense: this object is a category, not a 
+    set.}
+\begin{definition}
+\(
+    \catPsh{\cat{C}} := \hom[\catCat]{\op{\cat{C}}}{\catSet}
+\)
+\end{definition}
+In other words, a presheaf is a functor, and a morphism of presheaves
+is a natural transformation.
+
+In the usual fashion of category theory, this definition is slick
+and abstract, which results in a remarkably versatile object. 
+% 
+But in counterpart, the definition alone is not too helpful in building
+intuition about presheaves -- what are they good for?
+
+Presheaves\sidenote{sheaves, actually} were initially designed to capture 
+the idea of a set continuously parametrized by a topological space, which
+was later generalized to an arbitrary category. 
+% 
+However, we are interested in them for a different reason: they allow us
+to freely add colimits to a category.
+
+\subsection{Presheaves as a Categorical Cocompletion}
+
+Suppose that \( \cat{C} \) is \defnote{locally small}{A category is
+locally small if all of its hom-sets are small sets}.
+Recall the definition of the Yoneda embedding \( \yo \):
+\begin{definition}
+The Yoneda embedding is a functor from \( \cat{C} \) to \( \catPsh{\cat{C}} \)
+defined by
+\[
+\begin{array}{lcl}
+    \yo & : & \cat{C} \to \catPsh{\cat{C}} \\
+    \yo(c) & := & \hom[\cat{C}]{\_}{c}
+\end{array}
+\]
+The action of \( \yo \) on morphisms is given by post-composition, which
+makes it into a proper functor from \( \cat{C} \) to its presheaf
+category \( \catPsh{\cat{C}} \). 
+\end{definition}
+% 
+Furthermore, the Yoneda lemma teaches us that this functor is fully faithful, 
+and thus the \defnote{representable}{A presheaf is called representable when 
+it is in the image of \yo} presheaves can be understood as a copy of 
+\( \cat{C} \) sitting inside the larger category \( \catPsh{\cat{C}} \).
+
+There is a precise sense in which \( \catPsh{\cat{C}} \) is generated from 
+this internal copy of \( \cat{C} \) by freely adding all small colimits:
+
+\begin{theorem}
+    The category \( \catPsh{\cat{C}} \) admits all small colimits.
+\end{theorem}
+
+\begin{theorem}
+    Any object of \( \catPsh{\cat{C}} \) can be obtained as a small colimit of 
+    representable presheaves.
+\end{theorem}
+
+\begin{theorem}
+    Given a category \( \cat{D} \) that has all small colimits and a functor
+    \( F : \cat{C} \to \cat{D} \), there is a unique cocontinuous functor
+    \( \widehat{F} : \catPsh{\cat{C}} \to \cat{D} \) such that 
+    \( F = \widehat{F} \circ \yo \).
+\end{theorem}
+
+Proofs can be found in \sidecitet{MaclaneMoerdijk}.
+
+Put together, these three theorems seem to paint a surprisingly simple picture 
+of \( \catPsh{\cat{C}} \): we can think of a presheaf as an amalgamated sum of 
+objects from \( \cat{C} \).
+%
+However, mental images are a double edged sword and can be just as misleading
+as they are enlightening. In particular, the reader should note that the yoneda 
+embedding does not preserve colimits that may already exist in \( \cat{C} \),
+and as a consequence we should be careful to have different pictures for
+\( \yo(x+y) \) and \( \yo(x) + \yo(y) \).
+
+\shepherd{We will use this in the next chapter to define spaces and shit}
+
+\subsection{Presheaves as Generalized Categories of Sets}
+
+\shepherd{Cartesian closed categories}
+
+\shepherd{Forcing n stuff}
+
+\shepherd{We can give models to type theory, too!}
+
+\section{Type-theoretical Presheaves}\label{sec:intensional-problems}
+
+Hopefully by now, the reader is convinced that presheaves are a simple yet 
+versatile idea in category theory and thus a natural candidate for a 
+translation into type theory.
+% 
+But while concrete first-order objects such as integers, graphs or trees 
+generally translate very well, abstractions that deal with predicates, sets
+and functions usually come with their lot of complications -- and presheaves
+are no exception.
+
+In this section, we work in intensional Martin-Löf Type Theory, using the 
+syntax of the \Agda proof assistant.
+
+\subsection{First Definition}
+
+Let us assume we are working with a small category \( \cat{C} \), and that we
+managed to encode it nicely inside type theory:
+\sideremark[*2]{Arguments between curly braces are optional arguments, which will
+    usually be inferred from the context.}
+
+\ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{category}
+
+Furthermore, we assume that the unit laws and the associativity of
+composition hold \emph{by definition}:
+
+\ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{equations}
+
+\sideremark{This constraint might look very strong, but we will see that all 
+    small categories can in fact be presented in this way.}
+% 
+meaning that \shepherd{the equality here is not the propositional equality} \func{\_≡\_},
+but the definitional equality: these terms are convertible. 
+% 
+It could be the case, for instance, if we managed to express \( \cat{C} \) as a 
+full subcategory of \func{Set} -- in which cases the morphisms are just 
+functions, whose composition is associative by defintion.
+
+Now, how should we go about defining the type of presheaves on \( \cat{C} \)?
+If we mimic the set-theoretic definition of a presheaf, we might obtain 
+something that starts like this:
+
+\ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{presheaf1}
+
+But we also need some equations, as functors are supposed to preserve
+identities and composition.
+% 
+We can state them using the propositional equality \func{\_≡\_}: \shepherd{indent}
+
+\ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{presheaf2}
+
+And from there, all reasonable equalities such as
+\begin{equation}\label{eq-psh}
+    \field{F₁}\ ((f\ \func{\circ}\ g)\ \func{\circ}\ h) 
+    \ \func{≡}\ 
+    (\field{F₁}\ h\ \func{\circ}\ \field{F₁}\ g)\ \func{\circ}\ \field{F₁}\ f
+\end{equation}
+can be proved through chained rewritings using \field{F\_id} and 
+\field{F\_comp}.
+
+\subsection{A Story about Higher Coherences}
+
+Interestingly, if we try to prove equation \ref{eq-psh}, we can devise two
+chains of rewritings that take the left hand side to the right hand
+side:
+
+\begin{center}
+    \sideremark{The horizontal equalities are instances of \field{F\_comp},
+        and the two vertical equalities hold by definition.}
+\begin{tikzcd}
+    \field{F₁}\ ((f\ \func{\circ}\ g)\ \func{\circ}\ h)
+    \ar[equal]{r} \ar[equal]{d}
+    & \field{F₁}\ h\ \func{\circ}\ \field{F₁}\ (f\ \func{\circ}\ g) 
+    \ar[equal]{r}
+    & \field{F₁}\ h\ \func{\circ}\ (\field{F₁}\ g\ \func{\circ}\ \field{F₁}\ f)
+    \ar[equal]{d} \\
+    \field{F₁}\ (f\ \func{\circ}\ (g\ \func{\circ}\ h))
+    \ar[equal]{r}
+    & \field{F₁}\ (g\ \func{\circ}\ h) \ \func{\circ}\ \field{F₁}\ f
+    \ar[equal]{r}
+    & (\field{F₁}\ h\ \func{\circ}\ \field{F₁}\ g)\ \func{\circ}\ \field{F₁}\ f
+\end{tikzcd}
+\end{center}
+
+and these result in two different equality proofs.
+% 
+We might hope to prove that these two proofs are in fact equal ; but it does 
+not seem possible without assuming additional axioms (remember that we are 
+working in intensional \MLTT here, where identity proofs are by no means 
+unique!).
+% 
+This state of affairs is rather unsatisfying, and it certainly looks like that 
+kind of nuisance that will show up uninvited in our proofs later on.
+
+To understand the source of this phenomenon, it is helpful to turn ourselves to
+Homotopy Type Theory.
+% 
+As we explained in chapter \cref{ch:homotopy}, types in \HoTT are interpreted
+as \emph{spaces} instead of sets, and the two different notions of equality 
+(definitional and propositional) have very different interpretations:
+\begin{itemize}
+    \item the definitional equality \( a = b \) corresponds to an actual, 
+        on-the-nose equality between the two points, but
+    \item the propositional equality \( a\ \func{≡}\ b \) is the space of
+        paths connecting \( a \) to \( b \). 
+\end{itemize}
+% 
+Since \MLTT is a subset of \HoTT, our tentative definitions can be 
+interpreted as talking about spaces and should thus also make sense
+from this perspective. 
+% 
+So, does our definition properly encode \defnote{presheaves of 
+spaces}{Presheaves of spaces are an instance of higher presheaves, the
+analogue of regular presheaves in higher category theory.}?
+% 
+Unfortunately, it does not. 
+
+Indeed, for such a definition to work, \field{F\_id} and \field{F\_comp} need 
+to be definitional equalities. 
+% 
+When we relax these equalities to mere paths, we introduce superfluous 
+information -- as we have seen, there are now several ways to use 
+\field{F\_id} and \field{F\_comp} to prove what should really be a definitional 
+equality.
+% 
+And since paths are relevant information in \HoTT, the object we get is 
+actually different from what we aim for.
+% 
+Of course, we do not have access to the definitional equality in type theory, 
+so we have to find another way to eliminate these extra paths.
+
+We can try to simply add new fields to the record \func{presheaf} that recover 
+the missing equations, such as
+
+\begin{code}
+\>[0] \field{F\_coh} : \AgdaSymbol{∀}\ f\ g\ h\ \AgdaSymbol{→}
+\>[94I]\ (\field{F\_comp}\ h\ (f\ \func{∘}\ g))
+\ \func{∙}\ ((\field{F₁}\ h)\ \func{∘}\ (\field{F\_comp}\ g\ f))\<%
+\\
+\>[.][@{}l@{}]\<[94I]%
+\>[12]\func{≡}\ (\field{F\_comp}\ (g\ \func{∘}\ h)\ f)
+\ \func{∙}\ ((\field{F\_comp}\ h\ g)\ \func{∘}\ (\field{F₁}\ f)) \<%
+\end{code}
+\sideremark[*-5]{\func{\_∙\_} denotes the transitivity of equality / composition of 
+paths.}
+
+While it is true that we can find a finite number of equations that account for 
+all superfluous paths introduced by \field{F\_id} and \field{F\_comp}, this 
+approach will not get us very far. 
+% 
+\field{F\_coh} itself introduces superfluous paths between paths, and only
+leads us towards an infinite tower of coherences of ever increasing 
+dimensions, with no appearant way to make it fit into a finite definition.
+
+\subsection{The Problem of Simplicial Sets}
+
+It turns out that we don't know how to do that with types.
+
+Equivalent to the problem of (semi-)simplicial sets.
+
+Open problem in HoTT for 10 years.
+
+\shepherd{In fact, it also holds for the definition of a category}
+
+\subsection{Possible Solutions}
+
+We could use TTobs.
+
+We could use hsets.
+
+\section{Prefascist Sets}
+
+\section{Higher Prefascist Sets}
+
+\section{The Bar Construction}

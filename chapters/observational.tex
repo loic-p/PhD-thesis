@@ -1,0 +1,382 @@
+\setchapterimage[6cm]{seaside}
+\setchapterpreamble[u]{\margintoc}
+\chapter{Observational Type Theory}
+\labch{layout}
+
+% \SetoidTT has two cumulative hierarchies of universes. The first one, which we write \( \Type_i \)
+% (where \( i \) is a natural number), is the usual universe hierarchy of Martin-Löf type theory. The
+% second family, which we write \( \sProp_i \), is the family of \emph{definitionally
+% proof-irrelevant types}, which means that any two inhabitants of a type \( \tm{A}{\sProp_i} \) are
+% convertible.
+% %
+% This corresponds to the two hierarchies presented
+% in~\citet{gilbert:hal-01859964} and implemented in \Agda, except that
+% we also introduce some cumulativity features that will prove useful when
+% interpreting equality in the universe of propositions and for dependent
+% function types.
+% %
+% Having a proof-irrelevant hierarchy of types seems to be crucial to
+% interpret an extensional equality that satisfies \UIP.
+% %
+% Indeed, it trivializes all of the higher coherences
+% that naturally arise when considering proofs of equality between
+% equalities, and provides a canonical inhabitant for the type that
+% encodes UIP, which is simply given by reflexivity.
+
+
+I don't know I write something \MLTT
+
+% SetoidCC syntax
+\begin{figure}
+	\begin{small}
+		\[
+		\begin{array}{lclcl}
+		i,j								& \bnfin	& \Nat																					&  & \text{Universe levels}\\
+		s									& \bnfis	& \Type_i \qsep \sProp														&  & \text{Universes}\\
+		\Gamma , \Delta   & \bnfis	& \emptyctx 
+																\qsep \extctxannotated{\Gamma}{A}{s}						&  & \text{Contexts}\\
+		t,u,m,n,e,A,B     & \bnfis	& x \qsep s 																		&  & \text{Variables and Universes}\\
+											& \sep		& \lam{A}{t} \qsep t\ u 
+																\qsep \Depfunannotated{A}{B}{s}{s}{s'} 					&  & \text{Dependent products}\\
+											& \sep		& \zero \qsep \suc{t} \qsep \natrec{P}{t}{u}{n} 
+																\qsep \Nat																			&  & \text{Natural numbers}\\
+											& \sep		& \pair{t}{u} \qsep \fst{t} \qsep \snd{t} 
+																\qsep \Existsannotated{A}{B}{i}{j} 							&  & \text{Existential types}\\
+											& \sep		& \emptyrec{A}{t} \qsep \Empty									&  & \text{Empty type}\\
+											& \sep		& \unit \qsep \Unit															&  & \text{Singleton type}\\
+											& \sep		& \Obseq[A]{t}{u} \qsep \refl{t}{A} 
+																\qsep \transport{A}{t}{B}{u}{t'}{e}							&  & \text{Observational equality}\\
+											& \sep		& \cast{A}{B}{e}{t} \qsep \castrefl{A}{t}				&  & \text{Type cast}
+		\end{array}
+		\]
+	\end{small}
+	\caption{Syntax of \SetoidCC}
+	\label{fig:syntax}
+\end{figure}
+
+% SetoidCC typing rules
+\begin{figure}
+	\begin{small}
+		\begin{mathpar}
+			\inferrule[Ctx-Nil]
+				{ }
+				{\wfctx{\emptyctx}}
+			\ilabel{infrule:ctx-nil}
+			\and
+			\inferrule[Ctx-Cons]
+				{\wfctx{\Gamma} \\ \tytm{\Gamma}{A}{\Univ}}
+				{\wfctx{\extctxannotated{\Gamma}{A}{\Univ}}}
+			\ilabel{infrule:ctx-cons}
+			\and
+			\inferrule[Var]
+				{\wfctx{\Gamma} \\ \inctx{\Gamma}{A}{\Univ}}
+				{\tytmannotated{\Gamma}{x}{A}{\Univ}}
+			\ilabel{infrule:var}
+			\and
+			\inferrule[conv]
+				{\tytmannotated{\Gamma}{t}{A}{\Univ}
+					\\ \eqtm{\Gamma}{A}{B}{\Univ}}
+				{\tytmannotated{\Gamma}{t}{B}{\Univ}}
+			\ilabel{infrule:conv}
+			\\
+			\inferrule[Univ]
+				{\wfctx{\Gamma}}
+				{\tytm{\Gamma}{\Univ}{\Univ '}}
+				{\scriptstyle\univRel{\Univ}{\Univ '}}
+			\ilabel{infrule:univ}
+			\and
+			\inferrule[$\Pi$-Form]
+				{%\tytm{\Gamma}{A}{\Univ}
+					\tytm{\extctxannotated{\Gamma}{A}{\Univ}}{B}{\Univ '}}
+				{\tytm{\Gamma}{\Depfunannotated{A}{B}{s}{s}{s'}}{\piRel{\Univ}{\Univ '}}}
+				{}
+			\ilabel{infrule:pi-form}
+			\and
+			\inferrule[$\exists$-Form]
+				{%\tytm{\Gamma}{A}{\sProp_i}
+					\tytm{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp_i}}
+				{\tytm{\Gamma}{\Exists{A}{B}}{\sProp_i}}
+				% {\scriptstyle \substack{i \le k \\ j \le k}}
+			\ilabel{infrule:exists-form}
+			\\
+			\inferrule[Fun]
+				{\tytmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t}{B}{\Univ'}}
+				{\tytmannotated{\Gamma}{\lam{A}{t}}{\Depfun{A}{B}}{\piRel{\Univ}{\Univ '}}}
+			\ilabel{infrule:pi-intro}
+			\and
+			\inferrule[App]
+				{\tytmannotated{\Gamma}{t}{\Depfun{A}{B}}{\piRel{\Univ}{\Univ '}}
+					\\ \tytmannotated{\Gamma}{u}{A}{\Univ}}
+				{\tytmannotated{\Gamma}{t\ u}{\subst{B}{u}}{\Univ '}}
+			\ilabel{infrule:pi-elim}
+			\\
+			\inferrule[Pair]
+				{\tytm{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp_i} 
+					\\ \tytmannotated{\Gamma}{t}{A}{\sProp}
+					\\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\sProp}}
+				{\tytmannotated{\Gamma}{\pair{t}{u}}{\Exists{A}{B}}{\sProp}}
+			\ilabel{infrule:pair}
+			\\\
+			\inferrule[Fst]
+				{\tytmannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
+				{\tytmannotated{\Gamma}{\fst{t}}{A}{\sProp}}
+			\ilabel{infrule:fst}
+			\and
+			\inferrule[Snd]
+				{\tytmannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
+				{\tytmannotated{\Gamma}{\snd{t}}{\subst{B}{\fst{t}}}{\sProp}}
+			\ilabel{infrule:snd}
+			\\
+			\inferrule[$\Nat$-Form]
+				{\wfctx{\Gamma}}
+				{\tytm{\Gamma}{\Nat}{\Type_0}}
+			\ilabel{infrule:nat-form}
+			\and
+			\inferrule[Zero]
+				{\wfctx{\Gamma}}
+				{\tytmannotated{\Gamma}{\zero}{\Nat}{\Type_0}}
+			\ilabel{infrule:zero}
+			\and
+			\inferrule[Suc]
+				{\tytmannotated{\Gamma}{n}{\Nat}{\Type_0}}
+				{\tytmannotated{\Gamma}{\suc{n}}{\Nat}{\Type_0}}
+			\ilabel{infrule:suc}
+			\and
+			\inferrule[$\Nat$-Elim]
+				{\tytmannotated{\Gamma}{t_0}{A\ \zero}{\Univ}
+					\\ \tytmannotated{\Gamma}{t_S}{\Depfun[n]{\Nat}{\Fun{A\ n}{A\ (\suc{n})}}}{\Univ}
+					\\ \tytmannotated{\Gamma}{n}{\Nat}{\Type_0}}
+				{\tytmannotated{\Gamma}{\natrec{A}{t_0}{t_S}{n}}{A\ n}{\Univ}}
+			\ilabel{infrule:nat-elim}
+			\\
+			\inferrule[$\Empty$-Form]
+				{\wfctx{\Gamma}}
+				{\tytm{\Gamma}{\Empty}{\sProp_i}}
+			\ilabel{infrule:empty-form}
+			\and
+			\inferrule[$\Empty$-Elim]
+				{\tytm{\Gamma}{A}{\Univ_i}
+					\\ \tytmannotated{\Gamma}{t}{\Empty}{\sProp}}
+				{\tytmannotated{\Gamma}{\emptyrec{A}{t}}{A}{\Univ_i}}
+			\ilabel{infrule:empty-elim}
+			\and
+			\inferrule[$\Unit$-Form]
+				{\wfctx{\Gamma}}
+				{\tytm{\Gamma}{\Unit}{\sProp_i}}
+			\ilabel{infrule:unit-form}
+			\and
+			\inferrule[$\Unit$-Intro]
+				{\wfctx{\Gamma}}
+				{\tytmannotated{\Gamma}{\unit}{\Unit}{\sProp}}
+			\ilabel{infrule:unit-intro}
+			\\
+			\inferrule[Eq-Form]
+				{%\tytm{\Gamma}{A}{\Type_i} \\
+					\tytmannotated{\Gamma}{t}{A}{\Type_i}
+					\\ \tytmannotated{\Gamma}{u}{A}{\Type_i}}
+				{\tytm{\Gamma}{\Obseq[A]{t}{u}}{\sProp_i}}
+			\ilabel{infrule:eq-form}
+			\and
+			\inferrule[Refl]
+				{% \tytm{\Gamma}{A}{\Type_i} \\
+					\tytmannotated{\Gamma}{t}{A}{\Type_i}}
+				{\tytmannotated{\Gamma}{\refl{t}{A}}{\Obseq[A]{t}{t}}{\sProp_i}}
+			\ilabel{infrule:refl}
+			\and
+			% \inferrule{\tytm{\Gamma}{e}{\Obseq[A]{t}{u}}}
+			%           {\tytm{\Gamma}{\sym{e}}{\Obseq[A]{u}{t}}}
+			%   \and
+			\inferrule[Transport-$\sProp{}$]
+				{%\tytm{\Gamma}{A}{\Type_i}
+					\tytmannotated{\Gamma}{t,t'}{A}{\Type_i}
+					\quad \tytm{\extctxannotated[e]{\extctxannotated[y]{\Gamma}{A}{\Type_i}}{\Obseq[A]{t}{x}}{\sProp}}{B}{\sProp[j]}
+					% \quad \tytm{\Gamma}{B}{\sProp[j]}
+					\quad \tytmannotated{\Gamma}{u}{\subst[e]{\subst[y]{B}{t}}{\refl{t}{A}}}{\sProp}
+					%\quad \tytmannotated{\Gamma}{t'}{A}{\Univ}
+					\quad \tytmannotated{\Gamma}{e}{\Obseq[A]{t}{t'}}{\sProp}}
+				{\tytmannotated{\Gamma}{\transport{A}{t}{B}{u}{t'}{e}}{\subst[e]{\subst[y]{B}{t'}}{e}}{\sProp}}
+			\ilabel{infrule:transport-prop}
+			\and
+			\inferrule[Cast]
+				{% \tytm{\Gamma}{A}{\Univ_i}   \quad \tytm{\Gamma}{B}{\Univ_i}
+					\tytmannotated{\Gamma}{e}{\Obseq[{\Type_i}]{A}{B}}{\sProp}
+					\quad \tytmannotated{\Gamma}{t}{A}{\Type_i}}
+				{\tytmannotated{\Gamma}{\cast{A}{B}{e}{t}}{B}{\Type_i}}
+			\ilabel{infrule:cast}
+			\and
+			\inferrule[Cast-Refl]
+				{%\tytm{\Gamma}{A}{\Univ_i}
+					\tytmannotated{\Gamma}{t}{A}{\Type_i} \\
+					\tytmannotated{\Gamma}{e}{\Obseq[{\Type_i}]{A}{A}}{\sProp}}
+				{\tytm{\Gamma}{\castrefl{A}{t}}{\Obseq[A]{t}{\cast{A}{A}{e}{t}}}}
+			\ilabel{infrule:cast-refl}
+		\end{mathpar}
+	\end{small}
+	\caption{\SetoidCC Typing Rules}
+	\label{fig:SetoidCC-typing}
+\end{figure}
+
+% SetoidCC conversion rules
+\begin{figure}
+	\begin{small}
+		\begin{mathpar}
+			\inferrule[Refl]
+				{\tytmannotated{\Gamma}{t}{A}{\Type_i}}
+				{\eqtmannotated{\Gamma}{t}{t}{A}{\Type_i}}
+			\ilabel{infrule:reflexivity}
+			\and
+			\inferrule[Sym]
+				{\eqtmannotated{\Gamma}{t}{u}{A}{\Type_i}}
+				{\eqtmannotated{\Gamma}{u}{t}{A}{\Type_i}} 
+			\ilabel{infrule:sym}
+			\and
+			\inferrule[Trans]
+				{\eqtmannotated{\Gamma}{t}{t'}{A}{\Type_i}
+					\and \eqtmannotated{\Gamma}{t'}{u}{A}{\Type_i}}
+				{\eqtmannotated{\Gamma}{t}{u}{A}{\Type_i}}
+			\ilabel{infrule:trans}
+			\and
+			\inferrule[Red-Conv]
+				{\red{\Gamma}{t}{u}{A}}
+				{\eqtmannotated{\Gamma}{t}{u}{A}{\Type_i}}
+			\ilabel{inferrule:red-conv}
+			\\
+			\inferrule[$\eta$-Eq]
+				{\tytmannotated{\Gamma}{t, u}{\Depfunannotated{A}{B}{}{\Univ}{\Type_i}}{\piRel{\Univ}{\Type_i}}
+					\\ \eqtmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t\ x}{u\ x}{B}{\Type_i}}
+				{\eqtmannotated{\Gamma}{t}{u}{\Depfunannotated{A}{B}{}{\Univ}{\Type_i}}{\piRel{\Univ}{\Type_i}}}
+			\ilabel{infrule:eta}
+			\and
+			\inferrule[Proof-Irrelevance]
+				{\tytmannotated{\Gamma}{t,u}{A}{\sProp}}
+				{\eqtmannotated{\Gamma}{t}{u}{A}{\sProp}}
+			\ilabel{infrule:proof-irrelevance}
+		\end{mathpar}
+	\end{small}
+ 	\caption{\SetoidCC Conversion Rules (except congruence)}
+	\label{fig:SetoidCC-conversion}
+\end{figure}
+
+% SetoidCC reduction rules
+\begin{figure}
+	\begin{small}
+		\begin{mathpar}
+			\inferrule[$\beta$-red]
+				{\tytm{\extctx{\Gamma}{A}}{t}{B}
+					\\ \tytm{\Gamma}{u}{A}}
+				{\red{\Gamma}{(\lam{A}{t})\ u}{\subst{t}{u}}{\subst{B}{u}}}
+			\ilabel{inferrule:beta-red}
+			\and
+			\inferrule[Conv-Red]
+				{\red{\Gamma}{t}{u}{A} \\ \eqtm{\Gamma}{A}{B}{\Type_i{}}}
+				{\red{\Gamma}{t}{u}{B}}
+			\ilabel{inferrule:conv-red}
+			\and
+			\inferrule[$\Nat$-Elim-Zero]
+				{\tytm{\Gamma}{A}{\Fun{\Nat}{\Type_i}}
+					\\ \tytm{\Gamma}{t_0}{A\ \zero}
+					\\ \tytm{\Gamma}{t_S}{\Depfun[n]{\Nat}{\Fun{A\ n}{A\ (\suc{n})}}}}
+				{\red{\Gamma}{\natrec{A}{t_0}{t_S}{\zero}}{t_0}{A\ 0}}
+			\ilabel{inferrule:nat-elim-zero}
+			\and
+			\inferrule[$\Nat$-Elim-Suc]
+				{\tytm{\Gamma}{A}{\Fun{\Nat}{\Type_i}}
+					\\ \tytm{\Gamma}{t_0}{A\ \zero}
+					\\ \tytm{\Gamma}{t_S}{\Depfun[n]{\Nat}{\Fun{A\ n}{A\ (\suc{n})}}}
+					\\ \tytm{\Gamma}{n}{\Nat}}
+				{\red{\Gamma}{\natrec{A}{t_0}{t_S}{\suc{n}}}{t_S\ \natrec{A}{t_0}{t_S}{n}}{A\ (\suc{n})}}
+			\ilabel{inferrule:nat-elim-suc}
+			\and
+			\inferrule[Eq-Fun]
+				{\tytm{\Gamma}{f}{\Depfun{A}{B}}
+					\\ \tytm{\Gamma}{g}{\Depfun{A}{B}}}
+				{\red{\Gamma}{\Obseq[\Pi A B]{f}{g}}{\Depfun{A}{\Obseq[B]{f\ x}{g\ x}}}{\sProp_i}}
+			\ilabel{inferrule:eq-fun}
+			\and
+			\inferrule[Eq-$\sProp{}$]
+				{\tytm{\Gamma}{A}{\sProp_i}
+					\\ \tytm{\Gamma}{B}{\sProp_i}}
+				{\red{\Gamma}{\Obseq[{\sProp_i}]{A}{B}}{\Prod{(\Fun{A}{B})}{(\Fun{B}{A})}}{\sProp[j]}}
+			\ilabel{inferrule:eq-sprop}
+			\and
+			\inferrule[Eq-Univ]
+				{\wfctx{\Gamma} \\ A \in \{ \Nat, \Univ \}}
+				{\red{\Gamma}{\Obseq[{\Univ'}]{A}{A}}{\Unit}{\sProp[k]}}
+				{\scriptstyle \substack{\univRel{\Univ}{\Univ'}}}
+			\ilabel{inferrule:eq-univ}
+			\and
+			\inferrule[Eq-Univ-$\neq$]
+				{\wfctx{\Gamma} \\ A, B \in \{ \Nat, \Pi A.
+					B, \Univ \} \\ \head{A} \neq \head{B}}
+				{\red{\Gamma}{\Obseq[{\Univ'}]{A}{B}}{\Empty}{\sProp[k]}}
+				{\scriptstyle \substack{\univRel{\Univ}{\Univ'}}}
+			\ilabel{inferrule:eq-univ-noeq}
+			\and
+			\inferrule[Eq-$\Pi$]
+				{\tytm{\Gamma}{A,A'}{\Univ}
+					% \\ \tytm{\Gamma}{A'}{\Univ_i}
+					\\ \tytm{\extctx{\Gamma}{A}}{B}{\Univ'}
+					\\ \tytm{\extctx{\Gamma}{A'}}{B'}{\Univ'}
+					\\ a := \cast{A'}{A}{\sym{e}}{a'}}
+				{\redmultiline{\Gamma}
+					{\Obseq[{\piRel{\Univ}{\Univ'}}]{\Depfun{A}{B}}{\Depfun{A'}{B'}}}
+					{\Exists[e]{\Obseq[{\Univ}]{A}{A'}}{\Depfun[a']{A'}{\Obseq[{\Univ'}]{\subst{B}{a}}{\subst{B'}{a'}}}}}{\sProp_i}}
+			\ilabel{inferrule:eq-pi}
+			\and
+			\inferrule[Eq-zero]
+				{\wfctx{\Gamma}}
+				{\red{\Gamma}{\Obseq[\Nat]{\zero}{\zero}}{\Unit}{\sProp_i}}
+			\ilabel{inferrule:eq-zero}
+			\quad
+			\inferrule[Eq-Suc]
+				{\tytm{\Gamma}{n}{\Nat}
+					\\ \tytm{\Gamma}{m}{\Nat}}
+				{\red{\Gamma}{\Obseq[\Nat]{\suc{m}}{\suc{n}}}{\Obseq[\Nat]{m}{n}}{\sProp_i}}
+			\ilabel{inferrule:eq-suc}
+			\quad
+			\inferrule[Eq-zero-suc]
+				{\tytm{\Gamma}{n}{\Nat}}
+				{\red{\Gamma}{\Obseq[\Nat]{\zero}{\suc{n}}}{\Empty}{\sProp_i}}
+			\ilabel{inferrule:eq-zero-suc}
+			\quad
+			\inferrule[Eq-suc-zero]
+				{\tytm{\Gamma}{n}{\Nat}}
+				{\red{\Gamma}{\Obseq[\Nat]{\suc{n}}{\zero}}{\Empty}{\sProp_i}}
+			\ilabel{inferrule:eq-suc-zero}
+			\\
+			\inferrule[Cast-Zero]
+				{\tytm{\Gamma}{e}{\Obseq[{\Type_0}]{\Nat}{\Nat}}}
+				{\red{\Gamma}{\cast{\Nat}{\Nat}{e}{\zero}}{\zero}{\Nat}}
+			\ilabel{inferrule:cast-zero}
+			\quad
+			\inferrule[Cast-Suc]
+				{\tytm{\Gamma}{e}{\Obseq[{\Type_0}]{\Nat}{\Nat}}
+					\\ \tytm{\Gamma}{n}{\Nat}}
+				{\red{\Gamma}{\cast{\Nat}{\Nat}{e}{\suc{n}}}{\suc{\cast{\Nat}{\Nat}{e}{n}}}{\Nat}}
+			\ilabel{inferrule:cast-suc}
+			\quad
+			% \inferrule[Eq-Univ]{\wfctx{\Gamma}}
+			%           {\red{\Gamma}{\Obseq[{\U[j]}]{\Univ_i}{\Univ_i}}{\Unit}{\sProp[k]}}
+			%           {\scriptstyle \substack{i < j < k}}
+			%         \ilabel{inferrule:eq-univ}
+			%            \and
+			\inferrule[Cast-Univ]
+				{\tytm{\Gamma}{e}{\Obseq[\Univ']{\Univ}{\Univ}}
+					\\ \tytm{\Gamma}{A}{\Univ}}
+				{\red{\Gamma}{\cast{\Univ}{\Univ}{e}{A}}{A}{\Univ}}
+			\ilabel{inferrule:cast-univ}
+			\\
+			\inferrule[Cast-$\Pi$]
+				{\tytm{\Gamma}{e}{\Obseq[{\Type_i}]{\Depfun{A}{B}}{\Depfun{A'}{B'}}}
+					\\ \tytm{\Gamma}{f}{\Depfun{A}{B}}
+					\\ a := \cast{A'}{A}{\sym{\fst{e}}}{a'}}
+				{\redmultiline{\Gamma}
+					{\cast{\Depfun{A}{B}}{\Depfun{A'}{B'}}{e}{f}}
+					{\lam[a']{A'}{\cast{\subst{B}{a}}{\subst{B'}{a'}}{\snd{e}\ a'}{f\ a}}}
+					{\Depfun{A'}{B'}}}
+			\ilabel{inferrule:cast-pi}
+		\end{mathpar}
+	\end{small}
+	\caption{\SetoidCC Reduction Rules (except substitutions)}
+	\label{fig:SetoidCC-reduction}
+\end{figure}

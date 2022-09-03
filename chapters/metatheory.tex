@@ -1,0 +1,1473 @@
+\setchapterimage[6cm]{seaside}
+\setchapterpreamble[u]{\margintoc}
+\chapter{Meta-theory of TTobs}
+\labch{layout}
+
+In order for a type theory to be a reasonable candidate for implementation in a proof assistant,
+it is desirable to have some control over its behavior and its semantics. There is a wide variety
+of properties we can ask of a type theory; we will describe four of them and prove they apply to
+\SetoidTT.
+
+{\em Consistency.}
+A theory is called consistent if it is impossible to use it to derive a contradiction. It goes
+without saying that this property is of utmost importance if one wants to build interesting
+mathematics. When proving a theory consistent, one should pay some attention to the meta-theory
+where reasoning takes place, as a consistency result is really a reduction of the consistency of
+the theory to the consistency of the meta-theory.
+
+{\em Normalization.}
+If a type theory features reduction rules, one may want to make sure that by repeatedly applying
+said rules, all terms eventually reach a normal form that cannot be reduced further.
+One says that the reduction strategy is normalizing.
+%
+
+{\em Canonicity.}
+A term belonging to a type is called canonical when it can be explicitly built up
+using the constructors of that type. For instance, an inhabitant of the type \( \Nat \) of natural
+numbers is canonical if it is an explicit numeral. If all terms of type \( \Nat \) in an empty
+context normalize to a canonical form, then the theory is said to enjoy canonicity for natural
+numbers.
+
+{\em Decidability of Type Checking.}
+Finally, in order to implement a type theory in a proof assistant, it is desirable to have an
+algorithm that, given a context \( \Gamma \) and terms \( t \) and \( A \), decides whether \( t \)
+is an inhabitant of \( A \) in context \( \Gamma \). This ensures users that when they find a
+proof for a statement, the proof assistant can automatically check that their proof is correct.
+
+In this section, we will prove these four properties for \SetoidTT.
+%
+We first present our extension of the
+logical relations framework developed by \sidecitet{Abel:POPL2018} and
+later extended to $\sProp$ by~\sidecitet{gilbert:hal-01859964}. The
+framework provides a proof of normalization and canonicity from
+consistency, as well as decidability of conversion and thus decidability of
+type checking.
+%
+It has been formalized in the \Agda development.
+%
+Then, to get consistency and therefore canonicity, we develop a model of
+\SetoidTT in a constructive set theory that supports inductive-recursive definitions and one
+Grothendieck universe.
+
+\section{A logical relation with an Impredicative universe}
+\label{sec:logic-relat-with}
+
+\begin{figure}
+    \[
+  \begin{array}{lr}
+    \tytyR{\ell}{\Gamma}{A}{\Type{}} & \text{A is a reducible type of sort \( s \) in context \( \Gamma \)} \\
+    \eqtyR{\ell}{\Gamma}{A}{B}{\Type{}} & \text{A and B are reducibly equal types of sort \( s \) in context \( \Gamma \)} \\
+    \tytmR{\ell}{\Gamma}{t}{A}{\Type{}} & \text{t is a reducible term of type \( A \), which has sort \( s \) in context \( \Gamma \)} \\
+    \eqtmR{\ell}{\Gamma}{t}{u}{A}{\Type{}} & \qquad\text{t and u are reducibly equal terms of type \( A \), which has sort \( s \) in context \( \Gamma \)}
+  \end{array}
+\]
+  \caption{The four judgments of the logical relation}
+  \label{fig:log-rel-judgments}
+\end{figure}
+
+
+
+In this section, we define a logical relation to show
+normalization and decidability of conversion for \SetoidCC, following
+\sidecitet{Abel:POPL2018}.
+
+Normalization of dependent type theories is a subtle matter:
+if one tries to prove it by naive induction on the typing derivations,
+one quickly gets stuck on the case of the application rule because
+we cannot deduce normalization of \( t~u \) from normalization of
+$t$ and $u$.
+%
+The so-called ``logical relation'' is a standard technique to generalize the
+induction hypothesis, so that the proof by induction on the typeing
+derivation goes through.
+%
+Indeed, the logical relation collects information on types and terms
+that thoroughly characterizes their behaviour with respect to
+reduction, in a way that directly implies normalization.
+%
+It is direct to show that reducibility implies typing (a property
+refered to as the escape lemma).
+%
+Then, the fundamental lemma shows that any well-typed term is
+reducible by proving that this information is appropriately created
+and preserved by all the typing rules.
+
+The logical relation consists of four predicates which mirror the four
+typing judgments of \SetoidCC (cf \cref{fig:log-rel-judgments}), defined on a type-by-type basis.
+%
+%
+For \MLTT and \SetoidTT, the logical relation is indexed by a level
+\( \ell \), which reflects the predicative nature of the universe
+hierarchy: reducibility is first defined at level $0$ to characterize
+terms that inhabit the smallest universe \( \varType_0 \), then this relation is used
+to define reducibility at level 1 for terms that live in
+\( \varType_1 \) at most, and so on. Therefore, the whole definition is
+done by induction on \( \ell \).
+%
+This construction seems deeply incompatible with an impredicative
+universe, as dependent products in \( \sProp \) may mention arbitrarily
+large universes in their domain while still being at the bottom
+of the universe hierarchy.
+
+Thus, replicating the usual definition for the impredicative universe
+leads to a non well-founded relation.
+%
+In this section, we show how to break out of that circularity in the case of an
+impredicative universe with definitional proof-irrelevance, by
+defining a weaker logical relation on impredicative types that does
+not require knowledge of the logical relation for the predicative
+hierarchy.
+%
+However, a weaker logical relation means a weaker induction hypothesis,
+which makes the fundamental lemma harder to prove.
+We compensate for this by defining an alternative typing system
+for \SetoidCC, called \emph{paranoid} in reference to
+\sidecitet{andrej17:paranoid} and noted with $\dashPar$,
+in which we add seemingly redundant hypotheses in the typing derivations.
+These hypotheses are used during the proof of the fundamental lemma, to
+recover information that cannot be collected in the logical relation.
+%
+Actually, the proof of the fundamental lemma requires to generalize
+the induction hypothesis to ensure stability of reducibility, and
+consider a notion called \emph{validity}, noted for equality of terms as
+$\eqtmV{\ell}{\Gamma}{t}{u}{A}{\Type{}}$.
+%
+Validity is a generalization of reducibility, which coincides with it
+when considering the identity substitution.
+%
+Then, once the fundamental lemma is proven, we can show that the
+economic and paranoid typing systems for \SetoidCC are equivalent and
+conclude normalization.
+%
+Finally, to get decidability of conversion for
+\SetoidCC, one needs to introduce the notion of algortihmic
+conversion, noted $\algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}$,
+which is sound with respect to conversion and for which we can
+show that it is implied by reducible equality.
+%
+\cref{fig:proof-outline} summarizes the connections between those relations.
+
+\begin{figure}
+%     \[
+%       \xymatrix@R=4em@C=7em{
+%         \eqtmannotated{\Gamma}{t}{u}{A}{\Type{}}
+%         & \eqtmParaannotated{\Gamma}{t}{u}{A}{\Type{}}
+%         \ar@2{->}[l]^{\small\begin{array}{c}\mathrm{}\end{array}}_{\small\begin{array}{c}\mathrm{\cref{thm:nonparanoid}}\end{array}}
+%         \ar@2{->}[d]^{}_{\small\begin{array}{c}\mathrm{Fundamental} \\
+%                             \mathrm{\cref{thm:fundamental}} \end{array}}
+%         &
+%         \algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}
+%         \ar@2{->}[l]_{\small\begin{array}{c}\mathrm{Soundness~of}\end{array}}^{\small\begin{array}{c}\mathrm{Algo.~Conv.}\end{array}}
+%         \\
+%                 & \eqtmV{\ell}{\Gamma}{t}{u}{A}{\Type{}}
+%                 \ar@2{->}[r]^{\small\begin{array}{c}\mathrm{Identity}\end{array}}_{\small\begin{array}{c}\mathrm{Substitution}\end{array}}
+%                 &
+%     \eqtmR{\ell}{\Gamma}{t}{u}{A}{\Type{}} \ar@2{->}[u]_{\small\begin{array}{c}\mathrm{Escape} \\
+%                             \mathrm{Lemma} \end{array}}
+%   }
+%     \]
+	this should be redone with tikz or smth
+  \caption{Outline of the proof}
+  \label{fig:proof-outline}
+\end{figure}
+
+
+
+\subsection{The Logical Relation for the Predicative Hierarchy}
+
+We start by presenting the logical relation for the relevant
+fragment, closely following \sidecitet{Abel:POPL2018,pujet:hal-03367052}.
+%
+For pedagogical reasons, we will present a somewhat informal version
+of the logical relation where some arguments are left implicit, and
+refer the interested reader to the \Agda formalization.\sidenote{The
+  formalization is in the folder \texttt{logrel-ccobs}. The links to
+  \Agda files are broken for the double-blind process as they point to
+  our GitHub repository.}
+%
+While our formal proof and the definition in
+\refAgda{}{LogicalRelation} only feature three levels, it should be
+quite clear that the same technique works for any finite number of
+levels.
+
+The logical relation is defined by induction-recursion, as detailed
+in \cref{fig:logrel-ind-rec}.
+%
+The logical relation on types is defined inductively with seven
+constructors, one for every type of \SetoidCC. Each constructor
+involves an auxiliary predicate of the form \( \Gamma \Vdash_X t \)
+that packs the appropriate information for the corresponding type.
+%
+The logical relations on terms and equalities are simultaneously
+defined by recursion on \( \tytyR{\ell}{\Gamma}{A}{s} \), using
+more auxiliary predicates.
+%
+This technically means that these judgments should have an extra
+argument of type \( \tytyR{\ell}{\Gamma}{A}{s} \), but since it
+will turn out that all such derivations give rise to equivalent judgments
+(cf \refAgda{}{Irrelevance}), we freely omit this argument.
+
+\begin{figure}
+  \begin{small}
+\begin{flalign*}
+  \begin{array}{lcl}
+\_ \Vdash_\ell \_ : \_ & : & (\Gamma : \Context) \to (t : \Term) \to (A : \Term) \to (s : \Sort) \to \AgdaSet{} \\
+\_ \Vdash_\ell \_ : \_ & \bnfis & \Vne : \forall\ \Gamma\ t\ s \to
+                          (\Gamma \Vdash_{\mathsf{ne}} t : s) \to
+                          \Gamma \Vdash_\ell t : s\\
+               & \sep & \VU : \forall\ \Gamma\ t\ i \to
+                          (\Gamma \Vdash_{\mathsf{U}} t : \varType_i) \to
+                          \Gamma \Vdash_\ell t : \varType_i\\
+               & \sep & \Vnat : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Nat} t) \to
+                          \Gamma \Vdash_\ell t : \varType_0\\
+               & \sep & \Vpi : \forall\ \Gamma\ t\ i \to
+                          (\Gamma \Vdash_{\Pi} t : \varType_i) \to
+                          \Gamma \Vdash_\ell t : \varType_i\\
+               & \sep & \VOmega : \forall\ \Gamma\ t\ i \to
+                          (\Gamma \Vdash_{\Omega} t : \varType_i) \to
+                          \Gamma \Vdash_\ell t : \varType_i\\
+               & \sep & \Vforall : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\forall} t) \to
+                          \Gamma \Vdash_\ell t : \sProp\\
+               & \sep & \Vexists : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\exists} t) \to
+                          \Gamma \Vdash_\ell t : \sProp\\
+               & \sep & \Vempty : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\bot} t) \to
+                          \Gamma \Vdash_\ell t : \sProp\\
+               %% & \sep & \Vemb : \forall\ \ell'\ \Gamma\ t\ s \to
+               %%            \ell' < \ell \to
+               %%            \Gamma \Vdash_{\ell'} t : s \to
+               %%            \Gamma \Vdash_{\ell} t : s\\
+  \end{array} &&
+\end{flalign*}
+
+\begin{flalign*}
+  \begin{array}{lcl}
+\_ \Vdash_\ell \_ \equiv \_ : \_ & : & (\Gamma : \Context) \to (A : \Term) \to (B : \Term) \to (s : \Sort) \to \{ \Gamma \Vdash_\ell A : s \} \to \AgdaSet{} \\
+\Gamma \Vdash_\ell A \equiv B : s\ \{ \VX \} & = & \Gamma \Vdash_{X,\ell} A \equiv B : s
+  \qquad \text{for all }\ X \in \{\mathsf{ne}, \mathsf{U}, \mathbb{N}, \Pi, \Omega, \forall, \exists, \bot\}
+  \end{array} &&
+\end{flalign*}
+
+\begin{flalign*}
+  \begin{array}{lcl}
+\_ \Vdash_\ell \_ : \_ : \_ & : & (\Gamma : \Context) \to (t : \Term) \to (A : \Term) \to (s : \Sort) \to \{ \Gamma \Vdash_\ell A : s \} \to \AgdaSet{} \\
+\Gamma \Vdash_\ell t : A : s\ \{ \VX \} & = & \Gamma \Vdash_{X,\ell} t : A: s
+  \qquad \text{for all }\ X \in \{\mathsf{ne}, \mathsf{U}, \mathbb{N}, \Pi, \Omega, \forall, \exists, \bot\}
+  \end{array} &&
+\end{flalign*}
+
+\begin{flalign*}
+  \begin{array}{lcl}
+\_ \Vdash_\ell \_ \equiv \_ : \_ : \_ & : & (\Gamma : \Context) \to (t\ u : \Term) \to (A : \Term) \to (s : \Sort) \to \{ \Gamma \Vdash_\ell A : s \} \to \AgdaSet{} \\
+\Gamma \Vdash_\ell t \equiv u : A : s\ \{ \VX \} & = & \Gamma \Vdash_{X,\ell} t \equiv u : A: s
+  \qquad \text{for all }\ X \in \{\mathsf{ne}, \mathsf{U}, \mathbb{N}, \Pi, \Omega, \forall, \exists, \bot\}
+  \end{array} &&
+\end{flalign*}
+\end{small}
+  \caption{Inductive-recursive presentation of the logical relation}
+  \label{fig:logrel-ind-rec}
+\end{figure}
+
+%% As is customary in reducibility proofs~\sidecite{girard72}, these
+%% judgments imply normalization, are closed under weak head expansion,
+%% and are verified by all neutral terms.
+
+We now give the definition of all these auxiliary predicates, starting
+with the predicates for neutral types.
+
+\paragraph{Neutral Types}
+
+% The first kind of reducible type are neutral type.
+\[
+{\small
+  \inferrule{\redT{\Gamma}{A}{N}{s} \\ \neutral{N}}
+  {\tytyR{\mathsf{ne}}{\Gamma}{A}s{}}
+  }
+\]
+This rule states that $A$ is reducible to a neutral type:
+\( \redT{\Gamma}{A}{N}{s} \) means that \( A \) reduces to a neutral term \( N \)
+in a finite number of steps (possibly zero), and that both \( A \) and \( N \) are of sort \( s \) in context \( \Gamma \).
+%
+When $A$ is reducible to a neutral type, we define:
+% Given a derivation
+% \( \metatm{\mathscr{A}}{\tytyR{\ell}{\Gamma}{A}} \) built by this rule, we define:
+\begin{itemize}
+  \item \( \eqtyR{\mathsf{ne}}{\Gamma}{A}{B}{s} \) if there is a neutral term \( M \) such that
+    \( \redT{\Gamma}{B}{M}{s} \) and \( \eqtm{\Gamma}{N}{M}{s} \).
+  \item \( \tytmR{\mathsf{ne}}{\Gamma}{t}{A}{s} \) if there is a neutral term \( n \) such that
+    \( \redT{\Gamma}{t}{n}{N} \).
+  \item \( \eqtmR{\mathsf{ne}}{\Gamma}{t}{u}{A}{s} \) if there are neutral terms \( n, m \) such that
+    \( \redT{\Gamma}{t}{n}{N} \)
+
+    and \( \redT{\Gamma}{u}{m}{N} \), and
+    \( \eqtm{\Gamma}{n}{m}{N} \).
+\end{itemize}
+
+Note that the definition of reducible neutral types and terms does not
+recursively call the logical relation, thus it can be defined outside of
+the inductive-recursive definition.
+
+\paragraph{Natural Numbers}
+\[
+{\small
+  \inferrule{\redT{\Gamma}{A}{\Nat}{\varType_0}}
+            {\Gamma \Vdash_{\mathbb{N}} A}
+}\]
+When $A$ is reducible to $\Nat$, we define:
+ % Given a derivation \( \metatm{\mathscr{A}}{\tytyR{\ell}{\Gamma}{A}} \) built by this rule, we
+% define:
+\begin{itemize}
+  \item \( \Gamma \Vdash_{\mathbb{N}} A \equiv B \) if \( \redT{\Gamma}{B}{\Nat}{\varType_0} \).
+  \item \( \Gamma \Vdash_{\mathbb{N}} t : A \) if there is a normal form \( t' \) such that
+    \( \redT{\Gamma}{t}{t'}{\Nat} \) and \( \Gamma \Vdash_{\mathbb{N}\mathsf{t}} t' \), which is inductively
+    defined by
+{\small
+    \[
+      \inferrule{ }
+                {\nattmR{\Gamma}{\zero}}
+      \quad
+      \inferrule{\nattmR{\Gamma}{t}}
+                {\nattmR{\Gamma}{\suc{t}}}
+      \quad
+      \inferrule{\tytm{\Gamma}{n}{\Nat}
+                \\ \text{\( n \) is neutral}}
+                {\nattmR{\Gamma}{n}}
+    \]}
+  \item \( \Gamma \Vdash_{\mathbb{N}} t \equiv u : A \) if there are normal forms \( t', u' \) such that
+    \( \redT{\Gamma}{t}{t'}{\Nat} \) and
+
+    \( \redT{\Gamma}{u}{u'}{\Nat} \), and
+    \( \nateqR{\Gamma}{t'}{u'} \), which is inductively defined by
+    {\small
+\[
+      \inferrule{ }
+                {\nateqR{\Gamma}{\zero}{\zero}}
+      \quad
+      \inferrule{\nateqR{\Gamma}{t}{u}}
+                {\nateqR{\Gamma}{\suc{t}}{\suc{u}}}
+      \quad
+      \inferrule{\eqtm{\Gamma}{n}{m}{\Nat}
+                \\ \text{\( n, m \) are neutral}}
+                {\nateqR{\Gamma}{n}{m}}
+    \]}
+\end{itemize}
+
+Again, those definitions do not
+mention the logical relation and can be defined \emph{a priori}.
+
+
+\paragraph{Predicative Universes}
+\[
+{\small
+  \inferrule{\redT{\Gamma}{A}{\varType_i{}}{\varType_{i+1}}}
+            {\tytyR{\mathsf{U}}{\Gamma}{A}{\varType_{i+1}}}
+            { \substack{i < \ell}}
+}\]
+When $A$ is reducible to a predicative universe, we define:
+\begin{itemize}
+  \item \( \eqtyR{\mathsf{U}}{\Gamma}{A}{B}{\varType_{i+1}} \) if \( \redT{\Gamma}{B}{\varType_i{}}{\varType_{i+1}} \).
+  \item \( \tytmR{\mathsf{U}}{\Gamma}{t}{A}{\varType_{i+1}} \) if there is a normal form \( t' \) such that
+    \( \redT{\Gamma}{t}{t'}{\varType_i{}} \), and \( \tytyR{i}{\Gamma}{t}{\varType_i} \)
+
+    (which is already defined by induction hypothesis, since
+    \( i < \ell \)).
+  \item \( \eqtmR{\mathsf{U}}{\Gamma}{t}{u}{A}{\varType_{i+1}} \) if there are normal forms \( t', u' \) such that
+    \( \redT{\Gamma}{t}{t'}{\varType_i{}} \)
+
+    and \( \redT{\Gamma}{u}{u'}{\varType_i{}} \), and
+    \( \tytyR{i}{\Gamma}{t}{\varType_i} \), \( \tytyR{i}{\Gamma}{u}{\varType_i} \), and \( \eqtyR{i}{\Gamma}{t}{u}{\varType_i} \).
+\end{itemize}
+
+
+
+\paragraph{Dependent Function Types}
+
+  \[
+{\small
+  \inferrule{\redT{\Gamma}{A}{\Depfunannotated{F}{G}{}{s}{\varType_i}}{\varType_j} \\ \piRel{\Type{}}{\varType_i} = \varType_j
+            \\ \tytm{\Gamma}{F}{\Type{}}
+            \\ \tytm{\extctx{\Gamma}{F}}{G}{\varType_i}
+            \\ \forall \wkrho \to \tytyR{\ell}{\Delta}{F[\rho]}{\Type{}}
+            \\ \forall \wkrho \to \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}{\tytyR{\ell}{\Delta}{G[\rho, a]}{\varType_i}}
+            \\ \forall \wkrho \to
+              \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}
+              {\metaimply{\tytmR{\ell}{\Delta}{b}{F[\rho]}{\Type{}}}
+              {\metaimply{\eqtmR{\ell}{\Delta}{a}{b}{F[\rho]}{\Type{}}}
+              {\eqtyR{\ell}{\Delta}{G[\rho, a]}{G[\rho, b]}{\varType_i}}}}}
+            {\tytyR{\Pi}{\Gamma}{A}{\varType_j}}
+          }\]
+%
+This rule states that $A$ is reducible to a dependent function type.
+%
+We introduced quite a bit of notation here. \( \to \) is implication in the meta
+theory, \ie the theory of \Agda. \( \forall \wkrho \) is a meta-theoretical
+quantification on an arbitrary well-formed context \( \Delta \) and a weakening \( \rho \)
+that turns \( \Delta \) into \( \Gamma \).
+Applying such a weakening on the free variables of a term \( F \) that is a well-typed
+in context \( \Gamma \) results in a term \( F[\rho] \) that is well-typed in context \( \Delta \).
+Given a term \( G \) in the extended context \( \extctx{\Gamma}{F} \) and a term
+\( \tytm{\Delta}{a}{F[\rho]} \), we can apply \( \rho \) on the free variables of \( G \) except
+for \( x \) to get a term in \( \extctx{\Delta}{F[\rho]} \), and then substitute \( x \) with \( a \)
+to get a term in \( \Delta \). The result is noted \( G[\rho, a] \).
+
+With those notations, a term $A$ is reducible to a dependent function
+type when (i) it reduces to $\Depfun{F}{G}$, (ii) $F$ is a reducible type, (iii)
+given any reducible term $a$ at type $F$, $G[a]$ is a reducible type and (iv) when $a$ and $b$ are reducibly equal at type $B$, $G[a]$
+and $G[b]$ are reducibly equal types.
+%
+Moreover, all these reducibility premises should hold under any weakening \( \rho \).
+%
+Note that the definition above defines reducibility of a type using
+reducibility of terms, which explains the need for an inductive-recursive definition.
+
+When $A$ is reducible to a dependent function type,
+% Given a derivation \( \metatm{\mathscr{A}}{\tytyR{\ell}{\Gamma}{A}}
+% \) built by this rule,
+we define:
+\begin{itemize}
+  \item \( \eqtyR{\Pi}{\Gamma}{A}{B}{\varType_j} \) if there are terms \( F' \) and \( G' \) such that
+    \begin{itemize}
+      \item \( \redT{\Gamma}{B}{\Depfun{F'}{G'}}{\varType_j} \) and
+        \( \eqtm{\Gamma}{\Depfun{F}{G}}{\Depfun{F'}{G'}}{\varType_j} \)
+      \item \( \forall \wkrho.\ \ \eqtyR{\ell}{\Delta}{F[\rho]}{F'[\rho]}{\Type{}} \)
+      \item \( \forall \wkrho.\ \ \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}{\eqtyR{\ell}{\Delta}{G[\rho, a]}{G'[\rho, a]}{\varType_i}} \).
+      \end{itemize}
+    \item \( \tytmR{\Pi}{\Gamma}{t}{A}{{\varType_j}} \) if there is a normal form \( t' \) such that
+    \begin{itemize}
+      \item \( \redT{\Gamma}{t}{t'}{\Depfun{F}{G}} \)
+      \item \( \forall \wkrho.\ \
+        \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}{\tytmR{\ell}{\Delta}{t'[\rho]\ a}{G[\rho, a]}{\varType_i}} \)
+      \item
+        $\forall \wkrho.  \  \
+              \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}
+                    {\metaimply{\tytmR{\ell}{\Delta}{b}{F[\rho]}{\Type{}}}
+                      {\eqtmR{\ell}{\Delta}{a}{b}{F[\rho]}{\Type{}}}}$
+
+                          \hspace{9.1em}
+                          $\metaimply{}{\eqtmR{\ell}{\Delta}{t'[\rho]\ a}{t'[\rho]\ b}{G[\rho,
+                                                                    a]}{\varType_i}}$.
+    \end{itemize}
+  \item \( \eqtmR{\Pi}{\Gamma}{t}{u}{A}{\varType_j} \) if there are normal forms \( t', u' \) such that
+    \begin{itemize}
+      \item \( \redT{\Gamma}{t}{t'}{\Depfun{F}{G}} \)
+      and \( \redT{\Gamma}{u}{u'}{\Depfun{F}{G}} \)
+      \item \( \eqtm{\Gamma}{t'}{u'}{\Depfun{F}{G}} \)
+      \item \( \tytmR{\ell}{\Gamma}{t}{A}{\varType_j} \) and \( \tytmR{\ell}{\Gamma}{u}{A}{\varType_j} \)
+      \item \( \forall \wkrho.\ \ \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}{\eqtmR{\ell}{\Delta}{t'[\rho]\ a}{u'[\rho]\ a}{G[\rho, a]}{\varType_i}} \).
+    \end{itemize}
+  \end{itemize}
+
+  The three definitions above make sense because we know that when
+  $A$ is reducible to a dependent function type, we also know that its domain $F$
+  and codomain $G$ are reducible.
+  %% The reducibility of a term at a  dependent function type is defined pointwise, but we also need
+  %% to ask that the term preserves reducible equality.
+
+\subsection{The Logical Relation for the Impredicative Universe}
+
+We now turn to the definition of the relation for the proof-irrelevant
+fragment, which must be defined independently from the logical relation
+to avoid a non well-founded definition.
+
+Since there is no computation whatsoever in proof-irrelevant types,
+their inhabitants don't interact with other terms. This allows us
+to give a generic definition for reducibility of terms and term
+equality, that will work for any \( X \in \{ \bot, \forall, \exists\} \) :
+%
+\begin{itemize}
+  \item \( \tytmR{X}{\Gamma}{t}{A}{\sProp}\ \) when \(\ \tytm{\Gamma}{t}{A} \).
+  \item \( \eqtmR{X}{\Gamma}{t}{u}{A}{\sProp}\ \) when \(\ \tytm{\Gamma}{t}{A} \) and \( \tytm{\Gamma}{u}{A} \).
+  \end{itemize}
+%
+which means that if \( A \) is in \( \sProp \), then the logical
+relation does not need to collect any information on inhabitants of
+\( A \), save for the fact that they are well-typed. And this applies
+to equality too, for any two inhabitants of \( A \) are always
+convertible.
+
+It only remains to define the reducibility of types and type equality
+for $\Empty$, impredicative dependent products and existential types.
+%
+We do not add a case for \( \Unit \), since it can be encoded
+as \( \Fun{\Empty}{\Empty} \).
+%
+Note that the observational equality is not featured in the the logical
+relation, as it does not play the role of a type constructor, but
+rather that of a detructor that computes by pattern-matching on types.
+
+\paragraph{Empty type}
+
+The case of the empty type is easy, as it does not recursively call
+the logical relation.
+\[
+{\small
+  \inferrule{\redT{\Gamma}{A}{\Empty}{\sProp[i]}}
+            {\Gamma \Vdash_{\bot} A}
+          }\]
+%
+        When $A$ is reducible to the empty type, we define
+        \( \Gamma \Vdash_{\bot} A \equiv B \) as \( \redT{\Gamma}{B}{\Empty}{\sProp[i]} \).
+
+
+\paragraph{Impredicative Dependent Function Types}
+
+For the impredicative function types, the situation is more complex,
+as we can not reproduce the definition of their predicative
+counterpart:
+it involves a recursive call to the logical relation for the domain
+and codomain types, which might live in a higher universe than the
+function type.
+%
+Consequently, we go for minimalism and only collect the fact that the domain
+and the codomain are well-typed.
+
+  \[
+{\small
+  \inferrule{\redT{\Gamma}{A}{\Depfunannotated{F}{G}{}{s}{\sProp}}{\sProp}
+            \\ \tytm{\Gamma}{F}{\Type{}}
+            \\ \tytm{\extctx{\Gamma}{F}}{G}{\sProp}}
+            {\Gamma \Vdash_\forall A}
+          }\]
+%
+Similarly, when $A$ is reducible to an impredicative function type,
+% Given a derivation \( \metatm{\mathscr{A}}{\tytyR{\ell}{\Gamma}{A}}
+% \) built by this rule,
+we define reducible equality of $A$ and $B$ as the fact that $B$
+reduces to a convertible impredicative function type:
+  \[
+{\small
+  \inferrule{ \redT{\Gamma}{B}{\Depfun{F'}{G'}}{\sProp}
+            \\  \eqtm{\Gamma}{\Depfun{F}{G}}{\Depfun{F'}{G'}}{\sProp}}
+            {\Gamma \Vdash_\forall A \equiv B}
+          }\]
+        %
+
+These definitions do not recursively call the logical relation,
+but as a result the collected invariants are
+much weaker than those for relevant dependent function
+types. We will see in \cref{sec:fundamental-lemma} how to
+circumvent this problem by using a paranoid type system with
+many redundant hypotheses.
+
+
+\paragraph{Existential types}
+
+The definition of the logical relation for existential types is
+similar to the one for impredicative dependent function types. We define
+  \[
+{\small
+  \inferrule{\redT{\Gamma}{A}{\Exists{F}{G}}{\sProp}
+            \\ \tytm{\Gamma}{F}{\sProp}
+            \\ \tytm{\extctx{\Gamma}{F}}{G}{\sProp}}
+            {\Gamma \Vdash_\exists A}
+          }\]
+%
+  \[
+{\small
+  \inferrule{ \redT{\Gamma}{B}{\Exists{F'}{G'}}{\sProp}
+            \\  \eqtm{\Gamma}{\Exists{F}{G}}{\Exists{F'}{G'}}{\sProp}}
+            {\Gamma \Vdash_\exists A \equiv B}
+          }\]
+          %
+The only remaining case of our definition is the impredicative universe $\sProp$.
+
+\paragraph{The Impredicative Universe}
+\[
+{\small
+  \inferrule{\redT{\Gamma}{A}{\sProp}{\varType_0}}
+            {\tytyR{\Omega}{\Gamma}{A}{\varType_0}}
+}\]
+When $A$ is reducible to the impredicative universe, we define:
+\begin{itemize}
+  \item \( \eqtyR{\Omega}{\Gamma}{A}{B}{\varType_i} \) if \( \redT{\Gamma}{B}{\sProp}{\varType_i} \).
+  \item \( \tytmR{\Omega}{\Gamma}{t}{A}{\varType_j} \) if there is a normal form \( t' \) such that
+    \( \redT{\Gamma}{t}{t'}{\sProp} \), and \( \tytyR{i}{\Gamma}{t}{\sProp} \)
+
+    (which is already defined as reducibility of impredicative types is defined beforehand).
+  \item \( \eqtmR{\Omega}{\Gamma}{t}{u}{A}{\varType_j} \) if there are normal forms \( t', u' \) such that
+    \( \redT{\Gamma}{t}{t'}{\sProp} \)
+
+    and \( \redT{\Gamma}{u}{u'}{\sProp} \), and
+    \( \tytyR{i}{\Gamma}{t}{\sProp} \), \( \tytyR{i}{\Gamma}{u}{\sProp} \), and \( \eqtyR{i}{\Gamma}{t}{u}{\sProp} \).
+\end{itemize}
+
+\begin{figure}
+  \begin{small}
+    \begin{mathpar}
+ \inferrule[$\Pi$-Form$_p$] {\tytmPara{\Gamma}{A}{\Type[]{}} \\
+            \tytmPara{\extctxannotated{\Gamma}{A}{\Type[]{}}}{B}{\Type[]{'}}}
+            {\tytmPara{\Gamma}{\Depfunannotated{A}{B}{s}{s}{s'}}{\piRel{\Type}{\Type[]{'}}}}
+            {}
+\ilabel{infrule:pi-form-Para}
+\and
+ \inferrule[Fun$_p$]{\tytmPara{\Gamma}{A}{\Type[]{}} \\
+   \tytmParaannotated{\extctxannotated{\Gamma}{A}{\Type{}}}{t}{B}{\Type{'}}}
+            {\tytmParaannotated{\Gamma}{\lam{A}{t}}{\Depfun{A}{B}}{\piRel{\Type}{\Type[]{'}}}}
+\ilabel{infrule:pi-intro-Para}
+  \\
+  \inferrule[App$_p$]{\tytmPara{\Gamma}{A}{\Type[]{}} \\
+    \tytmPara{\extctxannotated{\Gamma}{A}{\Type[]{}}}{B}{\Type[]{'}}
+    \\
+    \tytmParaannotated{\Gamma}{t}{\Depfun{A}{B}}{\piRel{\Type}{\Type[]{'}}}
+            \\ \tytmParaannotated{\Gamma}{u}{A}{\Type{}}}
+            {\tytmParaannotated{\Gamma}{t\ u}{\subst{B}{u}}{\Type[]{'}}}
+            \ilabel{infrule:pi-elim-Para}
+  \\
+  \inferrule[$\exists$-Form$_p$]{\tytmPara{\Gamma}{A}{\sProp[i]} \\
+             \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]}}
+            {\tytmPara{\Gamma}{\Exists{A}{B}}{\sProp[i]}}
+            % {\scriptstyle \substack{i \le k \\ j \le k}}
+            \ilabel{infrule:exists-form-Para}
+            \and
+              \inferrule[Fst$_p$]{    \tytmPara{\Gamma}{A}{\sProp[i]} \\
+     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\\tytmParaannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
+            {\tytmParaannotated{\Gamma}{\fst{t}}{A}{\sProp}}\ilabel{infrule:fst-Para}
+\\
+  \inferrule[Snd$_p$]{    \tytmPara{\Gamma}{A}{\sProp[i]} \\
+     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\\tytmParaannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
+  {\tytmParaannotated{\Gamma}{\snd{t}}{\subst{B}{\fst{t}}}{\sProp}}
+  \ilabel{infrule:snd-Para}
+   \\
+  \inferrule[Pair$_p$]{
+    \tytmPara{\Gamma}{A}{\sProp[i]} \\
+     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\ \tytmParaannotated{\Gamma}{t}{A}{\sProp}
+            \\ \tytmParaannotated{\Gamma}{u}{\subst{B}{t}}{\sProp}}
+          {\tytmParaannotated{\Gamma}{\pair{t}{u}}{\Exists{A}{B}}{\sProp}}
+          \ilabel{infrule:pair-Para}
+        \end{mathpar}
+        \end{small}
+        \caption{\SetoidCC Paranoid Typing Rules (dependent function
+          types and existential types only)}
+  \label{fig:SetoidCC-paranoid-typing}
+\end{figure}
+
+
+\subsection{A Paranoid Version of \SetoidCC }
+
+In order to avoid circularity, we weakened the definition of the
+logical relation for dependent products, so that it does not mention
+reducibility of the domain and the codomain.
+%
+In counterpart, we need to prove the fundamental lemma with a
+significantly weaker induction hypothesis for proof-irrelevant type
+constructors.
+%
+To remedy to this problem, we define a paranoid variant of the type
+system of \SetoidCC that includes seemingly redundant premises in the
+typing rules of dependent products and existential types.
+%
+This variant, noted $\dashPar$, is presented in \cref{fig:SetoidCC-paranoid-typing}. The idea is that every
+sub-term of the conclusion must be explicitly typed
+in the premises.
+%
+For instance, the rule for application not only asks for $t$ and $u$ to
+be well-typed, but also for domain $A$ and codomain $B$ of the dependent
+function type of $t$.
+
+Obviously, when a term is well-typed for the paranoid variant, it is
+also well-typed in the economic system. But after proving the
+fundamental lemma on the paranoid variant, it becomes possible to show
+that the two typing systems are equivalent, leveraging the inversion
+lemmas provided by the logical relation.
+%
+Thus, the additional premises of the paranoid variant help us
+prove the fundamental lemma in presence of impredicativity, but end up
+being redundant once a sufficient amount of metatheory is established.
+
+\subsection{The Fundamental Lemma}
+\label{sec:fundamental-lemma}
+
+The fundamental lemma expresses the completeness of the logical
+relation with respect to
+typing~\refAgda{LogicalRelation.}{Fundamental}.
+%
+But before starting our induction, we need to generalize our
+hypothesis---the logical relation---yet a bit more: we will prove
+reducibility under any well-formed substitution.
+%
+Following \sidecite{Abel:POPL2018}, we use induction-recursion to define
+the notion of \emph{validity}, which will serve as our actual induction
+hypothesis \refAgda{LogicalRelation.}{Substitution}.
+%
+
+\[ {\small \inferrule{\forall \Delta\ \sigma \to \
+      \metaimply{\ctxV{\Delta}}{\metaimply{\tytyS{\Delta}{\sigma}{\Gamma}}{
+          \left \{ \begin{array}{l}
+                     \tytyR{\ell}{\Delta}{A[\sigma]}{\Type{}} \\
+                     \forall \sigma' \to
+                     \metaimply{\tytyS{\Delta}{\sigma'}{\Gamma}
+                     }{\metaimply{\eqtyS{\Delta}{\sigma}{\sigma'}{\Gamma}}{\eqtyR{\ell}{\Delta}{A[\sigma]}{A[\sigma']}{\Type{}}
+                     }}
+               \end{array}\right . }}
+}
+{\tytyV{\ell}{\Gamma}{A}{\Type{}}}
+}\]
+%
+In the definition above, $\Delta$ is valid context (noted $\ctxV{\Delta}$, meaning
+that the context is composed of valid types) and a
+substitution $\sigma$ is valid, noted $\tytyS{\Delta}{\sigma}{\Gamma}$,
+when it substitutes only reducible terms. Similarly, two valid
+substitutions $\sigma$ and $\sigma'$ are equal, noted
+$\eqtyS{\Delta}{\sigma}{\sigma'}{\Gamma}$, when they substitute
+reducibly equal terms.
+
+There are similar notions of validity for terms, equality of
+types and equality of terms. For instance, when $A$ is a valid
+type, the validity of a term $t$ at $A$ is defined as
+
+\[
+{\small
+  \inferrule{\forall \Delta\ \sigma \to \metaimply{\ctxV{\Delta}}{\metaimply{\tytyS{\Delta}{\sigma}{\Gamma}}{
+        \left \{ \begin{array}{l}
+           \tytmR{\ell}{\Delta}{t[\sigma]}{A[\sigma]}{\Type{}} \\
+                   \forall \sigma' \to
+                   \ \metaimply{\tytyS{\Delta}{\sigma'}{\Gamma} }{\metaimply{\eqtyS{\Delta}{\sigma}{\sigma'}{\Gamma}}{\eqtmR{\ell}{\Delta}{t[\sigma]}{t[\sigma']}{A[\sigma]}{\Type{}} }}
+                 \end{array} \right .}}
+         }
+         {\tytmV{\ell}{\Gamma}{t}{A}{\Type{}}}
+       }
+\]
+
+%% This notion of validity is a way to enforce stability by substitution
+%% for reducible terms.
+%
+Then, the fundamental lemma is stated with the paranoid variant of the type
+system. The lemma is proven using a mutual induction on derivations for well-typed types, terms, equality of
+types and equality of terms. We only present the statement on
+well-typed terms as we only explain the difference from the proof of
+\sidecitet{Abel:POPL2018,pujet:hal-03367052} on the impredicative fragment.
+%
+Note that because validity of a term can only be defined if the
+context and the type are themselves valid, the fundamental lemma
+actually provides validity of every component of the typing judgment.
+%
+\begin{lemma}[Fundamental lemma (for terms)
+  \refAgda{LogicalRelation.}{Fundamental}]
+  \label{thm:fundamental}
+  \
+  If\, \( \tytmParaannotated{\Gamma}{t}{A}{\Type{}} \), then there is a level \( \ell \) such that $\ctxV{\Gamma}$,
+  \( \tytyV{\ell}{\Gamma}{A}{\Type{}} \) and \( \tytmV{\ell}{\Gamma}{t}{A}{\Type{}} \).
+\end{lemma}
+\begin{proof}
+  The theorem is proven by induction on the paranoid derivation.
+  %
+  The only cases where the proof differs from
+  \sidecitet{Abel:POPL2018,pujet:hal-03367052} is when a rule builds
+  an inhabitant of a proof-irrelevant type. In this case, we need
+  to show that (i) the proof-irrelevant type is valid, and
+  (ii) that the term is well-typed.
+  %
+  Showing that the term is well-typed is always straightforward, but
+  the validity of its type can be more difficult to obtain.
+
+  In the case of the application of functions (Rule \nameref{infrule:pi-elim-Para}), the usual
+  predicative way to get the fact that ${\subst{B}{u}}$ is valid
+  is to extract it from the information collected by the
+  validity of the dependent function type (which is known
+  by induction hypothesis).
+  %
+  In the impredicative case however, we do not get such expansive information
+  from the validity of the dependent function type, because validity
+  of a type in the impredicative universe cannot recursively mention validity of the codomain, just like reducibility.
+  %
+  This is precisely where the paranoid assumption comes into play:
+  %
+  from the induction hypothesis on the additional assumptions, we also
+  know that $B$ is valid as a type family over $A$. Since validity is
+  defined as reducibility under any valid substitution, we can get the
+  reducibility of ${\subst{B}{u}}$.
+  %
+
+  This technique also applies to other rules such as \nameref{infrule:fst-Para}
+  or \nameref{infrule:snd-Para}.
+  %
+\end{proof}
+
+\subsection{Removing Paranoid Premises}
+\label{sec:remov-paran-prem}
+
+So far, we established the fundamental lemma on the paranoid
+version of the type system, but we would like to work with the more
+economic presentation instead.
+
+The first step is to establish the following corollary on the paranoid
+typing, by combining the fundamental lemma with the fact that
+reducible types are well-formed and reducible terms are well-typed:
+%
+\begin{corollary}[Typing Validity \refAgda{Typed.Consequences.}{Syntactic}] \label{thm:validity}
+  If $\tytmParaannotated{\Gamma}{t}{A}{\Type{}}$ then $\tytmPara{\Gamma}{A}{\Type{}}$ and similarly, if $\eqtmParaannotated{\Gamma}{t}{u}{A}{\Type{}}$ then
+  $\tytmPara{\Gamma}{A}{\Type{}}$,
+  $\tytmParaannotated{\Gamma}{t}{A}{\Type{}}$ and $\tytmParaannotated{\Gamma}{u}{A}{\Type{}}$.
+\end{corollary}
+%
+And now that we are equipped with this corollary, as well as some
+inversion lemmas that we obtained from the logical relation, we know
+enough to build a paranoid typing derivation from a
+standard derivation:
+%
+\begin{theorem}[\refAgda{Typed.}{NonParanoidTyping}]
+  \label{thm:nonparanoid}
+  If $\tytmannotated{\Gamma}{t}{A}{\Type{}}$ then $\tytmParaannotated{\Gamma}{t}{A}{\Type{}}$.
+\end{theorem}
+\begin{proof}
+  The proof is by induction on the typing derivation. The
+  correspondence between the two systems is one-to-one except for the
+  additional paranoid assumptions.
+  %
+  In all cases, we can get them from \cref{thm:validity} and from
+  inversion lemmas, such as the fact that $A$ and $B$ are well-typed
+  whenever $\Depfun{A}{B}$ is.
+\end{proof}
+
+Thus, we also have the fundamental lemma for the economic type system:
+%
+\begin{corollary}[Fundamental lemma on the economic type system]
+
+  \
+
+  If\, \( \tytmannotated{\Gamma}{t}{A}{\Type{}} \), then there is a level \( \ell \) such that $\ctxV{\Gamma}$,
+  \( \tytyV{\ell}{\Gamma}{A}{\Type{}} \) and \( \tytmV{\ell}{\Gamma}{t}{A}{\Type{}} \).
+\end{corollary}
+
+
+A direct consequence of the fundamental lemma is that any well-typed
+term has a weak-head normal form.
+%
+Another consequence is that any closed
+term of type $\Nat$ reduces to a whnf of type $\Nat$. Thus, to
+obtain canonicity for the integers of \SetoidCC, we just need to
+know that there is no neutral term of type $\Nat$ in an empty context
+\refAgda{Typed.Consequences.}{Canonicity}.
+
+Unfortunately, as in \sidecite{pujet:hal-03367052}, the logical relation
+is not sufficient to establish this. In fact, as we will see in \cref{sec:analys-norm-proof}, there is a good reason for that: the
+consistency and canonicity theorems for \SetoidCC have a remarkably high
+proof-theoretical strength due to impredicativity, whereas the
+logical relation argument can be developed in a predicative
+meta-theory.
+%
+In \cref{sec:cons-seto-model}, we will supplement
+ the normalization result with
+a model of \SetoidCC in an impredicative meta-theory, from which
+we will deduce the consistency and canoncity theorems.
+
+\subsection{Decidability of Conversion}
+
+Besides proving weak-head normalization of well-typed terms, the
+main point of the fundamental lemma is to be able to show that
+conversion is decidable in $\SetoidCC$.
+%
+To do so, we define an algorithmic relation
+$\algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}$ which is supposed to
+simulate convertibility of two terms $t$ and $u$, while being
+easier to decide \refAgda{}{Conversion}.
+%
+This algorithmic conversion keeps track of the relevance information,
+and uses it to either give an immediate answer in case \( t \) and
+\( u \) are irrelevant, or compute their weak-head normal forms, then
+compare their head constructor, and possibly apply the algorithm
+recursively in case \( t \) and \( u \) are relevant.
+%
+Correctness of this algorithmic conversion is direct as the rules used are
+subsumed by the general conversion judgement \refAgda{Conversion.}{Soundness}.
+
+Showing that the algorithmic conversion is also complete is more complex.
+%
+It basically amounts to replaying the fundamental lemma with a definition of the logical
+relation that uses algorithmic conversion instead of the general conversion
+\refAgda{Conversion.Consequences.}{Completeness}.
+%
+In our formal proof, we follow \sidecitet{Abel:POPL2018} in factoring the two
+instances of the fundamental lemma by defininig a generic interface for both
+algorithmic conversion and typed conversion, and using this interface
+in the definition of the logical relation \refAgda{Typed.}{EqualityRelation}.
+
+\begin{theorem}[Equivalence of conversion and algorithmic conversion]
+  \label{thm:algoconv}
+    Given two terms $t$ and $u$ such that
+    $\tytmannotated{\Gamma}{t}{A}{\Type{}}$ and
+    $\tytmannotated{\Gamma}{u}{A}{\Type{}}$, we have that
+
+    $$ \eqtmannotated{\Gamma}{t}{u}{A}{\Type{}} \Longleftrightarrow\algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}.$$
+\end{theorem}
+
+It still remains to provide a decision procedure for the algorithmic
+conversion \refAgda{Conversion.}{Decidable}.
+%
+Given two terms $t$ and $u$ well-typed at $A : \Type{}$ in context
+$\Gamma$, we can apply the fundamental lemma plus the reflexivity of
+the logical relation to get the fact that $\eqtmR{\ell}{\Gamma}{t}{t}{A}{\Type{}}$
+and similarly for $u$.
+%
+Because reducibly equal terms are also algorithmically convertible, we
+have $\algoeqtmannotated{\Gamma}{t}{t}{A}{\Type{}}$ (and similarly for $u$).
+%
+Then the decision procedure is done by double induction on the proofs
+that $t$ and $u$ are reflexive for the algorithmic conversion.
+%
+The idea is that $t$ and $u$ are convertible if and only if the two reflexive proofs are the same.
+
+Note that the proof that $t$ is algorithmically equal to itself
+contains the fact that $t$ strongly normalizes, because
+$t$ can be recursively put in whnf.
+
+\section{Analysis of the Normalization Proof}
+\label{sec:analys-norm-proof}
+
+The informal proof presented in \cref{sec:logic-relat-with}, and
+formalized in \Agda, outlines the construction of a normalization
+model in a rather powerful metatheory: Martin-Löf Type Theory extended
+with induction-recursion.
+%
+However, in order to control the computational complexity of the proof terms
+more finely, we can try to weaken this metatheory as much as possible.
+
+\subsection{The Computational Power of \SetoidCC}
+
+To establish a simple lower bound, we can start by noting that Martin-Löf
+Type Theory is a subset of \SetoidCC. Indeed, dependent products and
+the universes are handled in the exact same way, and \sidecitet{pujet:hal-03367052} explain
+how to deal with inductive tyes.
+%
+Therefore, a normalization proof for \SetoidCC can also act as a
+normalization proof for \MLTT.
+%
+And since normalization entails consistency for \MLTT, it follows that our
+meta-theory needs to be at least as strong as \MLTT---in fact, it turns out to be exactly what we need.
+
+\begin{theorem}\label{setoidCC-in-MLTT}
+  \MLTT with \( n + 4 \) universes can prove normalization of \SetoidCC with
+  \( n \) universes.
+\end{theorem}
+
+We defer the proof of this theorem to \cref{sec:fitt-norm-proof} and
+first analyse what can be deduced from it.
+
+\begin{corollary}
+  Normalization for \SetoidCC is equivalent to normalization for \MLTT
+  over a weak fragment of arithmetic.
+\end{corollary}
+
+Keep in mind that we cannot hope for a similar result for consistency or
+canonicity: while consistency and canonicity for \MLTT follow from
+normalization, proving that \SetoidCC is consistent requires the increased
+power of impredicativity.
+
+\cref{setoidCC-in-MLTT} also provides us with some
+control over the integer functions of \SetoidCC:
+
+\begin{corollary}\label{integer-functions}
+  \SetoidCC and \MLTT can express the exact same integer functions
+  as closed terms of type \( \Fun{\Nat}{\Nat} \).
+\end{corollary}
+
+\begin{proof}
+  As already explained, functions from \MLTT can simply be embedded in
+  \SetoidCC.
+  %
+  For the converse direction, note that any closed term \( f \) of
+  type \( \Fun{\Nat}{\Nat} \) in \SetoidCC only mentions a finite number of
+  universes.
+%
+  Thus, \cref{setoidCC-in-MLTT} provides us with a
+  normalization function for the corresponding fragment of \SetoidCC,
+  that computes a normal form when applied to \( f n \) where \( n \)
+  is a closed syntactic integer.
+%
+  If we compose it with a function that sends normal forms to the
+  adequate integer, %(or 0 if the normal form is non-canonical)
+  we obtain an integer function in \( \MLTT \), and canonicity ensures
+  that it represents the same function as the original \SetoidCC term.
+\end{proof}
+
+%
+\cref{integer-functions} might come off as a surprise, since \SetoidCC is equipped with an impredicative universe,
+and impredicativity generally adds a great deal of proof-theoretical
+strength!
+%
+And \SetoidCC does possess this logical power, in fact. Indeed, it can
+represent many more functions as \( \sProp \)-valued functional relations
+than \MLTT. But this corollary shows that there is no way to extract them
+in the proof-relevant fragment, even though we have access to elimination
+principles for false propositions and equalities (using casts).
+%
+Thus, the logical power of impredicativity is locked inside of \( \sProp \).
+%
+This is in stark contrast with the Calculus of Inductive Constructions,
+in which it is possible to define closed terms of type \( \Fun{\Nat}{\Nat} \) that leverage
+the power of impredicativity, using a principle called large elimination
+of singleton inductive types\footnote{The standard technique is to use
+the accessibility predicate as defined in \url{https://coq.inria.fr/library/Coq.Init.Wf.html}.}.
+%
+We discuss this principle with more detail in \cref{sec:setoidcc-with-an}.
+
+\subsection{Fitting the Normalization Proof in MLTT}
+\label{sec:fitt-norm-proof}
+
+In this subsection, we give a proof of \cref{setoidCC-in-MLTT}, by
+encoding the logical relation sketched in \cref{sec:logic-relat-with}
+without induction-recursion.
+%
+This argument has been formalized in \Agda.\footnote{The formalization is in the
+  folder \texttt{logrel-wo-ind-rec}. It is done for \MLTT and not
+full \SetoidCC, but it does not make a difference as the crux is in
+the definition of the relation without induction-recursion.}
+%
+For the remainder of this section, we work in plain \MLTT with a deep
+embedding of \SetoidCC.
+%
+To avoid confusion between the meta-theory and the object theory, we
+will use \Agda-style notations for the meta-theory.
+
+From a bird's eye perspective, the normalization proof builds a model
+of \SetoidCC in which well-formed types are interpreted as proof-relevant
+predicates on untyped terms, and induction-recursion is used to construct a
+universe in the model: we define the inductive predicate of reducible types
+simultaneously with recursive functions that associates reducibility
+predicates to a reducible type.
+%
+On closer inspection, we realize that the proof still works if the
+reducibility predicate of a universe lives one universe higher than the
+reducibility predicates of the types it contains. This allows us to use
+\emph{small} induction-recursion, which can be replaced by functional
+relations that only require simple indexed inductive types
+\sidecite{small-ind-rec}.
+
+\cref{fig:logrel-ind} showcases what the relation-based definition
+looks like.
+%
+For all \( \ell \le n \), we define an inductive relation \( \AgdaData{R}^\ell \) between
+a context, an untyped term \( t \) (the reducible type), its sort, a predicate \( P_{=} \) of
+types that are convertible to \( t \), a predicate \( P_{t} \) which is the
+reducibility predicate associated to \( t \), and a binary relation
+\( P_{t=} \) that encodes convertibility of terms in \( P_{t} \).
+%
+The logical relation \( \Vdash_\ell \) is then defined in terms of \( \AgdaData{R}^\ell \).
+%
+The inductive relation features eight constructors that are each
+defined in \cref{sec:logic-relat-with}, including \( \Rpi \)
+which recursively calls the logical relation.
+%% , plus an eighth one that ensures
+%% \( \AgdaData{R}^\ell \) contains all the relations \( \AgdaData{R}^{\ell'} \) for \( \ell' < \ell \).
+
+Note that the logical relation is built in stages:
+\begin{itemize}
+\item We first define an inductive relation
+  \( \AgdaData{R}^0 \) that has cases for dependent products and all base types, except
+  for proof-relevant universes: it only accounts for inhabitants of
+  \( \varType_0 \).
+  %
+\item From \( \AgdaData{R}^0 \), we define a reducibility predicate \( P_{\varType_0} \) for
+  \( \varType_0 \): a term \( t \) is in \( P_{\varType_0} \) if there exist
+  \( P_=, P_t, P_{t=} \) such that \( R^0(t,P_=, P_t, P_{t=}) \).
+  %
+  Now that we have a predicate for \( \varType_0 \), we can define a relation
+  \( \AgdaData{R}^1 \) that accounts for inhabitants of \( \varType_1 \). Of course, since
+  \( P_{\varType_0} \) lives in \( \AgdaSet{1} \), \( \AgdaData{R}^1 \) will land in \( \AgdaSet{2} \).
+\item We repeat this process \( n \) times to obtain a relation \( \AgdaData{R}^n \)
+  that handles our \( n \) universes.
+\end{itemize}
+Each step of this process requires an additional meta-theoretical universe
+level.
+%
+This is only natural, since we are proving normalization for a theory that
+subsumes \( \MLTT_n \), a property from which we can deduce the consistency
+of \( \MLTT_n \).
+%
+Therefore, Gödel's incompleteness theorem applies and guarantees that
+we need more universes in the meta-theory than in the fragment we
+consider.
+
+
+\begin{figure}
+  \begin{small}
+\begin{flalign*}
+  \begin{array}{lcl}
+   \AgdaData{R}^\ell         & : & \Context \to \Term \to (\Term \to \AgdaSet{\ell}) \to (\Term \to \AgdaSet{\ell}) \to (\Term \to \Term \to \AgdaSet{\ell}) \to \AgdaSet{\ell+1} \\
+   \AgdaData{R}^\ell         & \bnfis & \Rne : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\mathsf{ne}} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\mathsf{ne}} t \equiv \_)\ (\Gamma\ \Vdash_{\mathsf{ne}} \_ : t)\ (\Gamma\ \Vdash_{\mathsf{ne}} \_ \equiv \_ : t)\\
+               & \sep & \RU : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\mathsf{U}} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\mathsf{U}} t \equiv \_)\ (\Gamma\ \Vdash_{\mathsf{U}} \_ : t)\ (\Gamma\ \Vdash_{\mathsf{U}} \_ \equiv \_ : t)\\
+               & \sep & \Rnat : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Nat} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Nat} t \equiv \_)\ (\Gamma\ \Vdash_{\Nat} \_ : t)\ (\Gamma\ \Vdash_{\Nat
+                          } \_ \equiv \_ : t)\\
+               & \sep & \Rpi : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Pi} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Pi} t \equiv \_)\ (\Gamma\ \Vdash_{\Pi} \_ : t)\ (\Gamma\ \Vdash_{\Pi} \_ \equiv \_ : t)\\
+               & \sep & \ROmega : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Omega} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Omega} t \equiv \_)\ (\Gamma\ \Vdash_{\Omega} \_ : t)\ (\Gamma\ \Vdash_{\Omega} \_ \equiv \_ : t)\\
+               & \sep & \Rforall : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\forall} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\forall} t \equiv \_)\ (\Gamma\ \Vdash_{\forall} \_ : t)\ (\Gamma\ \Vdash_{\forall} \_ \equiv \_ : t)\\
+               & \sep & \Rexists : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\exists} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\exists} t \equiv \_)\ (\Gamma\ \Vdash_{\exists} \_ : t)\ (\Gamma\ \Vdash_{\exists} \_ \equiv \_ : t)\\
+               & \sep & \Rempty : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\bot} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\bot} t \equiv \_)\ (\Gamma\ \Vdash_{\bot} \_ : t)\ (\Gamma\ \Vdash_{\bot} \_ \equiv \_ : t)\\
+               %% & \sep & \Remb : \forall\ \Gamma\ t\ P_=\ P_t\ P_{t=} \to \AgdaData{R}^{\ell'}\ \Gamma\ t\ P_=\ P_t\ P_{t=} \to \AgdaData{R}^\ell\ \Gamma\ t\ P_=\ P_t\ P_{t=} \qquad \text{for all } \ell' < \ell
+  \end{array} &&
+\end{flalign*}
+
+\begin{flalign*}
+& \text{All the functions whose name contains } \Vdash_{\mathsf{ne}} \, , \ \Vdash_{\mathsf{U}} \, , \ \Vdash_{\Nat} \, ,\ \Vdash_{\Pi} \, ,\ \Vdash_{\forall} \, ,\ \Vdash_{\exists} \, ,\ \Vdash_{\bot}
+\text{ are as defined in \cref{sec:logic-relat-with}.} &
+\end{flalign*}
+
+\begin{flalign*}
+  \begin{array}{lcl}
+\_ \Vdash_\ell \_ : \_ & : & (\Gamma : \Context) \to (t : \Term) \to (A : \Term) \to (s : \Sort) \to \AgdaSet{\ell+1} \\
+\Gamma \Vdash_\ell t : s & = & (P_= : \Term \to \AgdaSet{\ell}) \times (P_t : \Term \to \AgdaSet{\ell}) \\ && \times\ (P_{t=} : \Term \to \Term \to \AgdaSet{\ell}) \times (\AgdaData{R}^\ell\ \Gamma\ t\ s\ P_=\ P_t\ P_{t=})
+  \end{array} &&
+\end{flalign*}
+
+\begin{flalign*}
+  \begin{array}{lcl}
+\_ \Vdash_\ell \_ \equiv \_ : \_ & : & (\Gamma : \Context) \to (A : \Term) \to (B : \Term) \to (s : \Sort) \to \{ \Gamma \Vdash_\ell A : s \} \to \AgdaSet{\ell} \\
+\Gamma \Vdash_\ell A \equiv B : s & = & P_=\ B
+  \end{array} &&
+\end{flalign*}
+
+\begin{flalign*}
+  \begin{array}{lcl}
+\_ \Vdash_\ell \_ : \_ : \_ & : & (\Gamma : \Context) \to (t : \Term) \to (A : \Term) \to (s : \Sort) \to \{ \Gamma \Vdash_\ell A : s \} \to \AgdaSet{\ell} \\
+\Gamma \Vdash_\ell t : A : s & = & P_t\ t
+  \end{array} &&
+\end{flalign*}
+
+\begin{flalign*}
+  \begin{array}{lcl}
+\_ \Vdash_\ell \_ \equiv \_ : \_ : \_ & : & (\Gamma : \Context) \to (t\ u : \Term) \to (A : \Term) \to (s : \Sort) \to \{ \Gamma \Vdash_\ell A : s \} \to \AgdaSet{\ell} \\
+\Gamma \Vdash_\ell t \equiv u : A : s & = & P_{t=}\ t\ u
+  \end{array} &&
+\end{flalign*}
+\end{small}
+  \caption{Inductive encoding of the logical relation}
+  \label{fig:logrel-ind}
+\end{figure}
+
+Constructing this universe of reducible types is only the first half
+of the normalization proof. To complete the construction, we also need
+to encode validity without induction-recursion in \( \MLTT \) and
+prove the fundamental lemma.
+%
+We do not develop this here as it uses a similar construction and
+refer the interested reader to the formalization for the full proof.
+
+\section{Semantics of \SetoidCC}
+\label{sec:cons-seto-model}
+
+In this section, we turn to the construction of the
+\emph{standard} set-theoretic model of \SetoidCC.
+%
+This model serves two purposes: to show consistency of our theory on
+the one hand, and to ensure that \SetoidCC is a good internal language for
+set theory on the other hand.
+
+\subsection{Deriving Consistency from a Model}
+
+As we already mentioned, the normalization model that we built in
+\cref{sec:logic-relat-with} is not strong enough to obtain consistency
+and canonicity for \SetoidCC. Indeed, this model interprets the
+proof-irrelevant proposition \( \bot \) as the set of syntactical
+terms with type \( \bot \), which does not grant any kind of control
+over its proofs in the empty context.
+
+This was already the case in the work of \sidecitet{pujet:hal-03367052} on
+\SetoidTT, so they supplemented their normalization proof with a model
+in the category of sets (presented as setoids), using
+induction-recursion to interpret universes as sets of codes \emph{à
+  la Tarski} defined mutually with eliminators and coercion functions.
+%
+In that model, \( \bot \) is actually interpreted as the empty set, which
+proves consistency of \SetoidTT: we can use it to show that there is
+no term of type \( \bot \) in the empty context.
+
+\subsection{\SetoidCC as an Internal Language for Sets}
+
+While the construction of \sidecitet{pujet:hal-03367052} does show consistency of
+\SetoidTT, it arguably falls short of presenting \SetoidTT as an internal
+language for classical mathematics.
+%
+Indeed, the inductive-recursive construction of the universe of codes is
+designed to only account for the codes that come from the syntax of
+\SetoidTT. In other words, the following statement
+\[
+\Pi(A : \Type)(x\ y\ z : A).\,\Fun{\Fun{\Obseq[A]{x}{y}}{\Obseq[A]{y}{z}}}{\Obseq[A]{x}{z}}
+\]
+only states transitivity of equality for sets that are built from
+the type formers of \SetoidTT, when interpreted in their model.
+
+This state of affairs is obviously not ideal, as readers who are not
+willing to accept \SetoidCC as a new foundation of mathematics would
+probably be more inclined to use it if they knew that any theorem they
+proved in \SetoidCC is also true for classical set theory.
+%
+Thus, instead of replicating this construction in an impredicative
+meta-theory (to be able to interpret \( \sProp \)), we seize the
+opportunity to solve two problems at once, and present a model in classical
+set theory that gives a much more sensible meaning to statements in \SetoidCC
+while still being able to show consistency.
+
+\subsection{Constructing the Set-theoretical Model}
+
+We work in ZF set theory with a countable hierarchy of Grothendieck universes
+\( \sV_0, \sV_1, ... \)
+%
+We call \( \Two \) the lattice of truth values (or in other words, the
+booleans), with \( \independent \) as its minimal value,
+and given \( p \in \Two \) we write \( \val\ p \) for the
+corresponding sub-singleton set \( \{ x \in \{ * \}\ |\ p \} \).
+%
+Even though we stay in the world of set theory for the duration of
+this section, we remain type theorists, and as such
+we use dependent products, dependent sums and inductive types in this
+section. They should be understood as their standard interpretation in
+the set-theoretic model of type theory.
+%
+In an attempt to minimize confusion, we change our notations a little
+bit: we use \( (a \in A) \to (B\ a) \) for the set-theoretic dependent product,
+\( (a \in A) \times (B\ a) \) for the the set-theoretic dependent sum and
+\( \metanat \) for the set-theoretic integers.
+
+The central ingredient of our standard model is the hierarchy of universes of
+codes \( \sU_0, \sU_1... \), that are used to interpret the proof-relevant universes
+of \SetoidCC.
+%
+It is tempting to define them directly as Grothendieck universes
+(\( \sU_i = \sV_i \)), but unfortunately this does not work: in \SetoidCC,
+type constructors are injective with respect to the observational equality
+(for instance, \( \Obseq{(\Fun{A}{B})}{(\Fun{A'}{B'})} \) implies that
+\( \Obseq{A}{A'} \) and \( \Obseq{B}{B'} \)) while set-theoretic function
+spaces collapse too much information for this to be possible
+(\( \Fun{\bot}{\Bool} \) and \( \Fun{\bot}{\Nat} \) are identical).
+
+This is not too difficult to fix, however: we simply need to add a bit of
+information to the codes in the universe, so that we can keep track of how
+we constructed any given set. The most natural way to do this from a type
+theorist's perspective is to build an inductive predicate \( \ \Upred \) over
+\( \sV_i \) and then interpret the universes of \SetoidCC as
+\( \sU_i = (X \in \sV_i)\times(\Upred\ X) \), as described in \cref{fig:model}.
+%
+Note how the constructor \( \codeemb \) builds a proof of \( \ \Upred\ X \)
+for any (small) set \( X \), so that statements that quantify over
+\( \varType_i \) apply to all appropriately-sized sets of the model.
+%
+This also implies that there might be several codes for the
+same set: for instance \( (\Fun{\Nat}{\Nat} \ ;\ \codeemb) \) and
+\( (\Fun{\Nat}{\Nat} \ ;\ \codepiuu\ ...) \) are both codes for
+the set \( \Fun{\Nat}{\Nat} \), but only the second one remembers that it
+has been built as a function space.
+
+Remark that the natural equality between codes matches closely the equality
+of \SetoidCC: two codes can only be equal if they pack the same witness of
+\( \Upred \), which means that they have been built in the same way.
+Moreover, if we compare two codes of the form
+\( (X \to Y ;\ \codepiuu\ ...) \), the equality of the second member means that
+the domains and the codomains of the function spaces are equal---we recover the injectivity of
+the type formers.
+
+\begin{figure}
+   \begin{small}
+\begin{flalign*}
+  \begin{array}{lcl}
+   \Upred         & : & \Fun{\sV_i}{\sV_{i+1}}\\
+   \Upred         & \bnfis & \tm{\codeemb}{\Fun{(X \in \sV_i)}{\Upred\ X}}\\
+%                     & \sep & \tm{\codenat}{\sU_i} & \qquad & \text{if i = 0}\\
+                     & \sep & \tm{\codepiuu}{\{ j, k \in \metanat\ |\ \mathrm{max}(j, k) \le i\} \to (A \in \sV_j) \to (A_\varepsilon \in \Upred\ A)} \\
+                  & & \qquad \to (B \in (A \to \sV_k)) \to (B_\varepsilon \in ((a \in A) \to \Upred\ (B\ a)))\\
+                  & & \qquad \to \Upred\ {((a \in A) \to B\ a)}\\
+                     & \sep & \tm{\codepisu}{(A \in \ssProp)} \\
+                  & & \qquad \to (B \in (\val\ A \to \sV_i)) \to (B_\varepsilon \in ((a \in \val\ A) \to \Upred\ (B\ a)))\\
+                  & & \qquad \to \Upred\ {((a \in \val\ A) \to B\ a)}\\
+                     & \sep & \tm{\codeU}{\Fun{\{ j \in \metanat\ |\ j < i\}}{\Upred\ \sU_j}} \\
+                     & \sep & \tm{\codesProp}{\Upred\ \ssProp} \\
+  \end{array} &&
+\end{flalign*}
+
+\begin{flalign*}
+  \hspace{5pt}\sU_i \quad := \quad (X \in \sV_i)\times(\Upred\ X) &&
+\end{flalign*}
+%
+\begin{flalign*}
+  &\hspace{5pt}\el \quad : \quad \sU_i \to \sV_i&\\
+  &\hspace{5pt}\el\ (X\ ;\ X_\varepsilon)\ :=\ X&
+\end{flalign*}
+\end{small}
+  \caption{The universe of codes, defined with set-theoretic inductive types}
+  \label{fig:model}
+\end{figure}
+
+\subsection{Interpreting the Syntax of \SetoidCC}
+
+Now that we know how to deal with the universes, it only
+remains to spell out the interpretation of the full syntax of \SetoidCC.
+%
+In the standard fashion~\sidecite{hofmann95}, we define interpretation functions that send
+\begin{itemize}
+  \item a context \( \Gamma \) to a set \( \mctx{\Gamma} \), and
+  \item a pair of a term \( t \) and a context \( \Gamma \) to a set \( \mty{t} \) indexed over \( \mctx{\Gamma} \).
+\end{itemize}
+Since these functions are defined on raw syntax without any guarantee of
+well-typedness, we cannot expect every term to have a sensible interpretation
+so we need to make them \emph{partial} functions. We will be able to prove
+that all well-typed terms admit an interpretation \textit{a posteriori} by
+induction on the derivations.
+
+As usual, contexts are interpreted as telescopes:
+\( \mctx{\emptyctx} = \{ * \} \) and
+\( \mctx{\extctx{\Gamma}{A}} = (\rho : \mctx{\Gamma})\times (\mty{A}\ \rho) \)
+when \( \mty{A} \) is defined.
+%
+Given \( \rho \in \mctx{\Gamma} \) and a variable \( x \) that appears in
+\( \Gamma \), we write \( \rho(x) \) for the corresponding projection.
+%
+The interpretation of the terms is defined in
+\cref{fig:interpretation}. The proof-relevant fragment unsurprisingly
+follows the standard interpretation of dependent type theory, and the
+observational equality is interpreted as the extensional equality of
+set-theory.
+%
+Note how the irrelevant proofs are all interpreted as \( * \), the inhabitant
+of the singleton set. This forces us to interpret cast as doing nothing, and \( \emptyrec{A}{t} \) is not even interpreted since it can only be formed in inconsistent contexts, which are empty in the model.
+
+In order to prove the soundness of our interpretation, we need to extend it to weakenings
+and substitutions between contexts.
+%
+Assume \( \Gamma \) and \( \Delta \) are a syntactical contexts, and \( A \) and \( t \)
+are syntactical terms.
+%
+In case \( \mctx{\Gamma, \tm{x}{A}, \Delta} \) and \( \mctx{\Gamma, \Delta} \) are well-defined,
+let \( \pi_A \) be the projection:
+{\small
+\[
+  \begin{split}
+  \pi_A : \mctx{\Gamma, \tm{x}{A}, \Delta} & \to \mctx{\Gamma, \Delta} \\
+  (\vec{x_\Gamma}, x_A, \vec{x_\Delta}) & \mapsto (\vec{x_\Gamma}, \vec{x_\Delta}).
+  \end{split}
+\]
+}
+In case \( \mctx{\Gamma, \subst{\Delta}{t}} \) and \( \mctx{\Gamma, \tm{x}{A}, \Delta} \) are
+well-defined, we define the function \( \sigma_t \) by:
+{\small
+\[
+  \begin{split}
+    \sigma_t : \mctx{\Gamma, \subst{\Delta}{t}} & \to \mctx{\Gamma, \tm{x}{A}, \Delta} \\
+    (\vec{x_\Gamma}, \vec{x_\Delta}) & \mapsto (\vec{x_\Gamma}, \mty{t}\ \vec{x_\Gamma}, \vec{x_\Delta}).
+  \end{split}
+\]
+}
+%
+\begin{lemma}[Weakening]\label{lem:weakening}
+  \( \pi_A \) is the semantic counterpart to the weakening of \( A \): for all terms \( u \),
+  when both sides are well defined, we have:
+  {\small
+\[
+    \mty[{\Gamma, \tm{x}{A}, \Delta}]{u} = \mty[{\Gamma, \Delta}]{u} \circ \pi_A
+  \]}
+\end{lemma}
+%
+\begin{lemma}[Substitution]\label{lem:substitution}\ \( \sigma_t \) is the semantic counterpart to the substitution by \( t \):
+  for all terms \( u \), when both sides are well defined, we have:
+  {\small
+\[
+    \mty[{\Gamma, \subst{\Delta}{t}}]{\subst{u}{t}} = \mty[{\Gamma, \tm{x}{A}, \Delta}]{u} \circ \sigma_t
+  \]}
+\end{lemma}
+
+\begin{theorem}[Soundness of the Standard Model]
+  \
+  \begin{enumerate}
+    \item If\, \( \wfctx{\Gamma} \) then \( \mctx{\Gamma} \) is defined.
+    \item If\, \( \tytm{\Gamma}{A}{\sProp} \) then \( \mty{A}\ \rho \) is a proposition for all \( \rho \in \mctx{\Gamma} \).
+    \item If\, \( \tytm{\Gamma}{A}{\varType_i} \) then \( \mty{A}\ \rho \) is in \( \sU_i \) for all \( \rho \in \mctx{\Gamma} \).
+    \item If\, \( \tytmannotated{\Gamma}{t}{A}{\sProp} \) then \( \mty{A}\ \rho \) is true for all \( \rho \in \mctx{\Gamma} \).
+    \item If\, \( \tytmannotated{\Gamma}{t}{A}{\varType_i} \) then \( \mty{t}\ \rho \) is in \( \el\ (\mty{A}\ \rho) \) for all \( \rho \in \mctx{\Gamma} \).
+    \item If\, \( \eqtm{\Gamma}{t}{u}{A} \) then \( \mty{t} = \mty{u} \).
+  \end{enumerate}
+\end{theorem}
+\begin{proof}
+  By induction on the typing derivations, using \cref{lem:weakening,lem:substitution}.
+\end{proof}
+
+
+\begin{figure}
+  \begin{small}
+\[
+\begin{array}{rcl}
+  \mty{x}\ \rho & := & \rho(x) \\
+  \mty{\varType_i}\ \rho & := & \langle \sU_i\ ;\ \codeU\ i \rangle \\
+  \mty{\sProp[i]}\ \rho & := & \langle \ssProp\ ;\ \codesProp \rangle\\
+  \mty{\Depfunannotated[y]{F}{G}{}{\varType_j}{\varType_k}}\ \rho & := & \big\langle (x \in\el\ \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
+& & ;\ \codepiuu\ j\ k\ (\mty{F}\ \rho)\ (x \mapsto \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle) \big\rangle\\
+  \mty{\Depfunannotated[y]{F}{G}{}{\sProp}{\varType_k}}\ \rho & := & \big\langle (x \in\val\ \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
+& & ;\ \codepisu\ (\mty{F}\ \rho)\ (x \mapsto \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle) \big\rangle\\
+  \mty{\Depfunannotated[y]{F}{G}{}{\varType_j}{\sProp}}\ \rho & := & \forall x \in (\el\ \mty{F}\ \rho),\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle\\
+  \mty{\Depfunannotated[y]{F}{G}{}{\sProp}{\sProp}}\ \rho & := & (\mty{F}\ \rho) \Rightarrow (\mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ *\rangle)\\
+  \mty{\lam[x]{F}{t}}\ \rho & := & x \mapsto (\mty[{\extctx[x]{\Gamma}{F}}]{t}\ \langle \rho\ ;\ x\rangle)\\
+  \mty{t\ u}\ \rho & := & (\mty{t}\ \rho)\ (\mty{u}\ \rho)\\
+  \mty{\Nat}\ \rho & := & \codeemb\ \metanat \\
+  \mty{\zero}\ \rho & := & \metazero \\
+  \mty{\suc{t}}\ \rho & := & \metasuc{(\mty{t}\ \rho)} \\
+  \mty{\natrec{P}{t_0}{t_S}{n}}\ \rho & := & \metanat\mathrm{-elim}(\el \circ (\mty{P}\ \rho), \mty{t_0}\ \rho, \mty{t_S}\ \rho, \mty{n}\ \rho)\\
+  \mty{\Exists[y]{F}{G}}\ \rho & := & (\mty{F}\ \rho) \land (\mty[{\extctx[y]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ * \rangle) \\
+  \mty{\pair{t}{u}}\ \rho & := & * \\
+  \mty{\fst{t}}\ \rho & := & * \\
+  \mty{\snd{t}}\ \rho & := & * \\
+  \mty{\Empty}\ \rho & := & \independent \in \Two \\
+  \mty{\emptyrec{A}{t}}\ \rho & := & \text{undefined} \\
+  \mty{\Obseq[A]{t}{u}}\ \rho & := & \sEq{\mty{t}\ \rho}{\mty{u}\ \rho} \qquad\text{in }\el(\mty{A}\ x) \\
+  \mty{\refl{t}{A}}\ \rho & := & * \\
+  \mty{\transport{F}{t}{G}{u}{t'}{e}}\ \rho & := & * \\
+  \mty{\cast{A}{B}{e}{t}}\ \rho & := & t\\
+  \mty{\castrefl{A}{t}}\ \rho & := & *
+\end{array}
+\]
+\end{small}
+  \caption{Interpretation of \SetoidTT in the Standard Model}
+  \label{fig:interpretation}
+\end{figure}
+
+\subsection{Consequences of the Model}
+
+From the soundness theorem and the interpretation of \( \bot \) being empty,
+the consistency of \SetoidCC is immediate:
+
+\begin{theorem}[Consistency]
+  There are no proofs of \( \bot \) in the empty context.
+\end{theorem}
+
+Furthermore, by inspecting the normal forms provided by the normalization
+theorem, we realize that \( \castName \) is the only way to build a neutral
+term in the absence of variables. But having a stuck \( \castName \) requires
+having an equality proof between two incompatible types, which contradicts
+consistency.
+
+\begin{theorem}
+  There are no neutral terms in the empty context.
+\end{theorem}
+
+From there, we deduce the canonicity theorem: all integers reduce to
+standard integers in the empty context. Thus, our modified model still allows
+us to establish all of the important meta-theoretical properties.
+
+On the other hand, it seems difficult to measure to what extent our
+set-theoretic model presents
+\SetoidCC as a good internal language for sets. Compared to the universe
+construction of \sidecitet{pujet:hal-03367052}, we gain the property that every set belongs
+to a universe---meaning that theorems which quantify over \( \varType_i \)
+will apply to all sufficiently small sets.
+%
+Of course, this does not prevent us from proving some theorems that are
+obviously false in classical mathematics, such as the
+injectivity of type formers. But we would argue that all such results
+are artifacts of the choice of encodings, and not meaningful
+mathematical statements.
+
