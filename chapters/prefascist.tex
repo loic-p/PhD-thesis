@@ -145,8 +145,8 @@ composition hold \emph{by definition}:
 \sideremark{This constraint might look very strong, but we will see that all 
     small categories can in fact be presented in this way.}
 % 
-meaning that \shepherd{the equality here is not the propositional equality} \func{\_≡\_},
-but the definitional equality: these terms are convertible. 
+meaning that the equality here is not the propositional equality \func{\_≡\_},
+but the definitional equality \( \_=\_\) : these terms are convertible. 
 % 
 It could be the case, for instance, if we managed to express \( \cat{C} \) as a 
 full subcategory of \func{Set} -- in which cases the morphisms are just 
@@ -268,23 +268,44 @@ approach will not get us very far.
 leads us towards an infinite tower of coherences of ever increasing 
 dimensions, with no appearant way to make it fit into a finite definition.
 
-\subsection{The Problem of Simplicial Sets}
+Here, we recognize a well-known pattern: difficulties with infinite 
+towers of coherences show up in numerous definitions in Homotopy Type Theory.
+% 
+The most famous such definition is that of \emph{semi-simplicial types}, 
+which was identified in the early years of \HoTT, and remains an open problem 
+as of today \sidecite{buchholtzSemiSimplicial}.
 
-It turns out that we don't know how to do that with types.
+Semi-simplicial types are presheaves on the category of finite ordinals and 
+strictly increasing maps \( \Delta_+ \).
+% 
+As we will explain shortly, if our type theory supports strict propositions,
+\( \Delta_+ \) can be presented as a category that satisfies the composition
+and the unit laws by definition, thereby making semi-simplicial sets a special
+case of our problem.
 
-Equivalent to the problem of (semi-)simplicial sets.
+As will not plan to solve the problem of semi-simplicial types in this thesis, 
+we give up on defining the type of type-valued presheaves and we focus on
+recovering the power of the definitional equality for simpler objects.
 
-Open problem in HoTT for 10 years.
-
-\shepherd{In fact, it also holds for the definition of a category}
-
-\subsection{Possible Solutions}
+\subsection{Truncation levels}
 
 We could use TTobs.
 
 We could use hsets.
 
 \section{Prefascist Sets}
+
+Note that the definition of a category exhibits the same problem if we try to
+use types to encode hom-sets. 
+% 
+Relaxing the associativity of composition and the unital laws by only having
+them hold up to a path introduces non-trivial coherence problems that require 
+infinite towers of equalities to solve, which we avoided by asking for our
+category \( \cat{C} \) to satisfy them by definition.
+
+In fact, there is no way to define the type of \defnote{type-enriched 
+categories}{Type-enriched categories are categories that have types as their
+hom-sets.} in \HoTT that we currently know of. 
 
 \section{Higher Prefascist Sets}
 
