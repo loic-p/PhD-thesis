@@ -1,6 +1,6 @@
 \setchapterimage[6cm]{seaside}
 \setchapterpreamble[u]{\margintoc}
-\chapter{Prefascist Sets}
+\chapter{Prefascist Types}
 \labch{prefascist}
 
 \shepherd{If some  Presheaves.
@@ -17,7 +17,7 @@ we only assume some basic knowledge about functors and limits.
 In this section, we recall the definition of presheaves and go over 
 some of their uses. 
 % 
-We work in an extensional meta-theory such as constructive set theory --
+We work in an extensional meta-theory such as constructive set theory;
 intensional and type theoretical considerations will wait until section 
 \ref{sec:intensional-problems}.
 
@@ -125,8 +125,11 @@ generally translate very well, abstractions that deal with predicates, sets
 and functions usually come with their lot of complications -- and presheaves
 are no exception.
 
-In this section, we work in intensional Martin-Löf Type Theory, using the 
-syntax of the \Agda proof assistant.
+In this section, we explain the difficulties with defining presheaves of types
+in intensional Martin-Löf Type Theory. 
+% 
+We use the syntax of the \Agda proof assistant for our type theoretical 
+definitions.
 
 \subsection{First Definition}
 
@@ -208,8 +211,8 @@ unique!).
 This state of affairs is rather unsatisfying, and it certainly looks like that 
 kind of nuisance that will show up uninvited in our proofs later on.
 
-To understand the source of this phenomenon, it is helpful to turn ourselves to
-Homotopy Type Theory.
+To understand the source of this irritating phenomenon, it is helpful to turn 
+ourselves to Homotopy Type Theory.
 % 
 As we explained in chapter \cref{ch:homotopy}, types in \HoTT are interpreted
 as \emph{spaces} instead of sets, and the two different notions of equality 
@@ -222,7 +225,7 @@ as \emph{spaces} instead of sets, and the two different notions of equality
 \end{itemize}
 % 
 Since \MLTT is a subset of \HoTT, our tentative definitions can be 
-interpreted as talking about spaces and should thus also make sense
+interpreted as talking about spaces as well and should thus make sense
 from this perspective. 
 % 
 So, does our definition properly encode \defnote{presheaves of 
@@ -231,10 +234,10 @@ analogue of regular presheaves in higher category theory.}?
 % 
 Unfortunately, it does not. 
 
-Indeed, for such a definition to work, \field{F\_id} and \field{F\_comp} need 
-to be definitional equalities. 
+Our definition would in fact work if \field{F\_id} and \field{F\_comp} were 
+definitional equalities. 
 % 
-When we relax these equalities to mere paths, we introduce superfluous 
+But when we relax these equalities to mere paths, we introduce superfluous 
 information -- as we have seen, there are now several ways to use 
 \field{F\_id} and \field{F\_comp} to prove what should really be a definitional 
 equality.
@@ -268,12 +271,12 @@ approach will not get us very far.
 leads us towards an infinite tower of coherences of ever increasing 
 dimensions, with no appearant way to make it fit into a finite definition.
 
-Here, we recognize a well-known pattern: difficulties with infinite 
-towers of coherences show up in numerous definitions in Homotopy Type Theory.
+Here, we recognize a well-known pattern, as difficulties with infinite 
+towers of coherences show up for numerous definitions in Homotopy Type Theory.
 % 
 The most famous such definition is that of \emph{semi-simplicial types}, 
-which was identified in the early years of \HoTT, and remains an open problem 
-as of today \sidecite{buchholtzSemiSimplicial}.
+which was identified in the early years of \HoTT \cite{IAS2012semisimplicial}, 
+and remains an open problem as of today \sidecite{buchholtzSemiSimplicial}.
 
 Semi-simplicial types are presheaves on the category of finite ordinals and 
 strictly increasing maps \( \Delta_+ \).
@@ -283,17 +286,70 @@ As we will explain shortly, if our type theory supports strict propositions,
 and the unit laws by definition, thereby making semi-simplicial sets a special
 case of our problem.
 
-As will not plan to solve the problem of semi-simplicial types in this thesis, 
-we give up on defining the type of type-valued presheaves and we focus on
-recovering the power of the definitional equality for simpler objects.
+\subsection{Possible Workarounds}
 
-\subsection{Truncation levels}
+Thanks to the perspective of Homotopy Type Theory, we now understand that
+defining presheaves of types on a general category is difficult because of the 
+intricate higher-dimensional structure that may be encoded in identity types.
+% 
+Even though the problem of defining presheaves of types in \MLTT remains open, 
+there are still ways to work with presheaves in type theory:
 
-We could use TTobs.
+\paragraph{Presheaves of hsets} If types in \HoTT correspond to spaces, there 
+is a certain subclass of types that can be identified as sets.
+% 
+These are the \emph{hsets}: types \( X \) equipped with a proof that all 
+paths between any two points of \( X \) are equal
 
-We could use hsets.
+\ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{hset}
 
-\section{Prefascist Sets}
+Interestingly, \field{is\_hset} removes all the non-trivial loops from 
+\field{X} without introducing any higher-dimensional coherence problems 
+(theorem 7.1.7 in \sidecite{HottBook13}). 
+% 
+Such is the mystery that shrouds coherence towers: sometimes we can find 
+a finite definition that handles them properly, sometimes this definition 
+remain elusive.
+
+Anyway, one can define presheaves of hsets and develop large swaths of category
+theory without fearing coherence issues \sidecite{hottcoq}, but the definitions
+will not handle higher category theory.
+
+\paragraph{Observational Type Theory}
+% 
+Going further in that direction, we can modify the type theory itself to 
+enforce the uniqueness of identity proofs, so that every type is a hset.
+% 
+In the observational type theories \SetoidTT and \SetoidCC that we introduced 
+in the first part of this thesis, the identity types are strict propositions,
+which means all identity proofs are equal by definition.
+
+This framework comes very close to constructive set theory, so we can
+reasonably expect that doing mathematics with presheaves will not pose 
+significant problems.
+
+\paragraph{Two-level type theories}
+% 
+Instead of curtailing the identity types, two-level type theories 
+(\sidecite{voevodsky:2013:hts}, \sidecite{annenkov-capriotti-kraus:2017})
+feature two distinct propositional equalities: a homotopical one that encodes 
+paths as well as strict one that stays closer to the definitional equality and
+satisfies UIP.
+
+Then, we can state the definition of a presheaf using the strict equality
+and avoid coherence problems, while still supporting types with arbitrarily
+complex homotopical structures -- at the price of additional complexity
+and manipulations of \emph{fibrancy conditions}.
+
+\section{Prefascist Types}
+% 
+\sideremark{Prefascist types owe their eyebrow-raising name to the French word
+for sheaf, \textit{faisceau}, and to the humor of Pierre-Marie Pédrot.}
+% 
+All the definitions that we have evocated so far keep the general shape of the 
+set-theoretical definition
+
+\subsection{Stricly Associative Categories}
 
 Note that the definition of a category exhibits the same problem if we try to
 use types to encode hom-sets. 
@@ -307,6 +363,6 @@ In fact, there is no way to define the type of \defnote{type-enriched
 categories}{Type-enriched categories are categories that have types as their
 hom-sets.} in \HoTT that we currently know of. 
 
-\section{Higher Prefascist Sets}
+\section{Higher Prefascist Types}
 
 \section{The Bar Construction}
