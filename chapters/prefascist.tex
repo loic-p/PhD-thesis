@@ -77,7 +77,8 @@ There is a precise sense in which \( \catPsh{\cat{C}} \) is generated from
 this internal copy of \( \cat{C} \) by freely adding all small colimits:
 
 \begin{theorem}
-    The category \( \catPsh{\cat{C}} \) admits all small colimits.
+    The category \( \catPsh{\cat{C}} \) admits all small colimits, which can
+    be computed point-wise.
 \end{theorem}
 
 \begin{theorem}
@@ -97,18 +98,28 @@ Proofs can be found in \sidecitet{MaclaneMoerdijk}.
 Put together, these three theorems seem to paint a surprisingly simple picture 
 of \( \catPsh{\cat{C}} \): we can think of a presheaf as an amalgamated sum of 
 objects from \( \cat{C} \).
-%
+% 
+This is why combinatorial models of spaces such as \emph{simplicial sets} and 
+\emph{cubical sets} are defined as presheaves on carefully chosen categories. 
+We will come back to this in the next chapter.
+
 However, mental images are a double edged sword and can be just as misleading
 as they are enlightening. In particular, the reader should note that the yoneda 
 embedding does not preserve colimits that may already exist in \( \cat{C} \),
 and as a consequence we should be careful to have different pictures for
 \( \yo(x+y) \) and \( \yo(x) + \yo(y) \).
 
-\shepherd{We will use this in the next chapter to define spaces and shit}
-
 \subsection{Presheaves as Generalized Categories of Sets}
 
-\shepherd{Cartesian closed categories}
+\begin{theorem}
+    The category \( \catPsh{\cat{C}} \) admits all small limits, which can
+    be computed point-wise. Moreover, the Yoneda embedding preserves
+    limits that exist in \( \cat{C} \).
+\end{theorem}
+
+\begin{theorem}
+    The category \( \catPsh{\cat{C}} \) is cartesian closed.
+\end{theorem}
 
 \shepherd{Forcing n stuff}
 
@@ -145,8 +156,9 @@ composition hold \emph{by definition}:
 
 \ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{equations}
 
-\sideremark{This constraint might look very strong, but we will see that all 
-    small categories can in fact be presented in this way.}
+\sideremark{This constraint might look very strong, but in the next section
+    we will see that all small categories can in fact be presented in this way
+    in a type theory with strict propositions.}
 % 
 meaning that the equality here is not the propositional equality \func{\_≡\_},
 but the definitional equality \( \_=\_\) : these terms are convertible. 
@@ -342,14 +354,78 @@ complex homotopical structures -- at the price of additional complexity
 and manipulations of \emph{fibrancy conditions}.
 
 \section{Prefascist Types}
-% 
-\sideremark{Prefascist types owe their eyebrow-raising name to the French word
-for sheaf, \textit{faisceau}, and to the humor of Pierre-Marie Pédrot.}
-% 
-All the definitions that we have evocated so far keep the general shape of the 
-set-theoretical definition
 
-\subsection{Stricly Associative Categories}
+All the definitions of presheaves that we just listed follow the same genral
+pattern: they keep the shape of the set-theory inspired definition, and
+then they find a way to force the propositional equalities involved in the
+definition to behave like strict equalities, \ie to prevent them from 
+introducing relevant path information. 
+
+However, this is not the only possible approach: 
+% 
+in \sidecite{pedrot:prefascist}, Pédrot designs a syntactical model of \CIC in
+an extension of \CIC, such that every type is interpreted as a presheaf which
+is functorial up to \emph{definitional equality}. 
+% 
+In order to do so, Pédrot introduces \defnote{prefascist types}{Prefascist 
+types owe their eyebrow-raising name to the French word for sheaf, 
+\textit{faisceau}, and to the humor of Pierre-Marie Pédrot.}, an original
+take on the definition of a presheaf.
+
+In this section, we explain the definition of prefascist types and show some of 
+their properties.
+
+As in \cref{sec:intensional-problems}, we assume that we are working with a 
+\emph{strict} category, that is a category \( \cat{C} \) that satisfies the 
+associativity and unit laws by definition. 
+
+Moreover, we will extend \MLTT with a sort of strict propositions \func{SProp},
+as implemented by \Coq, \Agda and \Lean \sidecite{gilbert:hal-01859964}.
+% 
+It works just like the universe \func{Set}, except that any type \( A \) 
+in \func{SProp} is proof-irrelevant, meaning that all terms with type 
+\( A \) are convertible.
+% 
+We also add a strict truncation operator \func{∥\_∥ₛ} that embeds 
+proof-relevant types in \func{SProp}.
+
+Using \func{SProp}, we can have the category \( \Delta_+ \) of finite ordinals 
+and increasing maps as a strict category by defining the monotonicity predicate 
+as a strict proposition: 
+% 
+in this way, the computational content of composition is just regular function 
+composition, which is definitionally associative.
+% 
+In \cref{sec:cat-strictification}, we will explain that we can handle all small
+categories in this way.
+
+\subsection{Parametric Sections of Presheaves}
+
+We start by noticing that if \( F \) is a presheaf and \( p \) an object of 
+\( \cat{C} \), then an element of \( F(p) \) should be considered along with
+if family of
+\defnote{restrictions}{If \( \alpha \) is a morphism of \( \hom{q}{p} \), then 
+\( F(\alpha) \) is called the restriction operation along \( \alpha \). This 
+terminology comes from the time where presheaves were always defined on 
+topological spaces.}
+along the morphisms with codomain \( p \).
+\[
+\AgdaSymbol{∀}\ q\ (α : \func{Hom}\ q\ p)\ \AgdaSymbol{→}\ F\ q
+\]
+
+\ExecuteMetaData[chapters/literate-agda/Prefascist.tex]{prefascist}
+
+au
+
+\ExecuteMetaData[chapters/literate-agda/Prefascist.tex]{morphism}
+
+revoir
+
+\subsection{Categorical Perspective}
+
+\subsection{Properties of Prefascist Types}
+
+\subsection{Stricly Associative Categories}\label{sec:cat-strictification}
 
 Note that the definition of a category exhibits the same problem if we try to
 use types to encode hom-sets. 
@@ -362,6 +438,8 @@ category \( \cat{C} \) to satisfy them by definition.
 In fact, there is no way to define the type of \defnote{type-enriched 
 categories}{Type-enriched categories are categories that have types as their
 hom-sets.} in \HoTT that we currently know of. 
+
+\subsection{The Prefascist Translation}
 
 \section{Higher Prefascist Types}
 
