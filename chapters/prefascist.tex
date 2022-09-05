@@ -14,12 +14,14 @@ we only assume some basic knowledge about functors and limits.
 
 \section{Set-theoretical Presheaves}\label{sec:categorical-reminders}
 
-In this section, we recall the definition of presheaves and go over 
-some of their uses. 
+In this section, we recall the definition of presheaves and go 
+over some of their uses.
 % 
-We work in an extensional meta-theory such as constructive set theory;
-intensional and type theoretical considerations will wait until section 
-\ref{sec:intensional-problems}.
+The reader who is already well acquainted with presheaves might want to skip
+this section and go directly to \cref{sec:intensional-problems}, where we
+investigate presheaves from the angle of intensional type theory.
+% 
+But until then, we will be working informally in a constructive set theory.
 
 Given any category \( \cat{C} \), the category 
 \( \catPsh{\cat{C}} \) of \emph{presheaves} on \( \cat{C} \) is the category 
@@ -33,8 +35,8 @@ small sets.
     \catPsh{\cat{C}} := \hom[\catCat]{\op{\cat{C}}}{\catSet}
 \)
 \end{definition}
-In other words, a presheaf is a functor, and a morphism of presheaves
-is a natural transformation.
+In other words, a presheaf is a functor, and a morphism of presheaves is a 
+natural transformation.
 
 In the usual fashion of category theory, this definition is slick
 and abstract, which results in a remarkably versatile object. 
@@ -42,12 +44,20 @@ and abstract, which results in a remarkably versatile object.
 But in counterpart, the definition alone is not too helpful in building
 intuition about presheaves -- what are they good for?
 
-Presheaves\sidenote{sheaves, actually} were initially designed to capture 
-the idea of a set continuously parametrized by a topological space, which
-was later generalized to an arbitrary category. 
+Presheaves\sidenote{sheaves, actually} were initially designed to capture the 
+idea of a set continuously parametrized by a topological space, whose lattice 
+of open sets was used as the index category. 
 % 
-However, we are interested in them for a different reason: they allow us
-to freely add colimits to a category.
+The definition was later generalized to an arbitrary category, but this 
+topological legacy has left traces in the terminology, with words such as 
+{\color{defcolor} section} and \defnote{restriction}{If \( F \) is a presheaf 
+on \( \cat{C} \), then the elements of \( F(p) \) are called sections of 
+\( F \) over \( p \), and the image of a morphism \( F(\alpha) \) is called 
+the restriction along \( \alpha \).}.
+
+But in this thesis, we will mostly be interested in presheaves different 
+reasons, one of them being that presheaves allow us to freely add colimits to 
+a category.
 
 \subsection{Presheaves as a Categorical Cocompletion}
 
@@ -156,9 +166,10 @@ composition hold \emph{by definition}:
 
 \ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{equations}
 
-\sideremark{This constraint might look very strong, but in the next section
-    we will see that all small categories can in fact be presented in this way
-    in a type theory with strict propositions.}
+\sideremark{Using the definitional equality in \Agda code like this is not
+possible in practice, of course. This abuse of notation should rather be 
+understood as assuming an actual implementation of \func{Hom}, \func{id} and
+\func{\_∘\_} that satisfy the definitional equations.}
 % 
 meaning that the equality here is not the propositional equality \func{\_≡\_},
 but the definitional equality \( \_=\_\) : these terms are convertible. 
@@ -166,6 +177,10 @@ but the definitional equality \( \_=\_\) : these terms are convertible.
 It could be the case, for instance, if we managed to express \( \cat{C} \) as a 
 full subcategory of \func{Set} -- in which cases the morphisms are just 
 functions, whose composition is associative by defintion.
+
+This constraint might look very strong, but in \cref{sec:cat-strictification}
+we will see that all small categories can in fact be presented in this way
+in a type theory with strict propositions.
 
 Now, how should we go about defining the type of presheaves on \( \cat{C} \)?
 If we mimic the set-theoretic definition of a presheaf, we might obtain 
@@ -368,13 +383,13 @@ an extension of \CIC, such that every type is interpreted as a presheaf which
 is functorial up to \emph{definitional equality}. 
 % 
 In order to do so, Pédrot introduces \defnote{prefascist types}{Prefascist 
-types owe their eyebrow-raising name to the French word for sheaf, 
-\textit{faisceau}, and to the humor of Pierre-Marie Pédrot.}, an original
+types owe their eyebrow-raising name to the French word for presheaf, 
+\textit{préfaisceau}, and to the humor of Pierre-Marie Pédrot.}, an original
 take on the definition of a presheaf.
 
 In this section, we explain the definition of prefascist types and show some of 
 their properties.
-
+% 
 As in \cref{sec:intensional-problems}, we assume that we are working with a 
 \emph{strict} category, that is a category \( \cat{C} \) that satisfies the 
 associativity and unit laws by definition. 
@@ -399,19 +414,58 @@ composition, which is definitionally associative.
 In \cref{sec:cat-strictification}, we will explain that we can handle all small
 categories in this way.
 
-\subsection{Parametric Sections of Presheaves}
+\subsection{What are Prefascist Types?}
 
-We start by noticing that if \( F \) is a presheaf and \( p \) an object of 
-\( \cat{C} \), then an element of \( F(p) \) should be considered along with
-if family of
-\defnote{restrictions}{If \( \alpha \) is a morphism of \( \hom{q}{p} \), then 
-\( F(\alpha) \) is called the restriction operation along \( \alpha \). This 
-terminology comes from the time where presheaves were always defined on 
-topological spaces.}
-along the morphisms with codomain \( p \).
+In order to arrive to a definition of prefascist types, we start by 
+investigating strict presheaves -- even though we do not have a working 
+definition for their type, we can still assume we have an object \( F \)
+that satisfies the functoriality equations up to definitional equality:
+
+\sideremark{Here, we abuse \Agda notation again. This should really be read
+as assuming actual implementations of \func{F₀} and \func{F₁} that satisfy
+the two definitional equations.}
+\ExecuteMetaData[chapters/literate-agda/PrePrefascist.tex]{strictpsh}
+
+Remark that given \( x \) in \( \func{F₀}\ p \), we can use the functoriality 
+condition to get an inhabitant of \( \func{F₀}\ q \) whenever there is a morphism 
+from \( q \) to \( p \).
+% 
+In other words, having the presheaf structure laying around means that elements
+of \( \func{F₀}\ p \) are really promoted to inhabitants of
 \[
-\AgdaSymbol{∀}\ q\ (α : \func{Hom}\ q\ p)\ \AgdaSymbol{→}\ F\ q
+\widehat{F}\ p := \AgdaSymbol{∀}\ q\ (α : \func{Hom}\ q\ p)\ \AgdaSymbol{→}\ F\ q
 \]
+where the promoted version of \( x \in \func{F₀}\ p \) is given by
+\[
+\widehat{x} := \AgdaSymbol{λ}\ q\ α\ \AgdaSymbol{→}\ F\ α\ x.
+\]
+Tracking all restrictions like this allows us to implement restriction for 
+\( \widehat{F} \) as a simple composition, without any reference to 
+\func{F₁}
+\begin{align*}
+    \alpha\ \func{∙}\ \_ \quad & : \quad \widehat{F}\ p\ \AgdaSymbol{→}\ \widehat{F}\ q \\
+    \alpha\ \func{∙}\ \widehat{x} \quad & := \quad \AgdaSymbol{λ}\ r\ β\ \AgdaSymbol{→}\ \widehat{x}\ r\ (α\ \func{∘}\ β).    
+\end{align*}
+and since \func{F₁} satisfies the functoriality equations by definition, 
+\( \alpha\ \func{∙}\ \widehat{x} \) is in fact convertible to the promotion
+of \( \func{F₁}\ \alpha\ x \), which means that we effectively replaced
+the restriction operation with composition in \( \cat{C} \)!
+% 
+Now, remember how we insisted that \( \cat{C} \) satisfies associativity and 
+the unit law up to definitional equality -- this is because thanks to these
+equations, the restriction for \( \widehat{F} \) satisfies functoriality by 
+definition:
+\begin{align*}
+    β\ \func{∙}\ (α\ \func{∙}\ \widehat{x}) & = (α\ \func{∘}\ β)\ \func{∙}\ \widehat{x} \\
+    (\func{id}\ p)\ \func{∙}\ \widehat{x} & = \widehat{x}
+\end{align*}
+
+What we just did is we embedded \( F \) into a larger presheaf 
+\( \widehat{F} \), which satisfies functoriality up to definitional equality 
+without relying on the equations for \( F \).
+% 
+This is exactly what prefascist types are: subobjects of presheaves with the
+form of \( \widehat{F} \).
 
 \ExecuteMetaData[chapters/literate-agda/Prefascist.tex]{prefascist}
 
