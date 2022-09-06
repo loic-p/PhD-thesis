@@ -99,8 +99,8 @@ this internal copy of \( \cat{C} \) by freely adding all small colimits:
 \begin{theorem}
     Given a category \( \cat{D} \) that has all small colimits and a functor
     \( F : \cat{C} \to \cat{D} \), there is a unique cocontinuous functor
-    \( \widehat{F} : \catPsh{\cat{C}} \to \cat{D} \) such that 
-    \( F = \widehat{F} \circ \yo \).
+    \( \widehat{\func{F₀}} : \catPsh{\cat{C}} \to \cat{D} \) such that 
+    \( F = \widehat{\func{F₀}} \circ \yo \).
 \end{theorem}
 
 Proofs can be found in \sidecitet{MaclaneMoerdijk}.
@@ -394,17 +394,17 @@ As in \cref{sec:intensional-problems}, we assume that we are working with a
 \emph{strict} category, that is a category \( \cat{C} \) that satisfies the 
 associativity and unit laws by definition. 
 
-Moreover, we will extend \MLTT with a sort of strict propositions \func{SProp},
+Moreover, we will extend \MLTT with a sort of strict propositions \func{Prop},
 as implemented by \Coq, \Agda and \Lean \sidecite{gilbert:hal-01859964}.
 % 
 It works just like the universe \func{Set}, except that any type \( A \) 
-in \func{SProp} is proof-irrelevant, meaning that all terms with type 
+in \func{Prop} is proof-irrelevant, meaning that all terms with type 
 \( A \) are convertible.
 % 
 We also add a strict truncation operator \func{∥\_∥ₛ} that embeds 
-proof-relevant types in \func{SProp}.
+proof-relevant types in \func{Prop}.
 
-Using \func{SProp}, we can have the category \( \Delta_+ \) of finite ordinals 
+Using \func{Prop}, we can have the category \( \Delta_+ \) of finite ordinals 
 and increasing maps as a strict category by defining the monotonicity predicate 
 as a strict proposition: 
 % 
@@ -433,19 +433,21 @@ from \( q \) to \( p \).
 In other words, having the presheaf structure laying around means that elements
 of \( \func{F₀}\ p \) are really promoted to inhabitants of
 \[
-\widehat{F}\ p := \AgdaSymbol{∀}\ q\ (α : \func{Hom}\ q\ p)\ \AgdaSymbol{→}\ F\ q
+\widehat{\func{F₀}}\ p := \AgdaSymbol{∀}\ q\ (α : \func{Hom}\ q\ p)\ \AgdaSymbol{→}\ \func{F₀}\ q
 \]
 where the promoted version of \( x \in \func{F₀}\ p \) is given by
 \[
-\widehat{x} := \AgdaSymbol{λ}\ q\ α\ \AgdaSymbol{→}\ F\ α\ x.
+\widehat{x} := \AgdaSymbol{λ}\ q\ α\ \AgdaSymbol{→}\ \func{F₁}\ α\ x.
 \]
 Tracking all restrictions like this allows us to implement restriction for 
-\( \widehat{F} \) as a simple composition, without any reference to 
+\( \widehat{\func{F₀}} \) as a simple composition, without any reference to 
 \func{F₁}
-\begin{align*}
-    \alpha\ \func{∙}\ \_ \quad & : \quad \widehat{F}\ p\ \AgdaSymbol{→}\ \widehat{F}\ q \\
-    \alpha\ \func{∙}\ \widehat{x} \quad & := \quad \AgdaSymbol{λ}\ r\ β\ \AgdaSymbol{→}\ \widehat{x}\ r\ (α\ \func{∘}\ β).    
-\end{align*}
+\[
+\begin{array}{lcl}
+    \alpha\ \func{∙}\ \_ & : & \widehat{\func{F₀}}\ p\ \AgdaSymbol{→}\ \widehat{\func{F₀}}\ q \\
+    \alpha\ \func{∙}\ \widehat{x} & := & \AgdaSymbol{λ}\ r\ β\ \AgdaSymbol{→}\ \widehat{x}\ r\ (α\ \func{∘}\ β).    
+\end{array}
+\]
 and since \func{F₁} satisfies the functoriality equations by definition, 
 \( \alpha\ \func{∙}\ \widehat{x} \) is in fact convertible to the promotion
 of \( \func{F₁}\ \alpha\ x \), which means that we effectively replaced
@@ -453,27 +455,63 @@ the restriction operation with composition in \( \cat{C} \)!
 % 
 Now, remember how we insisted that \( \cat{C} \) satisfies associativity and 
 the unit law up to definitional equality -- this is because thanks to these
-equations, the restriction for \( \widehat{F} \) satisfies functoriality by 
-definition:
+equations, \( \widehat{\func{F₀}} \) is strictly functorial:
 \begin{align*}
     β\ \func{∙}\ (α\ \func{∙}\ \widehat{x}) & = (α\ \func{∘}\ β)\ \func{∙}\ \widehat{x} \\
     (\func{id}\ p)\ \func{∙}\ \widehat{x} & = \widehat{x}
 \end{align*}
-
-What we just did is we embedded \( F \) into a larger presheaf 
-\( \widehat{F} \), which satisfies functoriality up to definitional equality 
-without relying on the equations for \( F \).
 % 
-This is exactly what prefascist types are: subobjects of presheaves with the
-form of \( \widehat{F} \).
+Now, let us take a step back to reflect on what we just did. We started from
+a strict presheaf \( F \), and we defined a larger strict presheaf 
+\( \widehat{\func{F₀}} \) along with an embedding 
+\( x \mapsto \widehat{x} : F \hookrightarrow \widehat{\func{F₀}} \).
+
+The presheaves of the form \( \widehat{X} \) for some \( X : \func{Obj} \to \func{Set} \) 
+(that we will call \defnote{cofree}{In the next section, we will present 
+presheaves as coalgebras, and presheaves of the form \( \widehat{X} \) 
+are cofree coalgebras.} presheaves) 
+behave remarkably well, and we can manipulate them without difficulty in 
+intensional type theory.
+% 
+This leads us to the definition of a prefascist type as a sub-presheaf of 
+a cofree presheaf:
 
 \ExecuteMetaData[chapters/literate-agda/Prefascist.tex]{prefascist}
 
-au
+This definition represents the subpresheaf of \( \widehat{\field{F₀}} \) 
+that is obtained by only keeping the elements of 
+\( \widehat{\field{F₀}}\ p \) that satisfy the proof-irrelevant predicate
+\( \field{Fε} \) for all their restrictions
+
+\ExecuteMetaData[chapters/literate-agda/Prefascist.tex]{elem}
+
+Prefascist types are still strict presheaves, as we can define 
+functoriality using composition which is, of course, stricly associative:
+\[
+\begin{array}{lcl}
+    \alpha\ \func{∙}\ \_ & : & \func{elem}\ F\ p\ \AgdaSymbol{→}\ \func{elem}\ F\ q \\
+    \alpha\ \func{∙}\ \func{⟨}\ \field{x₀}\ \func{,}\ \field{xε}\ \func{⟩} & 
+        := & \func{⟨}\ \alpha\ \func{∙}\ \field{x₀}\ \func{,}\ \alpha\ \func{∙}\ \field{xε} \ \func{⟩}  
+\end{array}
+\]
+Finally, morphisms of prefascist sets are defined as follows
 
 \ExecuteMetaData[chapters/literate-agda/Prefascist.tex]{morphism}
 
-revoir
+This definition might look daunting at first, but it simply imitates
+the definition of an element of \( G \) with an element of \( F \) in the 
+context: ``morphisms are generalized elements''. We invite the reader
+to check that morphisms are in fact strict natural transformations (meaning 
+that the naturality holds by definition, as usual).
+
+Thus, our prefascist types form a remarkable subcategory of presheaves that
+can be defined in a minor extension of \MLTT.
+% 
+Naturally, this begs the question of which presheaves can be encoded as
+prefascist sets. In the next section, we will see that prefastist types
+are equivalent to the full category of presheaves in a set-truncated theory, 
+but unfortunately falls short of it when homotopical relation 
+becomes relevant.
 
 \subsection{Categorical Perspective}
 
