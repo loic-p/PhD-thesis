@@ -2,6 +2,347 @@
 \chapter{Introduction in English}
 \labch{intro_english}
 
-\section{In which I explain what I did}
+\section{Proving programs correct using dependent types}
 
-Lorem ipsum dolor sit amet.
+If you are past your first year of CS studies, chances are that writing a program
+to sort lists of integers is not very exciting -- not to say boring.
+But! we need a bit of enthusiasm to make this blog post palatable, so let's have
+an imaginary first year student do it for us:
+
+In last week's lecture, she learned about a few sorting algorithms, and her professor
+had her implement merge sort in some functional language for homework (university teachers
+tend to be like that).
+Now, today's lecture is when things get serious: they are going to mathematically prove
+that the program is correct, and re-discover the joys of induction she had forgotten
+since she graduated high school.
+But if you think about it, our student already proved part of the specification
+of her merge sort program: her function probably starts something like
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+    mergeSort : int list -> int list
+\end{lstlisting}
+
+which guarantees that it will return a list of integers, when supplied with one
+(let's pretend that side effects are not a thing for a minute here). No paper proof
+is needed here, her program being well-typed is enough!
+
+In fact, if the type system of the language she is using is sufficiently expressive,
+she might even have access to a type of sorted lists, and write something like
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+    mergeSort : int list -> int sortedList
+\end{lstlisting}
+
+Now she is getting even closer to a program that satisfies the specification without
+having to do any paper proof!
+
+However, she doesn't want the output to be \emph{any} sorted list, it has to be a
+permutation of the input. This is a bit more difficult to enforce at the
+level of types though, because the constraint on the output depends on the input
+list.
+But if she has access to really sophisticated algebraic datatypes, she may be
+able to define some type `isPermutation l1 l2` whose elements are certificates
+that `l1` and `l2` are equal up to a permutation.
+
+Now she can ask her function to output both a list and a certificate:
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+     mergeSort : (l1 : int list) -> (l2 : int sortedList) × (isPermutation l1 l2)
+\end{lstlisting}
+
+This may look a bit unusual, as `isPermutation l1 l2` is a *type* that references
+run-time *values*! However, this interweaving of types and programs is the bread and
+butter of dependent types¹.
+
+Unfortunately, first year students are rarely introduced to dependently typed
+languages, so we bid farewell to our imaginary student.
+
+\section{Algebraic datatypes}
+
+Having access to these types that may depend on programs opens up a whole world
+of properties that you can enforce at the level of types: invertible matrices,
+normed vectors, you name it -- in fact, pretty much anything you could mathematically
+prove about your program on paper.
+
+Now, how would we go about defining `isPermutation l1 l2`?
+Let's do it one step at a time. First, we use algebraic datatypes to define lists:
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+data list (A : Type) : Type where
+  nil : list A
+  cons : A -> list A -> list A
+\end{lstlisting}
+
+The datatype `list A` has two constructors, `nil` (the empty list) and `cons a l`
+which appends an element `a` to the list `l`. Then, given a value with type `list A`, you
+may reason by pattern-matching on it:
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+length (A : Type) : list A -> int
+length A nil = 0
+length A (cons a l) = 1 + (length l)
+\end{lstlisting}
+
+So far so good -- if you are a seasoned Haskell programmer, you are probably getting
+bored and starting to wonder if we shouldn't call the imaginary first-year student back.
+
+Alright, let's pick up the pace a little bit, then. We can use generalized algebraic
+datatypes to define a more interesting property: equality
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+data equal (A : Type) (a : A) : A -> Type where
+  reflexivity : equal A a a
+\end{lstlisting}
+
+Note how dependent types come into play: the algebraic datatype `equal A a b`
+has one type parameter `A` and two parameters that are *programs* of type `A`.
+
+In the GADT tradition, the `reflexivity` constructor only builds programs with
+type `equal A a b` if `a = b`. And when you do pattern matching, a unification
+algorithm will replace all occurences of `b` with `a`:
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+symmetry (A : Type) (a b : A) : equal A a b -> equal A b a
+symmetry A a a reflexivity = reflexivity
+\end{lstlisting}
+
+And just like that, you proved the symmetry of equality!
+You can then use equality to define, say, the type of list with length 5:
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+fiveIntegers = (l : list int) × (equal int (length l) 5)
+\end{lstlisting}
+
+And now, you should have enough information to attempt a definition for `isPermutation`
+(ugh, it was easier when the first year student was the one doing homework problems!).
+
+\section{Equality of functions}
+
+Interestingly enough, our definition of `equal` is completely type agnostic -- it
+applies to integers just as well as function. The reason is simple: it actually
+encodes the equality of programs, and everything is a program in type theory.
+
+Unfortunately, this also entails that there is no way to build a proof of
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+equal (int -> int) (λn.1+n) (λn.n+1)
+\end{lstlisting}
+
+since these two functions are represented by two different programs. This is
+at odds with mathematical practice!
+
+There is a handful of ways to work around this difficulty, but in the rest of this
+article we will focus on one in particular: observational type theory[1], or more
+precisely its incarnation \SetoidTT.
+
+The main idea behind \SetoidTT is pretty straightforward: since the correct notion of
+equality depends on the type of the programs being compared, let's ditch `equal`
+and replace it with something defined by patter-matching on the *type*[2]
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+eq (A : Type) (a : A) (b : A) : Prop
+eq int m n                 = equal m n                   --good ol' equal works fine for integers
+eq (A -> B) f g            = (a : A) -> eq B (f a) (g a) --two functions are equal when their graphs are equal
+eq (A × B) <a , b> <c , d> = (eq A a c) × (eq B b d)     --two pairs are equal when their components are equal
+...
+\end{lstlisting}
+
+and just like that, we get a type that encodes mathematical equality! Well, not
+exactly a type, but rather a *proposition*: notice how `eq A a b` has type `Prop`
+instead of `Type`.
+
+Propositions work just like types, except that any two values of type `eq A a b`
+are completely interchangeable -- the unification algorithm of the type-checker
+will always deem them equal.
+But in exchange for that, you promise you will never do pattern-matching on the
+elements of a proposition.
+
+Fair enough, that sounds like a reasonable deal, but then without pattern-matching,
+what can we even do with a program of type `eq A a b`?
+
+\begin{lstlisting}[style=kaolstplain,linewidth=1.5\textwidth]
+cast (A : Type) (B : Type) (e : eq Type A B) (t : A) : B
+cast int int e n               = n
+cast (A -> B) (C -> D) e f     = λx.cast B D (fst e) (f (cast C A (snd e) x))
+cast (A × B) (C × D) e <t , u> = <cast A C (fst e) t , cast B D (snd e) u>
+...
+\end{lstlisting}
+
+\section{Intro to observational type theory}
+
+Dependent type theories and in particular \MLTT, as originally
+developed by~\sidecitet{MARTINLOF197573}, provide an adequate framework
+for developing constructive mathematics and certifying software.
+%
+A core aspect of \MLTT is the coexistence of two distinct notions of
+equality: a \emph{definitional} equality that records the equations
+automated by the system, and a \emph{propositional} equality that is
+a type internal to the system and thus can be used to do equational
+reasoning.
+%
+However, the propositional equality of \MLTT lacks some extensionality
+principles that pervade mathematical reasoning, such as function
+extensionality (funext). Since they are generally considered desirable, these
+principles are sometimes added as axioms, but doing so results in a system
+with weaker computational properties.
+
+Throughout the years, several options
+to obtain a more extensional version of propositional equality while preserving
+computation have been explored. The most successful lines of work can be roughly divided into two
+groups: the ones using an observational equality, and the ones using a
+cubical equality.
+%
+Both notions build on the following fundamental idea: in order to obtain
+sufficient extensionality principles, the behavior of equality in a given
+type should be explicitly specified for every type instead of using a single
+definition that is parametric over the types.
+
+The work on observational equality originated from the study of
+the setoid model of type theory \sidecite{hofmann95,altenkirch99}, and
+a first attempt at a proper type theory that supports an observational
+equality satisfying funext has been been proposed in~\sidecite{altenkirchAl:plpv2007}.
+%
+In these systems, observational equality equips every type with a setoid
+structure. This setoidal equality satisfies the uniqueness of identity proofs (UIP),
+which states that all proofs of an equality are equal; in other words,
+equality is proof irrelevant.
+
+The other line of work is more recent and takes its roots in the
+formulation of the univalence axiom~\sidecite{kapulkin2012simplicial,hottbook},
+which gives a new meaning to the equality between types: two types are
+equal when they equivalent. This can be understood as an extensionality
+principle for the universe of types.
+%
+In their search for a computational interpretation of
+univalence, \sidecitet{cubicaltt} developed a notion of cubical equality,
+which satisfies funext and univalence, but is incompatible with UIP.
+
+Thus, observational equality and cubical equality are two diverging
+directions for providing propositional equality with more extensionality.
+\sidecitet{hts-sota,Altenkirch2016ExtendingHT,Capriotti17} advocate that the
+two solutions are actually complementary and can be integrated to
+a single system with two universe hierarchies, one that satisfies
+univalence and the other that satisfies UIP.
+%
+While cubical type theory has been thoroughly investigated and even
+implemented in the \Agda proof assistant~\sidecitet{cubical-agda},
+observational equality has not reached a comparable level of maturity.
+%
+Recent attempts to design a type theory based on observational equality
+are either lacking an algorithm for type checking~\sidecitet{sterling_et_al:LIPIcs:2019:10538}, or restricted to a single
+universe and having computational properties only up to a
+conjecture~\sidecitet{Altenkirch2019}. Indeed, the latter relies on computation
+in an enriched version of \MLTT that features a universe of definitionally
+proof-irrelevant types (noted hereafter $\sProp[i]$) as recently proposed
+by~\sidecitet{gilbert:hal-01859964}, along with a proof-irrelevant identity type
+that supports a strong eliminator. This theory has not been justified yet,
+and it has even been shown not to be normalizing in presence of
+impredicativity~\sidecitet{lmcs:6606}.
+
+In this paper, we define \SetoidTT, the first extension of \MLTT +
+$\sProp[i]$ with an observational equality that satisfies UIP, funext
+and propext, and supports quotient types and countably many universes
+---with a proof of normalization and canonicity formalized in \Agda.\footnote{The formalization is available at
+  \url{https://github.com/CoqHott/logrel-mltt/}, references to a
+  particular file are done using \refAgda{}{myfile} which
+  directly points to the corresponding file on github.}
+%
+Firstly, we remark that this theory can only be derived in a system with
+some level of cumulativity, as it is required for certain
+computation rules to be well-typed. This makes explicit some difficulties
+that do not show up in previous works.
+%
+Second, we remark that our version of observational equality can be equipped
+with two elimination principles: a notion of type cast (or coercion) for
+proof relevant types, and the standard eliminator of \MLTT for
+proof irrelevant types, thus making all the setoidal structure
+derivable from the standard eliminator.
+%
+Funext and propext are obtained by specifying the right
+computation rules for observational equality whereas UIP is obtained
+for free by interpreting observational equality in $\sProp$.
+
+The proof of normalization and canonicity is based on the use
+of logical relations defined in \Agda using induction-recursion as
+initially developed by \sidecitet{Abel:POPL2018} and later extended to
+$\sProp$ by~\sidecitet{gilbert:hal-01859964}.
+%
+Compared to previous work on formalized normalization proofs, we have added the support
+for a cumulative hierarchy with two universes, and we make a clear distinction
+between inhabitants of proof-irrelevant types, which have no computational
+behavior, and inhabitants of proof relevant types, which do.
+%
+This key change allows us to add new principles in $\sProp$ without
+having to supply them with a computational behavior, trivializing for
+instance the management of higher coherences of the cubical interpretation.
+%
+In counterpart for this added flexibility, normalization does not directly
+imply canonicity anymore, and a separate proof of consistency of the
+theory is required to derive canonicity.
+%
+This proof is done by defining a model for \SetoidTT, but as
+consistency is the only consequence that we need from the existence of
+a model, the model can be defined in an extensional setting.
+
+To illustrate the simplicity of extending \MLTT+$\sProp$ to \SetoidTT,
+we have implemented a simple version in
+\Agda using rewrite rules, as recently introduced
+by~\sidecitet{taming_of_the_rew} (file \refAgdaRoot{setoid\_rr}).
+
+\section{Related and Future work }
+\label{sec:relatedwork}
+
+Compared to~\sidecite{altenkirchAl:plpv2007}, the most important ingredient in \SetoidTT is the
+use of definitional proof irrelevance.
+%
+This added flexibility in computations allows our recursors to enjoy proper computational
+behavior on open terms, and it also lets us seamlessly treat universe hierarchies.
+%
+Moreover, the normalization proof for OTT relies on a normalization conjecture for a different
+theory, unlike the normalization proof for \SetoidTT.
+
+In~\sidecite{Altenkirch2019}, the authors define a setoid model in \( \MLTT+\sProp \). Then, they
+interpret a version of \MLTT with proof-irrelevant identity types that support propext and
+funext in their model, thereby providing a computational interpretation of these principles.
+%
+However, handling universes in their model requires some additions to \( \MLTT+\sProp \), and
+the resulting theory is only conjectured to be normalizing.
+%
+In contrast to this, \SetoidTT is a full-fledged type theory and does not require any external
+model to compute.
+
+Compared to XTT~\sidecite{sterling_et_al:LIPIcs:2019:10538}, the strengths of \SetoidTT are a
+normalization strategy that exhibits canonicity, as well a full proof that conversion and typing
+are decidable. These properties allow us to present a concrete implementation of our system
+in a proof assistant.
+%
+In XTT however, Sterling\etal show that typing cannot be decidable, as there is no way to deduce
+\( \Path{A}{A'} \) and \( \Path{B}{B'} \) from a proof of \( \Path{A \times B}{A' \times B'} \).
+%
+In order to fix this shortcoming, they suggest adding a ``typecase'' operator to th theory, but
+argue against it since it forces the universe to be closed, thereby severely constraining the
+possible semantics.
+%
+In \SetoidTT, we obtain the injectivity of type contructors from the behavior of observational
+equality in the universe. These rules somewhat constrain the semantics---for instance, we cannot
+interpret \SetoidTT in set theory using a Grothendieck universe as the interpretation of \( \Type \)---
+but our universe remains open to the addition of arbitrary types.
+
+Finally, our setoidal adaptation of Swan's Id types~\sidecite{Swan_2016} turns \SetoidTT into a proper
+extension of \MLTT, which realizes UIP, funext and propext while enjoying algorithmic canonicity.
+To the best of our knowledge, this is a new result.
+
+\shepherd{
+The natural next step of our work is to implement \SetoidTT inside
+\Coq, \Lean or \Agda, which should not be too difficult as all of them
+already feature a proof-irrelevant universe of propositions.
+%
+The main missing ingredient for a concrete implementation is a general
+description of the reduction of equality and cast on arbitrary indexed
+inductive types, as explained in Section~\ref{sec:sheph-stand-induct}.
+
+Another interesting line of work is the marriage of \SetoidTT with
+cubical type theory in a 2-level type theory
+setting~\sidecite{hts-sota,Altenkirch2016ExtendingHT,Capriotti17}, which
+could lead to an implementation of \SetoidTT in the cubical extension
+of \Agda \sidecite{cubical-agda}.  }
