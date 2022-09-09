@@ -1,16 +1,468 @@
 \setchapterstyle{lines}
 \labch{appendix}
 
-\chapter{Appendix A}
+\pagelayout{wide}
 
-\section{Lorem ipsum dolor}
+\chapter{Rules of \SetoidTT and \SetoidCC}
 
- Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus convallis diam nec dolor sagittis, nec euismod ligula sollicitudin. Quisque rutrum tincidunt felis, eu maximus nisl porta vel. Phasellus vulputate, leo ut pellentesque blandit, justo ligula gravida nisl, et porta mauris dolor et eros. Duis rhoncus dolor a risus fermentum facilisis. Maecenas vitae posuere nulla. Sed sed mattis tortor, quis bibendum dui. Etiam aliquam metus eget aliquam consequat.
+\section{\SetoidCC Typing Rules}
 
-\subsection{sit amet}
+\begin{mathpar}
+    \inferrule[Ctx-Nil]
+        { }
+        {\wfctx{\emptyctx}}
+    \ilabel{infrule:ctx-nil}
+    \and
+    \inferrule[Ctx-Cons]
+        {\wfctx{\Gamma} \\ \tytm{\Gamma}{A}{\Univ}}
+        {\wfctx{\extctxannotated{\Gamma}{A}{\Univ}}}
+    \ilabel{infrule:ctx-cons}
+    \and
+    \inferrule[Var]
+        {\wfctx{\Gamma} \\ \inctx{\Gamma}{A}{\Univ}}
+        {\tytmannotated{\Gamma}{x}{A}{\Univ}}
+    \ilabel{infrule:var}
+    \and
+    \inferrule[conv]
+        {\tytmannotated{\Gamma}{t}{A}{\Univ}
+            \\ \eqtm{\Gamma}{A}{B}{\Univ}}
+        {\tytmannotated{\Gamma}{t}{B}{\Univ}}
+    \ilabel{infrule:conv}
+    \\
+    \inferrule[Univ]
+        {\wfctx{\Gamma}}
+        {\tytm{\Gamma}{\Univ}{\Univ '}}
+        {\scriptstyle\univRel{\Univ}{\Univ '}}
+    \ilabel{infrule:univ}
+    \and
+    \inferrule[$\Pi$-Form]
+        {%\tytm{\Gamma}{A}{\Univ}
+            \tytm{\extctxannotated{\Gamma}{A}{\Univ}}{B}{\Univ '}}
+        {\tytm{\Gamma}{\Depfunannotated{A}{B}{s}{s}{s'}}{\piRel{\Univ}{\Univ '}}}
+        {}
+    \ilabel{infrule:pi-form}
+    \and
+    \inferrule[$\exists$-Form]
+        {%\tytm{\Gamma}{A}{\sProp_i}
+            \tytm{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp_i}}
+        {\tytm{\Gamma}{\Exists{A}{B}}{\sProp_i}}
+        % {\scriptstyle \substack{i \le k \\ j \le k}}
+    \ilabel{infrule:exists-form}
+    \\
+    \inferrule[Fun]
+        {\tytmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t}{B}{\Univ'}}
+        {\tytmannotated{\Gamma}{\lam{A}{t}}{\Depfun{A}{B}}{\piRel{\Univ}{\Univ '}}}
+    \ilabel{infrule:pi-intro}
+    \and
+    \inferrule[App]
+        {\tytmannotated{\Gamma}{t}{\Depfun{A}{B}}{\piRel{\Univ}{\Univ '}}
+            \\ \tytmannotated{\Gamma}{u}{A}{\Univ}}
+        {\tytmannotated{\Gamma}{t\ u}{\subst{B}{u}}{\Univ '}}
+    \ilabel{infrule:pi-elim}
+    \\
+    \inferrule[Pair]
+        {\tytm{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp_i} 
+            \\ \tytmannotated{\Gamma}{t}{A}{\sProp}
+            \\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\sProp}}
+        {\tytmannotated{\Gamma}{\pair{t}{u}}{\Exists{A}{B}}{\sProp}}
+    \ilabel{infrule:pair}
+    \\\
+    \inferrule[Fst]
+        {\tytmannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
+        {\tytmannotated{\Gamma}{\fst{t}}{A}{\sProp}}
+    \ilabel{infrule:fst}
+    \and
+    \inferrule[Snd]
+        {\tytmannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
+        {\tytmannotated{\Gamma}{\snd{t}}{\subst{B}{\fst{t}}}{\sProp}}
+    \ilabel{infrule:snd}
+    \\
+    \inferrule[$\Nat$-Form]
+        {\wfctx{\Gamma}}
+        {\tytm{\Gamma}{\Nat}{\Type_0}}
+    \ilabel{infrule:nat-form}
+    \and
+    \inferrule[Zero]
+        {\wfctx{\Gamma}}
+        {\tytmannotated{\Gamma}{\zero}{\Nat}{\Type_0}}
+    \ilabel{infrule:zero}
+    \and
+    \inferrule[Suc]
+        {\tytmannotated{\Gamma}{n}{\Nat}{\Type_0}}
+        {\tytmannotated{\Gamma}{\suc{n}}{\Nat}{\Type_0}}
+    \ilabel{infrule:suc}
+    \and
+    \inferrule[$\Nat$-Elim]
+        {\tytmannotated{\Gamma}{t_0}{A\ \zero}{\Univ}
+            \\ \tytmannotated{\Gamma}{t_S}{\Depfun[n]{\Nat}{\Fun{A\ n}{A\ (\suc{n})}}}{\Univ}
+            \\ \tytmannotated{\Gamma}{n}{\Nat}{\Type_0}}
+        {\tytmannotated{\Gamma}{\natrec{A}{t_0}{t_S}{n}}{A\ n}{\Univ}}
+    \ilabel{infrule:nat-elim}
+    \\
+    \inferrule[$\Empty$-Form]
+        {\wfctx{\Gamma}}
+        {\tytm{\Gamma}{\Empty}{\sProp_i}}
+    \ilabel{infrule:empty-form}
+    \and
+    \inferrule[$\Empty$-Elim]
+        {\tytm{\Gamma}{A}{\Univ_i}
+            \\ \tytmannotated{\Gamma}{t}{\Empty}{\sProp}}
+        {\tytmannotated{\Gamma}{\emptyrec{A}{t}}{A}{\Univ_i}}
+    \ilabel{infrule:empty-elim}
+    \and
+    \inferrule[$\Unit$-Form]
+        {\wfctx{\Gamma}}
+        {\tytm{\Gamma}{\Unit}{\sProp_i}}
+    \ilabel{infrule:unit-form}
+    \and
+    \inferrule[$\Unit$-Intro]
+        {\wfctx{\Gamma}}
+        {\tytmannotated{\Gamma}{\unit}{\Unit}{\sProp}}
+    \ilabel{infrule:unit-intro}
+    \\
+    \inferrule[Eq-Form]
+        {%\tytm{\Gamma}{A}{\Type_i} \\
+            \tytmannotated{\Gamma}{t}{A}{\Type_i}
+            \\ \tytmannotated{\Gamma}{u}{A}{\Type_i}}
+        {\tytm{\Gamma}{\Obseq[A]{t}{u}}{\sProp_i}}
+    \ilabel{infrule:eq-form}
+    \and
+    \inferrule[Refl]
+        {% \tytm{\Gamma}{A}{\Type_i} \\
+            \tytmannotated{\Gamma}{t}{A}{\Type_i}}
+        {\tytmannotated{\Gamma}{\refl{t}{A}}{\Obseq[A]{t}{t}}{\sProp_i}}
+    \ilabel{infrule:refl}
+    \and
+    % \inferrule{\tytm{\Gamma}{e}{\Obseq[A]{t}{u}}}
+    %           {\tytm{\Gamma}{\sym{e}}{\Obseq[A]{u}{t}}}
+    %   \and
+    \inferrule[Transport-$\sProp{}$]
+        {%\tytm{\Gamma}{A}{\Type_i}
+            \tytmannotated{\Gamma}{t,t'}{A}{\Type_i}
+            \quad \tytm{\extctxannotated[e]{\extctxannotated[y]{\Gamma}{A}{\Type_i}}{\Obseq[A]{t}{x}}{\sProp}}{B}{\sProp[j]}
+            % \quad \tytm{\Gamma}{B}{\sProp[j]}
+            \quad \tytmannotated{\Gamma}{u}{\subst[e]{\subst[y]{B}{t}}{\refl{t}{A}}}{\sProp}
+            %\quad \tytmannotated{\Gamma}{t'}{A}{\Univ}
+            \quad \tytmannotated{\Gamma}{e}{\Obseq[A]{t}{t'}}{\sProp}}
+        {\tytmannotated{\Gamma}{\transport{A}{t}{B}{u}{t'}{e}}{\subst[e]{\subst[y]{B}{t'}}{e}}{\sProp}}
+    \ilabel{infrule:transport-prop}
+    \and
+    \inferrule[Cast]
+        {% \tytm{\Gamma}{A}{\Univ_i}   \quad \tytm{\Gamma}{B}{\Univ_i}
+            \tytmannotated{\Gamma}{e}{\Obseq[{\Type_i}]{A}{B}}{\sProp}
+            \quad \tytmannotated{\Gamma}{t}{A}{\Type_i}}
+        {\tytmannotated{\Gamma}{\cast{A}{B}{e}{t}}{B}{\Type_i}}
+    \ilabel{infrule:cast}
+    \and
+    \inferrule[Cast-Refl]
+        {%\tytm{\Gamma}{A}{\Univ_i}
+            \tytmannotated{\Gamma}{t}{A}{\Type_i} \\
+            \tytmannotated{\Gamma}{e}{\Obseq[{\Type_i}]{A}{A}}{\sProp}}
+        {\tytm{\Gamma}{\castrefl{A}{t}}{\Obseq[A]{t}{\cast{A}{A}{e}{t}}}}
+    \ilabel{infrule:cast-refl}
+\end{mathpar}
 
-Aliquam ac efficitur purus. Proin vulputate urna id dui consequat rutrum eu sed tortor. Nunc vehicula vitae odio id euismod. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Sed vehicula eros tempor odio vulputate varius. Nullam tempor cursus finibus. Curabitur ac nibh dui. Aenean tristique elit sed neque feugiat, nec congue velit tempus. Phasellus non dui ut nisl eleifend sagittis eget at nibh. Nam id pulvinar risus, eget tincidunt erat. Nam ac scelerisque metus, et lacinia urna. Etiam facilisis vehicula dictum. Cras interdum ex vitae euismod dignissim.
+\section{\SetoidCC Conversion Rules (except congruence)}
 
-\subsection{consectetur adipiscing elit}
+\begin{mathpar}
+    \inferrule[Refl]
+        {\tytmannotated{\Gamma}{t}{A}{\Type_i}}
+        {\eqtmannotated{\Gamma}{t}{t}{A}{\Type_i}}
+    \ilabel{infrule:reflexivity}
+    \and
+    \inferrule[Sym]
+        {\eqtmannotated{\Gamma}{t}{u}{A}{\Type_i}}
+        {\eqtmannotated{\Gamma}{u}{t}{A}{\Type_i}} 
+    \ilabel{infrule:sym}
+    \and
+    \inferrule[Trans]
+        {\eqtmannotated{\Gamma}{t}{t'}{A}{\Type_i}
+            \and \eqtmannotated{\Gamma}{t'}{u}{A}{\Type_i}}
+        {\eqtmannotated{\Gamma}{t}{u}{A}{\Type_i}}
+    \ilabel{infrule:trans}
+    \and
+    \inferrule[Red-Conv]
+        {\red{\Gamma}{t}{u}{A}}
+        {\eqtmannotated{\Gamma}{t}{u}{A}{\Type_i}}
+    \ilabel{inferrule:red-conv}
+    \\
+    \inferrule[$\eta$-Eq]
+        {\tytmannotated{\Gamma}{t, u}{\Depfunannotated{A}{B}{}{\Univ}{\Type_i}}{\piRel{\Univ}{\Type_i}}
+            \\ \eqtmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t\ x}{u\ x}{B}{\Type_i}}
+        {\eqtmannotated{\Gamma}{t}{u}{\Depfunannotated{A}{B}{}{\Univ}{\Type_i}}{\piRel{\Univ}{\Type_i}}}
+    \ilabel{infrule:eta}
+    \and
+    \inferrule[Proof-Irrelevance]
+        {\tytmannotated{\Gamma}{t,u}{A}{\sProp}}
+        {\eqtmannotated{\Gamma}{t}{u}{A}{\sProp}}
+    \ilabel{infrule:proof-irrelevance}
+\end{mathpar}
 
-Proin tellus mauris, luctus eu justo ut, feugiat porttitor urna. Vestibulum vulputate tortor eget eros condimentum porta. Cras nunc tortor, finibus quis placerat et, aliquet vel dolor. Duis auctor, tortor sed rutrum rutrum, diam nibh sodales nibh, nec porttitor lectus diam nec dui. Aliquam tristique elementum ornare. Ut purus est, mollis at imperdiet sed, vulputate id mauris. Duis gravida neque id leo vehicula faucibus. Ut posuere justo mi, eu tincidunt mi rutrum ac. Quisque at maximus turpis.
+\section{Reduction Rules (except substitutions)}
+
+\begin{mathpar}
+    \inferrule[$\beta$-red]
+        {\tytm{\extctx{\Gamma}{A}}{t}{B}
+            \\ \tytm{\Gamma}{u}{A}}
+        {\red{\Gamma}{(\lam{A}{t})\ u}{\subst{t}{u}}{\subst{B}{u}}}
+    \ilabel{inferrule:beta-red}
+    \and
+    \inferrule[Conv-Red]
+        {\red{\Gamma}{t}{u}{A} \\ \eqtm{\Gamma}{A}{B}{\Type_i{}}}
+        {\red{\Gamma}{t}{u}{B}}
+    \ilabel{inferrule:conv-red}
+    \and
+    \inferrule[$\Nat$-Elim-Zero]
+        {\tytm{\Gamma}{A}{\Fun{\Nat}{\Type_i}}
+            \\ \tytm{\Gamma}{t_0}{A\ \zero}
+            \\ \tytm{\Gamma}{t_S}{\Depfun[n]{\Nat}{\Fun{A\ n}{A\ (\suc{n})}}}}
+        {\red{\Gamma}{\natrec{A}{t_0}{t_S}{\zero}}{t_0}{A\ 0}}
+    \ilabel{inferrule:nat-elim-zero}
+    \and
+    \inferrule[$\Nat$-Elim-Suc]
+        {\tytm{\Gamma}{A}{\Fun{\Nat}{\Type_i}}
+            \\ \tytm{\Gamma}{t_0}{A\ \zero}
+            \\ \tytm{\Gamma}{t_S}{\Depfun[n]{\Nat}{\Fun{A\ n}{A\ (\suc{n})}}}
+            \\ \tytm{\Gamma}{n}{\Nat}}
+        {\red{\Gamma}{\natrec{A}{t_0}{t_S}{\suc{n}}}{t_S\ \natrec{A}{t_0}{t_S}{n}}{A\ (\suc{n})}}
+    \ilabel{inferrule:nat-elim-suc}
+    \and
+    \inferrule[Eq-Fun]
+        {\tytm{\Gamma}{f}{\Depfun{A}{B}}
+            \\ \tytm{\Gamma}{g}{\Depfun{A}{B}}}
+        {\red{\Gamma}{\Obseq[\Pi A B]{f}{g}}{\Depfun{A}{\Obseq[B]{f\ x}{g\ x}}}{\sProp_i}}
+    \ilabel{inferrule:eq-fun}
+    \and
+    \inferrule[Eq-$\sProp{}$]
+        {\tytm{\Gamma}{A}{\sProp_i}
+            \\ \tytm{\Gamma}{B}{\sProp_i}}
+        {\red{\Gamma}{\Obseq[{\sProp_i}]{A}{B}}{\Prod{(\Fun{A}{B})}{(\Fun{B}{A})}}{\sProp[j]}}
+    \ilabel{inferrule:eq-sprop}
+    \and
+    \inferrule[Eq-Univ]
+        {\wfctx{\Gamma} \\ A \in \{ \Nat, \Univ \}}
+        {\red{\Gamma}{\Obseq[{\Univ'}]{A}{A}}{\Unit}{\sProp[k]}}
+        {\scriptstyle \substack{\univRel{\Univ}{\Univ'}}}
+    \ilabel{inferrule:eq-univ}
+    \and
+    \inferrule[Eq-Univ-$\neq$]
+        {\wfctx{\Gamma} \\ A, B \in \{ \Nat, \Pi A.
+            B, \Univ \} \\ \head{A} \neq \head{B}}
+        {\red{\Gamma}{\Obseq[{\Univ'}]{A}{B}}{\Empty}{\sProp[k]}}
+        {\scriptstyle \substack{\univRel{\Univ}{\Univ'}}}
+    \ilabel{inferrule:eq-univ-noeq}
+    \and
+    \inferrule[Eq-$\Pi$]
+        {\tytm{\Gamma}{A,A'}{\Univ}
+            % \\ \tytm{\Gamma}{A'}{\Univ_i}
+            \\ \tytm{\extctx{\Gamma}{A}}{B}{\Univ'}
+            \\ \tytm{\extctx{\Gamma}{A'}}{B'}{\Univ'}
+            \\ a := \cast{A'}{A}{\sym{e}}{a'}}
+        {\redmultiline{\Gamma}
+            {\Obseq[{\piRel{\Univ}{\Univ'}}]{\Depfun{A}{B}}{\Depfun{A'}{B'}}}
+            {\Exists[e]{\Obseq[{\Univ}]{A}{A'}}{\Depfun[a']{A'}{\Obseq[{\Univ'}]{\subst{B}{a}}{\subst{B'}{a'}}}}}{\sProp_i}}
+    \ilabel{inferrule:eq-pi}
+    \and
+    \inferrule[Eq-zero]
+        {\wfctx{\Gamma}}
+        {\red{\Gamma}{\Obseq[\Nat]{\zero}{\zero}}{\Unit}{\sProp_i}}
+    \ilabel{inferrule:eq-zero}
+    \quad
+    \inferrule[Eq-Suc]
+        {\tytm{\Gamma}{n}{\Nat}
+            \\ \tytm{\Gamma}{m}{\Nat}}
+        {\red{\Gamma}{\Obseq[\Nat]{\suc{m}}{\suc{n}}}{\Obseq[\Nat]{m}{n}}{\sProp_i}}
+    \ilabel{inferrule:eq-suc}
+    \quad
+    \inferrule[Eq-zero-suc]
+        {\tytm{\Gamma}{n}{\Nat}}
+        {\red{\Gamma}{\Obseq[\Nat]{\zero}{\suc{n}}}{\Empty}{\sProp_i}}
+    \ilabel{inferrule:eq-zero-suc}
+    \quad
+    \inferrule[Eq-suc-zero]
+        {\tytm{\Gamma}{n}{\Nat}}
+        {\red{\Gamma}{\Obseq[\Nat]{\suc{n}}{\zero}}{\Empty}{\sProp_i}}
+    \ilabel{inferrule:eq-suc-zero}
+    \\
+    \inferrule[Cast-Zero]
+        {\tytm{\Gamma}{e}{\Obseq[{\Type_0}]{\Nat}{\Nat}}}
+        {\red{\Gamma}{\cast{\Nat}{\Nat}{e}{\zero}}{\zero}{\Nat}}
+    \ilabel{inferrule:cast-zero}
+    \quad
+    \inferrule[Cast-Suc]
+        {\tytm{\Gamma}{e}{\Obseq[{\Type_0}]{\Nat}{\Nat}}
+            \\ \tytm{\Gamma}{n}{\Nat}}
+        {\red{\Gamma}{\cast{\Nat}{\Nat}{e}{\suc{n}}}{\suc{\cast{\Nat}{\Nat}{e}{n}}}{\Nat}}
+    \ilabel{inferrule:cast-suc}
+    \quad
+    % \inferrule[Eq-Univ]{\wfctx{\Gamma}}
+    %           {\red{\Gamma}{\Obseq[{\Type_j}]{\Univ_i}{\Univ_i}}{\Unit}{\sProp[k]}}
+    %           {\scriptstyle \substack{i < j < k}}
+    %         \ilabel{inferrule:eq-univ}
+    %            \and
+    \inferrule[Cast-Univ]
+        {\tytm{\Gamma}{e}{\Obseq[\Univ']{\Univ}{\Univ}}
+            \\ \tytm{\Gamma}{A}{\Univ}}
+        {\red{\Gamma}{\cast{\Univ}{\Univ}{e}{A}}{A}{\Univ}}
+    \ilabel{inferrule:cast-univ}
+    \\
+    \inferrule[Cast-$\Pi$]
+        {\tytm{\Gamma}{e}{\Obseq[{\Type_i}]{\Depfun{A}{B}}{\Depfun{A'}{B'}}}
+            \\ \tytm{\Gamma}{f}{\Depfun{A}{B}}
+            \\ a := \cast{A'}{A}{\sym{\fst{e}}}{a'}}
+        {\redmultiline{\Gamma}
+            {\cast{\Depfun{A}{B}}{\Depfun{A'}{B'}}{e}{f}}
+            {\lam[a']{A'}{\cast{\subst{B}{a}}{\subst{B'}{a'}}{\snd{e}\ a'}{f\ a}}}
+            {\Depfun{A'}{B'}}}
+    \ilabel{inferrule:cast-pi}
+\end{mathpar}
+
+\section{Congruence Rules}
+
+\begin{mathpar}
+    \inferrule[$\Pi$-Cong]
+               {\eqtm{\Gamma}{A}{A'}{\Type[i]{}}
+              \\ \eqtm{\extctx{\Gamma}{A}}{B}{B'}{\Type[j]{'}}}
+              {\eqtm{\Gamma}{\Depfun{A}{B}}{\Depfun{A'}{B'}}{\Type[k]{'}}}
+              {\scriptstyle \substack{i \le k \\ j \le k}}
+            \and
+            %
+              \inferrule[$\exists$-Cong]{\eqtm{\Gamma}{A}{A'}{\sProp[i]}
+              \\ \eqtm{\extctx{\Gamma}{A}}{B}{B'}{\sProp[i]}}
+              {\eqtm{\Gamma}{\Exists{A}{B}}{\Exists{A'}{B'}}{\sProp[i]}}
+              % {\scriptstyle \substack{i \le k \\ j \le k}}
+              \ilabel{infrule:exists-cong}
+              \and
+      \inferrule[App-Cong]{\eqtm{\Gamma}{t}{t'}{\Depfun{A}{B}}
+              \\ \eqtm{\Gamma}{u}{u'}{A}}
+            {\eqtm{\Gamma}{t\ u}{t'\ u'}{\subst{B}{u}}}\ilabel{inferrule:app-cong}
+            \and
+              \inferrule[Suc-Cong]{\eqtm{\Gamma}{n}{n'}{\Nat}}
+    {\eqtm{\Gamma}{\suc{n}}{\suc{n'}}{\Nat}}\ilabel{infrule:suc-cong}
+    \and
+    \inferrule[$\Nat$-Elim-Cong]{\eqtm{\Gamma}{A}{A'}{\Fun{\Nat}{\Type[i]{}}}
+              \\ \eqtm{\Gamma}{t_0}{t_0'}{A\ \zero}
+              \\ \eqtm{\Gamma}{t_S}{t_S'}{\Depfun[n]{\Nat}{\Fun{A\ n}{A\ (\suc{n})}}}
+              \\ \eqtm{\Gamma}{n}{n'}{\Nat}}
+              {\eqtm{\Gamma}{\natrec{A}{t_0}{t_S}{n}}{\natrec{A'}{t_0'}{t_S'}{n'}}{A\
+                  n}}
+              \ilabel{inferrule:nat-elim-cong}
+  \and
+    \inferrule[$\Empty$-Elim-Cong]{\eqtm{\Gamma}{A}{A'}{\Type[i]{}}
+              \\ \eqtm{\Gamma}{t}{t'}{\Empty}}
+            {\eqtm{\Gamma}{\emptyrec{A}{t}}{\emptyrec{A'}{t'}}{A}}
+            \ilabel{infrule:empty-elim-cong}
+    \and
+    \inferrule[Eq-Cong]{\eqtm{\Gamma}{A}{A'}{\Type_i}
+              \\ \eqtm{\Gamma}{t}{t'}{A}
+              \\ \eqtm{\Gamma}{u}{u'}{A}}
+            {\eqtm{\Gamma}{\Path[A]{t}{u}}{\Path[A']{t'}{u'}}{\sProp[i]}}
+     \ilabel{inferrule:eq-cong}
+     \and
+            \inferrule[Cast-Cong]{\eqtm{\Gamma}{A}{A'}{\Type[i]{}}
+              \\ \eqtm{\Gamma}{B}{B'}{\Type[i]{}}
+              \\ \eqtm{\Gamma}{e}{e'}{\Path[{\Type{}}]{A}{B}}
+              \\ \eqtm{\Gamma}{t}{t'}{A}}
+            {\eqtm{\Gamma}{\cast{A}{B}{e}{t}}{\cast{A'}{B'}{e'}{t'}}{B}}
+            \ilabel{infrule:cast-cong}
+\end{mathpar}
+
+\section{Substitution Rules}
+
+\begin{mathpar}
+      \inferrule[App-Subst]{\red{\Gamma}{t}{t'}{\Depfun{A}{B}}
+              \\ \tytm{\Gamma}{u}{A}}
+            {\red{\Gamma}{t\ u}{t'\ u}{\subst{B}{u}}}\ilabel{inferrule:app-subst}
+    \and
+    \inferrule[$\Nat$-Elim-Subst]{\tytm{\Gamma}{A}{\Fun{\Nat}{\Type[i]{}}}
+              \\ \tytm{\Gamma}{t_0}{A\ \zero}
+              \\ \tytm{\Gamma}{t_S}{\Depfun[n]{\Nat}{\Fun{A\ n}{A\ (\suc{n})}}}
+              \\ \red{\Gamma}{n}{n'}{\Nat}}
+              {\red{\Gamma}{\natrec{A}{t_0}{t_S}{n}}{\natrec{A}{t_0}{t_S}{n'}}{A\
+                  n}}
+              \ilabel{inferrule:nat-elim-subst}
+              \and
+    \inferrule[Eq-Subst]{\red{\Gamma}{A}{A'}{\Type_i}
+              \tytm{\Gamma}{t}{A}
+              \\ \tytm{\Gamma}{u}{A}}
+            {\red{\Gamma}{\Path[A]{t}{u}}{\Path[A']{t}{u}}{\sProp[i]}}
+            \ilabel{inferrule:eq-subst}
+    \and
+    \inferrule[Eq-Univ-Subst]{
+              \red{\Gamma}{A}{A'}{{\Type_i}}
+              \\ \tytm{\Gamma}{B}{{\Type_i}}}
+            {\red{\Gamma}{\Path[{\Type_i}]{A}{B}}{\Path[{\Type_i}]{A'}{B}}{\sProp[j]}}
+            {\scriptstyle i < j}
+            \ilabel{inferrule:eq-nat-subst}
+    \and
+    \inferrule[Eq-Univ-$\Nat$-Subst]{
+              \red{\Gamma}{B}{B'}{{\Type_i}}}
+            {\red{\Gamma}{\Path[{\Type_i}]{\Nat}{B}}{\Path[{\Type_i}]{\Nat}{B'}}{\sProp[j]}}
+            {\scriptstyle i < j}
+            \ilabel{inferrule:eq-nat-subst}
+            \and
+      \inferrule[Eq-Univ-$\Pi$-Subst]{
+              \tytm{\Gamma}{\Depfun{A}{P}} {{\Type_i}}
+              \red{\Gamma}{B}{B'}{ {\Type_i}}}
+            {\red{\Gamma}{\Path[{\Type_i}]{\Depfun{A}{P}}{B}}{\Path[{\Type_i}]{\Depfun{A}{P}}{B'}}{\sProp[j]}}
+            {\scriptstyle i < j}
+            \ilabel{inferrule:eq-nat-subst}
+    \and
+    \inferrule[Eq-$\Nat$-Subst]{
+              \red{\Gamma}{n}{n'}{\Nat}
+              \\ \tytm{\Gamma}{m}{\Nat}}
+            {\red{\Gamma}{\Path[\Nat]{n}{m}}{\Path[\Nat]{n'}{m}}{\sProp[i]}}
+            \ilabel{inferrule:eq-nat-subst}
+    \and
+    \inferrule[Eq-$\Nat$-Zero-Subst]{
+              \red{\Gamma}{n}{n'}{\Nat}}
+            {\red{\Gamma}{\Path[\Nat]{0}{n}}{\Path[\Nat]{0}{n'}}{\sProp[i]}}
+            \ilabel{inferrule:eq-nat-zero-subst}
+    \and
+    \inferrule[Eq-$\Nat$-Suc-Subst]{
+              \tytm{\Gamma}{m}{\Nat}
+              \\ \red{\Gamma}{n}{n'}{\Nat}}
+            {\red{\Gamma}{\Path[\Nat]{\suc{m}}{n}}{\Path[\Nat]{\suc{m}}{n'}}{\sProp[i]}}
+            \ilabel{inferrule:eq-nat-zero-subst}
+    \and
+    \inferrule[Cast-Subst]{
+      \red{\Gamma}{A}{A'}{\Type[i]{}}
+              \\ \tytm{\Gamma}{B}{\Type[i]{}}
+              \\ \tytm{\Gamma}{e}{\Path[{\Type[i]{}}]{A}{B}}
+              \\ \tytm{\Gamma}{t}{A}}
+            {\red{\Gamma}{\cast{A}{B}{e}{t}}{\cast{A'}{B}{e}{t}}{B}}
+            \ilabel{inferrule:cast-subst}
+    \and
+    \inferrule[Cast-$\Type$-Subst]{
+                 \tytm{\Gamma}{A}{\Type_i}  \\
+                 \tytm{\Gamma}{e}{\Path[{\Type_j}]{\Type_i}{B}} \\
+                 \red{\Gamma}{B}{B'}{{\Type_j}}
+               }
+           {\red{\Gamma}{\cast{\Type_i}{B}{e}{A}}{\cast
+               {\Nat}{B'}{e}{A}}{B}}
+                     {\scriptstyle i < j}
+              \ilabel{inferrule:cast-univ-subst}
+              \and
+    \inferrule[Cast-$\Nat$-Subst]{
+                 \tytm{\Gamma}{n}{\Nat}  \\
+                 \tytm{\Gamma}{e}{\Path[{\Type_i}]{\Nat}{B}} \\
+                 \red{\Gamma}{B}{B'}{{\Type_i}}
+               }
+           {\red{\Gamma}{\cast{\Nat}{B}{e}{n}}{\cast {\Nat}{B'}{e}{n}}{B}}
+              \ilabel{inferrule:cast-nat-subst}
+              \and
+    \inferrule[Cast-$\Pi$-Subst]{
+                 \tytm{\Gamma}{\Depfun{A}{P}}{\Type_i} \\
+                 \tytm{\Gamma}{f}{\Depfun{A}{P}}  \\
+                 \tytm{\Gamma}{e}{\Path[{\Type_i}]{\Depfun{A}{P}}{B}} \\
+                 \red{\Gamma}{B}{B'}{{\Type_i}}
+               }
+           {\red{\Gamma}{\cast{\Depfun{A}{P}}{B}{e}{f}}{\cast {\Depfun{A}{P}}{B'}{e}{f}}{B}}
+         \ilabel{inferrule:cast-pi-subst}
+              \and
+    \inferrule[Cast-$\Nat$-$\Nat$-subst]{
+         \tytm{\Gamma}{e}{\Path[\Type]{\Nat}{\Nat}}
+              \\ \red{\Gamma}{n}{n'}{\Nat}}
+              {\red{\Gamma}{\cast{\Nat}{\Nat}{e}{n}}{\cast{\Nat}{\Nat}{e}{n'}}{\Nat}}
+              \ilabel{inferrule:cast-nat-nat}
+\end{mathpar}
