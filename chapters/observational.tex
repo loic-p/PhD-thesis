@@ -1,14 +1,13 @@
 \setchapterimage[6cm]{seaside}
-% \setchapterpreamble[u]{\margintoc}
-\chapter{Type Theory with an Observational Equality}
+\setchapterpreamble[u]{\margintoc}
+\chapter{The Observational Calculus of Constructions}
 \labch{layout}
 \label{sec:type-theory-with}
 
-\sideremark{The \SetoidCC acronym stands for the ``Observational Calculus of 
-Constructions''.}
-% 
+% \sideremark{The \SetoidCC acronym stands for the ``Observational Calculus of 
+% Constructions''.}
 In this chapter we present our system \SetoidCC, which is a flavor of 
-Altenkirch and McBride's observational type theory \sidecite{altenkirchAl:plpv2007}.
+Altenkirch and McBride's observational type theory \cite{altenkirchAl:plpv2007}.
 % 
 \SetoidCC extends Martin-Löf Type Theory with support for an observational 
 equality, impredicative propositions, and quotient types while preserving the
@@ -67,41 +66,126 @@ for the \emph{inductive equality} in the proof-relevant layer of \SetoidCC!
 
 \subsection{The Observational Equality}
 
-Compared to \MLTT with proof irrelevant types, there are two fundemental new ingredients in
-\SetoidTT.
-The first is a proof-irrelevant observational equality type
-$\Path[A]{t}{u}$ that encodes equality
-of $t$ and $u$ at type $A$, together with a term $\refl{t}{A}$ that witnesses reflexivity of this
-equality.
-The second is an operation that casts a term $t$ from a type \( A \) to another type \( B \)
-according to a proof of equality $e$ between $A$ and $B$, which is noted $\cast{A}{B}{e}{t}$. This
-operation comes with a witness $\castrefl{A}{t}$ that casting between a type $A$ and itself does
-nothing. Note that since observational equality is proof irrelevant, any proof of equality between
-$A$ and $A$ is convertible to $\refl{A}{\Type}$.
-%
-The theory also features a generic transport
-$\transport{A}{t}{B}{u}{t'}{e}$
-when $A$ and $B$ are proof irrelevant.
+A central feature of \SetoidCC is that every proof-relevant
+% 
+\sideremark{Proof-irrelevant propositions, on their part, do not need to be equipped 
+with an equality relation: since any two inhabitants are convertible, they
+would always be equal by reflexivity.}
+% 
+type \( A \) comes equipped with a proof-irrelevant \emph{observational equality} 
+type, that we write \( {\Obseq[A]{t}{u}} \).
 
-Observational equality is quite different from the usual Martin-Löf Identity Type, which is an
-inductive type that computes via the \( J \)-eliminator. Instead, observational equality
-\( \Path[A]{t}{u} \) should be understood as an eliminator that reduces the type \( A \) to its
-weak head normal form, and then reduces by pattern-matching on it, much like the path type from
-Cubical Type Theory.
-%
-In particular, the reduction rules for observational equality between two dependent products,
-or two types in $\sProp[i]$ provide us with function extensionality and propositional
-extensionality by definition.
+As suggested by its name, this equality is built around the idea that two 
+objects should be identified when they behave similarly with respect to all 
+obervations we can make on them.
+% 
+For instance, the observations we can make on a function \( f : \Nat \to \Nat \) 
+basically amount to applying \( f \) to some number \( n \), and computing the
+result. 
+% 
+Thus, two integer functions \( f \) and \( g \) are observationally equal 
+when \( \Obseq[\Nat]{f\ n}{g\ n} \) for all \( n : \Nat \),
+which is the principle of function extensionality.
 
-Having proof-irrelevant types seems to be crucial to interpret an extensional 
-equality that satisfies \UIP.
-%
-Indeed, it trivializes all of the higher coherences
-that naturally arise when considering proofs of equality between
-equalities, and provides a canonical inhabitant for the type that
-encodes UIP, which is simply given by reflexivity.
+In this regard, the observational equality is similar to the univalent equality 
+found in Homotopy Type Theory \sidecite{hottbook}. 
+% 
+But it is also fundamentally different: 
+% 
+by virtue of being a proof-irrelevant proposition, the observational equality 
+validates the principle of Uniqueness of Identity Proofs (\UIP), while the 
+equality of \HoTT equips types with the complex structure of a higher groupoid.
+% 
+In other words, \SetoidCC is a language for set-like objects and set-based 
+mathematics, not higher mathematics.
+% 
+In exchange for the comfortable simplicity of \UIP, the observational equality
+is not univalent, and in particular it does not identify isomorphic types.
 
-\section{Typing rules of \SetoidCC}
+From a computational perspective, the observational equality behaves very 
+differently from the usual Martin-Löf Identity Type.
+% 
+The equality type \( \Obseq[A]{t}{u} \) should be understood 
+as an \emph{eliminator} that computes by reducing the type \( A \) to its 
+normal form, and then pattern-matches on it to produce the equality 
+relation which is appropriate for \( A \). For instance, if \( A \) happens
+to be a function type, then the observational equality will reduce to the
+statement of function extensionality:
+\[
+	\Obseq[\Fun{A}{B}]{f}{g} \quad \Longrightarrow \quad \Depfun{A}{\Obseq[B]{f\ x}{g\ x}}.
+\]
+Likewise, all the other type formers have corresponding computation rules for the
+observational equality.
+
+\subsection{Eliminating Equality with Type Casting}
+
+For the observational equality to be of any use, we need a way to
+use it in constructions and proofs: 
+% 
+\sideremark{This principle is called the Leibniz rule.}
+% 
+from an inhabitant of \( P\ a \) and a proof of \( \Obseq{a}{b} \), we should 
+be able to obtain an inhabitant of \( P\ b \).
+% 
+To this end, \SetoidCC provides two primitive eliminators \( \transportName \)
+and \( \castName \).
+
+Elimination of equalities into the proof-irrelevant layer is done with 
+\( \transportName \). 
+% 
+Since the result is computationally irrelevant, this operator is not required 
+to satisfy any kind of equation -- in the proof-irrelevant world, all 
+equations are true as soon as they are well-typed.
+% 
+Thus \( \transportName \) is merely an axiom that postulates the Leibniz
+rule for propositional predicates \( P : A \to \sProp \).
+% 
+We can use it to derive important properties of the observational equality, 
+such as the fact that it is an equivalence relation, or that it is preserved
+by functions:
+\sideremark{The variables \( A, B, x, y \) are implicitly quantified over the 
+appropriate types, which we omit to avoid clutter.}
+\[
+\metaop{ap} : \Depfun[f]{A \to B}{\Fun{\Obseq[A]{x}{y}}{\Obseq[B]{f\ x}{f\ y}}}.
+\]
+
+On the other hand, \( \castName \) eliminates equalities into the 
+proof-relevant layer by allowing to cast terms between two observationally
+equal types.
+% 
+Given a proof \( e : \Obseq[\Type]{A}{B} \) and an inhabitant \( t : A \), the
+term \( \cast{A}{B}{e}{t} \) behaves like an eliminator that reduces the types
+\( A \) and \( B \) to normal form, and then computes by pattern-matching on 
+their head constructors.
+% 
+For instance, if \( A \) and \( B \) are two function types, then the cast
+will reduce to a function that casts back and forth:
+\sideremark{In this computation, \( e \) is a proof of 
+\( {\Obseq{\Fun{A}{B}}{\Fun{A'}{B'}}} \), which is actually convertible to
+\( {(\Obseq{A}{A'})} \land {(\Obseq{B}{B'})}. \) We write \( e_1 \) and 
+\( e_2 \) for its projections.}
+\begin{align*}
+& \cast{\Fun{A}{B}}{\Fun{A'}{B'}}{e}{f} \\
+& \qquad \Longrightarrow \quad
+\lam{A'}{\cast{B}{B'}{e_2}{f\ \cast{A'}{A}{e_1}{x}}}
+\end{align*}
+% 
+Just like with the observational equality, every type constructor comes with
+rules that describe the behavior of \( \castName \) on its elements.
+% 
+Note that the equality proof \( e \) plays no computational role, and is just
+here to ensure that the cast is consistent.
+
+The \( \castName \) operator, despite its apparent simplicity, is in fact enough
+to derive the \( J \) eliminator of \MLTT. Indeed, the \( J \) eliminator is
+equivalent to the Leibniz rule and the contractibility of singletons 
+\sidecite{hottbook}, but the contractibility of singletons is implied by 
+proof irrelevance of the equality. Finally, the Leibniz rule is a consequence 
+of \( \metaop{ap} \) and \( \castName \).
+
+
+
+\section{The Formal System \SetoidCC}
 \label{sec:typing-rules}
 
 \subsection{Syntax}
@@ -551,5 +635,10 @@ form are described in \cref{sec:congr-subst-rules}, \cref{fig:SetoidTT-substitut
 
 \section{Examples}
 \label{sec:examples}
+
+\shepherd{TODO}
+
+\section{Properties}
+\label{sec:properties}
 
 \shepherd{TODO}
