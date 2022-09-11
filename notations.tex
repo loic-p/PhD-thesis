@@ -204,6 +204,9 @@
 
 \newcommand{\Depsum}[3][x]{\Sigma (\tm{#1}{#2}).\, {#3}}
 \newcommand{\Sig}[3][x]{\Sigma (\tm{#1}{#2}).\, {#3}}
+\newcommand{\relpair}[2]{\langle #1\ {;}\ #2 \rangle }
+\newcommand{\relfst}[1]{\metaop{π}_{\metaop{1}}({#1})}
+\newcommand{\relsnd}[1]{\metaop{π}_{\metaop{2}}({#1})}
 
 \newcommand{\Quo}[2]{{#1}/{#2}}
 \newcommand{\quo}[1]{\pi(#1)}
@@ -289,7 +292,7 @@
 \newcommand{\eqtmParaannotated}[6][]{#1 #2 \dashPar #3 \equiv #4 : #5 : #6}
 \newcommand{\redannotated}[5][]{#1 #2 \vdash #3 \Rightarrow #4 : #5}
 \newcommand{\Depfunannotated}[6][x]{\Pi_{}^{#5, #6} (\tm{#1}{#2}).\, {#3}}
-\newcommand{\Depsumannotated}[6][x]{\Sigma_{#4,#5}^{#6} (\tm{#1}{#2}).\, {#3}}
+\newcommand{\Depsumannotated}[6][x]{\Sigma_{}^{#5, #6} (\tm{#1}{#2}).\, {#3}}
 \newcommand{\Existsannotated}[5][x]{\exists (\tm{#1}{#2}).\, {#3}}
 \newcommand{\castannotated}[5]{\mathrm{cast}^{#5}(#1,#2,#3,#4)}
 
