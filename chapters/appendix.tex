@@ -101,13 +101,13 @@
     \\
     \inferrule[$\Empty$-Form]
         {\wfctx{\Gamma}}
-        {\tytm{\Gamma}{\Empty}{\sProp_i}}
+        {\tytm{\Gamma}{\Empty}{\sProp}}
     \ilabel{infrule:empty-form}
     \and
     \inferrule[$\Empty$-Elim]
-        {\tytm{\Gamma}{A}{\Univ_i}
+        {\tytm{\Gamma}{A}{\Univ}
             \\ \tytmannotated{\Gamma}{t}{\Empty}{\sProp}}
-        {\tytmannotated{\Gamma}{\emptyrec{A}{t}}{A}{\Univ_i}}
+        {\tytmannotated{\Gamma}{\emptyrec{A}{t}}{A}{\Univ}}
     \ilabel{infrule:empty-elim}
     \and
     \inferrule[$\Unit$-Form]
@@ -120,17 +120,17 @@
         {\tytmannotated{\Gamma}{\unit}{\Unit}{\sProp}}
     \ilabel{infrule:unit-intro}
     \\
-    \inferrule[Eq-Form]
+	\inferrule[Eq-Form]
         {%\tytm{\Gamma}{A}{\Type_i} \\
             \tytmannotated{\Gamma}{t}{A}{\Type_i}
             \\ \tytmannotated{\Gamma}{u}{A}{\Type_i}}
-        {\tytm{\Gamma}{\Obseq[A]{t}{u}}{\sProp_i}}
+        {\tytm{\Gamma}{\Obseq[A]{t}{u}}{\sProp}}
     \ilabel{infrule:eq-form}
     \and
     \inferrule[Refl]
         {% \tytm{\Gamma}{A}{\Type_i} \\
             \tytmannotated{\Gamma}{t}{A}{\Type_i}}
-        {\tytmannotated{\Gamma}{\refl{t}{A}}{\Obseq[A]{t}{t}}{\sProp_i}}
+        {\tytmannotated{\Gamma}{\refl{t}{A}}{\Obseq[A]{t}{t}}{\sProp}}
     \ilabel{infrule:refl}
     \and
     % \inferrule{\tytm{\Gamma}{e}{\Obseq[A]{t}{u}}}
@@ -166,19 +166,19 @@
 
 \begin{mathpar}
     \inferrule[Refl]
-        {\tytmannotated{\Gamma}{t}{A}{\Type_i}}
-        {\eqtmannotated{\Gamma}{t}{t}{A}{\Type_i}}
+        {\tytmannotated{\Gamma}{t}{A}{\Univ}}
+        {\eqtmannotated{\Gamma}{t}{t}{A}{\Univ}}
     \ilabel{infrule:reflexivity}
     \and
     \inferrule[Sym]
-        {\eqtmannotated{\Gamma}{t}{u}{A}{\Type_i}}
-        {\eqtmannotated{\Gamma}{u}{t}{A}{\Type_i}} 
+        {\eqtmannotated{\Gamma}{t}{u}{A}{\Univ}}
+        {\eqtmannotated{\Gamma}{u}{t}{A}{\Univ}} 
     \ilabel{infrule:sym}
     \and
     \inferrule[Trans]
-        {\eqtmannotated{\Gamma}{t}{t'}{A}{\Type_i}
-            \and \eqtmannotated{\Gamma}{t'}{u}{A}{\Type_i}}
-        {\eqtmannotated{\Gamma}{t}{u}{A}{\Type_i}}
+        {\eqtmannotated{\Gamma}{t}{t'}{A}{\Univ}
+            \and \eqtmannotated{\Gamma}{t'}{u}{A}{\Univ}}
+        {\eqtmannotated{\Gamma}{t}{u}{A}{\Univ}}
     \ilabel{infrule:trans}
     \and
     \inferrule[Red-Conv]
