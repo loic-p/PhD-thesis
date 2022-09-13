@@ -3,38 +3,7 @@
 \chapter{Meta-theory of TTobs}
 \labch{metatheory}
 
-In order for a type theory to be a reasonable candidate for implementation in a proof assistant,
-it is desirable to have some control over its behavior and its semantics. There is a wide variety
-of properties we can ask of a type theory; we will describe four of them and prove they apply to
-\SetoidTT.
-
-{\em Consistency.}
-A theory is called consistent if it is impossible to use it to derive a contradiction. It goes
-without saying that this property is of utmost importance if one wants to build interesting
-mathematics. When proving a theory consistent, one should pay some attention to the meta-theory
-where reasoning takes place, as a consistency result is really a reduction of the consistency of
-the theory to the consistency of the meta-theory.
-
-{\em Normalization.}
-If a type theory features reduction rules, one may want to make sure that by repeatedly applying
-said rules, all terms eventually reach a normal form that cannot be reduced further.
-One says that the reduction strategy is normalizing.
-%
-
-{\em Canonicity.}
-A term belonging to a type is called canonical when it can be explicitly built up
-using the constructors of that type. For instance, an inhabitant of the type \( \Nat \) of natural
-numbers is canonical if it is an explicit numeral. If all terms of type \( \Nat \) in an empty
-context normalize to a canonical form, then the theory is said to enjoy canonicity for natural
-numbers.
-
-{\em Decidability of Type Checking.}
-Finally, in order to implement a type theory in a proof assistant, it is desirable to have an
-algorithm that, given a context \( \Gamma \) and terms \( t \) and \( A \), decides whether \( t \)
-is an inhabitant of \( A \) in context \( \Gamma \). This ensures users that when they find a
-proof for a statement, the proof assistant can automatically check that their proof is correct.
-
-In this section, we will prove these four properties for \SetoidTT.
+In this section, we will prove these four properties for \SetoidCC.
 %
 We first present our extension of the
 logical relations framework developed by \sidecitet{Abel:POPL2018} and
@@ -46,13 +15,14 @@ type checking.
 It has been formalized in the \Agda development.
 %
 Then, to get consistency and therefore canonicity, we develop a model of
-\SetoidTT in a constructive set theory that supports inductive-recursive definitions and one
+\SetoidCC in a constructive set theory that supports inductive-recursive definitions and one
 Grothendieck universe.
+
 
 \section{A logical relation with an Impredicative universe}
 \label{sec:logic-relat-with}
 
-\begin{figure}
+\begin{figure*}
     \[
   \begin{array}{lr}
     \tytyR{\ell}{\Gamma}{A}{\Type{}} & \text{A is a reducible type of sort \( s \) in context \( \Gamma \)} \\
@@ -63,9 +33,7 @@ Grothendieck universe.
 \]
   \caption{The four judgments of the logical relation}
   \label{fig:log-rel-judgments}
-\end{figure}
-
-
+\end{figure*}
 
 In this section, we define a logical relation to show
 normalization and decidability of conversion for \SetoidCC, following
@@ -77,26 +45,28 @@ one quickly gets stuck on the case of the application rule because
 we cannot deduce normalization of \( t~u \) from normalization of
 $t$ and $u$.
 %
-The so-called ``logical relation'' is a standard technique to generalize the
-induction hypothesis, so that the proof by induction on the typeing
-derivation goes through.
+The so-called ``logical relations'' is a standard family of techniques 
+used to strengthen the induction hypothesis, so that the proof by induction 
+on the typeing derivation goes through.
 %
-Indeed, the logical relation collects information on types and terms
-that thoroughly characterizes their behaviour with respect to
-reduction, in a way that directly implies normalization.
-%
-It is direct to show that reducibility implies typing (a property
-refered to as the escape lemma).
-%
-Then, the fundamental lemma shows that any well-typed term is
-reducible by proving that this information is appropriately created
-and preserved by all the typing rules.
+Concretely speaking, the strengthened induction hypothesis collects information 
+on types and terms that thoroughly characterizes their behaviour with respect 
+to substitution and reduction.
 
-The logical relation consists of four predicates which mirror the four
-typing judgments of \SetoidCC (cf \cref{fig:log-rel-judgments}), defined on a type-by-type basis.
-%
-%
-For \MLTT and \SetoidTT, the logical relation is indexed by a level
+The base ingredient of the logical relation is \emph{reducibility}, a set
+of four predicates which mirror the typing judgments of \SetoidCC 
+(cf \cref{fig:log-rel-judgments}), defined on a type-by-type basis.
+% 
+For instance, an term is deemed to be a reducible inhabitant of a \( \Pi \)-type 
+if it normalizes to a weak-head normal form, and it sends reducible 
+arguments to reducible images.
+% 
+However, reducibility is not quite strong enough for the induction to go 
+through. We must first close it under substitutions, and only after this
+can we prove the \emph{fundamental lemma} which shows that any well-typed 
+term is reducible by induction on the typing derivation.
+
+For \MLTT and \SetoidCC, the logical relation is indexed by a level
 \( \ell \), which reflects the predicative nature of the universe
 hierarchy: reducibility is first defined at level $0$ to characterize
 terms that inhabit the smallest universe \( \varType_0 \), then this relation is used
@@ -1181,29 +1151,29 @@ terms with type \( \bot \), which does not grant any kind of control
 over its proofs in the empty context.
 
 This was already the case in the work of \sidecitet{pujet:hal-03367052} on
-\SetoidTT, so they supplemented their normalization proof with a model
+\SetoidCC, so they supplemented their normalization proof with a model
 in the category of sets (presented as setoids), using
 induction-recursion to interpret universes as sets of codes \emph{à
   la Tarski} defined mutually with eliminators and coercion functions.
 %
 In that model, \( \bot \) is actually interpreted as the empty set, which
-proves consistency of \SetoidTT: we can use it to show that there is
+proves consistency of \SetoidCC: we can use it to show that there is
 no term of type \( \bot \) in the empty context.
 
 \subsection{\SetoidCC as an Internal Language for Sets}
 
 While the construction of \sidecitet{pujet:hal-03367052} does show consistency of
-\SetoidTT, it arguably falls short of presenting \SetoidTT as an internal
+\SetoidCC, it arguably falls short of presenting \SetoidCC as an internal
 language for classical mathematics.
 %
 Indeed, the inductive-recursive construction of the universe of codes is
 designed to only account for the codes that come from the syntax of
-\SetoidTT. In other words, the following statement
+\SetoidCC. In other words, the following statement
 \[
 \Pi(A : \Type)(x\ y\ z : A).\,\Fun{\Fun{\Obseq[A]{x}{y}}{\Obseq[A]{y}{z}}}{\Obseq[A]{x}{z}}
 \]
 only states transitivity of equality for sets that are built from
-the type formers of \SetoidTT, when interpreted in their model.
+the type formers of \SetoidCC, when interpreted in their model.
 
 This state of affairs is obviously not ideal, as readers who are not
 willing to accept \SetoidCC as a new foundation of mathematics would
@@ -1431,7 +1401,7 @@ well-defined, we define the function \( \sigma_t \) by:
 \end{array}
 \]
 \end{small}
-  \caption{Interpretation of \SetoidTT in the Standard Model}
+  \caption{Interpretation of \SetoidCC in the Standard Model}
   \label{fig:interpretation}
 \end{figure}
 

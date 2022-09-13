@@ -170,6 +170,18 @@
     		%frametitlebackgroundcolor=\@theorembackground,
     	},
     ]{lemma}
+	\declaretheorem[
+    	name=Pseudotheorem,
+    	%refname={lemma,lemmas},
+    	refname={Pseudotheorem,Pseudotheorems},
+    	Refname={Pseudotheorem,Pseudotheorems},
+    	sibling=theorem,
+    	mdframed={
+    		style=mdfkao,
+            backgroundcolor=\kaotheorems@lemmabackground,
+    		%frametitlebackgroundcolor=\@theorembackground,
+    	},
+    ]{pseudotheorem}
     \declaretheorem[
     	name=Corollary,
     	%refname={corollary,corollaries},
@@ -340,6 +352,12 @@
     	Refname={Lemma,Lemmas},
     	sibling=theorem,
     ]{lemma}
+	\declaretheorem[
+    	name=Pseudotheorem,
+    	refname={pseudotheorem,pseudotheorems},
+    	Refname={Pseudotheorem,Pseudotheorems},
+    	sibling=theorem,
+    ]{pseudotheorem}
     \declaretheorem[
     	name=Corollary,
     	refname={corollary,corollaries},

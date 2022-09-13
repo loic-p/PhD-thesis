@@ -9,14 +9,16 @@
 In this chapter we present our system \SetoidCC, which is a flavor of 
 Altenkirch and McBride's observational type theory \cite{altenkirchAl:plpv2007}.
 % 
-\SetoidCC extends Martin-Löf Type Theory with support for an observational 
-equality, impredicative propositions, and quotient types while preserving the
-computational properties of \MLTT (see \cref{ch:metatheory}).
+\SetoidCC extends Martin-Löf Type Theory with support for impredicative 
+propositions and an observational equality that satisfies UIP, function 
+extensionality and proposition extensionality, while preserving
+the computational properties of \MLTT. 
 
-We start in \cref{sec:generalities} with some generalities about the system, then we delve 
-into a detailed description of the typing rules in \cref{sec:typing-rules}, and 
-finally we conclude with a few examples that showcase the new features of 
-\SetoidCC in \cref{sec:examples}.
+We start in \cref{sec:generalities} with some generalities about the system, 
+then we delve into a detailed description of the typing rules in 
+\cref{sec:typing-rules} and \cref{sec:extensions}, and finally we conclude 
+with a few examples and an overview of the meta-theoretical properties of
+\SetoidCC in \cref{sec:properties}.
 
 \section{Generalities}
 \label{sec:generalities}
@@ -30,8 +32,8 @@ The proof-relevant types inhabit the universe hierarchy \( \Type_i \).
 % 
 This layer functions exactly like usual Martin-Löf Type Theory, and
 contains familiar types
-\sideremark{In fact all \MLTT types are available in \SetoidCC, and the usual 
-typing rules and equations still hold true.}
+\sideremark{In fact all \MLTT types are available in the proof-relevant layer, 
+and the usual typing rules and equations still hold true.}
 such as the type of natural numbers, \( \Pi \)-types, \( \Sigma \)-types or 
 universes; but also new types such as subset types and quotient types.
 % 
@@ -182,11 +184,11 @@ The \( \castName \) operator, despite its apparent simplicity, is in fact enough
 to derive the \( J \) eliminator of \MLTT. Indeed, the \( J \) eliminator is
 equivalent to the Leibniz rule and the contractibility of singletons 
 \sidecite{hottbook}, but the contractibility of singletons is implied by 
-proof irrelevance of the equality. Finally, the Leibniz rule is a consequence 
-of \( \metaop{ap} \) and \( \castName \).
+proof irrelevance of the equality, and the Leibniz rule is a consequence 
+of \( \metaop{ap} \) and \( \castName \). The corresponding term is spelled
+out in \cref{sec:inductive-equality}.
 
-
-\section{The Core System \SetoidCC}
+\section{The Core of \SetoidCC}
 \label{sec:typing-rules}
 
 \subsection{Syntax}
@@ -227,7 +229,7 @@ of \( \metaop{ap} \) and \( \castName \).
 	\label{fig:syntax}
 \end{figure}
 
-The syntax of the sorts, contexts, terms and types of \SetoidCC is
+The syntax of the sorts, contexts, terms and types of the core system is
 specified in \cref{fig:syntax}.
 %
 The theory features two sorts \( \sProp \) and \( \Type_i \), natural numbers, dependent products 
@@ -1139,9 +1141,9 @@ On top of this, quotients also come with the appropriate substitution and
 congruence rules.
 % ifAppendix{ as defined in \cref{fig:SetoidTT-substitution,fig:SetoidTT-congruence}}
 
-\subsection{Subset Types}
+% \subsection{Subset Types}
 
-\shepherd{TODO? optional...}
+% \shepherd{TODO, if I have time left}
 
 % \begin{mathpar}
 % 	\inferrule[$\Sigma$-Form]
@@ -1248,7 +1250,8 @@ Box types can be defined with the following rules:
   \and
   \inferrule{\tytmannotated{\Gamma}{t,u}{\Boxt{A}}{\Type_0}}
 			{\red{\Gamma}{\Obseq[\Boxt{A}]{t}{u}}{\Unit}{\sProp}}
-  \and
+\end{mathpar}
+\begin{mathpar}
   \inferrule{\tytm{\Gamma}{A}{\sProp}
 			\\ \tytm{\Gamma}{t}{\Boxt{A}}}
 			{\tytm{\Gamma}{\unboxt{t}}{A}}
@@ -1258,7 +1261,8 @@ Box types can be defined with the following rules:
 			  {\Obseq[\Type]{\Boxt{A}}{\Boxt{B}}}
 			  {\Obseq[\sProp]{A}{B}}
 			  {\sProp}}
-  \and
+\end{mathpar}
+\begin{mathpar}
   \inferrule{\tytm{\Gamma}{A, B}{\sProp}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{e}{\Obseq[\Type]{\Boxt{A}}{\Boxt{B}}}}
@@ -1266,6 +1270,7 @@ Box types can be defined with the following rules:
 \end{mathpar}
 
 \subsection{The Inductive Equality}
+\label{sec:inductive-equality}
 
 \paragraph*{Interpreting \MLTT into \SetoidCC}
 % 
@@ -1291,10 +1296,16 @@ satisfies the same typing rule:
 			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{\Obseq[A]{t}{x}}{\Univ}}}
 			\\ \tytm{\Gamma}{b}{B\ t\ \refl{t}{A}}
 			\\ \tytm{\Gamma}{t'}{A}
-			\\ \tytm{\Gamma}{e}{\Obseq[A]{t}{t'}}
-			\\ e_B := \transport{A}{t}{\lam{A}{\Depfun[e']{\Obseq{t}{x}}{\Obseq{B\ t\ \refl{t}{t}}{B\ x\ e'}}}}{\lambda\ e'\ .\ \metaop{refl}}{t'}{e}\ e}
-			{\tytm{\Gamma}{\cast{B\ t\ \refl{t}{A}}{B\ t'\ e}{e_B}{b}}{B\ t'\ e}}
+			\\ \tytm{\Gamma}{e}{\Obseq[A]{t}{t'}}}
+			{\tytm{\Gamma}{\cast{B\ t\ \refl{t}{A}}{B\ t'\ e}{\eqJ{A}{t}{B}{t'}{e}}{b}}{B\ t'\ e}}
 \end{mathpar}
+where the auxiliary operator \( \metaop{eq}_{\metaop{J}} \) is defined by
+\[
+\begin{array}{rcl}
+	\eqJ{A}{t}{B}{t'}{e} & : & \Obseq{B\ t\ \refl{t}{}}{B\ t'\ e} \\
+	\eqJ{A}{t}{B}{t'}{e} & := & \transport{A}{t}{\lam{A}{\Depfun[e']{\Obseq{t}{x}}{\Obseq{B\ t\ \refl{t}{t}}{B\ x\ e'}}}}{\lambda\ e'\ .\ \metaop{refl}}{t'}{e}\ e.
+\end{array}
+\]
 
 There is however a discrepancy with the computation rule of the \( J \) 
 eliminator. In \MLTT, applying \( J \) to a proof of reflexivity is 
@@ -1421,7 +1432,7 @@ We also need to account for this additional constructor in reduction rules:
 			\\ \tytm{\Gamma}{e}{\Obseq[A]{t}{t'}}}
 			{\redmultiline{\Gamma}
 			  {\J{A}{t}{B}{b}{t'}{\idpath{e}}}
-			  {\cast{B\ t\ \id{t}}{B\ t'\ \idpath{e}}{\eqJ{A}{t}{B}{u}{t'}{e} }{b}}
+			  {\cast{B\ t\ \id{t}}{B\ t'\ \idpath{e}}{\eqJ{A}{t}{B}{t'}{e} }{b}}
 			  {B\ t'\ \idpath{e}}}
 \end{mathpar}
 \begin{mathpar}
@@ -1470,25 +1481,32 @@ it only satisfies UIP up to a propositional equality.
 \section{Examples}
 \label{sec:examples}
 
-\shepherd{TODO}
+\shepherd{TODO, if I have time left}
 
-\section{Properties}
+\section{Overview of the Meta-Theory}
 \label{sec:properties}
 
-In this section, we .
-
-
 \subsection{Properties of \SetoidCC}
+
+In order for a type theory to be a reasonable candidate for implementation 
+in a proof assistant, it is desirable to have some amount of control over its 
+behavior and its semantics.
+% 
+There is a wide variety of properties we can ask of a type theory, but in this 
+section we will focus our attention on four important properties: consistency,
+normalization, canonicity and decidability. 
+% 
+All the theorems of this section will be proved in \cref{ch:metatheory}.
 
 \begin{theorem}[Consistency]
 	In the empty context, there is no proof of \( \Empty \).
 \end{theorem}
 
-\begin{theorem}[Canonicity of \( \Nat \)]
-	If a term \( t \) has type \( \Nat \) in the empty context, then there 
-	exists an external integer \( n \) such that \( t \) is 
-	convertible with \( \metaop{S}^n\ \zero \).
-\end{theorem}
+A theory is called consistent if it is impossible to use it to derive a contradiction. It goes
+without saying that this property is of utmost importance if one wants to build interesting
+mathematics. When proving a theory consistent, one should pay some attention to the meta-theory
+where reasoning takes place, as a consistency result is really a reduction of the consistency of
+the theory to the consistency of the meta-theory.
 
 \begin{theorem}[Normalization]
 	If the judgment \( \tytmannotated{\Gamma}{t}{A}{\Type_i} \) is derivable,
@@ -1498,6 +1516,22 @@ In this section, we .
 	By recursively applying the weak-head normalization to the subterms of 
 	\( t \), we eventually reach a deep normal form.
 \end{theorem}
+
+If a type theory features reduction rules, one may want to make sure that by repeatedly applying
+said rules, all terms eventually reach a normal form that cannot be reduced further.
+One says that the reduction strategy is normalizing.
+
+\begin{theorem}[Canonicity of \( \Nat \)]
+	If a term \( t \) has type \( \Nat \) in the empty context, then there 
+	exists an external integer \( n \) such that \( t \) is 
+	convertible with \( \metaop{S}^n\ \zero \).
+\end{theorem}
+
+A term belonging to a type is called canonical when it can be explicitly built up
+using the constructors of that type. For instance, an inhabitant of the type \( \Nat \) of natural
+numbers is canonical if it is an explicit numeral. If all terms of type \( \Nat \) in an empty
+context normalize to a canonical form, then the theory is said to enjoy canonicity for natural
+numbers.
 
 \begin{theorem}[Decidability]
 	There is an algorithm that decides whether any two terms \( t \) and 
@@ -1509,7 +1543,33 @@ In this section, we .
 	\( \tytmannotated{\Gamma}{t}{A}{\Univ} \) is derivable.
 \end{theorem}
 
+Finally, in order to implement a type theory in a proof assistant, it is desirable to have an
+algorithm that, given a context \( \Gamma \) and terms \( t \) and \( A \), decides whether \( t \)
+is an inhabitant of \( A \) in context \( \Gamma \). This ensures users that when they find a
+proof for a statement, the proof assistant can automatically check that their proof is correct.
+
 \subsection{Comparison with Martin-Löf Type Theory}
+
+The proof-relevant layer of \SetoidCC supports all the basic types of Martin-Löf 
+type theory: a universe hierarchy, dependent products, dependent sums, the natural 
+numbers, and the inductive equality; furthermore all the computation rules that 
+these types satisfy in \MLTT still hold true in \SetoidCC.
+% 
+Thus, we can embed this minimalistic version of \MLTT into our system:
+% 
+\begin{pseudotheorem}[Embedding]
+	If the judgment \( \tytm{\Gamma}{t}{A} \) is derivable in \MLTT, then
+	we can find an integer \( i \) such that \( \tytmannotated{\Gamma}{t}{A}{\Type_i} \)
+	is derivable in \SetoidCC. 
+\end{pseudotheorem}
+
+Now, the exact meaning of \MLTT is left 
+
+This theorem is intentionally a bit vague about the meaning of \MLTT (hence 
+the ``pseudo'' part). 
+
+But depending on how we define it, there might be more inductive types in 
+\MLTT
 
 In exchange for this, we lose \defnote{canonicity}{Canonicity for the identity
 type means that any proof of identity in the empty context is convertible to
