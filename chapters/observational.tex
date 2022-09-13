@@ -568,9 +568,10 @@ identity.
 	\ilabel{infrule:cast-refl}
 \end{mathpar}
 % 
-In \shepherd{TODO}, we study a slight variant of the system where the rule
-\nameref{infrule:cast-refl} holds computationally, but whose normalization
-and canonicity are only conjuctural.
+In \shepherd{TODO}, we study a slight variant of \SetoidCC dubbed \SetoidCCplus
+\marginpar{\shepherd{Should I call it \SetoidCC + castrefl instead?}} 
+where the rule \nameref{infrule:cast-refl} holds up to definitional equality, but its 
+normalization and canonicity are only conjectural.
 
 \subsection{Dependent products}
 
@@ -904,18 +905,20 @@ rule for \( \castName \).}
 \subsection{Reduction Rules for Cast}
 % 
 We can now turn to the description of the computation rules for type
-casting, which only need to be defined when the types are
-compatible -- otherwise the cast will be stuck.
+casting, which are defined on a type-by-type basis.
 % 
-\sideremark{Alternatively, we could reduce a cast between any two incompatible
+We only define reduction rules when the two types have the same head, and in other
+cases the cast will simply be a stuck term.
+% 
+Alternatively, we could reduce a cast between any two incompatible
 types to \( {\color{RoyalBlue}\bot}\metaop{-elim} \) applied to the equality
 proof, which has type $\Empty$ according to rule~\nameref{inferrule:eq-univ-noeq}.
-This amounts to replacing a stuck term with another, so we do not bother.}
+This amounts to replacing a stuck term with another, so we do not bother.
 
 Casting from $\Nat$ to $\Nat$ is defined by recursion.
-Alternatively, it could be defined as the identity, but we prefer
+\sideremark{We could instead define type-casting of natural numbers to be the identity, but we prefer
 this definition because it is an instance of the pattern we will define for 
-arbitrary inductive types in \shepherd{TODO}.
+arbitrary inductive types in \shepherd{TODO}.}
 % 
 \begin{mathpar}
 	\inferrule[Cast-Zero]
@@ -929,7 +932,7 @@ arbitrary inductive types in \shepherd{TODO}.
 		{\red{\Gamma}{\cast{\Nat}{\Nat}{e}{\suc{n}}}{\suc{\cast{\Nat}{\Nat}{e}{n}}}{\Nat}}
 	\ilabel{inferrule:cast-suc}
 \end{mathpar}
-% 
+
 Casting a type from a universe to the same universe is the identity.
 % 
 \begin{mathpar}
@@ -1025,73 +1028,6 @@ form are described in the appendix.
 \end{figure}
 
 And with this, we have completed the core system \SetoidCC.
-
-\section{Comparing \SetoidCC and \MLTT}
-\label{sec:comparison-MLTT}
-
-The reader may wonder if \SetoidTT extends Martin-Löf type theory
-with inductive types: that is, whether a judgment of MLTT is a
-judgment in the proof-relevant fragment of \SetoidTT. Our rules
-handle the universe hierarchy, dependent products, the natural
-numbers in the exact same way. But there are some difficulties with
-Martin-Löf identity type inductive equality, and more generally with
-indexed inductive types.
-
-The first idea that might come to the reader's mind is to use the proof equality types of \SetoidTT
-to interpret the \( I \)-types of MLTT. Sure enough, proof irrelevance will provide us with more
-definitional equalities than what we require.
-% , but this is not a problem at first glance.
-However, we
-need to explain how we interpret the \( J \) eliminator for proof-relevant predicates.
-
-It is not too hard to design a term that satisfies the correct typing
-rule, for instance, the term
-{\small
-\[
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
-			\\ \tytm{\Gamma}{t}{A}
-			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{\Obseq[A]{t}{x}}{\Type_j}}}
-			\\ \tytm{\Gamma}{b}{B\ t\ \refl{t}{A}}
-			\\ \tytm{\Gamma}{t'}{A}
-			\\ \tytm{\Gamma}{e}{\Obseq[A]{t}{t'}}}
-			{\tytm{\Gamma}{\cast{B\ t\ \refl{t}{A}}{B\ t'\
-  e}{\eqJ{A}{t}{u}{t'}{e}}{b}}{B\ t'\ e}}
-\]}
-where
-{\small
-$$\eqJ{A}{t}{B}{u}{t'}{e} :=
-\transport{A}{t}{\lam{A}{\lam[e']{\Obseq{t}{x}}{\Obseq{B\ t\ \refl{A}{t}}{B\ x\ e'}}}}{\refl{B\ t\ \refl{A}{t}}{}}{t'}{e}.$$
-}
-But the computational behavior is not preserved: in general, this term will not reduce to \( u \)
-when we substitute \( t' = t \) and \( e = \refl{t}{A} \). It might do when \( B \) is a closed
-term, but it certainly wil not if \( B \) is a neutral term. More generally, there is no hope to
-interpret \( I \)-types as proof-irrelevant types: \( I \)-types compute by doing reduction and
-pattern-matching on the equality proof, which cannot happen in a proof-irrelevant context.
-
-the rules for the dependent products, dependent sums, universes and integers
-
-and we can replace the Martin-Löf identity type with the observational 
-equality, which provides the additional comfort of function extensionality and
-proposition extensionality.
-
-There is however a small discrepancy with the computation rule of the \( J \) 
-eliminator. In \MLTT, applying \( J \) to a proof of reflexivity reduces
-to the corresponding argument:
-\[
-	\J{A}{t}{P}{u}{t}{\refl{t}{t}} \quad \Longrightarrow \quad u
-\]
-but in \SetoidCC with our replacement for \( J \), this rule is weakened
-and only holds up to a propositional equality that we can derive from 
-\( \castreflName \).
-% 
-This is not a huge deal, as weakening computation rules in presence of UIP 
-and funext does not change the expressive power of the theory \sidecite{weaktt},
-but it is an obstacle to a direct translation from \MLTT to \SetoidCC.
-% 
-In this thesis, we will discuss two ways around this obstacle: either we change 
-rule~\nameref{infrule:cast-refl} to be a definitional equality (see \shepherd{TODO}),
-or we translate the Martin-Löf identity type to the type \( \metaop{Id} \) of 
-\cref{sec:extensions}.
 
 \section{Additional Types}
 \label{sec:extensions}
@@ -1205,12 +1141,91 @@ congruence rules.
 
 \subsection{Subset Types}
 
-\subsection{Box and Squash Types}
+\shepherd{TODO? optional...}
+
+% \begin{mathpar}
+% 	\inferrule[$\Sigma$-Form]
+% 		{%\tytm{\Gamma}{A}{\Univ}
+% 			\tytm{\extctxannotated{\Gamma}{A}{\Type_i}}{B}{\Type_j}}
+% 		{\tytm{\Gamma}{\Depsumannotated{A}{B}{\Univ}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
+% 		{}
+% 	\ilabel{infrule:sigma-form}
+% \end{mathpar}
+% % 
+% \begin{mathpar}
+% 	\inferrule[Pair]
+% 		{\tytm{\extctxannotated{\Gamma}{A}{\Type_i}}{B}{\Type_j} 
+% 			\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}
+% 			\\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\Type_j}}
+% 		{\tytmannotated{\Gamma}{\relpair{t}{u}}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
+% 	\ilabel{infrule:pair}
+% 	\\\
+% 	\inferrule[Fst]
+% 		{\tytmannotated{\Gamma}{t}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
+% 		{\tytmannotated{\Gamma}{\relfst{t}}{A}{\Type_i}}
+% 	\ilabel{infrule:fst}
+% 	\ \inferrule[Snd]
+% 		{\tytmannotated{\Gamma}{t}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
+% 		{\tytmannotated{\Gamma}{\relsnd{t}}{\subst{B}{\relfst{t}}}{\Type_j}}
+% 	\ilabel{infrule:snd}
+% \end{mathpar}
+% % 
+% \begin{mathpar}
+% 	\inferrule[Fst-Pair]
+% 		{\tytm{\extctxannotated{\Gamma}{A}{\Type_i}}{B}{\Type_j} 
+% 			\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}
+% 			\\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\Type_j}}
+% 		{\red{\Gamma}{\relfst{\relpair{t}{u}}}{t}{A}}
+% 	\ilabel{infrule:fst-pair}
+% 	\and 
+% 	\inferrule[Snd-Pair]
+% 		{\tytm{\extctxannotated{\Gamma}{A}{\Type_i}}{B}{\Type_j} 
+% 			\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}
+% 			\\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\Type_j}}
+% 		{\red{\Gamma}{\relsnd{\relpair{t}{u}}}{u}{\subst{B}{t}}}
+% 	\ilabel{infrule:snd-pair}
+% \end{mathpar}
+% \begin{mathpar}
+% 	\inferrule[\( \eta \)-Depsum]
+% 		{\tytmannotated{\Gamma}{t}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
+% 		{\eqtmannotated{\Gamma}{t}{\relpair{\relfst{t}}{\relsnd{t}}}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
+% 	\ilabel{infrule:fst}
+% \end{mathpar}
+
+\subsection{Squash and Box Types}
+
+\paragraph*{Squash Types}
+
+The \emph{squash}, or propositional truncation type former embeds the 
+proof-relevant types into the proof-irrelevant world.
 % 
+Given a proof-relevant type \( A \), its truncated version \( \Squash{A} \) is a
+proposition that forgets all the computational information of inhabitants of
+\( A \) and only retains their mere existence.
+% 
+The squash type constructor is defined \textit{via} an impredicative encoding.
+\[
+	\Squash{A} \quad := \quad \Depfun[X]{\sProp}{\Fun{(\Fun{A}{X})}{X}}
+\]
+Given an inhabitant \( t \) of \( A \), we can give a proof of \( \Squash{A} \)
+with a simple lambda-term: 
+\[
+	\squash{t} \quad := \quad \lambda\ X\ H\ .\ H\ t \quad : \quad \Squash{A}
+\]
+
+The propositional truncation of \SetoidCC is reminiscent of the
+propositional truncation from Homotopy Type Theory, but there is an important 
+difference:
+% 
+\shepherd{in \HoTT, the notion of being a proposition (hprop) is defined in the
+logic, while in \SetoidCC it is a syntactical concept. Meaning that 
+truncated info will never get back to the proof-relevant layer or smth.}
+
 \paragraph*{Box Types}
-Box types embed the propositions into the proof-relevant world.
+% 
+Conversely, Box types embed the propositions into the proof-relevant world.
 They are useful for a number of constructions: for instance, from a type \( \tm{A}{\Type_i} \) and a
-proof-irrelevant predicate \( \tm{P}{\Fun{A}{\sProp[i]}} \), one can build a \emph{subset type}
+proof-irrelevant predicate \( \tm{P}{\Fun{A}{\sProp}} \), one can build a \emph{subset type}
 \( \tm{\Sig{A}{\Boxt{(P\ x)}}}{\Type_i} \) whose inhabitants come with a proof of \( P \), but
 retain the computational behavior of inhabitants of \( A \).
 
@@ -1234,52 +1249,70 @@ Box types can be defined with the following rules:
   \inferrule{\tytmannotated{\Gamma}{t,u}{\Boxt{A}}{\Type_0}}
 			{\red{\Gamma}{\Obseq[\Boxt{A}]{t}{u}}{\Unit}{\sProp}}
   \and
-  \inferrule{\tytm{\Gamma}{A}{\sProp[i]}
+  \inferrule{\tytm{\Gamma}{A}{\sProp}
 			\\ \tytm{\Gamma}{t}{\Boxt{A}}}
 			{\tytm{\Gamma}{\unboxt{t}}{A}}
   \and
-  \inferrule{\tytm{\Gamma}{A,B}{\sProp[i]}}
+  \inferrule{\tytm{\Gamma}{A,B}{\sProp}}
 			{\red{\Gamma}
 			  {\Obseq[\Type]{\Boxt{A}}{\Boxt{B}}}
 			  {\Obseq[\sProp]{A}{B}}
-			  {\sProp[j]}}
+			  {\sProp}}
   \and
-  \inferrule{\tytm{\Gamma}{A, B}{\sProp[i]}
+  \inferrule{\tytm{\Gamma}{A, B}{\sProp}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{e}{\Obseq[\Type]{\Boxt{A}}{\Boxt{B}}}}
 			{\red{\Gamma}{\cast{\Boxt{A}}{\Boxt{B}}{e}{\boxt{t}}}{\boxt{\cast{A}{B}{e}{t}}}{\Boxt{B}}}
 \end{mathpar}
 
-\paragraph*{Squash Types}
-Conversely, Squash types embed the proof-relevant world into the proof-irrelevant
-world.
-{\small
-\[
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}}
-			{\tytm{\Gamma}{\Squash{A}}{\sProp[i]}}
-  \quad
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
-			\\ \tytm{\Gamma}{t}{A}}
-			{\tytm{\Gamma}{\squash{t}}{\Squash{A}}}
-\]
-\[
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
-			\\ \tytm{\Gamma}{P}{\Fun{\Squash{A}}{\sProp[j]}}
-			\\ \tytm{\Gamma}{t_A}{\Depfun{A}{P\ \squash{x}}}
-			\\ \tytm{\Gamma}{t}{\Squash{A}}}
-			{\tytm{\Gamma}{\unsquash{P}{t_A}{t}}{P\ t}}
-\]}
-It is not very difficult to check that we can extend the logical relation,
-as well as \cref{reducibilitycast,reducibilityidU} so that they
-handle Box types and Squash types.
-%
-Likewise, we can extend the setoid model and its interpretation function, and obtain
-that these additions preserve the metatheoretical properties of \SetoidTT.
-
 \subsection{The Inductive Equality}
-% 
-As we explained in \cref{sec:comparison-MLTT}
 
+\paragraph*{Interpreting \MLTT into \SetoidCC}
+% 
+The reader may wonder if \SetoidCC extends Martin-Löf type theory: 
+that is, whether a judgment of \MLTT is also a judgment in the proof-relevant
+fragment of \SetoidCC. 
+% 
+Indeed, our rules handle the universe hierarchy, dependent products, dependent
+sums and the natural numbers in the exact same way. 
+But there are some difficulties with the Martin-Löf identity type.
+
+The first idea that might come to the reader's mind is to use the observational 
+equality of \SetoidCC to interpret the inductive equality of \MLTT. 
+Surely, proof irrelevance will provide us with more definitional equalities 
+than what we need!
+% 
+For this plan to work, we need to derive the \( J \) eliminator for the
+observational equality. It is not too difficult to come up with a term that
+satisfies the same typing rule: 
+\begin{mathpar}
+  \inferrule{\tytm{\Gamma}{A}{\Type_i}
+			\\ \tytm{\Gamma}{t}{A}
+			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{\Obseq[A]{t}{x}}{\Univ}}}
+			\\ \tytm{\Gamma}{b}{B\ t\ \refl{t}{A}}
+			\\ \tytm{\Gamma}{t'}{A}
+			\\ \tytm{\Gamma}{e}{\Obseq[A]{t}{t'}}
+			\\ e_B := \transport{A}{t}{\lam{A}{\Depfun[e']{\Obseq{t}{x}}{\Obseq{B\ t\ \refl{t}{t}}{B\ x\ e'}}}}{\lambda\ e'\ .\ \metaop{refl}}{t'}{e}\ e}
+			{\tytm{\Gamma}{\cast{B\ t\ \refl{t}{A}}{B\ t'\ e}{e_B}{b}}{B\ t'\ e}}
+\end{mathpar}
+
+There is however a discrepancy with the computation rule of the \( J \) 
+eliminator. In \MLTT, applying \( J \) to a proof of reflexivity is 
+definitionally equal to the fourth argument:
+\[
+	\J{A}{t}{P}{u}{t}{\refl{t}{t}} \ \equiv \ u
+\]
+but in \SetoidCC with our replacement for \( J \), this definitional equality 
+is weakened to a propositional equality in general -- it might hold by 
+definition when \( P \) is a closed term, but it certainly will not if \( P \) 
+is a variable. 
+% 
+This is not a huge deal, as a theory with weakened computation rules still proves
+the exact same theorem in presence of UIP and funext \sidecite{weaktt},
+but it is an obstacle to a direct translation from \MLTT to \SetoidCC.
+
+\paragraph*{The Inductive Equality in \SetoidCC}
+% 
 A very similar problem was encountered by \sidecitet{cubicaltt} in Cubical Type 
 Theory when trying to interpret the Martin-Löf identity type as the cubical path 
 type, and was solved by \sidecitet{Swan_2016}.
@@ -1295,10 +1328,12 @@ Following his ideas, we extend \SetoidCC with \( \metaop{Id} \)-types:
   \inferrule{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}}
 			{\tytm{\Gamma}{\id{t}}{\Id{A}{t}{t}}}
-  \and
+\end{mathpar}
+\begin{mathpar}
   \inferrule{\tytm{\Gamma}{e,e'}{\Id{A}{t}{u}}}
 			{\red{\Gamma}{\Obseq[\Id{A}{t}{u}]{e}{e'}}{\Unit}{\sProp[i]}}
-  \and
+\end{mathpar}
+\begin{mathpar}
   \inferrule{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{\Id{A}{t}{x}}{\Univ}}}
@@ -1306,7 +1341,8 @@ Following his ideas, we extend \SetoidCC with \( \metaop{Id} \)-types:
 			\\ \tytm{\Gamma}{t'}{A}
 			\\ \tytm{\Gamma}{e}{\Id{A}{t}{t'}}}
 			{\tytm{\Gamma}{\J{A}{t}{B}{u}{t'}{e}}{B\ t'\ e}}
-  \and
+\end{mathpar}
+\begin{mathpar}
   \inferrule{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{\Id{A}{t}{x}}{\Univ}}}
@@ -1403,17 +1439,33 @@ We also need to account for this additional constructor in reduction rules:
 Along with the adequate congruence rules and substitution rules, these form the
 rules for Id types.
 
-\paragraph{Relation with Setoid Equality}
+\paragraph{Relation with the Observational Equality}
 % 
-The introduction rule for $\metaop{IdPath}$ proves that \( \Obseq[A]{t}{u} \) imples \( \Id{A}{t}{u} \).
-Conversely, if we have an inhabitant of \( \Id{A}{t}{u} \), we can get a proof of
-\( \Obseq[A]{t}{u} \) by combining \( \metaop{J} \) to reduce it to the case \( u = t \), and
-\( \refl{t}{A} \) to inhabit \( \Obseq[A]{t}{t} \). Since both types are also contractible
-(for both notions of equality), they are equivalent.
+The \( \metaop{Id} \) type is logically equivalent to the observational 
+equality: 
+% 
+in one direction, the constructor $\metaop{IdPath}$ proves that 
+\( \Obseq[A]{t}{u} \) implies \( \Id{A}{t}{u} \), and in the other direction
+we can get a proof of observational equality from an inhabitant of 
+\( \Id{A}{t}{u} \) by using the \( \metaop{J} \) eliminator. 
+% 
+In particular, this means that the principles of uniqueness of identity 
+proofs, of function extensionality and of propositional extensionality are
+derivable for the inductive equality, in stark contrast with Martin-Löf
+type theory.
 
-\subsection{General Inductive Types}
-
-\shepherd{TODO}
+Thus, the only difference between the two equalities is a tradeoff between
+definitional and propositional equations:
+\sideremark{In the system \SetoidCCplus of \shepherd{TODO}, we have the best
+of both worlds: the observational equality satisfies both UIP and the computation
+of \( J \). But the normalization of this system is only conjectured.}
+% 
+\begin{itemize}
+\item The observational equality satisfies UIP by definition, but the \( J \) eliminator
+applied to reflexivity only satisfies its computation rule up to propositional equality.
+\item \( \metaop{Id} \) has a \( J \) eliminator that computes on reflexivity, but
+it only satisfies UIP up to a propositional equality.
+\end{itemize}
 
 \section{Examples}
 \label{sec:examples}
@@ -1422,7 +1474,11 @@ Conversely, if we have an inhabitant of \( \Id{A}{t}{u} \), we can get a proof o
 
 \section{Properties}
 \label{sec:properties}
-\shepherd{unique choice}
+
+In this section, we .
+
+
+\subsection{Properties of \SetoidCC}
 
 \begin{theorem}[Consistency]
 	In the empty context, there is no proof of \( \Empty \).
@@ -1452,3 +1508,24 @@ Conversely, if we have an inhabitant of \( \Id{A}{t}{u} \), we can get a proof o
 	a type \( A \) and a sort \( \Univ \), decides whether the judgment 
 	\( \tytmannotated{\Gamma}{t}{A}{\Univ} \) is derivable.
 \end{theorem}
+
+\subsection{Comparison with Martin-Löf Type Theory}
+
+In exchange for this, we lose \defnote{canonicity}{Canonicity for the identity
+type means that any proof of identity in the empty context is convertible to
+reflexivity.} for the inductive identity type.
+
+Naturally, \SetoidCC is not conservative over \MLTT, as it is possible to
+prove function extensionality and UIP for the inductive equality.
+
+\begin{theorem}[Computational power]
+	Any function that can be expressed as a term of type \( \Nat \to \Nat \)
+	in \SetoidCC can be expressed as a term of type \( \Nat \to \Nat \) in
+	\MLTT.
+\end{theorem}
+
+\shepherd{TODO}
+
+\subsection{Comparison with the Theory of Elementary Toposes}
+
+\shepherd{TODO}

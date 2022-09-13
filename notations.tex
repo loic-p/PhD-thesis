@@ -132,6 +132,7 @@
 \newcommand{\HoTT}{\ensuremath{\mathsf{HoTT}}\xspace}
 \newcommand{\SetoidTT}{\ensuremath{\mathsf{TT}^\mathrm{obs}}\xspace}
 \newcommand{\SetoidCC}{\ensuremath{\mathsf{CC}^\mathrm{obs}}\xspace}
+\newcommand{\SetoidCCplus}{\ensuremath{\mathsf{CC}^\mathrm{obs+}}\xspace}
 
 % Properties of type theories
 
@@ -208,6 +209,8 @@
 \newcommand{\relfst}[1]{\metaop{π}_{\metaop{1}}({#1})}
 \newcommand{\relsnd}[1]{\metaop{π}_{\metaop{2}}({#1})}
 
+\newcommand{\Subtype}[3][x]{\{ (\tm{#1}{#2}) \ |\ {#3} \}}
+
 \newcommand{\Quo}[2]{{#1}/{#2}}
 \newcommand{\quo}[1]{\pi(#1)}
 \newcommand{\quorec}[4]{\metaop{Q\mathrm{-}elim}(#1,#2,#3,#4)}
@@ -216,7 +219,7 @@
 \newcommand{\id}[1]{\metaop{Idrefl}(#1)}
 \newcommand{\idpath}[1]{\metaop{Idpath}(#1)}
 \newcommand{\J}[6]{\metaop{J}(#1,#2,#3,#4,#5,#6)}
-\newcommand{\eqJ}[5]{\metaop{eq_J}(#1,#2,#3,#4,#5)}
+\newcommand{\eqJ}[6]{\metaop{eq_J}(#1,#2,#3,#4,#5,#6)}
 
 \newcommand{\Boxt}[1]{\square{#1}}
 \newcommand{\boxt}[1]{\diamond{#1}}
