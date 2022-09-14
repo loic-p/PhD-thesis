@@ -797,7 +797,7 @@ returns \( \Empty \).
 
 The universe \( \sProp \) is a proof-relevant type of sort \( \Type_0 \).
 Note that it is natural for this universe to be a proof-relevant type, since its inhabitants are
-propositions which are not convertible to one another despite being proof-irrelevant.
+the propositions, which are not convertible to one another despite being proof-irrelevant.
 % 
 \begin{mathpar}
 	\inferrule[Univ-Prop]
@@ -1272,9 +1272,9 @@ Box types can be defined with the following rules:
 \subsection{The Inductive Equality}
 \label{sec:inductive-equality}
 
-\paragraph*{Interpreting \MLTT into \SetoidCC}
+\paragraph*{The J Eliminator for the Observational Equality}
 % 
-The reader may wonder if \SetoidCC extends Martin-Löf type theory: 
+The reader may wonder if \SetoidCC extends Martin-Löf type theory -- 
 that is, whether a judgment of \MLTT is also a judgment in the proof-relevant
 fragment of \SetoidCC. 
 % 
@@ -1533,6 +1533,20 @@ numbers is canonical if it is an explicit numeral. If all terms of type \( \Nat 
 context normalize to a canonical form, then the theory is said to enjoy canonicity for natural
 numbers.
 
+Together with normalization, canonicity gives a computational justification of
+constructiveness: 
+% 
+provided a closed witness of the type \( \Depsum[n]{\Nat}{P\ n} \), we can take 
+its first projection and normalize it to recover a concrete integer \( n \) that 
+satisfies \( P \).
+% 
+Thus, proving a theorem truly does amount to giving an explicit construction of a 
+witness.
+% 
+Note however that this is only true in the proof-relevant layer of \SetoidCC, as 
+there is no computational content to extract from a proof of 
+\( \Exists[n]{\Nat}{P\ n} \).
+
 \begin{theorem}[Decidability]
 	There is an algorithm that decides whether any two terms \( t \) and 
 	\( u \) that have type \( A \) in context \( \Gamma \) are convertible 
@@ -1548,35 +1562,31 @@ algorithm that, given a context \( \Gamma \) and terms \( t \) and \( A \), deci
 is an inhabitant of \( A \) in context \( \Gamma \). This ensures users that when they find a
 proof for a statement, the proof assistant can automatically check that their proof is correct.
 
-\subsection{Comparison with Martin-Löf Type Theory}
+\subsection{Comparing \SetoidCC with Other Type Theories}
 
+\paragraph*{Martin-Löf Type Theory}
+% 
 The proof-relevant layer of \SetoidCC supports all the basic types of Martin-Löf 
 type theory: a universe hierarchy, dependent products, dependent sums, the natural 
 numbers, and the inductive equality; furthermore all the computation rules that 
 these types satisfy in \MLTT still hold true in \SetoidCC.
 % 
-Thus, we can embed this minimalistic version of \MLTT into our system:
-% 
-\begin{pseudotheorem}[Embedding]
+Thus, we can embed this minimalistic version of \MLTT into our system.
+
+\begin{theorem}[Embedding]
 	If the judgment \( \tytm{\Gamma}{t}{A} \) is derivable in \MLTT, then
 	we can find an integer \( i \) such that \( \tytmannotated{\Gamma}{t}{A}{\Type_i} \)
 	is derivable in \SetoidCC. 
-\end{pseudotheorem}
+\end{theorem} 
 
-Now, the exact meaning of \MLTT is left 
-
-This theorem is intentionally a bit vague about the meaning of \MLTT (hence 
-the ``pseudo'' part). 
-
-But depending on how we define it, there might be more inductive types in 
-\MLTT
-
-In exchange for this, we lose \defnote{canonicity}{Canonicity for the identity
-type means that any proof of identity in the empty context is convertible to
-reflexivity.} for the inductive identity type.
-
-Naturally, \SetoidCC is not conservative over \MLTT, as it is possible to
-prove function extensionality and UIP for the inductive equality.
+Of course, \SetoidCC is not 
+\defnote{conservative}{An extension \( \mathcal{T}' \) of a theory 
+\( \mathcal{T} \) is said to be conservative when it proves no new
+theorems that can be stated in \( \mathcal{T} \)} over \MLTT, as it becomes 
+possible to prove function extensionality and UIP for the inductive equality.
+% 
+However, there is a precise sense in which \SetoidCC does not offer more
+computational power than \MLTT. 
 
 \begin{theorem}[Computational power]
 	Any function that can be expressed as a term of type \( \Nat \to \Nat \)
@@ -1584,8 +1594,83 @@ prove function extensionality and UIP for the inductive equality.
 	\MLTT.
 \end{theorem}
 
-\shepherd{TODO}
+This is quite surprising at first, because \SetoidCC is impredicative, and thus
+should be much more powerful than a predicative theory such as \MLTT. 
+% 
+Well, in a way, it is! The impredicativity allows us to prove the existence
+of functions that grow much faster than what is definable in \MLTT. But there is
+a catch: we can only prove their existence in the proof-irrelevant layer, and
+we have no way to extract them to actual functions of type \( \Nat \to \Nat \).
+We will discuss this in more detail in \cref{ch:impredicativity}.
 
-\subsection{Comparison with the Theory of Elementary Toposes}
+\paragraph*{Extensional Type Theory}
+% 
+Extensional Type Theory, as i
 
-\shepherd{TODO}
+\begin{theorem}[Embedding]
+	If the judgment \( \tytm{\Gamma}{t}{A} \) is derivable in \ETT, then
+	we can find an integer \( i \) such that \( \tytmannotated{\Gamma}{t}{A}{\Type_i} \)
+	is derivable in \SetoidCC. 
+\end{theorem} 
+
+\begin{proof}
+\sidecitet{hofmann95} proved that \ETT is conservative over \MLTT + UIP + 
+function extensionality, which is a subset of \SetoidCC.
+\end{proof}
+
+Thus, \SetoidCC can be seen as a version of \ETT that has more reasonable 
+computational properties.
+
+\subsection{Semantics of \SetoidCC}
+
+Because of the observational equality and the impredicative universe of 
+propositions, types in \SetoidCC feel a lot more ``set-like'' than types
+in Martin-Löf type theory: functions are extensional, equality 
+proofs are unique, we can build quotients and subtypes, \textit{etc}.
+% 
+Thus, it does not come as a surprise that we can interpret proofs in 
+\SetoidCC as talking about classical sets.
+
+\begin{theorem}
+	\SetoidCC has a model in classical set theory, in which the universe
+	hierarchy contains codes for all ZF sets.
+\end{theorem}
+
+But \SetoidCC is also constructive, \ie the principle of excluded middle
+does not hold. 
+% 
+This incites us to investigate more general classes of models, that do not 
+collapse the propositions to a two-valued set. Now, there happens to be a
+class of ``constructive-set-like'' categories that play an important role
+in mathematics, called \emph{Grothendieck toposes}. And indeed, we will
+prove in \shepherd{TODO} that
+\marginpar{\shepherd{Should I talk about toposes? I don't really care about them tbh}}
+
+\begin{theorem}
+	\SetoidCC has models in all Grothendieck toposes.
+\end{theorem}
+
+With this, we conclude our overview of the Observational Calculus of 
+Constructions and we turn to the next chapter, in which we will develop the
+tools which are needed to prove the various theorems that we enunciated.
+
+% The principle of \emph{unique choice} states that functions are the same
+% as graphs: given a relation \( R \) on \( A \times B \) that associates
+% exactly one element of \( B \) to any given element of \( A \), we can
+% construct a function \( f : A \to B \) which picks that element: 
+% \sideremark{The unique existence quantifier \( \ExistsUnique{A}{P\ x} \) is defined as
+% the following conjunction:
+% \( {\Exists{A}{P\ x}} \land {\Depfun[x,y]{A}{P\ x \to P\ y \to \Obseq{x}{y}}}. \)}
+% % 
+% \[
+% 	\Depfun{A}{\ExistsUnique[y]{B}{R\ x\ y}} \quad \to \quad \Depsum[f]{\Fun{A}{B}}{\Depfun{A}{R\ x\ (f\ x)}}.
+% \]
+% This principle is available in the theory of elementary toposes if we interpret
+% \( \sProp \) as the subobject classifier
+
+% Unfortunately, this principle is not provable in \SetoidCC, because we have
+% no way to extract the proof-relevant information necessary to build \( f \)
+% from a proof-irrelevant existential.
+
+% However, it becomes trivially provable if we replace the unique existence 
+% quantifier with a dependent sum.
