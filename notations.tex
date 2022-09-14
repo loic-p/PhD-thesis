@@ -206,8 +206,8 @@
 \newcommand{\Depsum}[3][x]{\Sigma (\tm{#1}{#2}).\, {#3}}
 \newcommand{\Sig}[3][x]{\Sigma (\tm{#1}{#2}).\, {#3}}
 \newcommand{\relpair}[2]{\langle #1\ {;}\ #2 \rangle }
-\newcommand{\relfst}[1]{\metaop{π}_{\metaop{1}}({#1})}
-\newcommand{\relsnd}[1]{\metaop{π}_{\metaop{2}}({#1})}
+\newcommand{\relfst}[1]{\metaop{proj}_{\metaop{1}}({#1})}
+\newcommand{\relsnd}[1]{\metaop{proj}_{\metaop{2}}({#1})}
 
 \newcommand{\Subtype}[3][x]{\{ (\tm{#1}{#2}) \ |\ {#3} \}}
 
@@ -229,7 +229,7 @@
 
 \newcommand{\Prod}[2]{{#1} \land {#2}}
 
-\newcommand{\Exists}[3][x]{\exists (\tm{#1}{#2}).\, {#3}}
+\newcommand{\Exists}[3][x]{(\tm{#1}{#2})\ \&\ {#3}}
 \newcommand{\ExistsUnique}[3][x]{\exists ! (\tm{#1}{#2}).\, {#3}}
 \newcommand{\varExists}[3][x]{\exists (\tm{#1}{#2}).\, {#3}}
 \newcommand{\pair}[2]{\langle #1 , #2 \rangle }
@@ -468,7 +468,7 @@
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
 
 % \newcommand{\agdahtml}{https://htmlpreview.github.io/?https://raw.githubusercontent.com/CoqHott/logrel-mltt/impredicativity-SProp-POPL/html}
-\newcommand{\agdahtml}{https://anonymous-material-path-to-be-replaced-by-real-path}
+\newcommand{\agdahtml}{https://htmlpreview.github.io/?https://raw.githubusercontent.com/CoqHott/logrel-mltt/setoid-universes-hierarchy/html}
 \newcommand{\refAgdaRoot}[1]{{\small{\href{\agdahtml/#1.html}{\emph{[#1.agda]}}}}}
 \newcommand{\refAgda}[2]{{\small{\href{\agdahtml/Definition.#1#2.html}{\emph{[#2.agda]}}}}}
 \newcommand{\refCoq}[1]{{\color{darkblue}\emph{[#1]}}}

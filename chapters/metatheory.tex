@@ -3,7 +3,7 @@
 \chapter{Meta-theory of TTobs}
 \labch{metatheory}
 
-In this section, we will prove these four properties for \SetoidCC.
+In this chapter, we will prove these four properties for \SetoidCC.
 %
 We first present our extension of the
 logical relations framework developed by \sidecitet{Abel:POPL2018} and
@@ -36,52 +36,52 @@ Grothendieck universe.
 \end{figure*}
 
 In this section, we define a logical relation to show
-normalization and decidability of conversion for \SetoidCC, following
-\sidecitet{Abel:POPL2018}.
+normalization and decidability of conversion for \SetoidCC, 
+based on the relation for \MLTT presented by \sidecitet{Abel:POPL2018}.
 
 Normalization of dependent type theories is a subtle matter:
-if one tries to prove it by naive induction on the typing derivations,
-one quickly gets stuck on the case of the application rule because
-we cannot deduce normalization of \( t~u \) from normalization of
-$t$ and $u$.
+if we try to prove it by naive induction on the typing derivations
+then we quickly get stuck on the case of the application rule, because
+we cannot obtain that \( t~u \) is normalizing from the hypotheses that
+$t$ and $u$ are normalizing.
 %
-The so-called ``logical relations'' is a standard family of techniques 
-used to strengthen the induction hypothesis, so that the proof by induction 
-on the typeing derivation goes through.
-%
-Concretely speaking, the strengthened induction hypothesis collects information 
-on types and terms that thoroughly characterizes their behaviour with respect 
-to substitution and reduction.
+Thus, we need to devise a stronger induction hypothesis.
+% 
+This is the point of the \emph{logical relations} technique, which builds
+a complex predicate that collects information on types and terms in order 
+to thoroughly capture their behaviour with respect to substitution and reduction.
 
 The base ingredient of the logical relation is \emph{reducibility}, a set
-of four predicates which mirror the typing judgments of \SetoidCC 
-(cf \cref{fig:log-rel-judgments}), defined on a type-by-type basis.
+of four predicates which correspond to the four typing judgments of \SetoidCC 
+(cf \cref{fig:log-rel-judgments}).
 % 
-For instance, an term is deemed to be a reducible inhabitant of a \( \Pi \)-type 
-if it normalizes to a weak-head normal form, and it sends reducible 
-arguments to reducible images.
+These reducbility predicates are defined on a type-by-type basis:
+% 
+for instance, a term \( t \) is deemed to be a reducible inhabitant of a 
+\( \Pi \)-type when it normalizes to a weak-head normal form, and applying
+\( t \) to a reducible argument produces a reducible image.
 % 
 However, reducibility is not quite strong enough for the induction to go 
 through. We must first close it under substitutions, and only after this
 can we prove the \emph{fundamental lemma} which shows that any well-typed 
 term is reducible by induction on the typing derivation.
 
-For \MLTT and \SetoidCC, the logical relation is indexed by a level
+For \MLTT, the reducibility predicates are indexed by a level
 \( \ell \), which reflects the predicative nature of the universe
 hierarchy: reducibility is first defined at level $0$ to characterize
-terms that inhabit the smallest universe \( \varType_0 \), then this relation is used
+terms that inhabit the smallest universe \( \Type_0 \), then this relation is used
 to define reducibility at level 1 for terms that live in
-\( \varType_1 \) at most, and so on. Therefore, the whole definition is
+\( \Type_1 \), and so on. Therefore, the whole definition is
 done by induction on \( \ell \).
 %
-This construction seems deeply incompatible with an impredicative
-universe, as dependent products in \( \sProp \) may mention arbitrarily
-large universes in their domain while still being at the bottom
+This construction seems deeply incompatible with the impredicative
+universe of \SetoidCC, as dependent products in \( \sProp \) may mention 
+arbitrarily large universes in their domain while still being at the bottom
 of the universe hierarchy.
+% 
+And indeed, a naive attempt at integrating the impredicative universe into
+the logical relation leads to a non well-founded construction.
 
-Thus, replicating the usual definition for the impredicative universe
-leads to a non well-founded relation.
-%
 In this section, we show how to break out of that circularity in the case of an
 impredicative universe with definitional proof-irrelevance, by
 defining a weaker logical relation on impredicative types that does
@@ -150,10 +150,8 @@ fragment, closely following \sidecitet{Abel:POPL2018,pujet:hal-03367052}.
 %
 For pedagogical reasons, we will present a somewhat informal version
 of the logical relation where some arguments are left implicit, and
-refer the interested reader to the \Agda formalization.\sidenote{The
-  formalization is in the folder \texttt{logrel-ccobs}. The links to
-  \Agda files are broken for the double-blind process as they point to
-  our GitHub repository.}
+encourage the reader who want all the gory detail to have a look at the \Agda 
+formalization. \shepherd{[Add link to the formalization]}
 %
 While our formal proof and the definition in
 \refAgda{}{LogicalRelation} only feature three levels, it should be

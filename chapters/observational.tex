@@ -14,9 +14,9 @@ propositions and an observational equality that satisfies UIP, function
 extensionality and proposition extensionality, while preserving
 the computational properties of \MLTT. 
 
-We start in \cref{sec:generalities} with some generalities about the system, 
+We start in \cref{sec:generalities} with some informal considerations about the system, 
 then we delve into a detailed description of the typing rules in 
-\cref{sec:typing-rules} and \cref{sec:extensions}, and finally we conclude 
+\cref{sec:typing-rules}, and finally we conclude 
 with a few examples and an overview of the meta-theoretical properties of
 \SetoidCC in \cref{sec:properties}.
 
@@ -178,7 +178,9 @@ Just like with the observational equality, every type constructor comes with
 rules that describe the behavior of \( \castName \) on its elements.
 % 
 Note that the equality proof \( e \) plays no computational role, and is just
-here to ensure that the cast is consistent.
+here to ensure that the cast is consistent. Thus \( \castName \) is really
+an eliminator of the universe of proof-relevant types \( \Type \) rather than
+an eliminator of the observational equality.
 
 The \( \castName \) operator, despite its apparent simplicity, is in fact enough
 to derive the \( J \) eliminator of \MLTT. Indeed, the \( J \) eliminator is
@@ -188,10 +190,39 @@ proof irrelevance of the equality, and the Leibniz rule is a consequence
 of \( \metaop{ap} \) and \( \castName \). The corresponding term is spelled
 out in \cref{sec:inductive-equality}.
 
-\section{The Core of \SetoidCC}
+\section{The Formal System \SetoidCC}
 \label{sec:typing-rules}
 
 \subsection{Syntax}
+
+The syntax of the sorts, contexts, terms and types of the system is
+specified in \cref{fig:syntax}.
+% 
+In order to distinguish them from the body text more easily, we will write 
+keywords of \SetoidCC in \( \metaop{blue} \).
+
+The formal system features dependent products 
+$\Depfunannotated{A}{B}{}{\Univ}{\Univ'}$, and dependent sums 
+$\Depsumannotated{A}{B}{}{\Univ}{\Univ'}$.
+% 
+In an attempt to maximize readability, we will omit the sort annotations on 
+\( \Pi \) and \( \Sigma \) when they can be inferred from the context, and we 
+write them as respectively \( \Fun{A}{B} \) and \( A \times B \) when \( B \) 
+does not depend on \( A \). 
+% 
+On top of this, the system supports some inductive types, which include the 
+standard examples of natural numbers \( \Nat \) and inductive equality 
+\( \metaop{Id} \) but also the less standard quotient types and box types.
+
+We will introduce a number of syntactic sugars for constructions of \SetoidCC,
+such as \( \top \) for the true proposition or \( \metaop{ap} \) for the proof
+that functions preserve the observational equality (cf \cref{sec:cast-intro}).
+% 
+We will introduce them throughout the chapter, but for convenience they are 
+collected in appendix \shepherd{TODO}.
+% 
+The capture-avoiding substitution of a variable \( x \) in a term \( A \) by the 
+term \( t \) is noted \( \subst{B}{t} \).
 
 % SetoidCC syntax
 \begin{figure}
@@ -204,9 +235,16 @@ out in \cref{sec:inductive-equality}.
 		& & \text{Universes} \\
 		\Gamma , \Delta & \bnfis	& \emptyctx \qsep \extctxannotated{\Gamma}{A}{\Univ}
 		& & \text{Contexts} \\
-		t,u,m,n,e,A,B   & \bnfis	& x \qsep \Univ 
+		t,u,v,m,n,e,A,B   & \bnfis	& x \qsep \Univ 
 		& & \text{Variables and Universes} \\
-						& \sep		& \zero \qsep \suc{t} \qsep \natrec{P}{t}{u}{n} 
+						& \sep		& \emptyrec{A}{t} \qsep \Empty
+		&  & \text{Empty type} \\
+						& \sep		& \Obseq[A]{t}{u} \qsep \refl{t}{A} 
+									\qsep \transport{A}{t}{B}{u}{t'}{e}	
+		&  & \text{Observational equality} \\
+						& \sep		& \cast{A}{B}{e}{t} \qsep \castrefl{A}{t}
+		&  & \text{Type cast} \\
+						& \sep		& \zero \qsep \suc{t} \qsep \natrec{A}{t}{u}{n} 
 									\qsep \Nat
 		&  & \text{Natural numbers} \\
 						& \sep		& \lam{A}{t} \qsep t\ u 
@@ -215,39 +253,21 @@ out in \cref{sec:inductive-equality}.
 						& \sep		& \relpair{t}{u} \qsep \relfst{t} \qsep \relsnd{t} 
 									\qsep \Depsumannotated{A}{B}{s}{\Univ}{\Univ'}
 		&  & \text{Dependent sums} \\
-						& \sep		& \emptyrec{A}{t} \qsep \Empty
-		&  & \text{Empty type} \\
-						& \sep		& \Obseq[A]{t}{u} \qsep \refl{t}{A} 
-									\qsep \transport{A}{t}{B}{u}{t'}{e}	
-		&  & \text{Observational equality} \\
-						& \sep		& \cast{A}{B}{e}{t} \qsep \castrefl{A}{t}
-		&  & \text{Type cast}
+						& \sep		& \quo{t} \qsep \quorec{A}{t}{u}{v} 
+									\qsep \Quo{A}{B}
+		&  & \text{Quotient Types} \\
+						& \sep		& \boxt{t} \qsep \unboxt{t}
+									\qsep \Boxt{A}
+		&  & \text{Box Types} \\
+						& \sep		& \id{t} \qsep \idpath{t} \qsep \J{A}{t}{B}{u}{v}{e}
+									\qsep \Id{A}{t}{u}
+		&  & \text{Inductive equality}
 		\end{array}
 		\]
 	\end{small}
 	\caption{Syntax of \SetoidCC}
 	\label{fig:syntax}
 \end{figure}
-
-The syntax of the sorts, contexts, terms and types of the core system is
-specified in \cref{fig:syntax}.
-%
-The theory features two sorts \( \sProp \) and \( \Type_i \), natural numbers, dependent products 
-(noted $\Depfunannotated{A}{B}{}{\Univ}{\Univ'}$) as well as dependent
-sums (noted $\Depsumannotated{A}{B}{}{\Univ}{\Univ'}$), and a proof-irrelevant 
-empty type (noted $\Empty$).
-% 
-We will frequently omit the sort annotations on \( \Pi \) and \( \Sigma \) when 
-they can be inferred from the context.
-
-When \( B \) does not depend on \( A \), we write \( \Fun{A}{B} \) instead of
-\( \Depfun{A}{B} \), and \( A \times B \) instead of \( \Depsum{A}{B} \). The capture-avoiding
-substitution of a variable \( x \) in a term \( A \) by the term \( t \) is noted
-\( \subst{B}{t} \).
-%
-\SetoidCC can also be extended with more primitives such as quotients or subset 
-types, but we defer the treatment of those to \cref{sec:extensions} to 
-have a first reasonably-sized system.
 
 \subsection{Structure of the Rules}
 
@@ -268,10 +288,9 @@ The typing and convertibility rules define the algebraic theory of
 algorithm that we will use to compute normal forms for the well-typed 
 terms.
 % 
-In case the type is a sort \( \Univ \), we will generally shorten 
+In case the type is a sort \( \Univ \), we shorten 
 \( \tytmannotated{\Gamma}{A}{\Univ}{\Univ^+} \) (where \( \Univ^+ \) is the next 
 bigger sort) to \( \tytm{\Gamma}{A}{\Univ} \).
-\marginpar{\shepherd{Is this confusing??}}
 
 As is often the case in type theory, the rules are organized in a very 
 systematic structure:
@@ -279,8 +298,8 @@ systematic structure:
 every type former comes with rules that describe its formation, introduction, 
 elimination and computation.
 % 
-On top of this, \SetoidCC adds rules that describe the observational equality 
-and the behavior of type-casting.
+In \SetoidCC, every type former must also add rules that describe the 
+observational equality.
 
 \subsection{Generic Rules}
 
@@ -346,9 +365,10 @@ proof-irrelevant terms.
 		{\eqtmannotated{\Gamma}{t}{u}{A}{\sProp}}
 	\ilabel{infrule:proof-irrelevance}
 \end{mathpar}
-% 
+
 On top of this, we need to add bureaucratic congruence rules which make sure
-that each constructor preserves the judgmental equality.
+that each constructor preserves the judgmental equality 
+(say for instance, if \( t \equiv u \) then \( \suc{t} \equiv \suc{u} \)).
 % 
 Since these rules present little interest, we do not reproduce them here.
 
@@ -400,7 +420,7 @@ impredicativity is a remarkably flexible tool to define new propositions and
 abstractions.
 % 
 This versatility makes impredicativity a crucial ingredient of numerous 
-tools in constructive mathetmatics, such as Tarski's fixed point theorem or 
+tools in constructive mathematics, such as Tarski's fixed point theorem or 
 lattice theory~\sidecite{paco}.
 
 \paragraph*{Dependent Conjunctions and Existential Types}
@@ -414,30 +434,37 @@ Given a proposition \( A \) and a second proposition \( B \) that depends on
 \[
 	\Exists{A}{B} \quad := \quad \Depfun[X]{\sProp}{\Fun{(\Fun{\Depfun{A}{B}}{X})}{X}}.
 \]
-Now, from a proof \( a \) of \( A \) and a proof \( b \) of \( \subst{B}{a} \), 
-we can derive a proof of \( \Exists{A}{B} \) as a simple function
+In presence of proof-irrelevance, this encoding provides everything we might
+ask of a dependent conjunction: on the one hand, from a proof \( a \) of 
+\( A \) and a proof \( b \) of \( \subst{B}{a} \), we can derive a proof of 
+\( \Exists{A}{B} \) as a simple lambda abstraction
 \[
 	\pair{a}{b} \quad := \quad \lambda\ X\ H\ .\ H\ a\ b
 \]
-and given a proof \( t \) of \( \Exists{A}{B} \), we define the following eliminators:
+and conversely, given a proof \( t \) of \( \Exists{A}{B} \) we define the 
+following eliminators:
 \[
 \begin{array}{rll}
 	\fst{t} \quad & := \quad t\ A\ (\lambda\ a\ b\ .\ a) & : \quad A \\
 	\snd{t} \quad & := \quad t\ (B\ \fst{t})\ (\lambda\ a\ b\ .\ b) & : \quad B\ \fst{t}.
 \end{array}
 \]
-Likewise, we can replicate the exact same definitions when \( A \) is a 
-proof-relevant type and \( B \) a dependent proposition to obtain an 
-existential type \( \varExists{A}{B} \).
 
-\paragraph*{Empty and Unit type}
+When \( A \) is a proof-relevant type and \( B \) is a proof-irrelevant proposition
+that depends on \( A \), we can replicate the same construction to obtain the 
+existential quantifier \( \varExists{A}{B} \). In this case however, the first 
+projection will not recover an inhabitant of \( A \), as this would extract 
+computational content from a proof-irrelevant object.
 
-To represent falsity and truth, \SetoidCC features the empty 
-type $\Empty$ and the unit type $\Unit$.
+\paragraph*{Truth and Falsity}
 
-Besides its formation rule (Rule~\nameref{infrule:empty-form}), the empty type 
+To represent absurdity, \SetoidCC features the false 
+proposition $\Empty$, from which we can define the true proposition 
+$\Unit$.
+
+Besides its formation rule (Rule~\nameref{infrule:empty-form}), the false proposition
 comes with an elimination principle (Rule~\nameref{infrule:empty-elim}) that 
-can eliminate it into both proof-irrelevant and proof-relevant types.
+applies to both proof-irrelevant and proof-relevant types.
 \sideremark{This large elimination rule means that we could not replace 
 \( \Empty \) with some impredicative encoding.}
 % 
@@ -466,8 +493,8 @@ In \SetoidCC however, there is another way of using proof irrelevant
 information to build a proof relevant term, by transporting (or casting) 
 along a proof of equality.
 
-The unit type on the other hand only requires a formation rule and a 
-constructor~$\unit$. It does not require an eliminator, since the usual one 
+The true proposition on the other hand only requires a formation rule and a 
+constructor. It does not require an eliminator, since the usual one 
 can be derived from proof irrelevance.
 % 
 Thus, we can simply define them as 
@@ -566,12 +593,11 @@ identity.
 		{%\tytm{\Gamma}{A}{\Univ_i}
 			\tytmannotated{\Gamma}{t}{A}{\Type_i} \\
 			\tytmannotated{\Gamma}{e}{\Obseq[{\Type_i}]{A}{A}}{\sProp}}
-		{\tytm{\Gamma}{\castrefl{A}{t}}{\Obseq[A]{t}{\cast{A}{A}{e}{t}}}}
+		{\tytmannotated{\Gamma}{\castrefl{A}{t}}{\Obseq[A]{t}{\cast{A}{A}{e}{t}}}{\sProp}}
 	\ilabel{infrule:cast-refl}
 \end{mathpar}
 % 
-In \shepherd{TODO}, we study a slight variant of \SetoidCC dubbed \SetoidCCplus
-\marginpar{\shepherd{Should I call it \SetoidCC + castrefl instead?}} 
+In \cref{ch:extensions}, we study a slight variant of \SetoidCC dubbed \SetoidCCplus
 where the rule \nameref{infrule:cast-refl} holds up to definitional equality, but its 
 normalization and canonicity are only conjectural.
 
@@ -636,7 +662,7 @@ In this case, it reduces to the point-wise equality of the two functions, which
 bakes the principle of function extensionality in the system.
 \begin{mathpar}
 	\inferrule[Eq-Fun]
-		{\tytm{\Gamma}{f, g}{\Depfunannotated{A}{B}{}{\Univ}{\Type_i}}}
+		{\tytmannotated{\Gamma}{f, g}{\Depfunannotated{A}{B}{}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(i, \Univ)}}}
 		{\red{\Gamma}{\Obseq[\Pi A B]{f}{g}}{\Depfunannotated{A}{\Obseq[B]{f\ x}{g\ x}}{}{\Univ}{\sProp}}{\sProp}}
 	\ilabel{inferrule:eq-fun}
 \end{mathpar}
@@ -700,15 +726,12 @@ to the equality of the first and second projections -- modulo a type casting,
 which is necessary for the second equality to type-check.
 
 \begin{mathpar}
-  \inferrule[Eq-Pair]{\tytm{\Gamma}{a}{A} \\ \tytm{\Gamma}{a'}{A} \\
-	\tytm{\Gamma}{b}{\subst{B}{a}}
-			\\ \tytm{\Gamma}{b'}{\subst{B}{a'}} \\ e' := \ap{B}{e}} %\transport{}{a}{\lam{A}{B}}{a'}{e}{b}{}}
-			{\redmultiline{\Gamma}{\Obseq[\Sigma A B]{(a;b)}{(a';b')}}{\Exists[e]{\Obseq[A]{a}{a'}}
-				{(\Obseq[B]{\cast{\subst{B}{a}}{\subst{B}{a'}}{e'}{b}}{b'})}}{\sProp}}
+  \inferrule[Eq-Pair]{\tytmannotated{\Gamma}{t,u}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}
+  			\\ b' := \cast{\subst{B}{\relfst{t}}}{\subst{B}{\relfst{u}}}{\ap{B}{e}}{\relsnd{t}}} 
+			{\redmultiline{\Gamma}{\Obseq[\Sigma A B]{t}{u}}{\Exists[e]{\Obseq[A]{\relfst{t}}{\relfst{u}}}
+				{(\Obseq[B]{b'}{\relsnd{u}})}}{\sProp}}
 		  \ilabel{inferrule:eq-pair}
 \end{mathpar}
-\sideremark[*-7]{Thanks to the \( \eta \)-conversion, we only need to state this
-rule for dependent pairs.}
 
 \subsection{Natural numbers}
 
@@ -732,7 +755,8 @@ rules are only necessary in the proof-relevant case.
 		{\tytmannotated{\Gamma}{n}{\Nat}{\Type_0}}
 		{\tytmannotated{\Gamma}{\suc{n}}{\Nat}{\Type_0}}
 	\ilabel{infrule:suc}
-	\and
+\end{mathpar}
+\begin{mathpar}
 	\inferrule[$\Nat$-Elim]
 		{\tytm{\Gamma}{A}{\Fun{\Nat}{\Univ}}
 			\\ \tytmannotated{\Gamma}{t_0}{A\ \zero}{\Univ}
@@ -749,7 +773,9 @@ rules are only necessary in the proof-relevant case.
 			\\ \tytmannotated{\Gamma}{t_S}{\Depfun[n]{\Nat}{\Fun{A\ n}{A\ (\suc{n})}}}{\Univ}}
 		{\red{\Gamma}{\natrec{A}{t_0}{t_S}{\zero}}{t_0}{A\ 0}}
 	\ilabel{inferrule:nat-elim-zero}
-	\and
+\end{mathpar}
+% 
+\begin{mathpar}
 	\inferrule[$\Nat$-Elim-Suc]
 		{\tytm{\Gamma}{A}{\Fun{\Nat}{\Type_i}}
 			\\ \tytmannotated{\Gamma}{t_0}{A\ \zero}{\Univ}
@@ -838,43 +864,34 @@ checking that the head constructors of the two types match.
 For instance, two proof-relevant function types \( A \to B \) and \( A' \to B' \) 
 are observationally equal exactly when \( \Obseq{A}{A'} \) and \( \Obseq{B}{B'} \).
 % 
-These rules imply the injectivity of type constructors, a very anti-univalent 
-principle.
-
-Rule \nameref{inferrule:eq-univ} stipulates that when the two terms are both 
-convertible to $\Nat$ or to the same universe, the equality holds, which is 
-captured by the fact that it reduces to the unit type.
+In case the head constructors do not match, the observational equality is false,
+as enforced by the following rule. 
+%  
+\sideremark{Rule~\nameref{inferrule:eq-univ-noeq} is not strictly necessary.
+We can drop it and get a system that works just as well, with slightly less 
+control over the universe.}
+\begin{mathpar}
+	\inferrule[Eq-Univ-$\neq$]
+		{\wfctx{\Gamma} \\ \head{A} \neq \head{B}}
+		{\red{\Gamma}{\Obseq[{\Type}]{A}{B}}{\Empty}{\sProp}}
+	\ilabel{inferrule:eq-univ-noeq}
+\end{mathpar}
 % 
+The auxiliary function $\head{A}$ returns the head constructor of \( A \), 
+including sort annotations. In particular, this means that the observational 
+equality between a \( \Pi \)-type with a relevant domain and a \( \Pi \)-type
+with an irrelevant domain reduces to \( \Empty \).
+
+In the case the head constructor \emph{do} match, however, the behavior of the
+observational equality needs to be specified with a rule for each constructor.
+Here are the rules that handle the proof-relevant types that we described so far: 
+
 \begin{mathpar}
 	\inferrule[Eq-Univ]
 		{\wfctx{\Gamma} \\ A \in \{ \Nat, \sProp, \Type_i \}}
 		{\red{\Gamma}{\Obseq[{\Type}]{A}{A}}{\Unit}{\sProp}}
 	\ilabel{inferrule:eq-univ}
 \end{mathpar}
-% 
-Rule \nameref{inferrule:eq-univ-noeq} says that when the two terms do not have 
-the same head constructor, the equality reduces to \( \Empty \). The function 
-$\head{A}$ is equal to $\Nat$, $\sProp$ or $\Type$ when $A$ is the type of 
-natural numbers or a universe, and is defined as $(\Pi, \Univ, \Univ')$ 
-(resp. $(\Sigma, \Univ, \Univ')$) when $A$ is the type 
-$\Depfunannotated{A}{B}{s}{\Univ}{\Univ'}$
-(resp. $\Depsumannotated{A}{B}{s}{\Univ}{\Univ'}$).
-% 
-\sideremark{Rule~\nameref{inferrule:eq-univ-noeq} is not strictly necessary.
-We can drop it and get a system that works just as well, with slightly less 
-control over the universe.}
-\begin{mathpar}
-	\inferrule[Eq-Univ-$\neq$]
-		{\wfctx{\Gamma} \\ A, B \in \{ \Nat, \Pi, \Sigma, \sProp, \Type_i \} \\ \head{A} \neq \head{B}}
-		{\red{\Gamma}{\Obseq[{\Type}]{A}{B}}{\Empty}{\sProp}}
-	\ilabel{inferrule:eq-univ-noeq}
-\end{mathpar}
-% 
-The last two rules (\nameref{inferrule:eq-pi} and \nameref{inferrule:eq-sigma}) 
-say that two dependent function (resp. sum) types are equal when their domain 
-are equal, and their codomain are pointwise equal (as type families) up to the 
-equality on their domain.
-% 
 \begin{mathpar}
 	\inferrule[Eq-$\Pi$]
 		{\tytm{\Gamma}{A,A'}{\Univ}
@@ -889,8 +906,8 @@ equality on their domain.
 \end{mathpar}
 \sideremark{Remark that the resulting types for \( \Pi \) and \( \Sigma \) are 
 slightly different (but equivalent) propositions.
-In each case, we picked the version that results in a simpler reduction 
-rule for \( \castName \).}
+In each case, we picked the version that will result in a simpler reduction 
+rule for \( \castName \) in the next section.}
 \begin{mathpar}
 	\inferrule[Eq-$\Sigma$]
 	{\tytm{\Gamma}{A,A'}{\Univ}
@@ -904,30 +921,33 @@ rule for \( \castName \).}
 	\ilabel{inferrule:eq-sigma}
 \end{mathpar}
 
-\subsection{Reduction Rules for Cast}
+The first rule~\nameref{inferrule:eq-univ} says that the diagonal equalities on
+the base type constructors are true.
+The other two (\nameref{inferrule:eq-pi} and \nameref{inferrule:eq-sigma}) 
+say that two dependent function (resp. sum) types are equal when their domain 
+are equal, and their codomain are pointwise equal (as type families) up to the 
+equality on their domain.
 % 
-We can now turn to the description of the computation rules for type
-casting, which are defined on a type-by-type basis.
-% 
-We only define reduction rules when the two types have the same head, and in other
-cases the cast will simply be a stuck term.
-% 
-Alternatively, we could reduce a cast between any two incompatible
-types to \( {\color{RoyalBlue}\bot}\metaop{-elim} \) applied to the equality
-proof, which has type $\Empty$ according to rule~\nameref{inferrule:eq-univ-noeq}.
-This amounts to replacing a stuck term with another, so we do not bother.
+Naturally, there are also rules for quotients, box types and the inductive 
+equality, that we will describe after having introduced them.
 
-Casting from $\Nat$ to $\Nat$ is defined by recursion.
+\paragraph*{Reduction Rules for Cast}
+% 
+As we explained in \cref{sec:cast-intro}, the \( \castName \) operator is an
+eliminator of the universe, which computes with a specific rule for each type.
+% 
+First, casting from $\Nat$ to $\Nat$ is defined by recursion.
 \sideremark{We could instead define type-casting of natural numbers to be the identity, but we prefer
 this definition because it is an instance of the pattern we will define for 
-arbitrary inductive types in \shepherd{TODO}.}
+arbitrary inductive types in \cref{ch:extensions}.}
 % 
 \begin{mathpar}
 	\inferrule[Cast-Zero]
 		{\tytm{\Gamma}{e}{\Obseq[{\Type_0}]{\Nat}{\Nat}}}
 		{\red{\Gamma}{\cast{\Nat}{\Nat}{e}{\zero}}{\zero}{\Nat}}
 	\ilabel{inferrule:cast-zero}
-	\and
+\end{mathpar}
+\begin{mathpar}
 	\inferrule[Cast-Suc]
 		{\tytm{\Gamma}{e}{\Obseq[{\Type_0}]{\Nat}{\Nat}}
 			\\ \tytmannotated{\Gamma}{n}{\Nat}{\Type_0}}
@@ -976,63 +996,13 @@ by applying \( \castName \) to the projections of the original one.
 	\ilabel{inferrule:cast-sigma}
 \end{mathpar}
 
-\subsection{Substitution Rules}
-
-For our definition of reduction to be complete, we need to add bureaucratic rules that
-reduce the scrutinees of eliminators to {\em weak-head normal form} (whnf),
-so the eliminator can then reduce by case analysis on the whnf.
-%
-Weak-head normal forms correspond to relevant terms that cannot be
-reduced (\cref{fig:whnf-neutral}).
-%
-They are either terms with a constructor in head position, or a neutral term, which
-correspond to the stuck terms that can not exist in an empty
-context. Neutral terms are either variables, eliminators applied to another neutral
-term, or obtained from an inhabitant of \( \Empty \).
-%
-In \SetoidCC, inhabitants of a proof-irrelevant type are never
-considered as whnf, as there is no notion of reduction of
-proof-irrelevant terms.
-%
-The substitution rules that implement reduction of scrutinees to weak-head normal
-form are described in the appendix.
-
-\begin{figure}[!h]
-  \begin{small}
-	\[
-	\begin{array}{l@{\qquad}lcl}
-	\whnf	& w & ::=	& \neu \\
-			&	& \sep	& \Type_i \qsep \sProp \qsep \Nat \qsep \Empty \qsep \Depfun{A}{B} \qsep \Depsum{A}{B} \\
-			&	& \sep	& \zero \qsep \suc{t} \qsep \lam{A}{t} \qsep \relpair{t}{u} \\
-	\neutral	& \neu	& ::=	& x \\
-				&		& \sep 	& \neu~t \qsep \relfst{\neu} \qsep \relsnd{\neu} 
-								\qsep \emptyrec{A}{e} \qsep \natrec{P}{t}{u}{\neu} \\   
-				&		& \sep	& \Obseq[\neu]{t}{u}
-								\qsep \Obseq[\Nat]{\neu}{m} \qsep \Obseq[\Nat]{\zero}{\neu}
-								\qsep \Obseq[\Nat]{\suc{m}}{\neu} \\ 
-				&		& \sep	& \Obseq[{\Type_i}]{\neu}{A}
-								\qsep \Obseq[{\Type_i}]{\Nat}{\neu}
-								\qsep \Obseq[{\Type_i}]{\Depfun{A}{B}}{\neu}
-								\qsep \Obseq[{\Type_i}]{\Depsum{A}{B}}{\neu} \\ 
-				&		& \sep	& \cast{\neu}{A}{e}{t} 
-								\qsep \cast{\Nat}{\neu}{e}{t}
-								\qsep \cast{\Nat}{\Nat}{e}{\neu} \\
-				&		& \sep	& \cast{\Depfun{A}{B}}{\neu}{e}{t}
-								\qsep \cast{\Depsum{A}{B}}{\neu}{e}{t} \\
-				&		& \sep	& \cast{w}{w'}{e}{t}
-												 \hspace{3em} \mbox{(where $\head{w} \neq
-												 \head{w'}$)}
-	\end{array}
-  \]
-  \end{small}
-  \caption{Weak-head normal and neutral forms}
-  \label{fig:whnf-neutral}
-\end{figure}
-
-And with this, we have completed the core system \SetoidCC.
-
-\section{Additional Types}
-\label{sec:extensions}
+We only define reduction rules when the two types have the same head, and in other
+cases the cast will simply be a stuck term.
+% 
+Alternatively, we could reduce a cast between any two incompatible
+types to \( {\color{RoyalBlue}\bot}\metaop{-elim} \) applied to the equality
+proof, which has type $\Empty$ according to rule~\nameref{inferrule:eq-univ-noeq}.
+This amounts to replacing a stuck term with another, so we do not bother.
 
 \subsection{Quotients}
 
@@ -1117,7 +1087,7 @@ quotient:
 % 
 The eliminator for quotient types encodes the universal property of quotients: to construct a
 function out of a quotient \( \Quo{A}{R} \), it suffices to give a function \( t_\pi \) out of \( A \)
-such that if \( R \ x \ y \), then their images under \( t_\pi \) are equal. \marginpar{\shepherd{TODO: fix overfull hboxes}}
+such that if \( R \ x \ y \), then their images under \( t_\pi \) are equal.
 % 
 \begin{mathpar}
   \inferrule{\tytm{\Gamma}{B}{\Fun{\Quo{A}{R}}{\Univ}}
@@ -1140,59 +1110,6 @@ The eliminator for quotient types has the obvious computation rule
 On top of this, quotients also come with the appropriate substitution and 
 congruence rules.
 % ifAppendix{ as defined in \cref{fig:SetoidTT-substitution,fig:SetoidTT-congruence}}
-
-% \subsection{Subset Types}
-
-% \shepherd{TODO, if I have time left}
-
-% \begin{mathpar}
-% 	\inferrule[$\Sigma$-Form]
-% 		{%\tytm{\Gamma}{A}{\Univ}
-% 			\tytm{\extctxannotated{\Gamma}{A}{\Type_i}}{B}{\Type_j}}
-% 		{\tytm{\Gamma}{\Depsumannotated{A}{B}{\Univ}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
-% 		{}
-% 	\ilabel{infrule:sigma-form}
-% \end{mathpar}
-% % 
-% \begin{mathpar}
-% 	\inferrule[Pair]
-% 		{\tytm{\extctxannotated{\Gamma}{A}{\Type_i}}{B}{\Type_j} 
-% 			\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}
-% 			\\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\Type_j}}
-% 		{\tytmannotated{\Gamma}{\relpair{t}{u}}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
-% 	\ilabel{infrule:pair}
-% 	\\\
-% 	\inferrule[Fst]
-% 		{\tytmannotated{\Gamma}{t}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
-% 		{\tytmannotated{\Gamma}{\relfst{t}}{A}{\Type_i}}
-% 	\ilabel{infrule:fst}
-% 	\ \inferrule[Snd]
-% 		{\tytmannotated{\Gamma}{t}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
-% 		{\tytmannotated{\Gamma}{\relsnd{t}}{\subst{B}{\relfst{t}}}{\Type_j}}
-% 	\ilabel{infrule:snd}
-% \end{mathpar}
-% % 
-% \begin{mathpar}
-% 	\inferrule[Fst-Pair]
-% 		{\tytm{\extctxannotated{\Gamma}{A}{\Type_i}}{B}{\Type_j} 
-% 			\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}
-% 			\\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\Type_j}}
-% 		{\red{\Gamma}{\relfst{\relpair{t}{u}}}{t}{A}}
-% 	\ilabel{infrule:fst-pair}
-% 	\and 
-% 	\inferrule[Snd-Pair]
-% 		{\tytm{\extctxannotated{\Gamma}{A}{\Type_i}}{B}{\Type_j} 
-% 			\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}
-% 			\\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\Type_j}}
-% 		{\red{\Gamma}{\relsnd{\relpair{t}{u}}}{u}{\subst{B}{t}}}
-% 	\ilabel{infrule:snd-pair}
-% \end{mathpar}
-% \begin{mathpar}
-% 	\inferrule[\( \eta \)-Depsum]
-% 		{\tytmannotated{\Gamma}{t}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
-% 		{\eqtmannotated{\Gamma}{t}{\relpair{\relfst{t}}{\relsnd{t}}}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
-% 	\ilabel{infrule:fst}
-% \end{mathpar}
 
 \subsection{Squash and Box Types}
 
@@ -1467,7 +1384,7 @@ type theory.
 
 Thus, the only difference between the two equalities is a tradeoff between
 definitional and propositional equations:
-\sideremark{In the system \SetoidCCplus of \shepherd{TODO}, we have the best
+\sideremark{In the system \SetoidCCplus of \cref{ch:extensions}, we have the best
 of both worlds: the observational equality satisfies both UIP and the computation
 of \( J \). But the normalization of this system is only conjectured.}
 % 
@@ -1477,6 +1394,60 @@ applied to reflexivity only satisfies its computation rule up to propositional e
 \item \( \metaop{Id} \) has a \( J \) eliminator that computes on reflexivity, but
 it only satisfies UIP up to a propositional equality.
 \end{itemize}
+
+\subsection{Weak-head Reduction}
+
+For our definition of reduction to be complete, we need to add bureaucratic rules that
+reduce the scrutinees of eliminators to {\em weak-head normal form} (whnf),
+so the eliminator can then reduce by case analysis on the whnf.
+%
+Weak-head normal forms correspond to relevant terms that cannot be
+reduced (\cref{fig:whnf-neutral}).
+%
+They are either terms with a constructor in head position, or a neutral term, which
+correspond to the stuck terms that can not exist in an empty
+context. Neutral terms are either variables, eliminators applied to another neutral
+term, or obtained from an inhabitant of \( \Empty \).
+%
+In \SetoidCC, inhabitants of a proof-irrelevant type are never
+considered as whnf, as there is no notion of reduction of
+proof-irrelevant terms.
+%
+The substitution rules that implement reduction of scrutinees to weak-head normal
+form are described in the appendix.
+
+\begin{figure}[!h]
+  \begin{small}
+	\[
+	\begin{array}{l@{\qquad}lcl}
+	\whnf	& w & ::=	& \neu \\
+			&	& \sep	& \Type_i \qsep \sProp \qsep \Nat \qsep \Empty \qsep \Depfun{A}{B} \qsep \Depsum{A}{B} 
+						\qsep \Quo{A}{R} \qsep \Boxt{A} \qsep \Id{A}{t}{u} \\
+			&	& \sep	& \zero \qsep \suc{t} \qsep \lam{A}{t} \qsep \relpair{t}{u}
+						\qsep \quo{t} \qsep \boxt{t} \qsep \id{t} \qsep \idpath{e} \\
+	\neutral	& \neu	& ::=	& x \\
+				&		& \sep 	& \neu~t \qsep \relfst{\neu} \qsep \relsnd{\neu} 
+								\qsep \emptyrec{A}{e} \\   
+				&		& \sep 	& \natrec{P}{t}{u}{\neu} \qsep \quorec{P}{t}{e}{\neu} \qsep \J{A}{t}{P}{u}{\neu}{e} \\  
+				&		& \sep	& \Obseq[\neu]{t}{u} \\
+				&		& \sep	& \Obseq[\Nat]{\neu}{m} \qsep \Obseq[\Nat]{\zero}{\neu}
+								\qsep \Obseq[\Nat]{\suc{m}}{\neu} \\ 
+				&		& \sep	& \Obseq[\Quo{A}{R}]{\neu}{t} \qsep \Obseq[\Quo{A}{R}]{\quo{t}}{\neu} \\
+				&		& \sep	& \Obseq[{\Type_i}]{\neu}{A}
+								\qsep \Obseq[{\Type_i}]{w}{\neu} \\ 
+				&		& \sep	& \cast{\neu}{A}{e}{t} 
+								\qsep \cast{w}{\neu}{e}{t} \\
+				&		& \sep	& \cast{\Nat}{\Nat}{e}{\neu}
+								\qsep \cast{\Quo{A}{R}}{\Quo{A'}{R'}}{e}{\neu} \\
+				&		& \sep	& \cast{w}{w'}{e}{t}
+												 \hspace{3em} \mbox{(where $\head{w} \neq
+												 \head{w'}$)}
+	\end{array}
+  \]
+  \end{small}
+  \caption{Weak-head normal and neutral forms}
+  \label{fig:whnf-neutral}
+\end{figure}
 
 \section{Examples}
 \label{sec:examples}
@@ -1562,10 +1533,8 @@ algorithm that, given a context \( \Gamma \) and terms \( t \) and \( A \), deci
 is an inhabitant of \( A \) in context \( \Gamma \). This ensures users that when they find a
 proof for a statement, the proof assistant can automatically check that their proof is correct.
 
-\subsection{Comparing \SetoidCC with Other Type Theories}
-
-\paragraph*{Martin-Löf Type Theory}
-% 
+\subsection{Comparing \SetoidCC with Martin-Löf Type Theory}
+ 
 The proof-relevant layer of \SetoidCC supports all the basic types of Martin-Löf 
 type theory: a universe hierarchy, dependent products, dependent sums, the natural 
 numbers, and the inductive equality; furthermore all the computation rules that 
@@ -1582,10 +1551,11 @@ Thus, we can embed this minimalistic version of \MLTT into our system.
 Of course, \SetoidCC is not 
 \defnote{conservative}{An extension \( \mathcal{T}' \) of a theory 
 \( \mathcal{T} \) is said to be conservative when it proves no new
-theorems that can be stated in \( \mathcal{T} \)} over \MLTT, as it becomes 
-possible to prove function extensionality and UIP for the inductive equality.
+theorems that can be stated in \( \mathcal{T} \)} 
+over \MLTT, as it becomes possible to prove function extensionality 
+and UIP for the inductive equality.
 % 
-However, there is a precise sense in which \SetoidCC does not offer more
+Still, there is a precise sense in which \SetoidCC does not offer more
 computational power than \MLTT. 
 
 \begin{theorem}[Computational power]
@@ -1601,25 +1571,7 @@ Well, in a way, it is! The impredicativity allows us to prove the existence
 of functions that grow much faster than what is definable in \MLTT. But there is
 a catch: we can only prove their existence in the proof-irrelevant layer, and
 we have no way to extract them to actual functions of type \( \Nat \to \Nat \).
-We will discuss this in more detail in \cref{ch:impredicativity}.
-
-\paragraph*{Extensional Type Theory}
-% 
-Extensional Type Theory, as i
-
-\begin{theorem}[Embedding]
-	If the judgment \( \tytm{\Gamma}{t}{A} \) is derivable in \ETT, then
-	we can find an integer \( i \) such that \( \tytmannotated{\Gamma}{t}{A}{\Type_i} \)
-	is derivable in \SetoidCC. 
-\end{theorem} 
-
-\begin{proof}
-\sidecitet{hofmann95} proved that \ETT is conservative over \MLTT + UIP + 
-function extensionality, which is a subset of \SetoidCC.
-\end{proof}
-
-Thus, \SetoidCC can be seen as a version of \ETT that has more reasonable 
-computational properties.
+We will discuss this in more detail in \cref{ch:extensions}.
 
 \subsection{Semantics of \SetoidCC}
 
@@ -1643,7 +1595,7 @@ This incites us to investigate more general classes of models, that do not
 collapse the propositions to a two-valued set. Now, there happens to be a
 class of ``constructive-set-like'' categories that play an important role
 in mathematics, called \emph{Grothendieck toposes}. And indeed, we will
-prove in \shepherd{TODO} that
+prove in \cref{ch:metatheory} that
 \marginpar{\shepherd{Should I talk about toposes? I don't really care about them tbh}}
 
 \begin{theorem}
@@ -1652,7 +1604,7 @@ prove in \shepherd{TODO} that
 
 With this, we conclude our overview of the Observational Calculus of 
 Constructions and we turn to the next chapter, in which we will develop the
-tools which are needed to prove the various theorems that we enunciated.
+tools that are needed to prove the various theorems that we enunciated.
 
 % The principle of \emph{unique choice} states that functions are the same
 % as graphs: given a relation \( R \) on \( A \times B \) that associates
