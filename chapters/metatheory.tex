@@ -234,7 +234,7 @@ these additional hypotheses (see \cref{sec:normalization-consequences}).
 \subsection{Modelling the Proof-Relevant Layer}
 
 We start by presenting the definition of reducibility for the relevant
-fragment, closely following \sidecitet{Abel:POPL2018,pujet:hal-03367052}.
+fragment, closely following \sidecitet{Abel:POPL2018}.
 %
 For pedagogical reasons, we will present a somewhat informal version
 of the proof where some arguments are left implicit, and encourage the reader 
@@ -242,68 +242,66 @@ who is interested in the technical details to have a look at the \Agda
 formalization.
 %
 While our formal proof and the definition in \refAgda{}{LogicalRelation} only 
-treat a subset of \SetoidCC with three universe levels, it should be quite 
+model a subset of \SetoidCC with three reducibility levels, it should be quite 
 clear that the same technique works for any finite number of levels.
-
-\begin{figure*}
-  \[
-\begin{array}{lr}
-   & \text{A is a reducible type of sort \( \Univ \) in context \( \Gamma \)} \\
-  \eqtyR{\ell}{\Gamma}{A}{B}{\Univ} & \text{A and B are reducibly equal types of sort \( \Univ \) in context \( \Gamma \)} \\
-  \tytmR{\ell}{\Gamma}{t}{A}{\Univ} & \text{t is a reducible term of type \( A \), which has sort \( \Univ \) in context \( \Gamma \)} \\
-  \eqtmR{\ell}{\Gamma}{t}{u}{A}{\Univ} & \qquad\text{t and u are reducibly equal terms of type \( A \), which has sort \( \Univ \) in context \( \Gamma \)}
-\end{array}
-\]
-\caption{The four reducibility predicates}
-\label{fig:log-rel-judgments}
-\end{figure*}
 
 The reducibility predicates are defined by induction-recursion, as detailed
 in \cref{fig:logrel-ind-rec}.
 %
-The logical relation on types is defined inductively with seven
-constructors, one for every type of \SetoidCC. Each constructor
-involves an auxiliary predicate of the form \( \Gamma \Vdash_X t \)
-that packs the appropriate information for the corresponding type.
+The reducible types are defined inductively with eleven constructors, one for 
+every type former of \SetoidCC and one for neutral types. 
+% 
+Each constructor takes as argument a proof of an auxiliary predicate of the 
+form \( \Gamma \Vdash_X t \) that packs information specific to the 
+corresponding type, that we will define individually.
 %
 The logical relations on terms and equalities are simultaneously
-defined by recursion on \( \tytyR{\ell}{\Gamma}{A}{s} \), using
+defined by recursion on \( \tytyR{\ell}{\Gamma}{A}{\Univ} \), using
 more auxiliary predicates.
 %
 This technically means that these judgments should have an extra
-argument of type \( \tytyR{\ell}{\Gamma}{A}{s} \), but since it
+argument of type \( \tytyR{\ell}{\Gamma}{A}{\Univ} \), but since it
 will turn out that all such derivations give rise to equivalent judgments
-(cf \refAgda{}{Irrelevance}), we freely omit this argument.
+(cf \refAgda{}{Irrelevance}), we leave this argument implicit.
 
 \begin{figure*}
   \begin{small}
 \begin{flalign*}
   \begin{array}{lcl}
-\_ \Vdash_\ell \_ : \_ & : & (\Gamma : \Context) \to (t : \Term) \to (A : \Term) \to (s : \Sort) \to \AgdaSet{} \\
-\_ \Vdash_\ell \_ : \_ & \bnfis & \Vne : \forall\ \Gamma\ t\ s \to
-                          (\Gamma \Vdash_{\mathsf{ne}} t : s) \to
-                          \Gamma \Vdash_\ell t : s\\
-               & \sep & \VU : \forall\ \Gamma\ t\ i \to
-                          (\Gamma \Vdash_{\mathsf{U}} t : \varType_i) \to
-                          \Gamma \Vdash_\ell t : \varType_i\\
-               & \sep & \Vnat : \forall\ \Gamma\ t \to
-                          (\Gamma \Vdash_{\Nat} t) \to
-                          \Gamma \Vdash_\ell t : \varType_0\\
-               & \sep & \Vpi : \forall\ \Gamma\ t\ i \to
-                          (\Gamma \Vdash_{\Pi} t : \varType_i) \to
-                          \Gamma \Vdash_\ell t : \varType_i\\
-               & \sep & \VOmega : \forall\ \Gamma\ t\ i \to
-                          (\Gamma \Vdash_{\Omega} t : \varType_i) \to
-                          \Gamma \Vdash_\ell t : \varType_i\\
+\_ \Vdash_\ell \_ : \_ & : & (\Gamma : \Context) \to (t : \Term) \to (A : \Term) \to (\Univ : \Sort) \to \AgdaSet{} \\
+\_ \Vdash_\ell \_ : \_ & \bnfis & \Vne : \forall\ \Gamma\ t\ \Univ \to
+                          (\Gamma \Vdash_{\mathsf{ne}} t : \Univ) \to
+                          \Gamma \Vdash_\ell t : \Univ\\
                & \sep & \Vforall : \forall\ \Gamma\ t \to
-                          (\Gamma \Vdash_{\forall} t) \to
-                          \Gamma \Vdash_\ell t : \sProp\\
-               & \sep & \Vexists : \forall\ \Gamma\ t \to
-                          (\Gamma \Vdash_{\exists} t) \to
+                          (\Gamma \Vdash_{\Pi \mathsf{i}} t) \to
                           \Gamma \Vdash_\ell t : \sProp\\
                & \sep & \Vempty : \forall\ \Gamma\ t \to
                           (\Gamma \Vdash_{\bot} t) \to
                           \Gamma \Vdash_\ell t : \sProp\\
+               & \sep & \VU : \forall\ \Gamma\ t\ i \to
+                          (\Gamma \Vdash_{\mathsf{U}} t : \Type_i) \to
+                          \Gamma \Vdash_\ell t : \Type_i\\
+               & \sep & \VOmega : \forall\ \Gamma\ t\ i \to
+                          (\Gamma \Vdash_{\Omega} t : \Type_i) \to
+                          \Gamma \Vdash_\ell t : \Type_i\\
+               & \sep & \Vnat : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Nat} t) \to
+                          \Gamma \Vdash_\ell t : \Type_0\\
+               & \sep & \Vpi : \forall\ \Gamma\ t\ i \to
+                          (\Gamma \Vdash_{\Pi} t : \Type_i) \to
+                          \Gamma \Vdash_\ell t : \Type_i\\
+               & \sep & \Vsigma : \forall\ \Gamma\ t\ i \to
+                          (\Gamma \Vdash_{\Sigma} t : \Type_i) \to
+                          \Gamma \Vdash_\ell t : \Type_i\\
+               & \sep & \Vbox : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Box} t) \to
+                          \Gamma \Vdash_\ell t : \Type_0\\
+               & \sep & \Vquo : \forall\ \Gamma\ t\ i \to
+                          (\Gamma \Vdash_{\mathsf{Q}} t : \Type_i) \to
+                          \Gamma \Vdash_\ell t : \Type_i\\
+               & \sep & \Vid : \forall\ \Gamma\ t\ i \to
+                          (\Gamma \Vdash_{\mathsf{Id}} t : \Type_i) \to
+                          \Gamma \Vdash_\ell t : \Type_i\\
                %% & \sep & \Vemb : \forall\ \ell'\ \Gamma\ t\ s \to
                %%            \ell' < \ell \to
                %%            \Gamma \Vdash_{\ell'} t : s \to
@@ -314,28 +312,28 @@ will turn out that all such derivations give rise to equivalent judgments
 \begin{flalign*}
   \begin{array}{lcl}
 \_ \Vdash_\ell \_ \equiv \_ : \_ & : & (\Gamma : \Context) \to (A : \Term) \to (B : \Term) \to (s : \Sort) \to \{ \Gamma \Vdash_\ell A : s \} \to \AgdaSet{} \\
-\Gamma \Vdash_\ell A \equiv B : s\ \{ \VX \} & = & \Gamma \Vdash_{X,\ell} A \equiv B : s
-  \qquad \text{for all }\ X \in \{\mathsf{ne}, \mathsf{U}, \mathbb{N}, \Pi, \Omega, \forall, \exists, \bot\}
+\Gamma \Vdash_\ell A \equiv B : s\ \{ \VX \} & = & \Gamma \Vdash_{X} A \equiv B : s
+  \qquad \text{for all }\ X \in \{\mathsf{ne}, {\Pi \mathsf{i}}, \bot, \mathsf{U}, \Omega, \mathbb{N}, \Pi, \Sigma, \Box, \mathsf{Q}, \mathsf{Id} \}
   \end{array} &&
 \end{flalign*}
 
 \begin{flalign*}
   \begin{array}{lcl}
 \_ \Vdash_\ell \_ : \_ : \_ & : & (\Gamma : \Context) \to (t : \Term) \to (A : \Term) \to (s : \Sort) \to \{ \Gamma \Vdash_\ell A : s \} \to \AgdaSet{} \\
-\Gamma \Vdash_\ell t : A : s\ \{ \VX \} & = & \Gamma \Vdash_{X,\ell} t : A: s
-  \qquad \text{for all }\ X \in \{\mathsf{ne}, \mathsf{U}, \mathbb{N}, \Pi, \Omega, \forall, \exists, \bot\}
+\Gamma \Vdash_\ell t : A : s\ \{ \VX \} & = & \Gamma \Vdash_{X} t : A: s
+  \qquad \text{for all }\ X \in \{\mathsf{ne}, {\Pi \mathsf{i}}, \bot, \mathsf{U}, \Omega, \mathbb{N}, \Pi, \Sigma, \Box, \mathsf{Q}, \mathsf{Id} \}
   \end{array} &&
 \end{flalign*}
 
 \begin{flalign*}
   \begin{array}{lcl}
 \_ \Vdash_\ell \_ \equiv \_ : \_ : \_ & : & (\Gamma : \Context) \to (t\ u : \Term) \to (A : \Term) \to (s : \Sort) \to \{ \Gamma \Vdash_\ell A : s \} \to \AgdaSet{} \\
-\Gamma \Vdash_\ell t \equiv u : A : s\ \{ \VX \} & = & \Gamma \Vdash_{X,\ell} t \equiv u : A: s
-  \qquad \text{for all }\ X \in \{\mathsf{ne}, \mathsf{U}, \mathbb{N}, \Pi, \Omega, \forall, \exists, \bot\}
+\Gamma \Vdash_\ell t \equiv u : A : s\ \{ \VX \} & = & \Gamma \Vdash_{X} t \equiv u : A: s
+  \qquad \text{for all }\ X \in \{\mathsf{ne}, {\Pi \mathsf{i}}, \bot, \mathsf{U}, \Omega, \mathbb{N}, \Pi, \Sigma, \Box, \mathsf{Q}, \mathsf{Id} \}
   \end{array} &&
 \end{flalign*}
 \end{small}
-  \caption{Inductive-recursive presentation of the logical relation}
+  \caption{Inductive-recursive presentation of reducibility}
   \label{fig:logrel-ind-rec}
 \end{figure*}
 
@@ -346,53 +344,48 @@ will turn out that all such derivations give rise to equivalent judgments
 We now give the definition of all these auxiliary predicates, starting
 with the predicates for neutral types.
 
-\paragraph{Neutral Types}
+\paragraph{Proof-relevant Neutral Types}
 
 % The first kind of reducible type are neutral type.
 \[
-{\small
-  \inferrule{\redT{\Gamma}{A}{N}{s} \\ \neutral{N}}
-  {\tytyR{\mathsf{ne}}{\Gamma}{A}s{}}
-  }
+  \inferrule{\redT{\Gamma}{A}{N}{\Type_i} \\ \neutral{N}}
+  {\tytyR{\mathsf{ne}}{\Gamma}{A}{\Type_i}}
 \]
-This rule states that $A$ is reducible to a neutral type:
-\( \redT{\Gamma}{A}{N}{s} \) means that \( A \) reduces to a neutral term \( N \)
-in a finite number of steps (possibly zero), and that both \( A \) and \( N \) are of sort \( s \) in context \( \Gamma \).
+Terms which reduce to neutral types are reducible types.
+In this rule, the premise \( \redT{\Gamma}{A}{N}{\Type_i} \) means that \( A \) 
+reduces to a term \( N \) in a finite number of steps (possibly zero), and that 
+both \( A \) and \( N \) are of sort \( \Type_i \) in context \( \Gamma \).
 %
-When $A$ is reducible to a neutral type, we define:
+When $A$ is reducible to a neutral type, we also define:
 % Given a derivation
 % \( \metatm{\mathscr{A}}{\tytyR{\ell}{\Gamma}{A}} \) built by this rule, we define:
 \begin{itemize}
-  \item \( \eqtyR{\mathsf{ne}}{\Gamma}{A}{B}{s} \) if there is a neutral term \( M \) such that
-    \( \redT{\Gamma}{B}{M}{s} \) and \( \eqtm{\Gamma}{N}{M}{s} \).
-  \item \( \tytmR{\mathsf{ne}}{\Gamma}{t}{A}{s} \) if there is a neutral term \( n \) such that
+  \item \( \eqtyR{\mathsf{ne}}{\Gamma}{A}{B}{\Type_i} \) if there is a neutral term \( M \) such that
+    \( \redT{\Gamma}{B}{M}{\Type_i} \) and \( \eqtm{\Gamma}{N}{M}{\Type_i} \).
+  \item \( \tytmR{\mathsf{ne}}{\Gamma}{t}{A}{\Type_i} \) if there is a neutral term \( n \) such that
     \( \redT{\Gamma}{t}{n}{N} \).
-  \item \( \eqtmR{\mathsf{ne}}{\Gamma}{t}{u}{A}{s} \) if there are neutral terms \( n, m \) such that
-    \( \redT{\Gamma}{t}{n}{N} \)
-
-    and \( \redT{\Gamma}{u}{m}{N} \), and
+  \item \( \eqtmR{\mathsf{ne}}{\Gamma}{t}{u}{A}{\Type_i} \) if there are neutral terms \( n, m \) such that
+    \( \redT{\Gamma}{t}{n}{N} \) and \( \redT{\Gamma}{u}{m}{N} \), and
     \( \eqtm{\Gamma}{n}{m}{N} \).
 \end{itemize}
 
-Note that the definition of reducible neutral types and terms does not
-recursively call the logical relation, thus it can be defined outside of
-the inductive-recursive definition.
+In other words, being a reducible inhabitant of a neutral type is simply
+reducing to a neutral term.
 
 \paragraph{Natural Numbers}
 \[
-{\small
-  \inferrule{\redT{\Gamma}{A}{\Nat}{\varType_0}}
+  \inferrule{\redT{\Gamma}{A}{\Nat}{\Type_0}}
             {\Gamma \Vdash_{\mathbb{N}} A}
-}\]
-When $A$ is reducible to $\Nat$, we define:
+\]
+Terms which reduce to $\Nat$ are reducible types. In case \( A \) is reducible 
+to \( \Nat \), we also define:
  % Given a derivation \( \metatm{\mathscr{A}}{\tytyR{\ell}{\Gamma}{A}} \) built by this rule, we
 % define:
 \begin{itemize}
-  \item \( \Gamma \Vdash_{\mathbb{N}} A \equiv B \) if \( \redT{\Gamma}{B}{\Nat}{\varType_0} \).
+  \item \( \Gamma \Vdash_{\mathbb{N}} A \equiv B \) if \( \redT{\Gamma}{B}{\Nat}{\Type_0} \).
   \item \( \Gamma \Vdash_{\mathbb{N}} t : A \) if there is a normal form \( t' \) such that
     \( \redT{\Gamma}{t}{t'}{\Nat} \) and \( \Gamma \Vdash_{\mathbb{N}\mathsf{t}} t' \), which is inductively
     defined by
-{\small
     \[
       \inferrule{ }
                 {\nattmR{\Gamma}{\zero}}
@@ -403,168 +396,387 @@ When $A$ is reducible to $\Nat$, we define:
       \inferrule{\tytm{\Gamma}{n}{\Nat}
                 \\ \text{\( n \) is neutral}}
                 {\nattmR{\Gamma}{n}}
-    \]}
+    \]
   \item \( \Gamma \Vdash_{\mathbb{N}} t \equiv u : A \) if there are normal forms \( t', u' \) such that
     \( \redT{\Gamma}{t}{t'}{\Nat} \) and
-
     \( \redT{\Gamma}{u}{u'}{\Nat} \), and
     \( \nateqR{\Gamma}{t'}{u'} \), which is inductively defined by
-    {\small
-\[
+\begin{mathpar}
       \inferrule{ }
                 {\nateqR{\Gamma}{\zero}{\zero}}
-      \quad
+      \and
       \inferrule{\nateqR{\Gamma}{t}{u}}
                 {\nateqR{\Gamma}{\suc{t}}{\suc{u}}}
-      \quad
+      \and
       \inferrule{\eqtm{\Gamma}{n}{m}{\Nat}
                 \\ \text{\( n, m \) are neutral}}
                 {\nateqR{\Gamma}{n}{m}}
-    \]}
+\end{mathpar}
 \end{itemize}
 
-Again, those definitions do not
-mention the logical relation and can be defined \emph{a priori}.
-
+These definitions mean that a term is a reducible natural number when it 
+reduces to either zero, a neutral term or a successor of a reducible 
+natural number.
 
 \paragraph{Predicative Universes}
 \[
-{\small
-  \inferrule{\redT{\Gamma}{A}{\varType_i{}}{\varType_{i+1}}}
-            {\tytyR{\mathsf{U}}{\Gamma}{A}{\varType_{i+1}}}
+  \inferrule{\redT{\Gamma}{A}{\Type_i{}}{\Type_{i+1}}}
+            {\tytyR{\mathsf{U}}{\Gamma}{A}{\Type_{i+1}}}
             { \substack{i < \ell}}
-}\]
-When $A$ is reducible to a predicative universe, we define:
+\]
+Terms which reduce to a predicative universe are reducible types. In case \( A \) 
+is reducible to a predicative universe, we also define:
 \begin{itemize}
-  \item \( \eqtyR{\mathsf{U}}{\Gamma}{A}{B}{\varType_{i+1}} \) if \( \redT{\Gamma}{B}{\varType_i{}}{\varType_{i+1}} \).
-  \item \( \tytmR{\mathsf{U}}{\Gamma}{t}{A}{\varType_{i+1}} \) if there is a normal form \( t' \) such that
-    \( \redT{\Gamma}{t}{t'}{\varType_i{}} \), and \( \tytyR{i}{\Gamma}{t}{\varType_i} \)
+  \item \( \eqtyR{\mathsf{U}}{\Gamma}{A}{B}{\Type_{i+1}} \) if \( \redT{\Gamma}{B}{\Type_i{}}{\Type_{i+1}} \).
+  \item \( \tytmR{\mathsf{U}}{\Gamma}{t}{A}{\Type_{i+1}} \) if there is a normal form \( t' \) such that
+    \( \redT{\Gamma}{t}{t'}{\Type_i{}} \), and \( \tytyR{i}{\Gamma}{t}{\Type_i} \)
 
     (which is already defined by induction hypothesis, since
     \( i < \ell \)).
-  \item \( \eqtmR{\mathsf{U}}{\Gamma}{t}{u}{A}{\varType_{i+1}} \) if there are normal forms \( t', u' \) such that
-    \( \redT{\Gamma}{t}{t'}{\varType_i{}} \)
-
-    and \( \redT{\Gamma}{u}{u'}{\varType_i{}} \), and
-    \( \tytyR{i}{\Gamma}{t}{\varType_i} \), \( \tytyR{i}{\Gamma}{u}{\varType_i} \), and \( \eqtyR{i}{\Gamma}{t}{u}{\varType_i} \).
+  \item \( \eqtmR{\mathsf{U}}{\Gamma}{t}{u}{A}{\Type_{i+1}} \) if there are normal forms \( t', u' \) such that
+    \( \redT{\Gamma}{t}{t'}{\Type_i{}} \)
+    and \( \redT{\Gamma}{u}{u'}{\Type_i{}} \), and
+    \( \tytyR{i}{\Gamma}{t}{\Type_i} \), \( \tytyR{i}{\Gamma}{u}{\Type_i} \), and \( \eqtyR{i}{\Gamma}{t}{u}{\Type_i} \).
 \end{itemize}
 
+According to these definitions, being a reducible inhabitant of a predicative
+universe is the same as being a proof-relevant reducible type: either a 
+neutral, or a dependent product, etc.
+% 
+This is the only case that recursively calls the definition of reducibility
+at a lower level, forcing us to define the whole affair by induction on 
+\( \ell \).
 
+\paragraph{Proof-relevant Dependent Products}
 
-\paragraph{Dependent Function Types}
-
-  \[
-{\small
-  \inferrule{\redT{\Gamma}{A}{\Depfunannotated{F}{G}{}{s}{\varType_i}}{\varType_j} \\ \piRel{\Type{}}{\varType_i} = \varType_j
-            \\ \tytm{\Gamma}{F}{\Type{}}
-            \\ \tytm{\extctx{\Gamma}{F}}{G}{\varType_i}
-            \\ \forall \wkrho \to \tytyR{\ell}{\Delta}{F[\rho]}{\Type{}}
-            \\ \forall \wkrho \to \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}{\tytyR{\ell}{\Delta}{G[\rho, a]}{\varType_i}}
-            \\ \forall \wkrho \to
-              \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}
-              {\metaimply{\tytmR{\ell}{\Delta}{b}{F[\rho]}{\Type{}}}
-              {\metaimply{\eqtmR{\ell}{\Delta}{a}{b}{F[\rho]}{\Type{}}}
-              {\eqtyR{\ell}{\Delta}{G[\rho, a]}{G[\rho, b]}{\varType_i}}}}}
-            {\tytyR{\Pi}{\Gamma}{A}{\varType_j}}
-          }\]
+  \begin{mathpar}
+  \inferrule{\redT{\Gamma}{A}{\Depfunannotated{F}{G}{}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(\Univ, i)}}
+            \\ \tytm{\Gamma}{F}{\Univ}
+            \\ \tytm{\extctx{\Gamma}{F}}{G}{\Type_i}
+            \\ \forall \wkrho,\ \tytyR{\ell}{\Delta}{F[\rho]}{\Univ}
+            \\ \forall \wkrho,\ \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Univ}}{\tytyR{\ell}{\Delta}{G[\rho, a]}{\Type_i}}
+            \\ \forall \wkrho,
+              {\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Univ}}
+              \to {\tytmR{\ell}{\Delta}{b}{F[\rho]}{\Univ}}
+              \to {\eqtmR{\ell}{\Delta}{a}{b}{F[\rho]}{\Univ}}
+              \to {\eqtyR{\ell}{\Delta}{G[\rho, a]}{G[\rho, b]}{\Type_i}}}
+            {\tytyR{\Pi}{\Gamma}{A}{\Type_{\mathrm{max}(\Univ, i)}}}
+  \end{mathpar}
 %
-This rule states that $A$ is reducible to a dependent function type.
+This rule describes the condition for $A$ to be reducible to a proof-relevant
+dependent product.
 %
-We introduced quite a bit of notation here. \( \to \) is implication in the meta
-theory, \ie the theory of \Agda. \( \forall \wkrho \) is a meta-theoretical
-quantification on an arbitrary well-formed context \( \Delta \) and a weakening \( \rho \)
-that turns \( \Delta \) into \( \Gamma \).
-Applying such a weakening on the free variables of a term \( F \) that is a well-typed
-in context \( \Gamma \) results in a term \( F[\rho] \) that is well-typed in context \( \Delta \).
-Given a term \( G \) in the extended context \( \extctx{\Gamma}{F} \) and a term
-\( \tytm{\Delta}{a}{F[\rho]} \), we can apply \( \rho \) on the free variables of \( G \) except
-for \( x \) to get a term in \( \extctx{\Delta}{F[\rho]} \), and then substitute \( x \) with \( a \)
-to get a term in \( \Delta \). The result is noted \( G[\rho, a] \).
+We introduced quite a bit of notation here, so we go over the premises one by 
+one.
+% 
+The first three premises state that \( A \) reduces to a dependent product in a
+finite number of steps, and that the domain and codomain of the dependent 
+product are well-formed types.
+% 
+\sideremark{Despite the similarity with an inclusion symbol, the notation 
+\( \Delta ⊑ \Gamma \) means that all types of \( \Gamma \) appear in 
+\( \Delta \).}
+% 
+The fourth premise asks for the domain \( F \) to be a reducible type under any
+weakening: the notation \( \wkrho \) means that \( \rho \) is a weakening from
+a context \( \Delta \) to the context \( \Gamma \), and the notation 
+\( F[\rho] \) represents the result of weakening the free variables of \( F \).
+% 
+The fifth premise says that given any weakening \( \rho \) and a term \( a \)
+which is a reducible inhabitant of \( F[\rho] \), the term we obtain by
+applying the weakening \( \rho \) to all free variables of \( G \) except for
+\( x \), and then substituting \( a \) for \( x \) is reducible.
+This term is noted \( G[\rho, a] \). 
+% 
+Finally, the last premise states that under any weakening, applying \( G \) to
+reducibly equal inhabitants of \( F \) results in two reducibly equal types.
 
-With those notations, a term $A$ is reducible to a dependent function
-type when (i) it reduces to $\Depfun{F}{G}$, (ii) $F$ is a reducible type, (iii)
-given any reducible term $a$ at type $F$, $G[a]$ is a reducible type and (iv) when $a$ and $b$ are reducibly equal at type $B$, $G[a]$
-and $G[b]$ are reducibly equal types.
-%
-Moreover, all these reducibility premises should hold under any weakening \( \rho \).
-%
-Note that the definition above defines reducibility of a type using
-reducibility of terms, which explains the need for an inductive-recursive definition.
+\sideremark[*1]{Thus, reducibility has the structure of a \emph{presheaf} over the
+category of weakenings. These generalized hypotheses are really an embodiment of
+the presheaf exponential.}
+The reader might be wondering why do we generalize the last three premises 
+under any weakening. The simple explanation is that we want reducibility to be
+stable under weakening, and we won't be able to prove it by induction on the
+definition because of the negative occurences -- so we generalize any premise
+that mentions reducibility on the left of an arrow.
 
-When $A$ is reducible to a dependent function type,
-% Given a derivation \( \metatm{\mathscr{A}}{\tytyR{\ell}{\Gamma}{A}}
-% \) built by this rule,
-we define:
+When $A$ is reducible to a dependent product, we define:
 \begin{itemize}
-  \item \( \eqtyR{\Pi}{\Gamma}{A}{B}{\varType_j} \) if there are terms \( F' \) and \( G' \) such that
+  \item \( \eqtyR{\Pi}{\Gamma}{A}{B}{\Type_{\mathrm{max}(\Univ, i)}} \) if there are terms \( F' \) and \( G' \) such that
     \begin{itemize}
-      \item \( \redT{\Gamma}{B}{\Depfun{F'}{G'}}{\varType_j} \) and
-        \( \eqtm{\Gamma}{\Depfun{F}{G}}{\Depfun{F'}{G'}}{\varType_j} \)
-      \item \( \forall \wkrho.\ \ \eqtyR{\ell}{\Delta}{F[\rho]}{F'[\rho]}{\Type{}} \)
-      \item \( \forall \wkrho.\ \ \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}{\eqtyR{\ell}{\Delta}{G[\rho, a]}{G'[\rho, a]}{\varType_i}} \).
+      \item \( \redT{\Gamma}{B}{\Depfun{F'}{G'}}{\Type_{\mathrm{max}(\Univ, i)}} \) 
+      \item \( \eqtm{\Gamma}{\Depfun{F}{G}}{\Depfun{F'}{G'}}{\Type_{\mathrm{max}(\Univ, i)}} \)
+      \item \( \forall \wkrho.\ \ \eqtyR{\ell}{\Delta}{F[\rho]}{F'[\rho]}{\Univ} \)
+      \item \( \forall \wkrho.\ \ {\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Univ}} \) 
+            \\ \( \phantom{\forall \wkrho} \to {\eqtyR{\ell}{\Delta}{G[\rho, a]}{G'[\rho, a]}{\Type_i}} \).
       \end{itemize}
-    \item \( \tytmR{\Pi}{\Gamma}{t}{A}{{\varType_j}} \) if there is a normal form \( t' \) such that
+    \item \( \tytmR{\Pi}{\Gamma}{t}{A}{{\Type_{\mathrm{max}(\Univ, i)}}} \) if there is a normal form \( t' \) such that
     \begin{itemize}
       \item \( \redT{\Gamma}{t}{t'}{\Depfun{F}{G}} \)
-      \item \( \forall \wkrho.\ \
-        \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}{\tytmR{\ell}{\Delta}{t'[\rho]\ a}{G[\rho, a]}{\varType_i}} \)
-      \item
-        $\forall \wkrho.  \  \
-              \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}
-                    {\metaimply{\tytmR{\ell}{\Delta}{b}{F[\rho]}{\Type{}}}
-                      {\eqtmR{\ell}{\Delta}{a}{b}{F[\rho]}{\Type{}}}}$
-
-                          \hspace{9.1em}
-                          $\metaimply{}{\eqtmR{\ell}{\Delta}{t'[\rho]\ a}{t'[\rho]\ b}{G[\rho,
-                                                                    a]}{\varType_i}}$.
+      \item \( \forall \wkrho.\ \ {\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Univ}} \) 
+            \\ \( \phantom{\forall \wkrho} \to {\tytmR{\ell}{\Delta}{t'[\rho]\ a}{G[\rho, a]}{\Type_i}} \)
+      \item \( \forall \wkrho.\ {\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Univ}} \)
+            \\ \( \phantom{\forall \wkrho} \to {\tytmR{\ell}{\Delta}{b}{F[\rho]}{\Univ}} \to {\eqtmR{\ell}{\Delta}{a}{b}{F[\rho]}{\Univ}} \)
+            \\ \( \phantom{\forall \wkrho} \to {\eqtmR{\ell}{\Delta}{t'[\rho]\ a}{t'[\rho]\ b}{G[\rho,a]}{\Type_i}} \).
     \end{itemize}
-  \item \( \eqtmR{\Pi}{\Gamma}{t}{u}{A}{\varType_j} \) if there are normal forms \( t', u' \) such that
+  \item \( \eqtmR{\Pi}{\Gamma}{t}{u}{A}{\Type_{\mathrm{max}(\Univ, i)}} \) if there are normal forms \( t', u' \) such that
     \begin{itemize}
       \item \( \redT{\Gamma}{t}{t'}{\Depfun{F}{G}} \)
       and \( \redT{\Gamma}{u}{u'}{\Depfun{F}{G}} \)
       \item \( \eqtm{\Gamma}{t'}{u'}{\Depfun{F}{G}} \)
-      \item \( \tytmR{\ell}{\Gamma}{t}{A}{\varType_j} \) and \( \tytmR{\ell}{\Gamma}{u}{A}{\varType_j} \)
-      \item \( \forall \wkrho.\ \ \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type{}}}{\eqtmR{\ell}{\Delta}{t'[\rho]\ a}{u'[\rho]\ a}{G[\rho, a]}{\varType_i}} \).
+      % \item \( \tytmR{\Pi}{\Gamma}{t}{A}{\Type_{\mathrm{max}(\Univ, i)}} \) 
+      %       and \( \tytmR{\Pi}{\Gamma}{u}{A}{\Type_{\mathrm{max}(\Univ, i)}} \)
+      \item \( \forall \wkrho.\ \ {\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Univ}} \)
+            \\ \( \phantom{\forall \wkrho} \to {\eqtmR{\ell}{\Delta}{t'[\rho]\ a}{u'[\rho]\ a}{G[\rho, a]}{\Type_i}} \).
     \end{itemize}
   \end{itemize}
 
-  The three definitions above make sense because we know that when
-  $A$ is reducible to a dependent function type, we also know that its domain $F$
-  and codomain $G$ are reducible.
-  %% The reducibility of a term at a  dependent function type is defined pointwise, but we also need
-  %% to ask that the term preserves reducible equality.
+These definitions deem a term to be a reducible dependent function when it
+reduces to either a neutral term or a lambda-abstraction, and it sends 
+reducible inhabitant of the domain to reducible inhabitants of the codomain.
+% 
+Note that in the three definitions above, we talk about reducibility of 
+inhabitants of the domain and the codomain. 
+We know that these reducibility predicates are well-defined because we assumed
+that the domain and the codomain are reducible types when we supposed
+that \( A \) is reducible to a dependent product.
 
-\subsection{The Logical Relation for the Impredicative Universe}
+\paragraph{Dependent Sums}
 
-We now turn to the definition of the relation for the proof-irrelevant
-fragment, which must be defined independently from the logical relation
-to avoid a non well-founded definition.
+\begin{mathpar}
+\inferrule{\redT{\Gamma}{A}{\Depsumannotated{F}{G}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}
+          \\ \tytm{\Gamma}{F}{\Type_i}
+          \\ \tytm{\extctx{\Gamma}{F}}{G}{\Type_j}
+          \\ \forall \wkrho,\ \tytyR{\ell}{\Delta}{F[\rho]}{\Type_i}
+          \\ \forall \wkrho,\ \metaimply{\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type_i}}{\tytyR{\ell}{\Delta}{G[\rho, a]}{\Type_j}}
+          \\ \forall \wkrho,
+            {\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type_i}}
+            \to {\tytmR{\ell}{\Delta}{b}{F[\rho]}{\Type_i}}
+            \to {\eqtmR{\ell}{\Delta}{a}{b}{F[\rho]}{\Type_i}}
+            \to {\eqtyR{\ell}{\Delta}{G[\rho, a]}{G[\rho, b]}{\Type_j}}}
+          {\tytyR{\Sigma}{\Gamma}{A}{\Type_{\mathrm{max}(i,j)}}}
+\end{mathpar}
+
+When \( A \) reduces to a dependent sum \( \Depsum{F}{G} \) such that \( F \) 
+and \( G \) verify the same conditions as for the dependent product, then 
+\( A \) is a reducible type.
+% 
+In this case, we define:
+\begin{itemize}
+  \item \( \eqtyR{\Sigma}{\Gamma}{A}{B}{\Type_{\mathrm{max}(i,j)}} \) if there are terms \( F' \) and \( G' \) such that
+    \begin{itemize}
+      \item \( \redT{\Gamma}{B}{\Depsum{F'}{G'}}{\Type_{\mathrm{max}(i,j)}} \) 
+      \item \( \eqtm{\Gamma}{\Depsum{F}{G}}{\Depsum{F'}{G'}}{\Type_{\mathrm{max}(i,j)}} \)
+      \item \( \forall \wkrho.\ \ \eqtyR{\ell}{\Delta}{F[\rho]}{F'[\rho]}{\Type_i} \)
+      \item \( \forall \wkrho.\ \ {\tytmR{\ell}{\Delta}{a}{F[\rho]}{\Type_i}} \) 
+            \\ \( \phantom{\forall \wkrho} \to {\eqtyR{\ell}{\Delta}{G[\rho, a]}{G'[\rho, a]}{\Type_j}} \).
+      \end{itemize}
+    \item \( \tytmR{\Sigma}{\Gamma}{t}{A}{{\Type_{\mathrm{max}(i,j)}}} \) if there is a normal form \( t' \) such that
+    \begin{itemize}
+      \item \( \redT{\Gamma}{t}{t'}{\Depsum{F}{G}} \)
+      \item \( \forall \wkrho.\ \ {\tytmR{\ell}{\Delta}{\relfst{t'[\rho]}}{F[\rho]}{\Type_i}} \) 
+      \item \( \forall \wkrho.\ \ {\tytmR{\ell}{\Delta}{\relsnd{t'[\rho]}}{G[\rho, \relfst{t'[\rho]}]}{\Type_j}}. \)
+    \end{itemize}
+  \item \( \eqtmR{\Sigma}{\Gamma}{t}{u}{A}{\Type_{\mathrm{max}(i,j)}} \) if there are normal forms \( t', u' \) such that
+    \begin{itemize}
+      \item \( \redT{\Gamma}{t}{t'}{\Depsum{F}{G}} \)
+      and \( \redT{\Gamma}{u}{u'}{\Depsum{F}{G}} \)
+      \item \( \eqtm{\Gamma}{t'}{u'}{\Depsum{F}{G}} \)
+      % \item \( \tytmR{\Sigma}{\Gamma}{t}{A}{\Type_{\mathrm{max}(i,j)}} \) 
+      %       and \( \tytmR{\Sigma}{\Gamma}{u}{A}{\Type_{\mathrm{max}(i,j)}} \)
+      \item \( \forall \wkrho.\ \ {\eqtmR{\ell}{\Delta}{\relfst{t'[\rho]}}{\relfst{u'[\rho]}}{F[\rho]}{\Type_i}} \) 
+      \item \( \forall \wkrho. \) \\ \({}\quad {\eqtmR{\ell}{\Delta}{\relsnd{t'[\rho]}}{\relsnd{u'[\rho]}}{G[\rho, \relfst{t'[\rho]}]}{\Type_j}}. \)
+    \end{itemize}
+\end{itemize}
+Thus, a term is a reducible inhabitant of \( A \) when it reduces to either a 
+neutral term or a dependent pair, a both of its projections are reducible.
+
+\paragraph*{Box types}
+\[
+  \inferrule{\redT{\Gamma}{A}{\Boxt{A'}}{\Type_0}
+            \\ \tytm{\Gamma}{A'}{\sProp}
+            \\ \tytyR{\ell}{\Gamma}{A'}{\sProp}}
+            {\tytyR{\Box}{\Gamma}{A}{\Type_0}}
+\]
+If \( A \) reduces to a boxed reducible proposition, then \( A \) is a 
+reducible type. In which case, we define:
+\begin{itemize}
+  \item \( \eqtyR{\Box}{\Gamma}{A}{B}{\Type_0} \) if there is a term \( B' \) such that
+    \begin{itemize}
+      \item \( \redT{\Gamma}{B}{\Boxt{B'}}{\Type_0} \)
+      \item \( \eqtyR{\ell}{\Gamma}{A'}{B'}{\sProp} \)
+    \end{itemize}
+  \item \( \tytmR{\Box}{\Gamma}{t}{A}{\Type_0} \) if there is a normal form \( t' \) such that
+    \( \redT{\Gamma}{t}{t'}{\Boxt{A'}} \) and \( \boxtmR{\Gamma}{t'} \), which is defined by
+    \begin{mathpar}
+      \inferrule{\tytm{\Gamma}{t}{A'}}
+                {\boxtmR{\Gamma}{\boxt{t}}}
+      \and
+      \inferrule{\tytm{\Gamma}{n}{\Boxt{A'}}
+                \\ \text{\( n \) is neutral}}
+                {\boxtmR{\Gamma}{n}}
+    \end{mathpar}
+  \item \( \eqtmR{\Box}{\Gamma}{t}{u}{A}{\Type_i} \) if there are normal forms \( t', u' \) such that
+    \( {\redT{\Gamma}{t}{t'}{\Boxt{A'}}} \), \( {\redT{\Gamma}{u}{u'}{\Boxt{A'}}} \), and
+    \( {\boxeqR{\Gamma}{t'}{u'}} \), which is defined by
+    \begin{mathpar}
+      \inferrule{\tytm{\Gamma}{t}{A'} \\ \tytm{\Gamma}{u}{A'}}
+                {\boxeqR{\Gamma}{\boxt{t}}{\boxt{u}}}
+      \and
+      \inferrule{\eqtm{\Gamma}{n}{m}{\Boxt{A'}}
+                \\ \text{\( n, m \) are neutral}}
+                {\boxeqR{\Gamma}{n}{m}}
+    \end{mathpar}
+\end{itemize}
+In other words, an inhabitant of a box type is reducible when it reduces
+to either a boxed proof, or a neutral term.
+
+\paragraph*{Quotients}
+
+\[
+  \inferrule{\redT{\Gamma}{A}{\Quo{A'}{(R,R_r,R_s,R_t)}}{\Type_i}
+            \\ \tytm{\Gamma}{A'}{\Type_i}
+            \\ \forall \wkrho.\ \ \tytyR{\ell}{\Gamma}{A'[\rho]}{\Type_i}
+            \\ \tytmR{\ell}{\Gamma}{R}{\Fun{A'}{\Fun{A'}{\sProp}}}{\Type_i}
+            \\ \tytm{\Gamma}{R_r}{\Depfun{A'}{R\ x\ x}}
+            \\ \tytm{\Gamma}{R_s}{\Depfun[x,y]{A'}{\Fun{R\ x\ y}{R\ y\ x}}}
+            \\ \tytm{\Gamma}{R_t}{\Depfun[x,y,z]{A'}{\Fun{R\ x\ y}{\Fun{R\ y\ z}{R\ x\ z}}}}}
+            {\tytyR{\mathsf{Q}}{\Gamma}{A}{\Type_i}}
+\]
+This rule stipulates that \( A \) is a reducible type if it reduces to a 
+quotient type \( \Quo{A'}{R} \), its underlying type \( A' \) is reducible 
+under any substitution, and \( R \) is a reducible relation on \( A' \). 
+Note that to enunciate this last condition, we need to make sure that the
+type of relations on \( A' \) is reducible, which is deduced from the
+reducibility of \( A' \) and of \( \sProp \).
+
+If \( A \) is reducible to a quotient type, we define:
+\begin{itemize}
+  \item \( \eqtyR{\mathsf{Q}}{\Gamma}{A}{B}{\Type_i} \) if there are terms \( B', Q, Q_r, Q_s, Q_t \) such that
+    \begin{itemize}
+      \item \( \redT{\Gamma}{B}{\Quo{B'}{(Q,Q_r,Q_s,Q_t)}}{\Type_i} \)
+      \item \( \forall \wkrho.\ \ \eqtyR{\ell}{\Delta}{A'[\rho]}{B'[\rho]}{\Type_i} \)
+      \item \( \eqtmR{\ell}{\Gamma}{R}{Q}{\Fun{A'}{\Fun{A'}{\sProp}}}{\Type_i} \).
+      % \item \( \tytm{\Gamma}{Q_r}{\Depfun{B'}{Q\ x\ x}} \)
+      % \item \( \tytm{\Gamma}{Q_s}{\Depfun[x,y]{B'}{\Fun{Q\ x\ y}{Q\ y\ x}}} \)
+      % \item \( \tytm{\Gamma}{Q_t}{\Depfun[x,y,z]{B'}{\Fun{Q\ x\ y}{\Fun{Q\ y\ z}{Q\ x\ z}}}}} \)
+    \end{itemize}
+  \item \( \tytmR{\mathsf{Q}}{\Gamma}{t}{A}{\Type_i} \) if there is a normal form \( t' \) such that
+    \( \redT{\Gamma}{t}{t'}{\Quo{A'}{R}} \) and \( \quotmR{\Gamma}{t'} \), which is defined by
+    \begin{mathpar}
+      \inferrule{\tytmR{\ell}{\Gamma}{t}{A'}{\Type_i}}
+                {\quotmR{\Gamma}{\quo{t}}}
+      \and
+      \inferrule{\tytm{\Gamma}{n}{\Quo{A'}{R}}
+                \\ \text{\( n \) is neutral}}
+                {\quotmR{\Gamma}{n}}
+    \end{mathpar}
+  \item \( \eqtmR{\mathsf{Q}}{\Gamma}{t}{u}{A}{\Type_0} \) if there are normal forms \( t', u' \) such that
+    \( {\redT{\Gamma}{t}{t'}{\Quo{A'}{R}}} \), \( {\redT{\Gamma}{u}{u'}{\Quo{A'}{R}}} \), and
+    \( {\quoeqR{\Gamma}{t'}{u'}} \), which is defined by
+    \begin{mathpar}
+      \inferrule{\eqtmR{\ell}{\Gamma}{t}{u}{A'}{\Type_i}}
+                {\quoeqR{\Gamma}{\quo{t}}{\quo{u}}}
+      \and
+      \inferrule{\eqtm{\Gamma}{n}{m}{\Quo{A'}{R}}
+                \\ \text{\( n, m \) are neutral}}
+                {\quoeqR{\Gamma}{n}{m}}
+    \end{mathpar}
+\end{itemize}
+In other words, an inhabitant of a quotient type is reducible when it reduces
+to either a projection of a reducible term, or a neutral term.
+
+\paragraph*{Inductive Identity Types}
+
+\[
+  \inferrule{\redT{\Gamma}{A}{\Id{A'}{t}{u}}{\Type_i}
+            \\ \tytyR{\ell}{\Gamma}{A'}{\Type_i}
+            \\ \tytmR{\ell}{\Gamma}{t}{A'}{\Type_i}
+            \\ \tytmR{\ell}{\Gamma}{u}{A'}{\Type_i}}
+            {\tytyR{\mathsf{Id}}{\Gamma}{A}{\Type_i}}
+\]
+When $A$ reduces to an identity type between two reducible inhabitants of
+a reducible type, then \( A \) is reducible. In this case, we define:
+\begin{itemize}
+  \item \( \eqtyR{\mathsf{Id}}{\Gamma}{A}{B}{\Type_i} \) if there are terms \( B', t', u' \) such that
+    \begin{itemize}
+      \item \( \redT{\Gamma}{B}{\Id{B'}{t'}{u'}}{\Type_i} \)
+      \item \( \eqtyR{\ell}{\Gamma}{A'}{B'}{\Type_i} \)
+      \item \( \eqtmR{\ell}{\Gamma}{t}{t'}{A'}{\Type_i} \)
+      \item \( \eqtmR{\ell}{\Gamma}{u}{u'}{A'}{\Type_i} \).
+    \end{itemize}
+  \item \( \tytmR{\mathsf{Id}}{\Gamma}{e}{A}{\Type_i} \) if there is a normal form \( e' \) such that
+    \( \redT{\Gamma}{e}{e'}{\Id{A'}{t}{u}} \) and \( \idtmR{\Gamma}{e'} \), which is defined by
+    \begin{mathpar}
+      \inferrule{ }
+                {\idtmR{\Gamma}{\id{t}}}
+      \and
+      \inferrule{\tytm{\Gamma}{e}{\Obseq[A']{t}{u}}}
+                {\idtmR{\Gamma}{\idpath{e}}}
+      \and
+      \inferrule{\tytm{\Gamma}{n}{\Id{A'}{t}{u}}
+                \\ \text{\( n \) is neutral}}
+                {\idtmR{\Gamma}{n}}
+    \end{mathpar}
+  \item \( \eqtmR{\mathsf{Id}}{\Gamma}{e}{f}{A}{\Type_i} \) if there are normal forms \( e', f' \) such that
+    \( \redT{\Gamma}{e}{e'}{\Id{A'}{t}{u}} \) and \( \redT{\Gamma}{f}{f'}{\Id{A'}{t}{u}} \), and
+    \( \ideqR{\Gamma}{e'}{f'} \), which is inductively defined by
+    \begin{mathpar}
+      \inferrule{ }
+                {\ideqR{\Gamma}{\id{t}}{\id{t}}}
+      \and
+      \inferrule{\tytm{\Gamma}{e, f}{\Obseq[A']{t}{u}}}
+                {\ideqR{\Gamma}{\idpath{e}}{\idpath{f}}}
+    \end{mathpar}
+    \begin{mathpar}
+      \inferrule{\eqtm{\Gamma}{n}{m}{\Id{A'}{t}{u}}
+                \\ \text{\( n, m \) are neutral}}
+                {\ideqR{\Gamma}{n}{m}}
+    \end{mathpar}
+  \end{itemize}
+
+Which states that a term is a reducible witness of the inductive equality when it
+reduces to either reflexivity, \( \metaop{Idpath} \), or a neutral term.
+
+\subsection{Modelling the Proof-Irrelevant Layer}
+
+We now turn to the definition of reducibility for the proof-irrelevant
+fragment, which must be defined independently from the rest of the model
+to ensure a well-founded definition.
 
 Since there is no computation whatsoever in proof-irrelevant types,
 their inhabitants don't interact with other terms. This allows us
 to give a generic definition for reducibility of terms and term
-equality, that will work for any \( X \in \{ \bot, \forall, \exists\} \) :
+equality, that will work for any \( X \in \{ \bot, {\Pi \mathsf{i}}\} \) :
 %
 \begin{itemize}
   \item \( \tytmR{X}{\Gamma}{t}{A}{\sProp}\ \) when \(\ \tytm{\Gamma}{t}{A} \).
   \item \( \eqtmR{X}{\Gamma}{t}{u}{A}{\sProp}\ \) when \(\ \tytm{\Gamma}{t}{A} \) and \( \tytm{\Gamma}{u}{A} \).
   \end{itemize}
 %
-which means that if \( A \) is in \( \sProp \), then the logical
-relation does not need to collect any information on inhabitants of
+which means that if \( A \) is in \( \sProp \), then the model does not
+need to collect any information on inhabitants of
 \( A \), save for the fact that they are well-typed. And this applies
-to equality too, for any two inhabitants of \( A \) are always
+to reducible equality too, for any two inhabitants of \( A \) are always
 convertible.
-
+% 
 It only remains to define the reducibility of types and type equality
-for $\Empty$, impredicative dependent products and existential types.
+for $\Empty$ and the impredicative dependent products.
+
+Now, the reader probably noticed that not all types appear in our definition
+of reducibility.
+% 
+First, note that we do not need to account for \( \Unit \), existential types 
+or propositional truncation, as they are defined in terms of \( \Empty \)
+and dependent products.
 %
-We do not add a case for \( \Unit \), since it can be encoded
-as \( \Fun{\Empty}{\Empty} \).
-%
-Note that the observational equality is not featured in the the logical
-relation, as it does not play the role of a type constructor, but
-rather that of a detructor that computes by pattern-matching on types.
+Second, the observational equality does not appear in the definition
+either.
+This is because it does not play the role of a type constructor, but
+rather that of a destructor that computes by pattern-matching on types.
+Therefore, a type of the shape \( \Obseq[A]{t}{u} \) is never in normal
+form, unless if it is neutral (in which case the generic rule for neutral
+terms applies).
 
 \paragraph{Empty type}
 
@@ -572,12 +784,12 @@ The case of the empty type is easy, as it does not recursively call
 the logical relation.
 \[
 {\small
-  \inferrule{\redT{\Gamma}{A}{\Empty}{\sProp[i]}}
+  \inferrule{\redT{\Gamma}{A}{\Empty}{\sProp}}
             {\Gamma \Vdash_{\bot} A}
           }\]
 %
         When $A$ is reducible to the empty type, we define
-        \( \Gamma \Vdash_{\bot} A \equiv B \) as \( \redT{\Gamma}{B}{\Empty}{\sProp[i]} \).
+        \( \Gamma \Vdash_{\bot} A \equiv B \) as \( \redT{\Gamma}{B}{\Empty}{\sProp} \).
 
 
 \paragraph{Impredicative Dependent Function Types}
@@ -594,10 +806,10 @@ and the codomain are well-typed.
 
   \[
 {\small
-  \inferrule{\redT{\Gamma}{A}{\Depfunannotated{F}{G}{}{s}{\sProp}}{\sProp}
+  \inferrule{\redT{\Gamma}{A}{\Depfunannotated{F}{G}{}{\Univ}{\sProp}}{\sProp}
             \\ \tytm{\Gamma}{F}{\Type{}}
             \\ \tytm{\extctx{\Gamma}{F}}{G}{\sProp}}
-            {\Gamma \Vdash_\forall A}
+            {\Gamma \Vdash_{\Pi \mathsf{i}} A}
           }\]
 %
 Similarly, when $A$ is reducible to an impredicative function type,
@@ -609,108 +821,35 @@ reduces to a convertible impredicative function type:
 {\small
   \inferrule{ \redT{\Gamma}{B}{\Depfun{F'}{G'}}{\sProp}
             \\  \eqtm{\Gamma}{\Depfun{F}{G}}{\Depfun{F'}{G'}}{\sProp}}
-            {\Gamma \Vdash_\forall A \equiv B}
+            {\Gamma \Vdash_{\Pi \mathsf{i}} A \equiv B}
           }\]
         %
 
 These definitions do not recursively call the logical relation,
 but as a result the collected invariants are
 much weaker than those for relevant dependent function
-types. We will see in \cref{sec:fundamental-lemma} how to
-circumvent this problem by using a paranoid type system with
-many redundant hypotheses.
-
-
-\paragraph{Existential types}
-
-The definition of the logical relation for existential types is
-similar to the one for impredicative dependent function types. We define
-  \[
-{\small
-  \inferrule{\redT{\Gamma}{A}{\Exists{F}{G}}{\sProp}
-            \\ \tytm{\Gamma}{F}{\sProp}
-            \\ \tytm{\extctx{\Gamma}{F}}{G}{\sProp}}
-            {\Gamma \Vdash_\exists A}
-          }\]
-%
-  \[
-{\small
-  \inferrule{ \redT{\Gamma}{B}{\Exists{F'}{G'}}{\sProp}
-            \\  \eqtm{\Gamma}{\Exists{F}{G}}{\Exists{F'}{G'}}{\sProp}}
-            {\Gamma \Vdash_\exists A \equiv B}
-          }\]
-          %
-The only remaining case of our definition is the impredicative universe $\sProp$.
+types. We will discuss this in the proof of the fundamental lemma in \cref{sec:fundamental-lemma}.
 
 \paragraph{The Impredicative Universe}
 \[
-{\small
-  \inferrule{\redT{\Gamma}{A}{\sProp}{\varType_0}}
-            {\tytyR{\Omega}{\Gamma}{A}{\varType_0}}
-}\]
+  \inferrule{\redT{\Gamma}{A}{\sProp}{\Type_0}}
+            {\tytyR{\Omega}{\Gamma}{A}{\Type_0}}
+\]
 When $A$ is reducible to the impredicative universe, we define:
 \begin{itemize}
-  \item \( \eqtyR{\Omega}{\Gamma}{A}{B}{\varType_i} \) if \( \redT{\Gamma}{B}{\sProp}{\varType_i} \).
-  \item \( \tytmR{\Omega}{\Gamma}{t}{A}{\varType_j} \) if there is a normal form \( t' \) such that
+  \item \( \eqtyR{\Omega}{\Gamma}{A}{B}{\Type_i} \) if \( \redT{\Gamma}{B}{\sProp}{\Type_i} \).
+  \item \( \tytmR{\Omega}{\Gamma}{t}{A}{\Type_j} \) if there is a normal form \( t' \) such that
     \( \redT{\Gamma}{t}{t'}{\sProp} \), and \( \tytyR{i}{\Gamma}{t}{\sProp} \)
 
-    (which is already defined as reducibility of impredicative types is defined beforehand).
-  \item \( \eqtmR{\Omega}{\Gamma}{t}{u}{A}{\varType_j} \) if there are normal forms \( t', u' \) such that
-    \( \redT{\Gamma}{t}{t'}{\sProp} \)
-
-    and \( \redT{\Gamma}{u}{u'}{\sProp} \), and
-    \( \tytyR{i}{\Gamma}{t}{\sProp} \), \( \tytyR{i}{\Gamma}{u}{\sProp} \), and \( \eqtyR{i}{\Gamma}{t}{u}{\sProp} \).
+    (which is already defined as we defined the reducibility of impredicative types  
+    outside of the large inductive-recursive definition of reducibility).
+  \item \( \eqtmR{\Omega}{\Gamma}{t}{u}{A}{\Type_j} \) if there are normal forms \( t', u' \) such that
+    \begin{itemize}
+    \item \( \redT{\Gamma}{t}{t'}{\sProp} \) and \( \redT{\Gamma}{u}{u'}{\sProp} \)
+    \item \( \tytyR{i}{\Gamma}{t}{\sProp} \) and \( \tytyR{i}{\Gamma}{u}{\sProp} \)
+    \item  \( \eqtyR{i}{\Gamma}{t}{u}{\sProp} \).
+    \end{itemize}
 \end{itemize}
-
-\begin{figure}
-  \begin{small}
-    \begin{mathpar}
- \inferrule[$\Pi$-Form$_p$] {\tytmPara{\Gamma}{A}{\Type[]{}} \\
-            \tytmPara{\extctxannotated{\Gamma}{A}{\Type[]{}}}{B}{\Type[]{'}}}
-            {\tytmPara{\Gamma}{\Depfunannotated{A}{B}{s}{s}{s'}}{\piRel{\Type}{\Type[]{'}}}}
-            {}
-\ilabel{infrule:pi-form-Para}
-\and
- \inferrule[Fun$_p$]{\tytmPara{\Gamma}{A}{\Type[]{}} \\
-   \tytmParaannotated{\extctxannotated{\Gamma}{A}{\Type{}}}{t}{B}{\Type{'}}}
-            {\tytmParaannotated{\Gamma}{\lam{A}{t}}{\Depfun{A}{B}}{\piRel{\Type}{\Type[]{'}}}}
-\ilabel{infrule:pi-intro-Para}
-  \\
-  \inferrule[App$_p$]{\tytmPara{\Gamma}{A}{\Type[]{}} \\
-    \tytmPara{\extctxannotated{\Gamma}{A}{\Type[]{}}}{B}{\Type[]{'}}
-    \\
-    \tytmParaannotated{\Gamma}{t}{\Depfun{A}{B}}{\piRel{\Type}{\Type[]{'}}}
-            \\ \tytmParaannotated{\Gamma}{u}{A}{\Type{}}}
-            {\tytmParaannotated{\Gamma}{t\ u}{\subst{B}{u}}{\Type[]{'}}}
-            \ilabel{infrule:pi-elim-Para}
-  \\
-  \inferrule[$\exists$-Form$_p$]{\tytmPara{\Gamma}{A}{\sProp[i]} \\
-             \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]}}
-            {\tytmPara{\Gamma}{\Exists{A}{B}}{\sProp[i]}}
-            % {\scriptstyle \substack{i \le k \\ j \le k}}
-            \ilabel{infrule:exists-form-Para}
-            \and
-              \inferrule[Fst$_p$]{    \tytmPara{\Gamma}{A}{\sProp[i]} \\
-     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\\tytmParaannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
-            {\tytmParaannotated{\Gamma}{\fst{t}}{A}{\sProp}}\ilabel{infrule:fst-Para}
-\\
-  \inferrule[Snd$_p$]{    \tytmPara{\Gamma}{A}{\sProp[i]} \\
-     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\\tytmParaannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
-  {\tytmParaannotated{\Gamma}{\snd{t}}{\subst{B}{\fst{t}}}{\sProp}}
-  \ilabel{infrule:snd-Para}
-   \\
-  \inferrule[Pair$_p$]{
-    \tytmPara{\Gamma}{A}{\sProp[i]} \\
-     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\ \tytmParaannotated{\Gamma}{t}{A}{\sProp}
-            \\ \tytmParaannotated{\Gamma}{u}{\subst{B}{t}}{\sProp}}
-          {\tytmParaannotated{\Gamma}{\pair{t}{u}}{\Exists{A}{B}}{\sProp}}
-          \ilabel{infrule:pair-Para}
-        \end{mathpar}
-        \end{small}
-        \caption{\SetoidCC Paranoid Typing Rules (dependent function
-          types and existential types only)}
-  \label{fig:SetoidCC-paranoid-typing}
-\end{figure}
 
 \subsection{The Fundamental Lemma}
 \label{sec:fundamental-lemma}
@@ -873,6 +1012,57 @@ lemmas provided by the logical relation.
 Thus, the additional premises of the paranoid variant help us
 prove the fundamental lemma in presence of impredicativity, but end up
 being redundant once a sufficient amount of metatheory is established.
+
+
+\begin{figure}
+  \begin{small}
+    \begin{mathpar}
+ \inferrule[$\Pi$-Form$_p$] {\tytmPara{\Gamma}{A}{\Type[]{}} \\
+            \tytmPara{\extctxannotated{\Gamma}{A}{\Type[]{}}}{B}{\Type[]{'}}}
+            {\tytmPara{\Gamma}{\Depfunannotated{A}{B}{\Univ}{\Univ}{\Univ'}}{\piRel{\Type}{\Type[]{'}}}}
+            {}
+\ilabel{infrule:pi-form-Para}
+\and
+ \inferrule[Fun$_p$]{\tytmPara{\Gamma}{A}{\Type[]{}} \\
+   \tytmParaannotated{\extctxannotated{\Gamma}{A}{\Type{}}}{t}{B}{\Type{'}}}
+            {\tytmParaannotated{\Gamma}{\lam{A}{t}}{\Depfun{A}{B}}{\piRel{\Type}{\Type[]{'}}}}
+\ilabel{infrule:pi-intro-Para}
+  \\
+  \inferrule[App$_p$]{\tytmPara{\Gamma}{A}{\Type[]{}} \\
+    \tytmPara{\extctxannotated{\Gamma}{A}{\Type[]{}}}{B}{\Type[]{'}}
+    \\
+    \tytmParaannotated{\Gamma}{t}{\Depfun{A}{B}}{\piRel{\Type}{\Type[]{'}}}
+            \\ \tytmParaannotated{\Gamma}{u}{A}{\Type{}}}
+            {\tytmParaannotated{\Gamma}{t\ u}{\subst{B}{u}}{\Type[]{'}}}
+            \ilabel{infrule:pi-elim-Para}
+  \\
+  \inferrule[$\exists$-Form$_p$]{\tytmPara{\Gamma}{A}{\sProp[i]} \\
+             \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]}}
+            {\tytmPara{\Gamma}{\Exists{A}{B}}{\sProp[i]}}
+            % {\scriptstyle \substack{i \le k \\ j \le k}}
+            \ilabel{infrule:exists-form-Para}
+            \and
+              \inferrule[Fst$_p$]{    \tytmPara{\Gamma}{A}{\sProp[i]} \\
+     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\\tytmParaannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
+            {\tytmParaannotated{\Gamma}{\fst{t}}{A}{\sProp}}\ilabel{infrule:fst-Para}
+\\
+  \inferrule[Snd$_p$]{    \tytmPara{\Gamma}{A}{\sProp[i]} \\
+     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\\tytmParaannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
+  {\tytmParaannotated{\Gamma}{\snd{t}}{\subst{B}{\fst{t}}}{\sProp}}
+  \ilabel{infrule:snd-Para}
+   \\
+  \inferrule[Pair$_p$]{
+    \tytmPara{\Gamma}{A}{\sProp[i]} \\
+     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\ \tytmParaannotated{\Gamma}{t}{A}{\sProp}
+            \\ \tytmParaannotated{\Gamma}{u}{\subst{B}{t}}{\sProp}}
+          {\tytmParaannotated{\Gamma}{\pair{t}{u}}{\Exists{A}{B}}{\sProp}}
+          \ilabel{infrule:pair-Para}
+        \end{mathpar}
+        \end{small}
+        \caption{\SetoidCC Paranoid Typing Rules (dependent function
+          types and existential types only)}
+  \label{fig:SetoidCC-paranoid-typing}
+\end{figure}
 
 \subsection{Removing Paranoid Premises}
 \label{sec:remov-paran-prem}
@@ -1150,15 +1340,15 @@ Note that the logical relation is built in stages:
 \item We first define an inductive relation
   \( \AgdaData{R}^0 \) that has cases for dependent products and all base types, except
   for proof-relevant universes: it only accounts for inhabitants of
-  \( \varType_0 \).
+  \( \Type_0 \).
   %
-\item From \( \AgdaData{R}^0 \), we define a reducibility predicate \( P_{\varType_0} \) for
-  \( \varType_0 \): a term \( t \) is in \( P_{\varType_0} \) if there exist
+\item From \( \AgdaData{R}^0 \), we define a reducibility predicate \( P_{\Type_0} \) for
+  \( \Type_0 \): a term \( t \) is in \( P_{\Type_0} \) if there exist
   \( P_=, P_t, P_{t=} \) such that \( R^0(t,P_=, P_t, P_{t=}) \).
   %
-  Now that we have a predicate for \( \varType_0 \), we can define a relation
-  \( \AgdaData{R}^1 \) that accounts for inhabitants of \( \varType_1 \). Of course, since
-  \( P_{\varType_0} \) lives in \( \AgdaSet{1} \), \( \AgdaData{R}^1 \) will land in \( \AgdaSet{2} \).
+  Now that we have a predicate for \( \Type_0 \), we can define a relation
+  \( \AgdaData{R}^1 \) that accounts for inhabitants of \( \Type_1 \). Of course, since
+  \( P_{\Type_0} \) lives in \( \AgdaSet{1} \), \( \AgdaData{R}^1 \) will land in \( \AgdaSet{2} \).
 \item We repeat this process \( n \) times to obtain a relation \( \AgdaData{R}^n \)
   that handles our \( n \) universes.
 \end{itemize}
@@ -1196,8 +1386,8 @@ consider.
                           (\Gamma \Vdash_{\Omega} t) \to
                           \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Omega} t \equiv \_)\ (\Gamma\ \Vdash_{\Omega} \_ : t)\ (\Gamma\ \Vdash_{\Omega} \_ \equiv \_ : t)\\
                & \sep & \Rforall : \forall\ \Gamma\ t \to
-                          (\Gamma \Vdash_{\forall} t) \to
-                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\forall} t \equiv \_)\ (\Gamma\ \Vdash_{\forall} \_ : t)\ (\Gamma\ \Vdash_{\forall} \_ \equiv \_ : t)\\
+                          (\Gamma \Vdash_{\Pi \mathsf{i}} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Pi \mathsf{i}} t \equiv \_)\ (\Gamma\ \Vdash_{\Pi \mathsf{i}} \_ : t)\ (\Gamma\ \Vdash_{\Pi \mathsf{i}} \_ \equiv \_ : t)\\
                & \sep & \Rexists : \forall\ \Gamma\ t \to
                           (\Gamma \Vdash_{\exists} t) \to
                           \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\exists} t \equiv \_)\ (\Gamma\ \Vdash_{\exists} \_ : t)\ (\Gamma\ \Vdash_{\exists} \_ \equiv \_ : t)\\
@@ -1209,7 +1399,7 @@ consider.
 \end{flalign*}
 
 \begin{flalign*}
-& \text{All the functions whose name contains } \Vdash_{\mathsf{ne}} \, , \ \Vdash_{\mathsf{U}} \, , \ \Vdash_{\Nat} \, ,\ \Vdash_{\Pi} \, ,\ \Vdash_{\forall} \, ,\ \Vdash_{\exists} \, ,\ \Vdash_{\bot}
+& \text{All the functions whose name contains } \Vdash_{\mathsf{ne}} \, , \ \Vdash_{\mathsf{U}} \, , \ \Vdash_{\Nat} \, ,\ \Vdash_{\Pi} \, ,\ \Vdash_{\Pi \mathsf{i}} \, ,\ \Vdash_{\exists} \, ,\ \Vdash_{\bot}
 \text{ are as defined in \cref{sec:logic-relat-with}.} &
 \end{flalign*}
 
@@ -1350,7 +1540,7 @@ theorist's perspective is to build an inductive predicate \( \ \Upred \) over
 %
 Note how the constructor \( \codeemb \) builds a proof of \( \ \Upred\ X \)
 for any (small) set \( X \), so that statements that quantify over
-\( \varType_i \) apply to all appropriately-sized sets of the model.
+\( \Type_i \) apply to all appropriately-sized sets of the model.
 %
 This also implies that there might be several codes for the
 same set: for instance \( (\Fun{\Nat}{\Nat} \ ;\ \codeemb) \) and
@@ -1479,9 +1669,9 @@ well-defined, we define the function \( \sigma_t \) by:
   \begin{enumerate}
     \item If\, \( \wfctx{\Gamma} \) then \( \mctx{\Gamma} \) is defined.
     \item If\, \( \tytm{\Gamma}{A}{\sProp} \) then \( \mty{A}\ \rho \) is a proposition for all \( \rho \in \mctx{\Gamma} \).
-    \item If\, \( \tytm{\Gamma}{A}{\varType_i} \) then \( \mty{A}\ \rho \) is in \( \sU_i \) for all \( \rho \in \mctx{\Gamma} \).
+    \item If\, \( \tytm{\Gamma}{A}{\Type_i} \) then \( \mty{A}\ \rho \) is in \( \sU_i \) for all \( \rho \in \mctx{\Gamma} \).
     \item If\, \( \tytmannotated{\Gamma}{t}{A}{\sProp} \) then \( \mty{A}\ \rho \) is true for all \( \rho \in \mctx{\Gamma} \).
-    \item If\, \( \tytmannotated{\Gamma}{t}{A}{\varType_i} \) then \( \mty{t}\ \rho \) is in \( \el\ (\mty{A}\ \rho) \) for all \( \rho \in \mctx{\Gamma} \).
+    \item If\, \( \tytmannotated{\Gamma}{t}{A}{\Type_i} \) then \( \mty{t}\ \rho \) is in \( \el\ (\mty{A}\ \rho) \) for all \( \rho \in \mctx{\Gamma} \).
     \item If\, \( \eqtm{\Gamma}{t}{u}{A} \) then \( \mty{t} = \mty{u} \).
   \end{enumerate}
 \end{theorem}
@@ -1495,13 +1685,13 @@ well-defined, we define the function \( \sigma_t \) by:
 \[
 \begin{array}{rcl}
   \mty{x}\ \rho & := & \rho(x) \\
-  \mty{\varType_i}\ \rho & := & \langle \sU_i\ ;\ \codeU\ i \rangle \\
+  \mty{\Type_i}\ \rho & := & \langle \sU_i\ ;\ \codeU\ i \rangle \\
   \mty{\sProp[i]}\ \rho & := & \langle \ssProp\ ;\ \codesProp \rangle\\
-  \mty{\Depfunannotated[y]{F}{G}{}{\varType_j}{\varType_k}}\ \rho & := & \big\langle (x \in\el\ \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
+  \mty{\Depfunannotated[y]{F}{G}{}{\Type_j}{\Type_k}}\ \rho & := & \big\langle (x \in\el\ \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
 & & ;\ \codepiuu\ j\ k\ (\mty{F}\ \rho)\ (x \mapsto \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle) \big\rangle\\
-  \mty{\Depfunannotated[y]{F}{G}{}{\sProp}{\varType_k}}\ \rho & := & \big\langle (x \in\val\ \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
+  \mty{\Depfunannotated[y]{F}{G}{}{\sProp}{\Type_k}}\ \rho & := & \big\langle (x \in\val\ \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
 & & ;\ \codepisu\ (\mty{F}\ \rho)\ (x \mapsto \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle) \big\rangle\\
-  \mty{\Depfunannotated[y]{F}{G}{}{\varType_j}{\sProp}}\ \rho & := & \forall x \in (\el\ \mty{F}\ \rho),\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle\\
+  \mty{\Depfunannotated[y]{F}{G}{}{\Type_j}{\sProp}}\ \rho & := & \forall x \in (\el\ \mty{F}\ \rho),\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle\\
   \mty{\Depfunannotated[y]{F}{G}{}{\sProp}{\sProp}}\ \rho & := & (\mty{F}\ \rho) \Rightarrow (\mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ *\rangle)\\
   \mty{\lam[x]{F}{t}}\ \rho & := & x \mapsto (\mty[{\extctx[x]{\Gamma}{F}}]{t}\ \langle \rho\ ;\ x\rangle)\\
   \mty{t\ u}\ \rho & := & (\mty{t}\ \rho)\ (\mty{u}\ \rho)\\
@@ -1554,7 +1744,7 @@ On the other hand, it seems difficult to measure to what extent our
 set-theoretic model presents
 \SetoidCC as a good internal language for sets. Compared to the universe
 construction of \sidecitet{pujet:hal-03367052}, we gain the property that every set belongs
-to a universe---meaning that theorems which quantify over \( \varType_i \)
+to a universe---meaning that theorems which quantify over \( \Type_i \)
 will apply to all sufficiently small sets.
 %
 Of course, this does not prevent us from proving some theorems that are

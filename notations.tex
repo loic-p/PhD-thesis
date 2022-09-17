@@ -314,10 +314,14 @@
 \newcommand{\VOmega}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\textcolor{AgdaInductiveConstructor} \Omega}}
 \newcommand{\Vempty}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\textcolor{AgdaInductiveConstructor} \bot}}
 \newcommand{\Vpi}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\textcolor{AgdaInductiveConstructor} \Pi}}
-\newcommand{\Vforall}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\textcolor{AgdaInductiveConstructor} \forall}}
+\newcommand{\Vsigma}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\textcolor{AgdaInductiveConstructor} \Sigma}}
+\newcommand{\Vbox}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\textcolor{AgdaInductiveConstructor} \Box}}
+\newcommand{\Vforall}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\textcolor{AgdaInductiveConstructor} \Pi \mathsf{\textcolor{AgdaInductiveConstructor} i}}}
 \newcommand{\Vexists}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\textcolor{AgdaInductiveConstructor} \exists}}
 \newcommand{\Vnat}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\AgdaCon{N}}}
 \newcommand{\Vne}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\AgdaCon{ne}}}
+\newcommand{\Vquo}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\AgdaCon{Q}}}
+\newcommand{\Vid}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\AgdaCon{Id}}}
 \newcommand{\Vemb}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\AgdaCon{emb}}}
 \newcommand{\VX}{{\textcolor{AgdaInductiveConstructor} \Vdash}_{\AgdaCon{X}}}
 
@@ -341,6 +345,8 @@
 \newcommand{\nateqR}[3]{#1 \Vdash_{\mathbb{N}\mathsf{t}=}\ {#2} \equiv {#3}}
 \newcommand{\quotmR}[2]{#1 \Vdash_Q\ {#2}}
 \newcommand{\quoeqR}[3]{#1 \Vdash_Q\ {#2} \equiv {#3}}
+\newcommand{\boxtmR}[2]{#1 \Vdash_{\Box}\ {#2}}
+\newcommand{\boxeqR}[3]{#1 \Vdash_{\Box}\ {#2} \equiv {#3}}
 \newcommand{\idtmR}[2]{#1 \Vdash_\mathrm{Id}\ {#2}}
 \newcommand{\ideqR}[3]{#1 \Vdash_\mathrm{Id}\ {#2} \equiv {#3}}
 \newcommand{\eqtyR}[5]{#2 \Vdash_{#1} #3 \equiv #4 : #5}
@@ -348,7 +354,7 @@
 \newcommand{\eqtmR}[6]{#2 \Vdash_{#1} #3 \equiv #4 : #5 : #6}
 \newcommand{\eqtmV}[6]{#2 \Vdash^v_{#1} #3 \equiv #4 : #5 : #6}
 \newcommand{\wk}[3]{{#1}}% : {#2} \le {#3}}
-\newcommand{\wkrho}{\Delta\, \rho}
+\newcommand{\wkrho}{(\rho : \Delta ⊑ \Gamma)}
 
 
 
