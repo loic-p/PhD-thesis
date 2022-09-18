@@ -819,12 +819,11 @@ Consequently, we go for minimalism and only collect the fact that the domain
 and the codomain are well-typed.
 
   \[
-{\small
   \inferrule{\redT{\Gamma}{A}{\Depfunannotated{F}{G}{}{\Univ}{\sProp}}{\sProp}
             \\ \tytm{\Gamma}{F}{\Type{}}
             \\ \tytm{\extctx{\Gamma}{F}}{G}{\sProp}}
             {\Gamma \Vdash_{\Pi \mathsf{i}} A}
-          }\]
+  \]\label{def:reducibility-impred-pi}
 %
 Similarly, when $A$ is reducible to an impredicative function type,
 % Given a derivation \( \metatm{\mathscr{A}}{\tytyR{\ell}{\Gamma}{A}}
@@ -832,11 +831,10 @@ Similarly, when $A$ is reducible to an impredicative function type,
 we define reducible equality of $A$ and $B$ as the fact that $B$
 reduces to a convertible impredicative function type:
   \[
-{\small
   \inferrule{ \redT{\Gamma}{B}{\Depfun{F'}{G'}}{\sProp}
             \\  \eqtm{\Gamma}{\Depfun{F}{G}}{\Depfun{F'}{G'}}{\sProp}}
             {\Gamma \Vdash_{\Pi \mathsf{i}} A \equiv B}
-          }\]
+  \]
         %
 
 These definitions do not recursively call the logical relation,
@@ -1100,40 +1098,53 @@ code and most of the time required to check the whole proof is spent on them.
 \end{lemma}
 
 \begin{proof}
-  The case of \nameref{infrule:pi-irr-form} is easy, as proving reducibility 
-  of a proof-irrelevant \( \Pi \)-type only requires proving that the domain
-  and codomain are well-typed, which we obtain from the validity hypotheses.
+  The case of the formation rule \nameref{infrule:pi-irr-form} is easy, as 
+  proving reducibility of a proof-irrelevant \( \Pi \)-type only requires 
+  proving that the domain and codomain are well-typed, which we obtain from 
+  the validity hypotheses.
 
-  The case of \nameref{infrule:pi-irr-intro} is also a one-liner, because
-  proving reducibility of an inhabitant of a proof-irrelevant type is only
-  a matter of showing that it is well-typed.
+  The case of the lambda-abstraction rule \nameref{infrule:pi-irr-intro} is 
+  also a one-liner, because proving reducibility of an inhabitant of a 
+  proof-irrelevant type is only a matter of showing that it is well-typed.
 
-  In the case of the application of functions (Rule \nameref{infrule:pi-elim-Para}), the usual
-  predicative way to get the fact that ${\subst{B}{u}}$ is valid
-  is to extract it from the information collected by the
-  validity of the dependent function type (which is known
-  by induction hypothesis).
-  %
-  In the impredicative case however, we do not get such expansive information
-  from the validity of the dependent function type, because validity
-  of a type in the impredicative universe cannot recursively mention validity of the codomain, just like reducibility.
-  %
-  This is precisely where the paranoid assumption comes into play:
-  %
-  from the induction hypothesis on the additional assumptions, we also
-  know that $B$ is valid as a type family over $A$. Since validity is
-  defined as reducibility under any valid substitution, we can get the
-  reducibility of ${\subst{B}{u}}$.
-  %
-
-  This technique also applies to other rules such as \nameref{infrule:fst-Para}
-  or \nameref{infrule:snd-Para}.
-  %
+  The case of the elimination rule \nameref{infrule:pi-irr-elim} is more 
+  interesting: the conclusion needs us to prove that \( \subst{B}{u} \) is
+  a valid proposition for any valid inhabitant \( u : A \), and then that
+  \( t\ u \) is well-typed.
+  % 
+  Unfortunately, it seems that the premises give us very little information 
+  on \( B \), because our definition of reducibility for impredicative dependent
+  products is very weak (definition \ref{def:reducibility-impred-pi}).
+  % 
+  We circumvent this problem by replacing rule \nameref{infrule:pi-irr-elim}
+  with the following typing rule, which adds well-formedness hypotheses for
+  the domain and codomain of the \( \Pi \)-type.
+  % 
+  \sideremark{Even though this change of rules gives the impression that the
+    rules we presented in \cref{ch:observational} are informal rules that
+    omit important premises, it is not the case: in \cref{sec:remov-paran-prem},
+    we will show that the simplified rules of \cref{ch:observational} are 
+    in fact equivalent to the rules with all the required hypotheses.}
+  % 
+  \[
+    \inferrule[App-Irr']{\tytm{\Gamma}{A}{\Univ} \\
+    \tytm{\extctxannotated{\Gamma}{A}{\Univ}}{B}{\sProp}
+    \\
+    \tytmannotated{\Gamma}{t}{\Depfun{A}{B}}{\sProp}
+            \\ \tytmannotated{\Gamma}{u}{A}{\Univ}}
+            {\tytmannotated{\Gamma}{t\ u}{\subst{B}{u}}{\sProp}}
+  \]
+  Now, our hypotheses also provide that $B$ is valid as a type family over $A$. 
+  Since validity is defined as reducibility under any valid substitution, we can 
+  get the reducibility of ${\subst{B}{u}}$.
 \end{proof}
 
+This concludes our overview of the proof of the fundamental lemma. As a direct
+consequence, we obtain that any well-typed term is reducible, and thus 
+normalizing:
+
 \begin{corollary}[Normalization]
-  A direct consequence of the fundamental lemma is that any well-typed
-  term has a weak-head normal form.
+  Any well-typed term has a weak-head normal form.
 \end{corollary}
 
 \section{Consequences of Normalization}
@@ -1141,34 +1152,62 @@ code and most of the time required to check the whole proof is spent on them.
 
 \subsection{Canonicity}
 
-Another direct consequence of the fundamental lemma is that any closed
+A direct consequence of the fundamental lemma is that any closed
 term of type $\Nat$ reduces to a whnf of type $\Nat$. Thus, to
-conclude canonicity, we just need to know that there is no neutral
-term of type $\Nat$ in an empty context.
+derive canonicity for the natural numbers, we just need to know that there are
+no neutral terms of type $\Nat$ in an empty context.
+
+In \MLTT, neutral terms necessarily contain a variable, and therefore cannot 
+exist in the empty context. 
+% 
+But unfortunately, the situation is more delicate for \SetoidCC, as
+the eliminator \( \metaop{\Empty-elim} \) can produce a neutral term from any 
+proof of \( \Empty \), over which reducibility does not provide any control.
+% 
+Moreover, the \( \castName \) operator can produce a neutral term from any
+proof of observational equality between two types with incompatible head 
+constructors, which we do not control either.
+
+Therefore, in order to prove canonicity for natural numbers (or for any other 
+type), we need to show that there exists no proof of \( \Empty \) in the empty
+context, and no proof of equality between incompatible types.
 %
-Unfortunately, as the notion of reduction is absent for
-terms of proof-irrelevant types, and in particular for the empty type,
-this cannot be proven by induction on the syntax of the neutral terms.
-%
-However, assuming consistency of \SetoidCC (proved in \cref{sec:cons-seto-model}), or in other words that
-there is no closed term of type $\Empty$, we can derive canonicity of
-\SetoidCC \refAgda{Typed.Consequences.}{Canonicity}.
+We will prove this by constructing a set-theoretic model of \SetoidCC in 
+\cref{sec:cons-seto-model}. As a consequence, we are able to derive our 
+canonicity theorem:
+
+\begin{theorem}[Computational canonicity of \( \Nat \)]
+	If a term \( t \) has type \( \Nat \) in the empty context, then there 
+	exists an external integer \( n \) such that \( t \) reduces to 
+  \( \metaop{S}^n\ \zero \).
+\end{theorem}
 
 \subsection{Decidability of Conversion}
 
-Besides proving weak-head normalization of well-typed terms, the
-main point of the fundamental lemma is to be able to show that
-conversion is decidable in $\SetoidCC$.
-%
-To do so, we define an algorithmic relation
-$\algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}$ which is supposed to
-simulate convertibility of two terms $t$ and $u$, while being
-easier to decide \refAgda{}{Conversion}.
+In order to prove that convertibity is decidable for \SetoidCC, we need to 
+devise a conversion checking algorithm, and then prove that it is both
+sound and complete.
+
+To do so, we define \emph{algorithmic conversion} as a relation on well-typed 
+terms \( t \) and \( u \) of type \( A \) in context \( \Gamma \).
+$\algoeqtmannotated{\Gamma}{t}{u}{A}{\Univ}$.
 %
 This algorithmic conversion keeps track of the relevance information,
+\begin{itemize}
+  \item In case \( A \) is a proposition, \( t \) and \( u \) are 
+    computationally irrelevant, so the algorighmic conversion holds
+    between \( t \) and \( u \).
+  \item In case \( A \) is a positive proof-relevant type, then \( t \) and
+    \( u \) have weak head normal forms \( t' \) and \( u' \) according to 
+    the normalization theorem. 
+    % 
+    The algorithmic equality between \( t \) and \( u \) holds
+    if the head constructors of \( t' \) and \( u' \) are identical, then the 
+    algorithmic equality holds if it holds on all the sub-terms.
+\end{itemize}
 and uses it to either give an immediate answer in case \( t \) and
-\( u \) are irrelevant, or compute their weak-head normal forms, then
-compare their head constructor, and possibly apply the algorithm
+\( u \) are irrelevant, or compute their weak-head normal forms using
+the normalization theorem, then compare their head constructor, and possibly apply the algorithm
 recursively in case \( t \) and \( u \) are relevant.
 %
 Correctness of this algorithmic conversion is direct as the rules used are
@@ -1214,132 +1253,95 @@ Note that the proof that $t$ is algorithmically equal to itself
 contains the fact that $t$ strongly normalizes, because
 $t$ can be recursively put in whnf.
 
-\subsection{A Paranoid Version of \SetoidCC }
+\subsection{Decidability of Typing}
 
-We compensate for this by doing our proof on inference rules that feature 
-all the well-formedness hypotheses 
-% 
-We call the enriched rules \emph{paranoid} in reference to \sidecitet{andrej17:paranoid}.
-% 
-For instance, the paranoid rule for function abstraction requires hypotheses
-of well-formedness for the domain and codomain, whereas the simplified rules
-only mention an hypothesis on the function body (rule~\nameref{infrule:pi-intro}).
-% 
-These supplementary hypotheses are in fact necessary in our proof of the 
-fundamental lemma, to recover information that cannot be tracked by the 
-weakened model.
-% 
-Once the fundamental lemma is established, we can prove that most of the 
-information in the paranoid rules is in fact redundant, and that the 
-simplified rules of \cref{ch:observational} do in fact contain all the 
-necessary information.
+Now that we have an algorithm that decides conversion, we can rely on the
+work of \sidecitet{meven_thesis} on bidirectional type-checking, who explain 
+how to obtain an algorithm for type-checking provided that the
+theory enjoys subject reduction and decidability of conversion.
 
-In order to avoid circularity, we weakened the definition of the
-logical relation for dependent products, so that it does not mention
-reducibility of the domain and the codomain.
-%
-In counterpart, we need to prove the fundamental lemma with a
-significantly weaker induction hypothesis for proof-irrelevant type
-constructors.
-%
-To remedy to this problem, we define a paranoid variant of the type
-system of \SetoidCC that includes seemingly redundant premises in the
-typing rules of dependent products and existential types.
-%
-This variant, noted $\dashPar$, is presented in \cref{fig:SetoidCC-paranoid-typing}. The idea is that every
-sub-term of the conclusion must be explicitly typed
-in the premises.
-%
-For instance, the rule for application not only asks for $t$ and $u$ to
-be well-typed, but also for domain $A$ and codomain $B$ of the dependent
-function type of $t$.
+\shepherd{TODO if I have time left: an overview of bidirectional type checking?? probably a bad idea lol}
+
+\subsection{Simplifying Paranoid Typing Rules}
+
+Recall that in our construction of the normalization model, impredicativity 
+forced us to give a definition of reducibility for proof-irrelevant 
+\( \Pi \)-types that is considerably weaker than the definition for 
+proof-relevant \( \Pi \)-types.
+% 
+As a consequence, we were not able to prove the fundamental lemma 
+directly on the typing rules of \cref{ch:observational}, and we
+circumvented this issue by adding well-formedness hypotheses to several
+rules. For instance, the rule for application of a proof-irrelevant
+function
+\[
+\inferrule[App-Irr]
+{\tytmannotated{\Gamma}{t}{\Depfun{A}{B}}{\sProp}
+  \\ \tytmannotated{\Gamma}{u}{A}{\Univ}}
+{\tytmannotated{\Gamma}{t\ u}{\subst{B}{u}}{\sProp}}
+\]
+was modified to include hypotheses on the domain and the codomain
+of the function.
+\[
+  \inferrule[App-Irr']{\tytm{\Gamma}{A}{\Univ} \\
+  \tytm{\extctxannotated{\Gamma}{A}{\Univ}}{B}{\sProp}
+  \\
+  \tytmannotated{\Gamma}{t}{\Depfun{A}{B}}{\sProp}
+          \\ \tytmannotated{\Gamma}{u}{A}{\Univ}}
+          {\tytmannotated{\Gamma}{t\ u}{\subst{B}{u}}{\sProp}}
+\]
+
+Therefore, the reader may wonder if the rules that we enunciated in 
+\cref{ch:observational} are approximate rules and need to be extended 
+with the omitted well-formedness premises for types, contexts, etc.
+% 
+In this section, we show that it is not the case, and that the simplified 
+rules are in fact equivalent to the fully extended rules.
+
+\sideremark{The terminology is in reference to Bauer \etal \cite{andrej17:paranoid}.}
+% 
+Until the next section, we distinguish between the \emph{economic} version of the 
+system which uses the rules defined in \cref{ch:observational}, that we denote 
+\( \vdash_e \), and the \emph{paranoid} version which adds well-formedness
+hypotheses to all types that appear in rules, noted \( \vdash_p \).
 
 Obviously, when a term is well-typed for the paranoid variant, it is
 also well-typed in the economic system. But after proving the
 fundamental lemma on the paranoid variant, it becomes possible to show
 that the two typing systems are equivalent, leveraging the inversion
-lemmas provided by the logical relation.
+lemmas provided by reducibility.
 %
+\sideremark{It must be noted that since the proof of equivalence of the
+two systems uses the fundamental lemma, it is by no means computationally
+trivial. Therefore, in an actual implementation of a typechecker for 
+\SetoidCC, it might be more sensible to work with the paranoid system if 
+we need the supplementary information.}
+% 
 Thus, the additional premises of the paranoid variant help us
 prove the fundamental lemma in presence of impredicativity, but end up
 being redundant once a sufficient amount of metatheory is established.
 
-
-\begin{figure}
-  \begin{small}
-    \begin{mathpar}
- \inferrule[$\Pi$-Form$_p$] {\tytmPara{\Gamma}{A}{\Type[]{}} \\
-            \tytmPara{\extctxannotated{\Gamma}{A}{\Type[]{}}}{B}{\Type[]{'}}}
-            {\tytmPara{\Gamma}{\Depfunannotated{A}{B}{\Univ}{\Univ}{\Univ'}}{\piRel{\Type}{\Type[]{'}}}}
-            {}
-\ilabel{infrule:pi-form-Para}
-\and
- \inferrule[Fun$_p$]{\tytmPara{\Gamma}{A}{\Type[]{}} \\
-   \tytmParaannotated{\extctxannotated{\Gamma}{A}{\Type{}}}{t}{B}{\Type{'}}}
-            {\tytmParaannotated{\Gamma}{\lam{A}{t}}{\Depfun{A}{B}}{\piRel{\Type}{\Type[]{'}}}}
-\ilabel{infrule:pi-intro-Para}
-  \\
-  \inferrule[App$_p$]{\tytmPara{\Gamma}{A}{\Type[]{}} \\
-    \tytmPara{\extctxannotated{\Gamma}{A}{\Type[]{}}}{B}{\Type[]{'}}
-    \\
-    \tytmParaannotated{\Gamma}{t}{\Depfun{A}{B}}{\piRel{\Type}{\Type[]{'}}}
-            \\ \tytmParaannotated{\Gamma}{u}{A}{\Type{}}}
-            {\tytmParaannotated{\Gamma}{t\ u}{\subst{B}{u}}{\Type[]{'}}}
-            \ilabel{infrule:pi-elim-Para}
-  \\
-  \inferrule[$\exists$-Form$_p$]{\tytmPara{\Gamma}{A}{\sProp[i]} \\
-             \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]}}
-            {\tytmPara{\Gamma}{\Exists{A}{B}}{\sProp[i]}}
-            % {\scriptstyle \substack{i \le k \\ j \le k}}
-            \ilabel{infrule:exists-form-Para}
-            \and
-              \inferrule[Fst$_p$]{    \tytmPara{\Gamma}{A}{\sProp[i]} \\
-     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\\tytmParaannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
-            {\tytmParaannotated{\Gamma}{\fst{t}}{A}{\sProp}}\ilabel{infrule:fst-Para}
-\\
-  \inferrule[Snd$_p$]{    \tytmPara{\Gamma}{A}{\sProp[i]} \\
-     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\\tytmParaannotated{\Gamma}{t}{\Exists{A}{B}}{\sProp}}
-  {\tytmParaannotated{\Gamma}{\snd{t}}{\subst{B}{\fst{t}}}{\sProp}}
-  \ilabel{infrule:snd-Para}
-   \\
-  \inferrule[Pair$_p$]{
-    \tytmPara{\Gamma}{A}{\sProp[i]} \\
-     \tytmPara{\extctxannotated{\Gamma}{A}{\sProp}}{B}{\sProp[i]} \\ \tytmParaannotated{\Gamma}{t}{A}{\sProp}
-            \\ \tytmParaannotated{\Gamma}{u}{\subst{B}{t}}{\sProp}}
-          {\tytmParaannotated{\Gamma}{\pair{t}{u}}{\Exists{A}{B}}{\sProp}}
-          \ilabel{infrule:pair-Para}
-        \end{mathpar}
-        \end{small}
-        \caption{\SetoidCC Paranoid Typing Rules (dependent function
-          types and existential types only)}
-  \label{fig:SetoidCC-paranoid-typing}
-\end{figure}
-
-\subsection{Removing Paranoid Premises}
-\label{sec:remov-paran-prem}
-
-So far, we established the fundamental lemma on the paranoid
-version of the type system, but we would like to work with the more
-economic presentation instead.
-
-The first step is to establish the following corollary on the paranoid
+First, we establish the following result on the paranoid
 typing, by combining the fundamental lemma with the fact that
 reducible types are well-formed and reducible terms are well-typed:
 %
-\begin{corollary}[Typing Validity \refAgda{Typed.Consequences.}{Syntactic}] \label{thm:validity}
-  If $\tytmParaannotated{\Gamma}{t}{A}{\Type{}}$ then $\tytmPara{\Gamma}{A}{\Type{}}$ and similarly, if $\eqtmParaannotated{\Gamma}{t}{u}{A}{\Type{}}$ then
-  $\tytmPara{\Gamma}{A}{\Type{}}$,
-  $\tytmParaannotated{\Gamma}{t}{A}{\Type{}}$ and $\tytmParaannotated{\Gamma}{u}{A}{\Type{}}$.
+\begin{corollary}[Typing Validity \refAgda{Typed.Consequences.}{Syntactic}] \label{thm:validity} \phantom{a}
+  \begin{enumerate}
+    \item If $\tytmParaannotated{\Gamma}{t}{A}{\Univ}$ then $\tytmPara{\Gamma}{A}{\Univ}$ 
+    \item If $\eqtmParaannotated{\Gamma}{t}{u}{A}{\Univ}$ then
+  $\tytmPara{\Gamma}{A}{\Univ}$,
+  $\tytmParaannotated{\Gamma}{t}{A}{\Univ}$ and $\tytmParaannotated{\Gamma}{u}{A}{\Univ}$.
+  \end{enumerate}
 \end{corollary}
 %
 And now that we are equipped with this corollary, as well as some
-inversion lemmas that we obtained from the logical relation, we know
+inversion lemmas that we obtained from the reducibility, we know
 enough to build a paranoid typing derivation from a
 standard derivation:
 %
 \begin{theorem}[\refAgda{Typed.}{NonParanoidTyping}]
   \label{thm:nonparanoid}
-  If $\tytmannotated{\Gamma}{t}{A}{\Type{}}$ then $\tytmParaannotated{\Gamma}{t}{A}{\Type{}}$.
+  If $\tytmEcoannotated{\Gamma}{t}{A}{\Univ}$ then $\tytmParaannotated{\Gamma}{t}{A}{\Univ}$.
 \end{theorem}
 \begin{proof}
   The proof is by induction on the typing derivation. The
@@ -1354,149 +1356,152 @@ standard derivation:
 Thus, we also have the fundamental lemma for the economic type system:
 %
 \begin{corollary}[Fundamental lemma on the economic type system]
-
-  \
-
-  If\, \( \tytmannotated{\Gamma}{t}{A}{\Type{}} \), then there is a level \( \ell \) such that $\ctxV{\Gamma}$,
-  \( \tytyV{\ell}{\Gamma}{A}{\Type{}} \) and \( \tytmV{\ell}{\Gamma}{t}{A}{\Type{}} \).
+  If\, \( \tytmEcoannotated{\Gamma}{t}{A}{\Univ} \), then there is a level \( \ell \) such that $\ctxV{\Gamma}$,
+  \( \tytyV{\ell}{\Gamma}{A}{\Univ} \) and \( \tytmV{\ell}{\Gamma}{t}{A}{\Univ} \).
 \end{corollary}
-
-
-A direct consequence of the fundamental lemma is that any well-typed
-term has a weak-head normal form.
-%
-Another consequence is that any closed
-term of type $\Nat$ reduces to a whnf of type $\Nat$. Thus, to
-obtain canonicity for the integers of \SetoidCC, we just need to
-know that there is no neutral term of type $\Nat$ in an empty context
-\refAgda{Typed.Consequences.}{Canonicity}.
-
-Unfortunately, as in \sidecite{pujet:hal-03367052}, the logical relation
-is not sufficient to establish this. In fact, as we will see in \cref{sec:analys-norm-proof}, there is a good reason for that: the
-consistency and canonicity theorems for \SetoidCC have a remarkably high
-proof-theoretical strength due to impredicativity, whereas the
-logical relation argument can be developed in a predicative
-meta-theory.
-%
-In \cref{sec:cons-seto-model}, we will supplement
- the normalization result with
-a model of \SetoidCC in an impredicative meta-theory, from which
-we will deduce the consistency and canoncity theorems.
-
-\subsection{Decidability of Typing}
-
-\shepherd{TODO}
 
 \section{Analysis of the Normalization Proof}
 \label{sec:analys-norm-proof}
 
-The informal proof presented in \cref{sec:logic-relat-with}, and
-formalized in \Agda, outlines the construction of a normalization
-model in a rather powerful metatheory: Martin-Löf Type Theory extended
-with induction-recursion.
+Both the informal normalization proof presented in \cref{sec:logic-relat-with}
+and its formalized version take place in a somewhat sophisticated metatheory: 
+Martin-Löf Type Theory extended with induction-recursion.
 %
 However, in order to control the computational complexity of the proof terms
-more finely, we can try to weaken this metatheory as much as possible.
+more finely, we explain how to re-enact the proof in a weaker meta-theory.
 
 \subsection{The Computational Power of \SetoidCC}
 
-To establish a simple lower bound, we can start by noting that Martin-Löf
-Type Theory is a subset of \SetoidCC. Indeed, dependent products and
-the universes are handled in the exact same way, and \sidecitet{pujet:hal-03367052} explain
-how to deal with inductive tyes.
+Proof terms in \SetoidCC can be considered as \emph{programs}, at least in the 
+sense of being terms of a lambda-calculus with additional operators.
+% 
+As evidenced by the normalization theorem, \SetoidCC is not Turing-complete:
+all programs extracted from well-typed terms are guaranteed to terminate.
+% 
+Therefore, it makes sense to ask what is the computational power of 
+\SetoidCC: what are the integer functions 
+% 
+\sideremark{We restrict our attention to functions from \( \Nat \) to 
+  \( \Nat \), because higher-order computability is a complex topic with many 
+  non-equivalent definitions.}
+% 
+can be expressed as well-typed terms?
+
+To derive a lower bound for the computational power, we simply remark 
+that Martin-Löf type theory is a subset of \SetoidCC, provided we use a 
+definition of \MLTT that does not support more inductive types than our 
+definition of \SetoidCC.
 %
-Therefore, a normalization proof for \SetoidCC can also act as a
-normalization proof for \MLTT.
-%
-And since normalization entails consistency for \MLTT, it follows that our
-meta-theory needs to be at least as strong as \MLTT---in fact, it turns out to be exactly what we need.
+Therefore, any function that can be defined in \MLTT is definable in \SetoidCC.
+
+In order to obtain an upper bound, we need to analyze the normalization proof:
+since the argument is constructive, it provides us with a concrete algorithm to 
+evaluate terms of \SetoidCC. 
+% 
+Therefore, we seek to replay our normalization proof in a meta-theory that is 
+as weak as possible, to get a tighter upper bound. Of course, we cannot
+hope to go lower than \MLTT, given that it is a subset \SetoidCC. But we
+can get pretty close:
 
 \begin{theorem}\label{setoidCC-in-MLTT}
-  \MLTT with \( n + 4 \) universes can prove normalization of \SetoidCC with
-  \( n \) universes.
+  \MLTT with \( n + 4 \) universes and \( \mathrm{W} \)-types can prove normalization of 
+  \SetoidCC with \( n \) universes and \( \mathrm{W} \)-types.
 \end{theorem}
+\begin{proof}
+  The proof of this theorem is given in \cref{sec:fitt-norm-proof}.
+\end{proof}
 
-We defer the proof of this theorem to \cref{sec:fitt-norm-proof} and
-first analyse what can be deduced from it.
+In the rest of this section, we need to be very precise about the exact
+amount of inductives and universes in our theories.
+We will write \( \MLTTW_n \) for Martin-Löf type 
+theory with \( n \) universes and \( \mathrm{W} \)-types, and we will write
+\( \SetoidCCW_n \) for the observational calculus of constructions extended 
+with proof-relevant \( \mathrm{W} \)-types and \( n \) universes.
+
+When we consider theories with an unbounded hierarchy of universes, we get that
+normalization for \MLTTW is equivalent to normalization for \SetoidCCW.
 
 \begin{corollary}
-  Normalization for \SetoidCC is equivalent to normalization for \MLTT
+  Normalization for \SetoidCCW is equivalent to normalization for \MLTTW
   over a weak fragment of arithmetic.
 \end{corollary}
 
-Keep in mind that we cannot hope for a similar result for consistency or
-canonicity: while consistency and canonicity for \MLTT follow from
-normalization, proving that \SetoidCC is consistent requires the increased
-power of impredicativity.
+Note that we cannot hope for a similar result in terms of consistency or
+canonicity: while consistency and canonicity for \MLTTW follow from
+normalization, proving that \SetoidCCW is consistent requires an impredicative
+theory, which is necessarily much stronger than \MLTTW.
 
-\cref{setoidCC-in-MLTT} also provides us with some
-control over the integer functions of \SetoidCC:
+\Cref{setoidCC-in-MLTT} also provides us with a neat description of the
+computational power of \SetoidCCW:
 
 \begin{corollary}\label{integer-functions}
-  \SetoidCC and \MLTT can express the exact same integer functions
+  \SetoidCCW and \MLTTW can express the exact same integer functions
   as closed terms of type \( \Fun{\Nat}{\Nat} \).
 \end{corollary}
 
 \begin{proof}
-  As already explained, functions from \MLTT can simply be embedded in
-  \SetoidCC.
-  %
-  For the converse direction, note that any closed term \( f \) of
-  type \( \Fun{\Nat}{\Nat} \) in \SetoidCC only mentions a finite number of
-  universes.
-%
-  Thus, \cref{setoidCC-in-MLTT} provides us with a
-  normalization function for the corresponding fragment of \SetoidCC,
-  that computes a normal form when applied to \( f n \) where \( n \)
-  is a closed syntactic integer.
-%
-  If we compose it with a function that sends normal forms to the
-  adequate integer, %(or 0 if the normal form is non-canonical)
-  we obtain an integer function in \( \MLTT \), and canonicity ensures
-  that it represents the same function as the original \SetoidCC term.
-\end{proof}
+  In one direction, we can simply embed functions from \MLTTW into \SetoidCCW.
 
+  In the converse direction, we note that any closed term \( f \) of
+  type \( \Fun{\Nat}{\Nat} \) in \SetoidCCW only mentions a finite number of
+  universes \( N \).
+  %
+  Thus, \cref{setoidCC-in-MLTT} provides us with a normalization function for 
+  \( \SetoidCCW_N \) in \( \MLTTW_{N+4} \), that computes the normal form of any 
+  well-typed term. 
+  % 
+  From there, we can define a function \( f' : \Fun{\Nat}{\Nat} \) in \MLTTW
+  that represents the same integer function as \( f \).
+  Given an integer \( n : \Nat \), \( f' \) first computes a \SetoidCCW typing 
+  derivation for \( f\ n \) in the empty context, then applies the 
+  normalization function to obtain a weak-head normal form that is necessarily
+  canonical, and converts this normal form back to an integer.
+\end{proof}
 %
-\cref{integer-functions} might come off as a surprise, since \SetoidCC is equipped with an impredicative universe,
-and impredicativity generally adds a great deal of proof-theoretical
-strength!
+In the case of \SetoidCC without \( \mathrm{W} \)-types, we only know that its
+computational power is between that of \MLTT and \MLTTW, but we conjecture that
+it is equivalent to \MLTT.
+
+\Cref{integer-functions} might come off as a surprise, since \SetoidCC is 
+equipped with an impredicative universe, and impredicativity generally adds
+a great deal of proof-theoretical strength!
 %
 And \SetoidCC does possess this logical power, in fact. Indeed, it can
 represent many more functions as \( \sProp \)-valued functional relations
 than \MLTT. But this corollary shows that there is no way to extract them
 in the proof-relevant fragment, even though we have access to elimination
-principles for false propositions and equalities (using casts).
+principles for false propositions and the observational equality.
 %
 Thus, the logical power of impredicativity is locked inside of \( \sProp \).
-%
+
 This is in stark contrast with the Calculus of Inductive Constructions,
 in which it is possible to define closed terms of type \( \Fun{\Nat}{\Nat} \) that leverage
 the power of impredicativity, using a principle called large elimination
-of singleton inductive types\footnote{The standard technique is to use
+of singleton inductive types\sideremark{The standard technique is to use
 the accessibility predicate as defined in \url{https://coq.inria.fr/library/Coq.Init.Wf.html}.}.
 %
-We discuss this principle with more detail in \cref{sec:setoidcc-with-an}.
+We discuss this principle with more detail in \cref{ch:extensions}.
 
 \subsection{Fitting the Normalization Proof in MLTT}
 \label{sec:fitt-norm-proof}
 
-In this subsection, we give a proof of \cref{setoidCC-in-MLTT}, by
+In this section, we give a proof of \cref{setoidCC-in-MLTT}, by
 encoding the logical relation sketched in \cref{sec:logic-relat-with}
 without induction-recursion.
 %
-This argument has been formalized in \Agda.\footnote{The formalization is in the
+This argument has been formalized in \Agda.\sideremark{The formalization is in the
   folder \texttt{logrel-wo-ind-rec}. It is done for \MLTT and not
-full \SetoidCC, but it does not make a difference as the crux is in
+full \SetoidCC, but it does not make a difference as the crux of the proof is in
 the definition of the relation without induction-recursion.}
 %
-For the remainder of this section, we work in plain \MLTT with a deep
-embedding of \SetoidCC.
+For the remainder of this section, we work in \( \MLTTW_{n+4} \) with a deep
+embedding of \( \SetoidCCW_n \).
 %
 To avoid confusion between the meta-theory and the object theory, we
 will use \Agda-style notations for the meta-theory.
 
 From a bird's eye perspective, the normalization proof builds a model
-of \SetoidCC in which well-formed types are interpreted as proof-relevant
+of \SetoidCCW in which well-formed types are interpreted as proof-relevant
 predicates on untyped terms, and induction-recursion is used to construct a
 universe in the model: we define the inductive predicate of reducible types
 simultaneously with recursive functions that associates reducibility
@@ -1509,7 +1514,7 @@ reducibility predicates of the types it contains. This allows us to use
 relations that only require simple indexed inductive types
 \sidecite{small-ind-rec}.
 
-\cref{fig:logrel-ind} showcases what the relation-based definition
+\Cref{fig:logrel-ind} showcases what the relation-based definition
 looks like.
 %
 For all \( \ell \le n \), we define an inductive relation \( \AgdaData{R}^\ell \) between
@@ -1518,11 +1523,11 @@ types that are convertible to \( t \), a predicate \( P_{t} \) which is the
 reducibility predicate associated to \( t \), and a binary relation
 \( P_{t=} \) that encodes convertibility of terms in \( P_{t} \).
 %
-The logical relation \( \Vdash_\ell \) is then defined in terms of \( \AgdaData{R}^\ell \).
+The reducibility for types \( \Vdash_\ell \) is then defined in terms of \( \AgdaData{R}^\ell \).
 %
-The inductive relation features eight constructors that are each
-defined in \cref{sec:logic-relat-with}, including \( \Rpi \)
-which recursively calls the logical relation.
+The inductive relation features twelve constructors that are all
+described in \cref{sec:logic-relat-with}, except for the \( \mathrm{W} \)-types
+(which do not pose any additional difficulty).
 %% , plus an eighth one that ensures
 %% \( \AgdaData{R}^\ell \) contains all the relations \( \AgdaData{R}^{\ell'} \) for \( \ell' < \ell \).
 
@@ -1547,15 +1552,15 @@ Each step of this process requires an additional meta-theoretical universe
 level.
 %
 This is only natural, since we are proving normalization for a theory that
-subsumes \( \MLTT_n \), a property from which we can deduce the consistency
-of \( \MLTT_n \).
+subsumes \( \MLTTW_n \), a property from which we can deduce the consistency
+of \( \MLTTW_n \).
 %
 Therefore, Gödel's incompleteness theorem applies and guarantees that
 we need more universes in the meta-theory than in the fragment we
 consider.
 
 
-\begin{figure}
+\begin{figure*}
   \begin{small}
 \begin{flalign*}
   \begin{array}{lcl}
@@ -1622,17 +1627,18 @@ consider.
   \end{array} &&
 \end{flalign*}
 \end{small}
-  \caption{Inductive encoding of the logical relation}
+  \caption{Inductive encoding of reducibility}
   \label{fig:logrel-ind}
-\end{figure}
+\end{figure*}
 
 Constructing this universe of reducible types is only the first half
 of the normalization proof. To complete the construction, we also need
-to encode validity without induction-recursion in \( \MLTT \) and
+to encode validity without induction-recursion in \( \MLTTW_{n+4} \) and
 prove the fundamental lemma.
 %
-We do not develop this here as it uses a similar construction and
-refer the interested reader to the formalization for the full proof.
+We do not develop this here as the construction is a similar encoding of
+small induction-recursion with functional relations.
+The interested reader can consult the formalization for a more detailed proof.
 
 \section{Semantics of \SetoidCC}
 \label{sec:cons-seto-model}
@@ -1654,34 +1660,34 @@ terms with type \( \bot \), which does not grant any kind of control
 over its proofs in the empty context.
 
 This was already the case in the work of \sidecitet{pujet:hal-03367052} on
-\SetoidCC, so they supplemented their normalization proof with a model
+\SetoidTT, so they supplemented their normalization proof with a model
 in the category of sets (presented as setoids), using
 induction-recursion to interpret universes as sets of codes \emph{à
   la Tarski} defined mutually with eliminators and coercion functions.
 %
 In that model, \( \bot \) is actually interpreted as the empty set, which
-proves consistency of \SetoidCC: we can use it to show that there is
+proves consistency of \SetoidTT: we can use it to show that there is
 no term of type \( \bot \) in the empty context.
 
 \subsection{\SetoidCC as an Internal Language for Sets}
 
 While the construction of \sidecitet{pujet:hal-03367052} does show consistency of
-\SetoidCC, it arguably falls short of presenting \SetoidCC as an internal
+\SetoidTT, it arguably falls short of presenting \SetoidTT as an internal
 language for classical mathematics.
 %
 Indeed, the inductive-recursive construction of the universe of codes is
 designed to only account for the codes that come from the syntax of
-\SetoidCC. In other words, the following statement
+\SetoidTT. In other words, the following statement
 \[
 \Pi(A : \Type)(x\ y\ z : A).\,\Fun{\Fun{\Obseq[A]{x}{y}}{\Obseq[A]{y}{z}}}{\Obseq[A]{x}{z}}
 \]
 only states transitivity of equality for sets that are built from
-the type formers of \SetoidCC, when interpreted in their model.
+the type formers of \SetoidTT, when interpreted in their model.
 
 This state of affairs is obviously not ideal, as readers who are not
-willing to accept \SetoidCC as a new foundation of mathematics would
+willing to accept \SetoidTT as a new foundation of mathematics would
 probably be more inclined to use it if they knew that any theorem they
-proved in \SetoidCC is also true for classical set theory.
+proved in \SetoidTT is also true for classical set theory.
 %
 Thus, instead of replicating this construction in an impredicative
 meta-theory (to be able to interpret \( \sProp \)), we seize the

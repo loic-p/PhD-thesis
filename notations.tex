@@ -126,12 +126,14 @@
 
 \newcommand{\CIC}{\ensuremath{\mathsf{CIC}}\xspace}
 \newcommand{\MLTT}{\ensuremath{\mathsf{MLTT}}\xspace}
+\newcommand{\MLTTW}{\ensuremath{\mathsf{MLTT}^\mathsf{W}}\xspace}
 \newcommand{\sMLTT}{\ensuremath{\mathsf{sMLTT}}\xspace}
 \newcommand{\ETT}{\ensuremath{\mathsf{ETT}}\xspace}
 \newcommand{\HTS}{\ensuremath{\mathsf{HTS}}\xspace}
 \newcommand{\HoTT}{\ensuremath{\mathsf{HoTT}}\xspace}
 \newcommand{\SetoidTT}{\ensuremath{\mathsf{TT}^\mathrm{obs}}\xspace}
 \newcommand{\SetoidCC}{\ensuremath{\mathsf{CC}^\mathrm{obs}}\xspace}
+\newcommand{\SetoidCCW}{\ensuremath{\mathsf{CC}^{\mathrm{obs}, \mathsf{W}}}\xspace}
 \newcommand{\SetoidCCplus}{\ensuremath{\mathsf{CC}^\mathrm{obs+}}\xspace}
 
 % Properties of type theories
@@ -272,10 +274,12 @@
 \newcommand{\subst}[3][x]{#2[{#1}:={#3}]}
 
 \newcommand\dashPar{\vdash_{p}}
+\newcommand\dashEco{\vdash_{e}}
 
 \newcommand{\wfctx}[2][]{#1 \vdash #2}
 \newcommand{\tytm}[4][]{#1 #2 \vdash #3 : #4}
 \newcommand{\tytmPara}[4][]{#1 #2 \dashPar #3 : #4}
+\newcommand{\tytmEco}[4][]{#1 #2 \dashEco #3 : #4}
 \newcommand{\tm}[2]{#1 : #2}
 \newcommand{\tytms}{\tytm}
 \newcommand{\eqtm}[5][]{#1 #2 \vdash #3 \equiv #4 : #5}
@@ -291,9 +295,11 @@
 \newcommand{\extctxannotated}[4][x]{#2 , \tmannotated{#1}{#3}{#4}{}}
 \newcommand{\tytmannotated}[5][]{#1 #2 \vdash \tmannotated{#3}{#4}{#5}}
 \newcommand{\tytmParaannotated}[5][]{#1 #2 \dashPar \tmannotated{#3}{#4}{#5}}
+\newcommand{\tytmEcoannotated}[5][]{#1 #2 \dashEco \tmannotated{#3}{#4}{#5}}
 \newcommand{\eqtmannotated}[6][]{#1 #2 \vdash #3 \equiv #4 : #5 : #6}
 \newcommand{\algoeqtmannotated}[6][]{#1 #2 \vdash #3 \cong #4 : #5 : #6}
 \newcommand{\eqtmParaannotated}[6][]{#1 #2 \dashPar #3 \equiv #4 : #5 : #6}
+\newcommand{\eqtmEcoannotated}[6][]{#1 #2 \dashEco #3 \equiv #4 : #5 : #6}
 \newcommand{\redannotated}[5][]{#1 #2 \vdash #3 \Rightarrow #4 : #5}
 \newcommand{\Depfunannotated}[6][x]{\Pi_{}^{#5, #6} (\tm{#1}{#2}).\, {#3}}
 \newcommand{\Depsumannotated}[6][x]{\Sigma_{}^{#5, #6} (\tm{#1}{#2}).\, {#3}}
