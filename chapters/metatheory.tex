@@ -231,7 +231,7 @@ Once the fundamental lemma is proved, we will be able to show that the rules
 of \cref{ch:observational} do in fact contain sufficient information to recover
 these additional hypotheses (see \cref{sec:normalization-consequences}).
 
-\subsection{Modelling the Proof-Relevant Layer}
+\subsection{Reducibility for the Proof-Relevant Layer}
 
 We start by presenting the definition of reducibility for the relevant
 fragment, closely following \sidecitet{Abel:POPL2018}.
@@ -738,7 +738,7 @@ a reducible type, then \( A \) is reducible. In this case, we define:
 Which states that a term is a reducible witness of the inductive equality when it
 reduces to either reflexivity, \( \metaop{Idpath} \), or a neutral term.
 
-\subsection{Modelling the Proof-Irrelevant Layer}
+\subsection{Reducibility for the Proof-Irrelevant Layer}
 
 We now turn to the definition of reducibility for the proof-irrelevant
 fragment, which must be defined independently from the rest of the model
@@ -747,7 +747,7 @@ to ensure a well-founded definition.
 Since there is no computation whatsoever in proof-irrelevant types,
 their inhabitants don't interact with other terms. This allows us
 to give a generic definition for reducibility of terms and term
-equality, that will work for any \( X \in \{ \bot, {\Pi \mathsf{i}}\} \) :
+equality, that will work for any \( X \in \{ \mathrm{ne}, \bot, {\Pi \mathsf{i}}\} \) :
 %
 \begin{itemize}
   \item \( \tytmR{X}{\Gamma}{t}{A}{\sProp}\ \) when \(\ \tytm{\Gamma}{t}{A} \).
@@ -761,7 +761,7 @@ to reducible equality too, for any two inhabitants of \( A \) are always
 convertible.
 % 
 It only remains to define the reducibility of types and type equality
-for $\Empty$ and the impredicative dependent products.
+for neutrals, $\Empty$ and the impredicative dependent products.
 
 Now, the reader probably noticed that not all types appear in our definition
 of reducibility.
@@ -777,6 +777,20 @@ rather that of a destructor that computes by pattern-matching on types.
 Therefore, a type of the shape \( \Obseq[A]{t}{u} \) is never in normal
 form, unless if it is neutral (in which case the generic rule for neutral
 terms applies).
+
+\paragraph{Proof-irrelevant Neutral Types}
+
+% The first kind of reducible type are neutral type.
+\[
+  \inferrule{\redT{\Gamma}{A}{N}{\sProp} \\ \neutral{N}}
+  {\tytyR{\mathsf{ne}}{\Gamma}{A}{\sProp}}
+\]
+When $A$ is reducible to a neutral proposition, we define 
+reducible equality to \( A \) just as in the case of neutral 
+proof-relevant types: 
+\( \eqtyR{\mathsf{ne}}{\Gamma}{A}{B}{\sProp} \) if there is 
+a neutral term \( M \) such that \( \redT{\Gamma}{B}{M}{\sProp} \) 
+and \( \eqtm{\Gamma}{N}{M}{\sProp} \).
 
 \paragraph{Empty type}
 
@@ -837,36 +851,95 @@ types. We will discuss this in the proof of the fundamental lemma in \cref{sec:f
 \]
 When $A$ is reducible to the impredicative universe, we define:
 \begin{itemize}
-  \item \( \eqtyR{\Omega}{\Gamma}{A}{B}{\Type_i} \) if \( \redT{\Gamma}{B}{\sProp}{\Type_i} \).
-  \item \( \tytmR{\Omega}{\Gamma}{t}{A}{\Type_j} \) if there is a normal form \( t' \) such that
-    \( \redT{\Gamma}{t}{t'}{\sProp} \), and \( \tytyR{i}{\Gamma}{t}{\sProp} \)
-
-    (which is already defined as we defined the reducibility of impredicative types  
-    outside of the large inductive-recursive definition of reducibility).
-  \item \( \eqtmR{\Omega}{\Gamma}{t}{u}{A}{\Type_j} \) if there are normal forms \( t', u' \) such that
+  \item \( \eqtyR{\Omega}{\Gamma}{A}{B}{\Type_0} \) if \( \redT{\Gamma}{B}{\sProp}{\Type_0} \).
+  \item \( \tytmR{\Omega}{\Gamma}{t}{A}{\Type_0} \) if there is a normal form \( t' \) such that
+    \( \redT{\Gamma}{t}{t'}{\sProp} \), and \( \tytyR{X}{\Gamma}{t}{\sProp} \) for
+    \( X \in \{ \mathrm{ne}, \bot, {\Pi \mathsf{i}}\} \).
+  \item \( \eqtmR{\Omega}{\Gamma}{t}{u}{A}{\Type_0} \) if there are normal forms \( t', u' \), as well
+  as \( X \in \{ \mathrm{ne}, \bot, {\Pi \mathsf{i}}\} \) such that
     \begin{itemize}
     \item \( \redT{\Gamma}{t}{t'}{\sProp} \) and \( \redT{\Gamma}{u}{u'}{\sProp} \)
-    \item \( \tytyR{i}{\Gamma}{t}{\sProp} \) and \( \tytyR{i}{\Gamma}{u}{\sProp} \)
-    \item  \( \eqtyR{i}{\Gamma}{t}{u}{\sProp} \).
+    \item \( \tytyR{X}{\Gamma}{t}{\sProp} \) and \( \tytyR{X}{\Gamma}{u}{\sProp} \)
+    \item  \( \eqtyR{X}{\Gamma}{t}{u}{\sProp} \).
     \end{itemize}
 \end{itemize}
+Being a reducible proposition amounts to reducing to either a neutral term,
+the false proposition, or an impredicative dependent product.
 
-\subsection{The Fundamental Lemma}
-\label{sec:fundamental-lemma}
+\subsection{Auxiliary Lemmas on Reducibility}
 
-The fundamental lemma expresses the completeness of the logical
-relation with respect to
-typing~\refAgda{LogicalRelation.}{Fundamental}.
-%
-But before starting our induction, we need to generalize our
-hypothesis---the logical relation---yet a bit more: we will prove
-reducibility under any well-formed substitution.
-%
-Following \sidecite{Abel:POPL2018}, we use induction-recursion to define
-the notion of \emph{validity}, which will serve as our actual induction
-hypothesis \refAgda{LogicalRelation.}{Substitution}.
-%
+Now that we have completed our definition of reducibility, we prove
+some auxiliary lemmas:
 
+\begin{lemma} \phantom{a}
+  \begin{enumerate}
+  \item Given a context \( \Gamma \), the reducible equality \( \eqtyR{\ell}{\Gamma}{A}{B}{\Univ} \) is
+  reflexive, symmetric and transitive. 
+  \item Given a context \( \Gamma \) and a reducible type
+  \( \tytyR{\ell}{\Gamma}{A}{\Univ} \), the reducible equality \( \eqtmR{\ell}{\Gamma}{t}{u}{A}{\Univ} \)
+  is also reflextive, symmetric and transitive.
+  \end{enumerate}
+\end{lemma}
+
+\begin{lemma}[Conversion]
+  Given \( \eqtyR{\ell}{\Gamma}{A}{B}{\Univ} \),
+  \begin{enumerate}
+    \item \( \tytmR{\ell}{\Gamma}{t}{A}{\Univ} \) if and only if\, \( \tytmR{\ell}{\Gamma}{t}{B}{\Univ} \).
+    \item \( \eqtmR{\ell}{\Gamma}{t}{u}{A}{\Univ} \) if and only if\, \( \eqtmR{\ell}{\Gamma}{t}{u}{B}{\Univ} \).
+  \end{enumerate}
+\end{lemma}
+
+\begin{lemma}[Neutrals are reducible] Let \( A \) be a reducible type and \( n, m \) be neutral terms.
+  \begin{enumerate}
+    \item If\, \( \tytm{\Gamma}{n}{A} \), then \( \tytmR{\ell}{\Gamma}{n}{A}{\Univ} \).
+    \item If\, \( \eqtm{\Gamma}{n}{m}{A} \), then \( \eqtmR{\ell}{\Gamma}{n}{m}{A}{\Univ} \).
+  \end{enumerate}
+\end{lemma}
+
+\begin{lemma}[Weak head expansion] \phantom{a}
+  \begin{enumerate}
+    \item If\, \( \tytyR{\ell}{\Gamma}{B}{\Univ} \) and \( \red{\Gamma}{A}{B}{\Univ} \),
+      then \( \tytyR{\ell}{\Gamma}{A}{\Univ} \) and \( \eqtyR{\ell}{\Gamma}{A}{B}{\Univ} \).
+    \item If\, \( \tytmR{\ell}{\Gamma}{u}{A}{\Univ} \) and \( \red{\Gamma}{t}{u}{A} \),
+    then \( \tytmR{\ell}{\Gamma}{t}{A}{\Univ} \) and \( \eqtmR{\ell}{\Gamma}{t}{u}{A}{\Univ} \).
+  \end{enumerate}
+\end{lemma}
+
+All these lemmas are proved by straightforward induction. The interested reader can find
+formal proofs in \refAgda{LogicalRelation.}{Properties}.
+
+\subsection{Building a Model From Reducibility}
+\label{sec:validity}
+
+While reducibility is the main ingredient to our normalization proof, it is not 
+strong enough to define a model of \SetoidCC. For instance, reducibility is not 
+preserved by the lambda-abstraction rule~\nameref{infrule:pi-intro}:
+\[
+	\inferrule[Fun-Rel]
+		{\tytmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t}{B}{\Type_i}}
+		{\tytmannotated{\Gamma}{\lam{A}{t}}{\Depfunannotated{A}{B}{\Univ}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(i, \Univ)}}}
+\]
+For the lambda-abstraction to be a reducible element of the dependent product,
+% 
+\sideremark{We use the weak-head expansion lemma to reduce the proof of 
+reducibility of \( {(\lam{A}{t})\ a} \) to a proof of reducibility of
+\( {\subst{t}{a}} \)}
+% 
+we need to prove that for any term \( a \) which is a reducible inhabitant of
+\( A \), the term \( {\subst{t}{a}} \) is a reducible inhabitant of 
+\( {\subst{B}{a}} \).
+%  
+But our induction hypothesis only provides that \( t \) is reducible, and we 
+have no obvious way to show that reducibility is stable under substitution by
+reducible terms.
+
+Thus, following \sidecitet{Abel:POPL2018}, we define the notion of 
+\emph{validity}, which is the closure of reducibility under substitution 
+\refAgda{LogicalRelation.}{Substitution}.
+%
+\[
+a
+\]
 \[ {\small \inferrule{\forall \Delta\ \sigma \to \
       \metaimply{\ctxV{\Delta}}{\metaimply{\tytyS{\Delta}{\sigma}{\Gamma}}{
           \left \{ \begin{array}{l}
@@ -905,37 +978,135 @@ type, the validity of a term $t$ at $A$ is defined as
        }
 \]
 
-%% This notion of validity is a way to enforce stability by substitution
-%% for reducible terms.
-%
-Then, the fundamental lemma is stated with the paranoid variant of the type
-system. The lemma is proven using a mutual induction on derivations for well-typed types, terms, equality of
-types and equality of terms. We only present the statement on
-well-typed terms as we only explain the difference from the proof of
-\sidecitet{Abel:POPL2018,pujet:hal-03367052} on the impredicative fragment.
-%
-Note that because validity of a term can only be defined if the
-context and the type are themselves valid, the fundamental lemma
-actually provides validity of every component of the typing judgment.
-%
-\begin{lemma}[Fundamental lemma (for terms)
+\subsection{The Fundamental Lemma}
+\label{sec:fundamental-lemma}
+
+The fundamental lemma is the proof that validity is preserved by all inference 
+rules of \SetoidCC, or equivalently, that validity defines a model of 
+\SetoidCC.
+
+\begin{lemma}[Fundamental lemma for terms
   \refAgda{LogicalRelation.}{Fundamental}]
   \label{thm:fundamental}
   \
-  If\, \( \tytmParaannotated{\Gamma}{t}{A}{\Type{}} \), then there is a level \( \ell \) such that $\ctxV{\Gamma}$,
+  If\, \( \tytmannotated{\Gamma}{t}{A}{\Univ} \), then there is a level \( \ell \) such that $\ctxV{\Gamma}$,
   \( \tytyV{\ell}{\Gamma}{A}{\Type{}} \) and \( \tytmV{\ell}{\Gamma}{t}{A}{\Type{}} \).
 \end{lemma}
+
+The lemma is proved by a mutual induction on derivations for well-formed 
+contexts, types, type equality, terms and term equality. 
+% 
+Our extension to a cumulative hierarchy of universes and to the new 
+proof-relevant types requires numerous changes to the proof of Abel \etal, 
+but these do not pose any major difficulty -- albeit the proof
+is by no means trivial, as the arguments have to be spelled out in
+excruciating detail.
+
+Therefore, we focus on the three features of \SetoidCC that are more
+disruptive: the observational equality, the \( \castName \) operator, and
+the impredicative dependent products 
+(Rules \nameref{infrule:eq-form}, \nameref{infrule:cast}, and \nameref{infrule:pi-irr-form}).
+
+\begin{lemma}[Reducibility of cast]\label{reducibilitycast}
+Given any level \( \ell \), in a well-formed context \( \Gamma \), if:
+  \begin{enumerate}
+    \item \( \tytyR{\ell}{\Gamma}{A}{\Univ} \) and \( \tytyR{\ell}{\Gamma}{A'}{\Univ} \) and \( \eqtyR{\ell}{\Gamma}{A}{A'}{\Univ} \)
+    \item \( \tytyR{\ell}{\Gamma}{B}{\Univ} \) and \( \tytyR{\ell}{\Gamma}{B'}{\Univ} \) and \( \eqtyR{\ell}{\Gamma}{B}{B'}{\Univ} \)
+    \item \( \tytm{\Gamma}{e}{\Obseq[\Univ]{A}{B}} \) and \( \tytm{\Gamma}{e'}{\Obseq[\Univ]{A'}{B'}} \)
+    \item \( \tytmR{\ell}{\Gamma}{t}{A}{\Univ} \) and \( \tytmR{\ell}{\Gamma}{t'}{A'}{\Univ} \) and \( \eqtmR{\ell}{\Gamma}{t}{t'}{A}{\Univ} \)
+  \end{enumerate}
+  then \( \tytmR{\ell}{\Gamma}{\cast{A}{B}{e}{t}}{B}{\Univ} \) and \\ \( \eqtmR{\ell}{\Gamma}{\cast{A}{B}{e}{t}}{\cast{A'}{B'}{e'}{t'}}{B}{\Univ} \).
+\end{lemma}
+\sideremark{Note that we are able to prove this lemma on reducibility, without needing validity. 
+  It is easy to derive the same lemma for validity once it is established for reducibility.}
 \begin{proof}
-  The theorem is proven by induction on the paranoid derivation.
-  %
-  The only cases where the proof differs from
-  \sidecitet{Abel:POPL2018,pujet:hal-03367052} is when a rule builds
-  an inhabitant of a proof-irrelevant type. In this case, we need
-  to show that (i) the proof-irrelevant type is valid, and
-  (ii) that the term is well-typed.
-  %
-  Showing that the term is well-typed is always straightforward, but
-  the validity of its type can be more difficult to obtain.
+The proof is by case analysis on the reducibility proofs of \( A, A', B \) and \( B' \).
+%
+From the proofs of reducible equality, one obtains that the reducibility proofs of \( A \) and
+\( A' \) (resp. \( B \) and \( B' \)) are introduced by the same rule. Then, if one of the
+normal forms is neutral, or if the normal forms of \( A \) and \( B \) have different head
+constructors, then \( \cast{A}{B}{e}{t} \) and \( \cast{A'}{B'}{e'}{t'} \) are neutral and easily
+seen to be reducible.
+%
+Therefore, it suffices to prove the lemma when all the reducibility proofs are introduced by the
+same rule. We only cover the case of dependent products, as it is the most interesting.
+
+We know that \( A \) reduces to a term of the form \( \Depfun{F_A}{G_A} \), as do \( A', B, B' \).
+Therefore, we know that \( \cast{A}{B}{e}{t} \) reduces to
+\( \lam[a']{F_B}{\cast{\subst{G_A}{a}}{\subst{G_B}{a'}}{\snd{e}\ a'}{t\ a}} \) where \( a \) is
+a shorthand for \( \cast{F_B}{F_A}{\sym{\fst{e}}}{a'} \), and \( \cast{A'}{B'}{e'}{t'} \) reduces
+similarly. By the weak head expansion lemma, it suffices to prove that these two normal forms are
+reducible, and reducibly equal at type \( \Depfun{F_B}{G_B} \) -- that is, we need to prove that
+\begin{itemize}
+\item applying either function to a reducible term results in a reducible term,
+\item applying the two functions to the same reducible term results in two reducibly equal terms,  
+\item and that applying either function to two reducibly equal terms produces two reducibly equal terms.
+\end{itemize}
+
+To prove the first obligation, we first recursively apply the lemma to
+\( \cast{F_B}{F_A}{\sym{\fst{e}}}{a'} \) so that we obtain reducibility of \( a \), and then
+recursively apply it to \( \cast{\subst{G_A}{a}}{\subst{G_B}{a'}}{\snd{e}\ a'}{t\ a} \).
+The other two obligations are proved in the exact same manner.
+\end{proof}
+
+\begin{lemma}[Reducibility of the observational equality in the universe]\label{reducibilityidU}
+  Given any level \( \ell \), in a well formed context \( \Gamma \), if:
+    \begin{enumerate}
+      \item \( \tytyR{\ell}{\Gamma}{A}{\Univ} \) and \( \tytyR{\ell}{\Gamma}{A'}{\Univ} \) and \( \eqtyR{\ell}{\Gamma}{A}{A'}{\Univ} \)
+      \item \( \tytyR{\ell}{\Gamma}{B}{\Univ} \) and \( \tytyR{\ell}{\Gamma}{B'}{\Univ} \) and \( \eqtyR{\ell}{\Gamma}{B}{B'}{\Univ} \)
+    \end{enumerate}
+    then \( \tytyR{\ell}{\Gamma}{\Obseq[\Univ]{A}{B}}{\sProp} \) and 
+    \( \eqtyR{\ell}{\Gamma}{\Obseq[\Univ]{A}{B}}{\Obseq[\Univ]{A'}{B'}}{\sProp} \).
+\end{lemma}
+\begin{proof}
+The proof is by case analysis on the reducibility proofs of \( A, A', B \) and \( B' \). 
+As in the proof of \cref{reducibilitycast},
+we reduce the proof to introduction rules that correspond to the same kind of normal form.
+Most cases are straightforward, the most interesting case being again the dependent products.
+
+We know that \( A \) reduces to a term of the form \( \Depfun{F_A}{G_A} \),
+and so for \( A', B\) and \( B' \). Thus, we know that \( \Obseq[\Univ]{A}{B} \) reduces to
+\( \Exists[e]{\Obseq[{\Univ}]{F_A}{F_B}}{\Depfun[a']{F_B}{\Obseq[{\Univ}]{\subst{G_A}{a}}{\subst{G_B}{a'}}}} \)
+where \( a \) is a shorthand for \( \cast{F_B}{F_A}{\sym{\fst{e}}}{a'} \), and \( \Obseq[\Univ]{A'}{B'} \)
+reduces similarly. By the weak head expansion lemma, it suffices to prove that the first normal form
+is reducible, and reducibly equal to the second one.
+%
+We do this by applying reducibility of \( \castName \) to get reducibility of \( a \), and then doing
+recursive calls on \( \Obseq[{\Univ}]{F_A}{F_B} \) and
+\( \Obseq[{\Univ}]{\subst{G_A}{a}}{\subst{G_B}{a'}} \).
+\end{proof}
+
+\begin{lemma}[Reducibility of the observational equality]
+  Given any level \( \ell \), in a well formed context \( \Gamma \), if:
+    \begin{enumerate}
+      \item \( \tytyR{\ell}{\Gamma}{A}{\Type_i} \) and \( \tytyR{\ell}{\Gamma}{A'}{\Type_i} \) and \( \eqtyR{\ell}{\Gamma}{A}{A'}{\Type_i} \)
+      \item \( \tytmR{\ell}{\Gamma}{t}{A}{\Type_i} \) and \( \tytmR{\ell}{\Gamma}{t'}{A'}{\Type_i} \) and \( \eqtmR{\ell}{\Gamma}{t}{t'}{A}{\Type_i} \)
+      \item \( \tytmR{\ell}{\Gamma}{u}{A}{\Type_i} \) and \( \tytmR{\ell}{\Gamma}{u'}{A'}{\Type_i} \) and \( \eqtmR{\ell}{\Gamma}{u}{u'}{A}{\Type_i} \)
+    \end{enumerate}
+    then \( \tytyR{\ell}{\Gamma}{\Obseq[A]{t}{u}}{\sProp} \) and \( \eqtyR{\ell}{\Gamma}{\Obseq[A]{t}{u}}{\Obseq[A]{t'}{u'}}{\sProp} \).
+\end{lemma}
+\begin{proof}
+  By case analysis on \( A \) and \( A' \). The most difficult case is the universe, and
+  is handled by \cref{reducibilityidU}. The case of dependent products requires doing
+  recursive calls on the domain and the codomain, as in the previous lemmas.
+\end{proof}
+
+The lemmas for \( \castName \) and the observational equality constitute the 
+bulk of the proof: they occupy approximately 5,000 lines of Agda
+code and most of the time required to check the whole proof is spent on them.
+
+\begin{lemma}
+  The rules \nameref{infrule:pi-irr-form}, \nameref{infrule:pi-irr-intro} and \nameref{infrule:pi-irr-elim} preserve validity.
+\end{lemma}
+
+\begin{proof}
+  The case of \nameref{infrule:pi-irr-form} is easy, as proving reducibility 
+  of a proof-irrelevant \( \Pi \)-type only requires proving that the domain
+  and codomain are well-typed, which we obtain from the validity hypotheses.
+
+  The case of \nameref{infrule:pi-irr-intro} is also a one-liner, because
+  proving reducibility of an inhabitant of a proof-irrelevant type is only
+  a matter of showing that it is well-typed.
 
   In the case of the application of functions (Rule \nameref{infrule:pi-elim-Para}), the usual
   predicative way to get the fact that ${\subst{B}{u}}$ is valid
@@ -960,8 +1131,88 @@ actually provides validity of every component of the typing judgment.
   %
 \end{proof}
 
+\begin{corollary}[Normalization]
+  A direct consequence of the fundamental lemma is that any well-typed
+  term has a weak-head normal form.
+\end{corollary}
+
 \section{Consequences of Normalization}
 \label{sec:normalization-consequences}
+
+\subsection{Canonicity}
+
+Another direct consequence of the fundamental lemma is that any closed
+term of type $\Nat$ reduces to a whnf of type $\Nat$. Thus, to
+conclude canonicity, we just need to know that there is no neutral
+term of type $\Nat$ in an empty context.
+%
+Unfortunately, as the notion of reduction is absent for
+terms of proof-irrelevant types, and in particular for the empty type,
+this cannot be proven by induction on the syntax of the neutral terms.
+%
+However, assuming consistency of \SetoidCC (proved in \cref{sec:cons-seto-model}), or in other words that
+there is no closed term of type $\Empty$, we can derive canonicity of
+\SetoidCC \refAgda{Typed.Consequences.}{Canonicity}.
+
+\subsection{Decidability of Conversion}
+
+Besides proving weak-head normalization of well-typed terms, the
+main point of the fundamental lemma is to be able to show that
+conversion is decidable in $\SetoidCC$.
+%
+To do so, we define an algorithmic relation
+$\algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}$ which is supposed to
+simulate convertibility of two terms $t$ and $u$, while being
+easier to decide \refAgda{}{Conversion}.
+%
+This algorithmic conversion keeps track of the relevance information,
+and uses it to either give an immediate answer in case \( t \) and
+\( u \) are irrelevant, or compute their weak-head normal forms, then
+compare their head constructor, and possibly apply the algorithm
+recursively in case \( t \) and \( u \) are relevant.
+%
+Correctness of this algorithmic conversion is direct as the rules used are
+subsumed by the general conversion judgement \refAgda{Conversion.}{Soundness}.
+
+Showing that the algorithmic conversion is also complete is more complex.
+%
+It basically amounts to replaying the fundamental lemma with a definition of the logical
+relation that uses algorithmic conversion instead of the general conversion
+\refAgda{Conversion.Consequences.}{Completeness}.
+%
+In our formal proof, we follow \sidecitet{Abel:POPL2018} in factoring the two
+instances of the fundamental lemma by defininig a generic interface for both
+algorithmic conversion and typed conversion, and using this interface
+in the definition of the logical relation \refAgda{Typed.}{EqualityRelation}.
+
+\begin{theorem}[Equivalence of conversion and algorithmic conversion]
+  \label{thm:algoconv}
+    Given two terms $t$ and $u$ such that
+    $\tytmannotated{\Gamma}{t}{A}{\Type{}}$ and
+    $\tytmannotated{\Gamma}{u}{A}{\Type{}}$, we have that
+
+    $$ \eqtmannotated{\Gamma}{t}{u}{A}{\Type{}} \Longleftrightarrow\algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}.$$
+\end{theorem}
+
+It still remains to provide a decision procedure for the algorithmic
+conversion \refAgda{Conversion.}{Decidable}.
+%
+Given two terms $t$ and $u$ well-typed at $A : \Type{}$ in context
+$\Gamma$, we can apply the fundamental lemma plus the reflexivity of
+the logical relation to get the fact that $\eqtmR{\ell}{\Gamma}{t}{t}{A}{\Type{}}$
+and similarly for $u$.
+%
+Because reducibly equal terms are also algorithmically convertible, we
+have $\algoeqtmannotated{\Gamma}{t}{t}{A}{\Type{}}$ (and similarly for $u$).
+%
+Then the decision procedure is done by double induction on the proofs
+that $t$ and $u$ are reflexive for the algorithmic conversion.
+%
+The idea is that $t$ and $u$ are convertible if and only if the two reflexive proofs are the same.
+
+Note that the proof that $t$ is algorithmically equal to itself
+contains the fact that $t$ strongly normalizes, because
+$t$ can be recursively put in whnf.
 
 \subsection{A Paranoid Version of \SetoidCC }
 
@@ -1131,66 +1382,6 @@ In \cref{sec:cons-seto-model}, we will supplement
  the normalization result with
 a model of \SetoidCC in an impredicative meta-theory, from which
 we will deduce the consistency and canoncity theorems.
-
-\subsection{Decidability of Conversion}
-
-Besides proving weak-head normalization of well-typed terms, the
-main point of the fundamental lemma is to be able to show that
-conversion is decidable in $\SetoidCC$.
-%
-To do so, we define an algorithmic relation
-$\algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}$ which is supposed to
-simulate convertibility of two terms $t$ and $u$, while being
-easier to decide \refAgda{}{Conversion}.
-%
-This algorithmic conversion keeps track of the relevance information,
-and uses it to either give an immediate answer in case \( t \) and
-\( u \) are irrelevant, or compute their weak-head normal forms, then
-compare their head constructor, and possibly apply the algorithm
-recursively in case \( t \) and \( u \) are relevant.
-%
-Correctness of this algorithmic conversion is direct as the rules used are
-subsumed by the general conversion judgement \refAgda{Conversion.}{Soundness}.
-
-Showing that the algorithmic conversion is also complete is more complex.
-%
-It basically amounts to replaying the fundamental lemma with a definition of the logical
-relation that uses algorithmic conversion instead of the general conversion
-\refAgda{Conversion.Consequences.}{Completeness}.
-%
-In our formal proof, we follow \sidecitet{Abel:POPL2018} in factoring the two
-instances of the fundamental lemma by defininig a generic interface for both
-algorithmic conversion and typed conversion, and using this interface
-in the definition of the logical relation \refAgda{Typed.}{EqualityRelation}.
-
-\begin{theorem}[Equivalence of conversion and algorithmic conversion]
-  \label{thm:algoconv}
-    Given two terms $t$ and $u$ such that
-    $\tytmannotated{\Gamma}{t}{A}{\Type{}}$ and
-    $\tytmannotated{\Gamma}{u}{A}{\Type{}}$, we have that
-
-    $$ \eqtmannotated{\Gamma}{t}{u}{A}{\Type{}} \Longleftrightarrow\algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}.$$
-\end{theorem}
-
-It still remains to provide a decision procedure for the algorithmic
-conversion \refAgda{Conversion.}{Decidable}.
-%
-Given two terms $t$ and $u$ well-typed at $A : \Type{}$ in context
-$\Gamma$, we can apply the fundamental lemma plus the reflexivity of
-the logical relation to get the fact that $\eqtmR{\ell}{\Gamma}{t}{t}{A}{\Type{}}$
-and similarly for $u$.
-%
-Because reducibly equal terms are also algorithmically convertible, we
-have $\algoeqtmannotated{\Gamma}{t}{t}{A}{\Type{}}$ (and similarly for $u$).
-%
-Then the decision procedure is done by double induction on the proofs
-that $t$ and $u$ are reflexive for the algorithmic conversion.
-%
-The idea is that $t$ and $u$ are convertible if and only if the two reflexive proofs are the same.
-
-Note that the proof that $t$ is algorithmically equal to itself
-contains the fact that $t$ strongly normalizes, because
-$t$ can be recursively put in whnf.
 
 \subsection{Decidability of Typing}
 
