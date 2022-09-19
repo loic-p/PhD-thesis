@@ -335,9 +335,14 @@
 \newcommand{\ROmega}{\AgdaCon{R}_{\textcolor{AgdaInductiveConstructor} \Omega}}
 \newcommand{\Rempty}{\AgdaCon{R}_{\textcolor{AgdaInductiveConstructor} \bot}}
 \newcommand{\Rpi}{\AgdaCon{R}_{\textcolor{AgdaInductiveConstructor} \Pi}}
-\newcommand{\Rforall}{\AgdaCon{R}_{\textcolor{AgdaInductiveConstructor} \forall}}
+\newcommand{\Rsigma}{\AgdaCon{R}_{\textcolor{AgdaInductiveConstructor} \Sigma}}
+\newcommand{\Rbox}{\AgdaCon{R}_{\textcolor{AgdaInductiveConstructor} \Box}}
+\newcommand{\Rforall}{\AgdaCon{R}_{\textcolor{AgdaInductiveConstructor} \Pi \mathsf{\textcolor{AgdaInductiveConstructor} i}}}
 \newcommand{\Rexists}{\AgdaCon{R}_{\textcolor{AgdaInductiveConstructor} \exists}}
 \newcommand{\Rnat}{\AgdaCon{R}_{\AgdaCon{N}}}
+\newcommand{\RW}{\AgdaCon{R}_{\AgdaCon{W}}}
+\newcommand{\Rquo}{\AgdaCon{R}_{\AgdaCon{Q}}}
+\newcommand{\Rid}{\AgdaCon{R}_{\AgdaCon{Id}}}
 \newcommand{\Rne}{\AgdaCon{R}_{\AgdaCon{ne}}}
 \newcommand{\Remb}{\AgdaCon{R}_{\AgdaCon{emb}}}
 
@@ -378,11 +383,14 @@
 \newcommand{\codepisu}{\mathsf{c}_{\Pi\Omega\mathsf{U}}}
 \newcommand{\codepius}{\mathsf{c}_{\Pi\mathsf{U}\Omega}}
 \newcommand{\codepiss}{\mathsf{c}_{\Pi\Omega\Omega}}
+\newcommand{\codesigma}{\mathsf{c}_{\Sigma}}
+\newcommand{\codebox}{\mathsf{c}_{\Box}}
+\newcommand{\codequo}{\mathsf{c}_\mathsf{Q}}
+\newcommand{\codeid}{\mathsf{c}_\mathsf{Id}}
 \newcommand{\codeex}{\mathsf{c}_{\exists}}
 \newcommand{\codeU}{\mathsf{c}_\mathsf{U}}
 \newcommand{\codesProp}{\mathsf{c}_{\sProp}}
 \newcommand{\codeempty}{\mathsf{c}_\bot}
-\newcommand{\codequo}{\mathsf{c}_Q}
 
 
 \newcommand{\Setoid}{\mathsf{Setoid}}
@@ -419,7 +427,7 @@
 
 \newcommand{\sV}{\mathbf{V}}
 \newcommand{\sU}{\mathbf{U}}
-\newcommand{\Upred}{\mathcal{U}_{\varepsilon}}
+\newcommand{\Upred}{\mathbf{U}^{\varepsilon}}
 \newcommand{\sType}{\mathbf{s}}
 \newcommand{\ssProp}{\Two}
 \newcommand{\sFun}[2]{#1 \to_s #2}
@@ -474,7 +482,7 @@
 
 \newcommand{\bbfamily}{\fontencoding{U}\fontfamily{bbold}\selectfont}
 \DeclareMathAlphabet{\mathbbold}{U}{bbold}{m}{n}
-\newcommand{\Two}{\mathbbold{\Omega}}
+\newcommand{\Two}{\mathbb{B}}
 %% \newcommand{\Two}{{\color{white}\contour{black}{$\Omega$}}}
 %% \newcommand{\Two}{\mathbbm{\Omega}}
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}

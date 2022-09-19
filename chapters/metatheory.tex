@@ -281,9 +281,9 @@ will turn out that all such derivations give rise to equivalent judgments
                & \sep & \VU : \forall\ \Gamma\ t\ i \to
                           (\Gamma \Vdash_{\mathsf{U}} t : \Type_i) \to
                           \Gamma \Vdash_\ell t : \Type_i\\
-               & \sep & \VOmega : \forall\ \Gamma\ t\ i \to
-                          (\Gamma \Vdash_{\Omega} t : \Type_i) \to
-                          \Gamma \Vdash_\ell t : \Type_i\\
+               & \sep & \VOmega : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Omega} t) \to
+                          \Gamma \Vdash_\ell t : \Type_0\\
                & \sep & \Vnat : \forall\ \Gamma\ t \to
                           (\Gamma \Vdash_{\Nat} t) \to
                           \Gamma \Vdash_\ell t : \Type_0\\
@@ -596,7 +596,7 @@ neutral term or a dependent pair, a both of its projections are reducible.
   \inferrule{\redT{\Gamma}{A}{\Boxt{A'}}{\Type_0}
             \\ \tytm{\Gamma}{A'}{\sProp}
             \\ \tytyR{\ell}{\Gamma}{A'}{\sProp}}
-            {\tytyR{\Box}{\Gamma}{A}{\Type_0}}
+            {\Gamma \Vdash_{\Box} A}
 \]
 If \( A \) reduces to a boxed reducible proposition, then \( A \) is a 
 reducible type. In which case, we define:
@@ -845,7 +845,7 @@ types. We will discuss this in the proof of the fundamental lemma in \cref{sec:f
 \paragraph{The Impredicative Universe}
 \[
   \inferrule{\redT{\Gamma}{A}{\sProp}{\Type_0}}
-            {\tytyR{\Omega}{\Gamma}{A}{\Type_0}}
+            {\Gamma \Vdash_{\Omega} A}
 \]
 When $A$ is reducible to the impredicative universe, we define:
 \begin{itemize}
@@ -1418,7 +1418,8 @@ theory with \( n \) universes and \( \mathrm{W} \)-types, and we will write
 \( \SetoidCCW_n \) for the observational calculus of constructions extended 
 with proof-relevant \( \mathrm{W} \)-types and \( n \) universes.
 
-When we consider theories with an unbounded hierarchy of universes, we get that
+When we let \( n \) go to infinity, or in other words when we consider theories 
+with an unbounded hierarchy of universes, we get that
 normalization for \MLTTW is equivalent to normalization for \SetoidCCW.
 
 \begin{corollary}
@@ -1496,6 +1497,11 @@ the definition of the relation without induction-recursion.}
 %
 For the remainder of this section, we work in \( \MLTTW_{n+4} \) with a deep
 embedding of \( \SetoidCCW_n \).
+% 
+Having \( \mathrm{W} \)-types and inductive equalities in our meta-theory,
+it becomes possible to encode a wide range of indexed, nested inductive
+types as described by \sidecitet{inductives_with_W}. Therefore, we freely
+make use of them, and assume they are translated back to \( \mathrm{W} \)-types.
 %
 To avoid confusion between the meta-theory and the object theory, we
 will use \Agda-style notations for the meta-theory.
@@ -1568,35 +1574,46 @@ consider.
    \AgdaData{R}^\ell         & \bnfis & \Rne : \forall\ \Gamma\ t \to
                           (\Gamma \Vdash_{\mathsf{ne}} t) \to
                           \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\mathsf{ne}} t \equiv \_)\ (\Gamma\ \Vdash_{\mathsf{ne}} \_ : t)\ (\Gamma\ \Vdash_{\mathsf{ne}} \_ \equiv \_ : t)\\
-               & \sep & \RU : \forall\ \Gamma\ t \to
-                          (\Gamma \Vdash_{\mathsf{U}} t) \to
-                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\mathsf{U}} t \equiv \_)\ (\Gamma\ \Vdash_{\mathsf{U}} \_ : t)\ (\Gamma\ \Vdash_{\mathsf{U}} \_ \equiv \_ : t)\\
-               & \sep & \Rnat : \forall\ \Gamma\ t \to
-                          (\Gamma \Vdash_{\Nat} t) \to
-                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Nat} t \equiv \_)\ (\Gamma\ \Vdash_{\Nat} \_ : t)\ (\Gamma\ \Vdash_{\Nat
-                          } \_ \equiv \_ : t)\\
-               & \sep & \Rpi : \forall\ \Gamma\ t \to
-                          (\Gamma \Vdash_{\Pi} t) \to
-                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Pi} t \equiv \_)\ (\Gamma\ \Vdash_{\Pi} \_ : t)\ (\Gamma\ \Vdash_{\Pi} \_ \equiv \_ : t)\\
-               & \sep & \ROmega : \forall\ \Gamma\ t \to
-                          (\Gamma \Vdash_{\Omega} t) \to
-                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Omega} t \equiv \_)\ (\Gamma\ \Vdash_{\Omega} \_ : t)\ (\Gamma\ \Vdash_{\Omega} \_ \equiv \_ : t)\\
                & \sep & \Rforall : \forall\ \Gamma\ t \to
                           (\Gamma \Vdash_{\Pi \mathsf{i}} t) \to
                           \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Pi \mathsf{i}} t \equiv \_)\ (\Gamma\ \Vdash_{\Pi \mathsf{i}} \_ : t)\ (\Gamma\ \Vdash_{\Pi \mathsf{i}} \_ \equiv \_ : t)\\
-               & \sep & \Rexists : \forall\ \Gamma\ t \to
-                          (\Gamma \Vdash_{\exists} t) \to
-                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\exists} t \equiv \_)\ (\Gamma\ \Vdash_{\exists} \_ : t)\ (\Gamma\ \Vdash_{\exists} \_ \equiv \_ : t)\\
                & \sep & \Rempty : \forall\ \Gamma\ t \to
                           (\Gamma \Vdash_{\bot} t) \to
                           \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\bot} t \equiv \_)\ (\Gamma\ \Vdash_{\bot} \_ : t)\ (\Gamma\ \Vdash_{\bot} \_ \equiv \_ : t)\\
+               & \sep & \RU : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\mathsf{U}} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\mathsf{U}} t \equiv \_)\ (\Gamma\ \Vdash_{\mathsf{U}} \_ : t)\ (\Gamma\ \Vdash_{\mathsf{U}} \_ \equiv \_ : t)\\
+               & \sep & \ROmega : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Omega} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Omega} t \equiv \_)\ (\Gamma\ \Vdash_{\Omega} \_ : t)\ (\Gamma\ \Vdash_{\Omega} \_ \equiv \_ : t)\\
+               & \sep & \Rnat : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Nat} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Nat} t \equiv \_)\ (\Gamma\ \Vdash_{\Nat} \_ : t)\ (\Gamma\ \Vdash_{\Nat} \_ \equiv \_ : t)\\
+               & \sep & \Rpi : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Sigma} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Pi} t \equiv \_)\ (\Gamma\ \Vdash_{\Pi} \_ : t)\ (\Gamma\ \Vdash_{\Pi} \_ \equiv \_ : t)\\
+               & \sep & \Rsigma : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Sigma} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Sigma} t \equiv \_)\ (\Gamma\ \Vdash_{\Sigma} \_ : t)\ (\Gamma\ \Vdash_{\Sigma} \_ \equiv \_ : t)\\
+               & \sep & \Rbox : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\Box} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\Box} t \equiv \_)\ (\Gamma\ \Vdash_{\Box} \_ : t)\ (\Gamma\ \Vdash_{\Box} \_ \equiv \_ : t)\\
+               & \sep & \Rquo : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\mathsf{Q}} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\mathsf{Q}} t \equiv \_)\ (\Gamma\ \Vdash_{\mathsf{Q}} \_ : t)\ (\Gamma\ \Vdash_{\mathsf{Q}} \_ \equiv \_ : t)\\
+               & \sep & \Rid : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\mathsf{Id}} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\mathsf{Id}} t \equiv \_)\ (\Gamma\ \Vdash_{\mathsf{Id}} \_ : t)\ (\Gamma\ \Vdash_{\mathsf{Id}} \_ \equiv \_ : t)\\
+               & \sep & \RW : \forall\ \Gamma\ t \to
+                          (\Gamma \Vdash_{\mathsf{Id}} t) \to
+                          \AgdaData{R}^\ell\ \Gamma\ t\ (\Gamma\ \Vdash_{\mathsf{W}} t \equiv \_)\ (\Gamma\ \Vdash_{\mathsf{W}} \_ : t)\ (\Gamma\ \Vdash_{\mathsf{W}} \_ \equiv \_ : t)\\
                %% & \sep & \Remb : \forall\ \Gamma\ t\ P_=\ P_t\ P_{t=} \to \AgdaData{R}^{\ell'}\ \Gamma\ t\ P_=\ P_t\ P_{t=} \to \AgdaData{R}^\ell\ \Gamma\ t\ P_=\ P_t\ P_{t=} \qquad \text{for all } \ell' < \ell
   \end{array} &&
 \end{flalign*}
 
 \begin{flalign*}
-& \text{All the functions whose name contains } \Vdash_{\mathsf{ne}} \, , \ \Vdash_{\mathsf{U}} \, , \ \Vdash_{\Nat} \, ,\ \Vdash_{\Pi} \, ,\ \Vdash_{\Pi \mathsf{i}} \, ,\ \Vdash_{\exists} \, ,\ \Vdash_{\bot}
-\text{ are as defined in \cref{sec:logic-relat-with}.} &
+& \text{All the auxiliary predicates whose name mentions } \Vdash_{\mathsf{ne}} \, ,\ \Vdash_{\Pi \mathsf{i}} \, ,\ \Vdash_{\bot} \, , \ \Vdash_{\mathsf{U}}...
+\text{ are defined exactly as in \cref{sec:logic-relat-with}.} &
 \end{flalign*}
 
 \begin{flalign*}
@@ -1644,7 +1661,7 @@ The interested reader can consult the formalization for a more detailed proof.
 \label{sec:cons-seto-model}
 
 In this section, we turn to the construction of the
-\emph{standard} set-theoretic model of \SetoidCC.
+``standard'' set-theoretic model of \SetoidCC.
 %
 This model serves two purposes: to show consistency of our theory on
 the one hand, and to ensure that \SetoidCC is a good internal language for
@@ -1659,10 +1676,10 @@ proof-irrelevant proposition \( \bot \) as the set of syntactical
 terms with type \( \bot \), which does not grant any kind of control
 over its proofs in the empty context.
 
-This was already the case in the work of \sidecitet{pujet:hal-03367052} on
-\SetoidTT, so they supplemented their normalization proof with a model
+This was already the case in our previous work on \SetoidTT \sidecite{pujet:hal-03367052}, 
+so we supplemented our normalization proof with a model
 in the category of sets (presented as setoids), using
-induction-recursion to interpret universes as sets of codes \emph{à
+induction-recursion to interpret universes as sets of codes \textit{à
   la Tarski} defined mutually with eliminators and coercion functions.
 %
 In that model, \( \bot \) is actually interpreted as the empty set, which
@@ -1671,9 +1688,9 @@ no term of type \( \bot \) in the empty context.
 
 \subsection{\SetoidCC as an Internal Language for Sets}
 
-While the construction of \sidecitet{pujet:hal-03367052} does show consistency of
-\SetoidTT, it arguably falls short of presenting \SetoidTT as an internal
-language for classical mathematics.
+While the construction from our earlier work \cite{pujet:hal-03367052} does 
+show consistency of \SetoidTT, it arguably falls short of presenting \SetoidTT 
+as an internal language for classical mathematics.
 %
 Indeed, the inductive-recursive construction of the universe of codes is
 designed to only account for the codes that come from the syntax of
@@ -1685,9 +1702,9 @@ only states transitivity of equality for sets that are built from
 the type formers of \SetoidTT, when interpreted in their model.
 
 This state of affairs is obviously not ideal, as readers who are not
-willing to accept \SetoidTT as a new foundation of mathematics would
+willing to accept \SetoidTT / \SetoidCC as a new foundation of mathematics would
 probably be more inclined to use it if they knew that any theorem they
-proved in \SetoidTT is also true for classical set theory.
+proved in type theory is also true for classical set theory.
 %
 Thus, instead of replicating this construction in an impredicative
 meta-theory (to be able to interpret \( \sProp \)), we seize the
@@ -1716,28 +1733,35 @@ bit: we use \( (a \in A) \to (B\ a) \) for the set-theoretic dependent product,
 \( (a \in A) \times (B\ a) \) for the the set-theoretic dependent sum and
 \( \metanat \) for the set-theoretic integers.
 
-The central ingredient of our standard model is the hierarchy of universes of
-codes \( \sU_0, \sU_1... \), that are used to interpret the proof-relevant universes
-of \SetoidCC.
+The central ingredient of our standard model is the interpretation of the
+proof-relevant universes of \SetoidCC.
 %
-It is tempting to define them directly as Grothendieck universes
-(\( \sU_i = \sV_i \)), but unfortunately this does not work: in \SetoidCC,
-type constructors are injective with respect to the observational equality
+It is tempting to define them directly as Grothendieck universes, but 
+unfortunately this does not work: in \SetoidCC, type constructors are 
+injective with respect to the observational equality
 (for instance, \( \Obseq{(\Fun{A}{B})}{(\Fun{A'}{B'})} \) implies that
 \( \Obseq{A}{A'} \) and \( \Obseq{B}{B'} \)) while set-theoretic function
 spaces collapse too much information for this to be possible
-(\( \Fun{\bot}{\Bool} \) and \( \Fun{\bot}{\Nat} \) are identical).
+(\( \Fun{\bot}{\Bool} \) and \( \Fun{\bot}{\Nat} \) are identical function 
+sets).
 
-This is not too difficult to fix, however: we simply need to add a bit of
-information to the codes in the universe, so that we can keep track of how
-we constructed any given set. The most natural way to do this from a type
-theorist's perspective is to build an inductive predicate \( \ \Upred \) over
-\( \sV_i \) and then interpret the universes of \SetoidCC as
-\( \sU_i = (X \in \sV_i)\times(\Upred\ X) \), as described in \cref{fig:model}.
+This is not too difficult to fix, however: 
+% 
+we can define a hierarchy of sets \( \sU_0 , \sU_1 ... \) that have the same 
+elements as the Grothendieck universes, but decorated with labels that keep 
+track of how they were constructed. For instance, the label of a set that has 
+been constructed as a function space will contain the labels of its domain and 
+codomain, so that there is no way to confuse two different function spaces that happen
+to have the same elements. 
+
+The most natural way to do this from a type
+theorist's perspective is to build an inductive predicate \( \Upred_i \) over
+\( \sV_i \) and then define our alternative universes as
+\( \sU_i := (X \in \sV_i)\times(\Upred_i\ X) \), as described in \cref{fig:model}.
 %
-Note how the constructor \( \codeemb \) builds a proof of \( \ \Upred\ X \)
-for any (small) set \( X \), so that statements that quantify over
-\( \Type_i \) apply to all appropriately-sized sets of the model.
+Note how the constructor \( \codeemb \) builds a proof of \( \Upred_i\ X \)
+for any (small) set \( X \), so that \SetoidCC statements that quantify over
+the universe apply to all appropriately-sized sets of the model.
 %
 This also implies that there might be several codes for the
 same set: for instance \( (\Fun{\Nat}{\Nat} \ ;\ \codeemb) \) and
@@ -1745,34 +1769,45 @@ same set: for instance \( (\Fun{\Nat}{\Nat} \ ;\ \codeemb) \) and
 the set \( \Fun{\Nat}{\Nat} \), but only the second one remembers that it
 has been built as a function space.
 
-Remark that the natural equality between codes matches closely the equality
-of \SetoidCC: two codes can only be equal if they pack the same witness of
-\( \Upred \), which means that they have been built in the same way.
-Moreover, if we compare two codes of the form
-\( (X \to Y ;\ \codepiuu\ ...) \), the equality of the second member means that
-the domains and the codomains of the function spaces are equal---we recover the injectivity of
-the type formers.
+Remark that the natural equality between elements of \( \sU_i \) corresponds 
+closely the equality of \SetoidCC: two elements can only be equal if they pack 
+the same witness of \( \Upred_i \), which means that they have been built in the 
+same way.
+% 
+Moreover, if we compare two codes of the form \( (X \to Y ;\ \codepiuu\ ...) \), 
+the equality of the second member means that the domains and the codomains of 
+the function spaces are equal -- we recover the injectivity of the type formers.
 
 \begin{figure}
    \begin{small}
 \begin{flalign*}
   \begin{array}{lcl}
-   \Upred         & : & \Fun{\sV_i}{\sV_{i+1}}\\
-   \Upred         & \bnfis & \tm{\codeemb}{\Fun{(X \in \sV_i)}{\Upred\ X}}\\
+   \Upred_i         & : & \Fun{\sV_i}{\sV_{i+1}}\\
+   \Upred_i         & \bnfis & \tm{\codeemb}{\Fun{(X \in \sV_i)}{\Upred_i\ X}}\\
 %                     & \sep & \tm{\codenat}{\sU_i} & \qquad & \text{if i = 0}\\
-                     & \sep & \tm{\codepiuu}{\{ j, k \in \metanat\ |\ \mathrm{max}(j, k) \le i\} \to (A \in \sV_j) \to (A_\varepsilon \in \Upred\ A)} \\
-                  & & \qquad \to (B \in (A \to \sV_k)) \to (B_\varepsilon \in ((a \in A) \to \Upred\ (B\ a)))\\
-                  & & \qquad \to \Upred\ {((a \in A) \to B\ a)}\\
+                     & \sep & \tm{\codepiuu}{\{ j, k \in \metanat\ |\ \mathrm{max}(j, k) \le i\} \to (A \in \sV_j) \to (A_\varepsilon \in \Upred_i\ A)} \\
+                          & & \qquad \to (B \in (A \to \sV_k)) \to (B_\varepsilon \in ((a \in A) \to \Upred_i\ (B\ a)))\\
+                          & & \qquad \to \Upred_i\ {((a \in A) \to B\ a)}\\
                      & \sep & \tm{\codepisu}{(A \in \ssProp)} \\
-                  & & \qquad \to (B \in (\val\ A \to \sV_i)) \to (B_\varepsilon \in ((a \in \val\ A) \to \Upred\ (B\ a)))\\
-                  & & \qquad \to \Upred\ {((a \in \val\ A) \to B\ a)}\\
-                     & \sep & \tm{\codeU}{\Fun{\{ j \in \metanat\ |\ j < i\}}{\Upred\ \sU_j}} \\
-                     & \sep & \tm{\codesProp}{\Upred\ \ssProp} \\
+                          & & \qquad \to (B \in (\val\ A \to \sV_i)) \to (B_\varepsilon \in ((a \in \val\ A) \to \Upred_i\ (B\ a)))\\
+                          & & \qquad \to \Upred_i\ {((a \in \val\ A) \to B\ a)}\\
+                     & \sep & \tm{\codesigma}{\{ j, k \in \metanat\ |\ \mathrm{max}(j, k) \le i\} \to (A \in \sV_j) \to (A_\varepsilon \in \Upred_i\ A)} \\
+                          & & \qquad \to (B \in (A \to \sV_k)) \to (B_\varepsilon \in ((a \in A) \to \Upred_i\ (B\ a)))\\
+                          & & \qquad \to \Upred_i\ {((a \in A) \times B\ a)}\\
+                     & \sep & \tm{\codebox}{(A \in \ssProp) \to \Upred_i\ (\val\ A)} \\
+                     & \sep & \tm{\codequo}{\{ j \in \metanat\ |\ j < i\} \to (A \in \sV_j) \to (A_\varepsilon \in \Upred_i\ A)} \\
+                          & & \qquad \to \{ R \in A \to A \to \Two \ |\ R \text{ is an equivalence relation}\}\\
+                          & & \qquad \to \Upred_i\ {(A/R)}\\
+                     & \sep & \tm{\codeid}{\{ j \in \metanat\ |\ j < i\} \to (A \in \sV_j) \to (A_\varepsilon \in \Upred_i\ A)} \\
+                          & & \qquad \to (x \in A) \to (y \in A)\\
+                          & & \qquad \to \Upred_i\ {(\val\ (t=u))}\\
+                     & \sep & \tm{\codeU}{\Fun{\{ j \in \metanat\ |\ j < i\}}{\Upred_i\ \sU_j}} \\
+                     & \sep & \tm{\codesProp}{\Upred_i\ \ssProp} \\
   \end{array} &&
 \end{flalign*}
 
 \begin{flalign*}
-  \hspace{5pt}\sU_i \quad := \quad (X \in \sV_i)\times(\Upred\ X) &&
+  \hspace{5pt}\sU_i \quad := \quad (X \in \sV_i)\times(\Upred_i\ X) &&
 \end{flalign*}
 %
 \begin{flalign*}
@@ -1883,7 +1918,7 @@ well-defined, we define the function \( \sigma_t \) by:
 \begin{array}{rcl}
   \mty{x}\ \rho & := & \rho(x) \\
   \mty{\Type_i}\ \rho & := & \langle \sU_i\ ;\ \codeU\ i \rangle \\
-  \mty{\sProp[i]}\ \rho & := & \langle \ssProp\ ;\ \codesProp \rangle\\
+  \mty{\sProp}\ \rho & := & \langle \ssProp\ ;\ \codesProp \rangle\\
   \mty{\Depfunannotated[y]{F}{G}{}{\Type_j}{\Type_k}}\ \rho & := & \big\langle (x \in\el\ \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
 & & ;\ \codepiuu\ j\ k\ (\mty{F}\ \rho)\ (x \mapsto \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle) \big\rangle\\
   \mty{\Depfunannotated[y]{F}{G}{}{\sProp}{\Type_k}}\ \rho & := & \big\langle (x \in\val\ \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
@@ -1892,14 +1927,15 @@ well-defined, we define the function \( \sigma_t \) by:
   \mty{\Depfunannotated[y]{F}{G}{}{\sProp}{\sProp}}\ \rho & := & (\mty{F}\ \rho) \Rightarrow (\mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ *\rangle)\\
   \mty{\lam[x]{F}{t}}\ \rho & := & x \mapsto (\mty[{\extctx[x]{\Gamma}{F}}]{t}\ \langle \rho\ ;\ x\rangle)\\
   \mty{t\ u}\ \rho & := & (\mty{t}\ \rho)\ (\mty{u}\ \rho)\\
-  \mty{\Nat}\ \rho & := & \codeemb\ \metanat \\
+  \mty{\Depsumannotated[y]{F}{G}{}{\Type_j}{\Type_k}}\ \rho & := & \big\langle (x \in\el\ \mty{F}\ \rho)\times (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
+& & ;\ \codesigma\ j\ k\ (\mty{F}\ \rho)\ (x \mapsto \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle) \big\rangle\\
+  \mty{\relpair{t}{u}}\ \rho & := & \langle \mty{t}\ \rho\ ;\ \mty{u}\ \rho \rangle \\
+  \mty{\relfst{t}}\ \rho & := & \pi_1 (\mty{t}\ \rho) \\
+  \mty{\relsnd{t}}\ \rho & := & \pi_2 (\mty{t}\ \rho) \\
+  \mty{\Nat}\ \rho & := & \langle \metanat\ ;\ \codeemb\ \metanat \rangle \\
   \mty{\zero}\ \rho & := & \metazero \\
   \mty{\suc{t}}\ \rho & := & \metasuc{(\mty{t}\ \rho)} \\
   \mty{\natrec{P}{t_0}{t_S}{n}}\ \rho & := & \metanat\mathrm{-elim}(\el \circ (\mty{P}\ \rho), \mty{t_0}\ \rho, \mty{t_S}\ \rho, \mty{n}\ \rho)\\
-  \mty{\Exists[y]{F}{G}}\ \rho & := & (\mty{F}\ \rho) \land (\mty[{\extctx[y]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ * \rangle) \\
-  \mty{\pair{t}{u}}\ \rho & := & * \\
-  \mty{\fst{t}}\ \rho & := & * \\
-  \mty{\snd{t}}\ \rho & := & * \\
   \mty{\Empty}\ \rho & := & \independent \in \Two \\
   \mty{\emptyrec{A}{t}}\ \rho & := & \text{undefined} \\
   \mty{\Obseq[A]{t}{u}}\ \rho & := & \sEq{\mty{t}\ \rho}{\mty{u}\ \rho} \qquad\text{in }\el(\mty{A}\ x) \\
