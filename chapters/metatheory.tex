@@ -110,7 +110,7 @@ Whenever a type \( A \) is equipped with these three reducibility predicates, we
 A reducibility predicate typically characterizes the behaviour that ``well-behaved''
 terms of type \( A \) should have: for instance, a term \( t \) is deemed
 to be a reducible inhabitant of type \( B \to C \) if it reduces to a term 
-\( \bar{t} \) in weak-head normal form, such that \( \bar{t} \) applied to
+\( {t'} \) in weak-head normal form, such that \( {t'} \) applied to
 any reducible term of type \( B \) produces a reducible term of type \( C \)
 (up to some technical details).
 
@@ -1718,9 +1718,8 @@ We work in ZF set theory with a countable hierarchy of Grothendieck universes
 \( \sV_0, \sV_1, ... \)
 %
 We call \( \Two \) the lattice of truth values (or in other words, the
-booleans), with \( \independent \) as its minimal value,
-and given \( p \in \Two \) we write \( \val\ p \) for the
-corresponding sub-singleton set \( \{ x \in \{ * \}\ |\ p \} \).
+subobjects of the singleton set \( \{ * \} \)), with \( \emptyset \) as its 
+minimal value.
 %
 Even though we stay in the world of set theory for the duration of
 this section, we remain type theorists, and as such
@@ -1789,18 +1788,18 @@ the function spaces are equal -- we recover the injectivity of the type formers.
                           & & \qquad \to (B \in (A \to \sV_k)) \to (B_\varepsilon \in ((a \in A) \to \Upred_i\ (B\ a)))\\
                           & & \qquad \to \Upred_i\ {((a \in A) \to B\ a)}\\
                      & \sep & \tm{\codepisu}{(A \in \ssProp)} \\
-                          & & \qquad \to (B \in (\val\ A \to \sV_i)) \to (B_\varepsilon \in ((a \in \val\ A) \to \Upred_i\ (B\ a)))\\
-                          & & \qquad \to \Upred_i\ {((a \in \val\ A) \to B\ a)}\\
+                          & & \qquad \to (B \in (A \to \sV_i)) \to (B_\varepsilon \in ((a \in A) \to \Upred_i\ (B\ a)))\\
+                          & & \qquad \to \Upred_i\ {((a \in A) \to B\ a)}\\
                      & \sep & \tm{\codesigma}{\{ j, k \in \metanat\ |\ \mathrm{max}(j, k) \le i\} \to (A \in \sV_j) \to (A_\varepsilon \in \Upred_i\ A)} \\
                           & & \qquad \to (B \in (A \to \sV_k)) \to (B_\varepsilon \in ((a \in A) \to \Upred_i\ (B\ a)))\\
                           & & \qquad \to \Upred_i\ {((a \in A) \times B\ a)}\\
-                     & \sep & \tm{\codebox}{(A \in \ssProp) \to \Upred_i\ (\val\ A)} \\
+                     & \sep & \tm{\codebox}{(A \in \ssProp) \to \Upred_i\ A} \\
                      & \sep & \tm{\codequo}{\{ j \in \metanat\ |\ j < i\} \to (A \in \sV_j) \to (A_\varepsilon \in \Upred_i\ A)} \\
                           & & \qquad \to \{ R \in A \to A \to \Two \ |\ R \text{ is an equivalence relation}\}\\
                           & & \qquad \to \Upred_i\ {(A/R)}\\
                      & \sep & \tm{\codeid}{\{ j \in \metanat\ |\ j < i\} \to (A \in \sV_j) \to (A_\varepsilon \in \Upred_i\ A)} \\
                           & & \qquad \to (x \in A) \to (y \in A)\\
-                          & & \qquad \to \Upred_i\ {(\val\ (t=u))}\\
+                          & & \qquad \to \Upred_i\ \{ x \in \{ * \}\ |\ \sEq{t}{u} \}\\\
                      & \sep & \tm{\codeU}{\Fun{\{ j \in \metanat\ |\ j < i\}}{\Upred_i\ \sU_j}} \\
                      & \sep & \tm{\codesProp}{\Upred_i\ \ssProp} \\
   \end{array} &&
@@ -1831,7 +1830,7 @@ In the standard fashion~\sidecite{hofmann95}, we define interpretation functions
 \end{itemize}
 Since these functions are defined on raw syntax without any guarantee of
 well-typedness, we cannot expect every term to have a sensible interpretation
-so we need to make them \emph{partial} functions. We will be able to prove
+so we need to define them as partial functions. We will be able to prove
 that all well-typed terms admit an interpretation \textit{a posteriori} by
 induction on the derivations.
 
@@ -1842,15 +1841,27 @@ when \( \mty{A} \) is defined.
 %
 Given \( \rho \in \mctx{\Gamma} \) and a variable \( x \) that appears in
 \( \Gamma \), we write \( \rho(x) \) for the corresponding projection.
-%
-The interpretation of the terms is defined in
-\cref{fig:interpretation}. The proof-relevant fragment unsurprisingly
-follows the standard interpretation of dependent type theory, and the
-observational equality is interpreted as the extensional equality of
-set-theory.
-%
-Note how the irrelevant proofs are all interpreted as \( * \), the inhabitant
-of the singleton set. This forces us to interpret cast as doing nothing, and \( \emptyrec{A}{t} \) is not even interpreted since it can only be formed in inconsistent contexts, which are empty in the model.
+
+The interpretation of the terms is defined in \cref{fig:interpretation}. 
+\begin{itemize}
+\item In the proof-relevant fragment, we interpret types as elements of
+  our decorated hierarchy \( \sU_1, \sU_2 ... \) and terms as sets.
+  The intention is that if \( t \) is an inhabitant of
+  the proof relevant term \( A \) in context \( \Gamma \), then its interpretation 
+  \( \mty{t}\ \rho \) should be an element of \( \el\ (\mty{A}\ \rho) \) for all
+  \( \rho \in \mctx{\Gamma} \).
+\item In order to validate proposition extensionality, proof-irrelevant 
+  propositions are directly interpreted as \emph{truth values}, or
+  in other words, subsets of the singleton set.
+  Computationally irrelevant proofs such as \( \metaop{refl} \) of 
+  \( \metaop{\Box{-}elim} \) are all interpreted interpreted as \( \rho \mapsto * \),
+  which guarantees that the corresponding proposition is true for all
+  \( \rho \in \mctx{\Gamma} \).
+  % 
+  We can interpret cast as the identity, since the two types are interpreted
+  as the same set, and \( \emptyrec{A}{t} \) is not even interpreted since it 
+  can only be formed in inconsistent contexts, which are empty in the model.
+\end{itemize}
 
 In order to prove the soundness of our interpretation, we need to extend it to weakenings
 and substitutions between contexts.
@@ -1900,11 +1911,11 @@ well-defined, we define the function \( \sigma_t \) by:
   \
   \begin{enumerate}
     \item If\, \( \wfctx{\Gamma} \) then \( \mctx{\Gamma} \) is defined.
-    \item If\, \( \tytm{\Gamma}{A}{\sProp} \) then \( \mty{A}\ \rho \) is a proposition for all \( \rho \in \mctx{\Gamma} \).
+    \item If\, \( \tytm{\Gamma}{A}{\sProp} \) then \( \mty{A}\ \rho \) is a subset of \( \{ * \} \) for all \( \rho \in \mctx{\Gamma} \).
     \item If\, \( \tytm{\Gamma}{A}{\Type_i} \) then \( \mty{A}\ \rho \) is in \( \sU_i \) for all \( \rho \in \mctx{\Gamma} \).
-    \item If\, \( \tytmannotated{\Gamma}{t}{A}{\sProp} \) then \( \mty{A}\ \rho \) is true for all \( \rho \in \mctx{\Gamma} \).
+    \item If\, \( \tytmannotated{\Gamma}{t}{A}{\sProp} \) then \( \mty{A}\ \rho \) is equal to \( \{ * \} \) for all \( \rho \in \mctx{\Gamma} \).
     \item If\, \( \tytmannotated{\Gamma}{t}{A}{\Type_i} \) then \( \mty{t}\ \rho \) is in \( \el\ (\mty{A}\ \rho) \) for all \( \rho \in \mctx{\Gamma} \).
-    \item If\, \( \eqtm{\Gamma}{t}{u}{A} \) then \( \mty{t} = \mty{u} \).
+    \item If\, \( \eqtmannotated{\Gamma}{t}{u}{A}{\Univ} \) then \( \mty{t} = \mty{u} \).
   \end{enumerate}
 \end{theorem}
 \begin{proof}
@@ -1912,43 +1923,62 @@ well-defined, we define the function \( \sigma_t \) by:
 \end{proof}
 
 
-\begin{figure}
+\begin{figure*}
   \begin{small}
 \[
 \begin{array}{rcl}
   \mty{x}\ \rho & := & \rho(x) \\
   \mty{\Type_i}\ \rho & := & \langle \sU_i\ ;\ \codeU\ i \rangle \\
   \mty{\sProp}\ \rho & := & \langle \ssProp\ ;\ \codesProp \rangle\\
+  \\
   \mty{\Depfunannotated[y]{F}{G}{}{\Type_j}{\Type_k}}\ \rho & := & \big\langle (x \in\el\ \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
 & & ;\ \codepiuu\ j\ k\ (\mty{F}\ \rho)\ (x \mapsto \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle) \big\rangle\\
-  \mty{\Depfunannotated[y]{F}{G}{}{\sProp}{\Type_k}}\ \rho & := & \big\langle (x \in\val\ \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
+  \mty{\Depfunannotated[y]{F}{G}{}{\sProp}{\Type_k}}\ \rho & := & \big\langle (x \in \mty{F}\ \rho)\to (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
 & & ;\ \codepisu\ (\mty{F}\ \rho)\ (x \mapsto \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle) \big\rangle\\
   \mty{\Depfunannotated[y]{F}{G}{}{\Type_j}{\sProp}}\ \rho & := & \forall x \in (\el\ \mty{F}\ \rho),\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle\\
   \mty{\Depfunannotated[y]{F}{G}{}{\sProp}{\sProp}}\ \rho & := & (\mty{F}\ \rho) \Rightarrow (\mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ *\rangle)\\
   \mty{\lam[x]{F}{t}}\ \rho & := & x \mapsto (\mty[{\extctx[x]{\Gamma}{F}}]{t}\ \langle \rho\ ;\ x\rangle)\\
   \mty{t\ u}\ \rho & := & (\mty{t}\ \rho)\ (\mty{u}\ \rho)\\
+  \\
   \mty{\Depsumannotated[y]{F}{G}{}{\Type_j}{\Type_k}}\ \rho & := & \big\langle (x \in\el\ \mty{F}\ \rho)\times (\el\ \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle)\\
 & & ;\ \codesigma\ j\ k\ (\mty{F}\ \rho)\ (x \mapsto \mty[{\extctx[x]{\Gamma}{F}}]{G}\ \langle \rho\ ;\ x\rangle) \big\rangle\\
   \mty{\relpair{t}{u}}\ \rho & := & \langle \mty{t}\ \rho\ ;\ \mty{u}\ \rho \rangle \\
   \mty{\relfst{t}}\ \rho & := & \pi_1 (\mty{t}\ \rho) \\
   \mty{\relsnd{t}}\ \rho & := & \pi_2 (\mty{t}\ \rho) \\
+  \\
   \mty{\Nat}\ \rho & := & \langle \metanat\ ;\ \codeemb\ \metanat \rangle \\
   \mty{\zero}\ \rho & := & \metazero \\
   \mty{\suc{t}}\ \rho & := & \metasuc{(\mty{t}\ \rho)} \\
   \mty{\natrec{P}{t_0}{t_S}{n}}\ \rho & := & \metanat\mathrm{-elim}(\el \circ (\mty{P}\ \rho), \mty{t_0}\ \rho, \mty{t_S}\ \rho, \mty{n}\ \rho)\\
-  \mty{\Empty}\ \rho & := & \independent \in \Two \\
+  \\
+  \mty{\Boxt{A}}\ \rho & := & \langle \mty{A}\ \rho\ ;\ \codebox\ (\mty{A}\ \rho) \rangle \\
+  \mty{\boxt{t}}\ \rho & := & * \\
+  \mty{\unboxt{t}}\ \rho & := & * \\
+  \\
+  \mty{\Quo{A}{R}}\ \rho & := & \langle (\mty{A}\ \rho)/(\mty{R}\ \rho)\ ;\ \codequo\ (\mty{A}\ \rho)\ (\mty{R}\ \rho) \rangle \\
+  \mty{\quo{t}}\ \rho & := & \text{the equivalence class of } \mty{t}\ \rho \text{ in the quotient} \\
+  \mty{\quorec{A}{t}{u}{v}}\ \rho & := & (\mty{t}\ \rho)\ x \qquad \text{for any } x \in (\mty{v}\ \rho)\\  
+  \\
+  \mty{\Id{A}{t}{u}}\ \rho & := & \langle \{ x \in \{ * \}\ |\ \sEq{\mty{t}\ \rho}{\mty{u}\ \rho} \} \\
+& & ;\ \codeid\ (\mty{A}\ \rho)\ (\mty{t}\ \rho)\ (\mty{u}\ \rho) \rangle \\
+  \mty{\id{t}}\ \rho & := & * \\
+  \mty{\idpath{t}}\ \rho & := & * \\
+  \mty{\J{A}{t}{B}{u}{t'}{e}}\ \rho & := & \mty{u}\ \rho \\
+  \\
+  \mty{\Empty}\ \rho & := & \emptyset \\
   \mty{\emptyrec{A}{t}}\ \rho & := & \text{undefined} \\
-  \mty{\Obseq[A]{t}{u}}\ \rho & := & \sEq{\mty{t}\ \rho}{\mty{u}\ \rho} \qquad\text{in }\el(\mty{A}\ x) \\
+  \\
+  \mty{\Obseq[A]{t}{u}}\ \rho & := & \{ x \in \{ * \}\ |\ \sEq{\mty{t}\ \rho}{\mty{u}\ \rho} \}\\
   \mty{\refl{t}{A}}\ \rho & := & * \\
   \mty{\transport{F}{t}{G}{u}{t'}{e}}\ \rho & := & * \\
-  \mty{\cast{A}{B}{e}{t}}\ \rho & := & t\\
+  \mty{\cast{A}{B}{e}{t}}\ \rho & := & \mty{t}\ \rho\\
   \mty{\castrefl{A}{t}}\ \rho & := & *
 \end{array}
 \]
 \end{small}
   \caption{Interpretation of \SetoidCC in the Standard Model}
   \label{fig:interpretation}
-\end{figure}
+\end{figure*}
 
 \subsection{Consequences of the Model}
 
