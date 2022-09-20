@@ -3,29 +3,52 @@
 \chapter{Meta-theory of \SetoidCC}
 \labch{metatheory}
 
-In this chapter, we will prove these four properties for \SetoidCC.
-%
-We first present our extension of the
-logical relations framework developed by \sidecitet{Abel:POPL2018} and
-later extended to $\sProp$ by~\sidecitet{gilbert:hal-01859964}. The
-framework provides a proof of normalization and canonicity from
-consistency, as well as decidability of conversion and thus decidability of
-type checking.
-%
-It has been formalized in the \Agda development.
-%
-Then, to get consistency and therefore canonicity, we develop a model of
-\SetoidCC in a constructive set theory that supports inductive-recursive definitions and one
-Grothendieck universe.
+In this chapter, we develop the meta-theory of \SetoidCC to prove
+the theorems that are presented in \cref{sec:properties}.
 
-In this section, we build a model to show normalization and decidability of 
-conversion for \SetoidCC, based on the normalization model for \MLTT presented 
-by \sidecitet{Abel:POPL2018}.
+Firstly, in \cref{sec:logic-relat-with} we build a normalization model for \SetoidCC
+in \Agda, based on the model for \MLTT presented by Abel 
+\etal~\cite{Abel:POPL2018}. 
+% 
+By interpreting types as logical predicates on terms, we prove that 
+every well-typed term of \SetoidCC has a normal form that can be computed
+by reduction.
+
+Then in \cref{sec:normalization-consequences}, we study the consequences of 
+the normalization model. We explain how to deduce canonicity of \SetoidCC from
+a proof of consistency, we show that conversion is decidable, and we give the 
+outline of an algorithm for type-checking. 
+% 
+Except for the decidability of typing, all the proofs of this section have been
+formally verified in \Agda. 
+
+In \cref{sec:analys-norm-proof}, we explain how to replay the construction of
+the normalization model in Martin-Löf Type Theory with W-types, a theory that is
+weaker than the theory of \Agda. 
+% 
+From there, we deduce that \SetoidCC cannot express more integer functions than \MLTT. 
+% 
+This section is also supported by an \Agda development.
+
+Finally, in \cref{sec:cons-seto-model} we construct a model of \SetoidCC in ZF 
+set theory with Grothendieck universes, from which we obtain a proof of 
+consistency (and therefore canonicity) for \SetoidCC. Furthermore, we make sure
+that our model provides reasonable set-theoretic semantics for our system, so
+that statements of \SetoidCC may be interpreted as natural statements of ZF set 
+theory.
 
 \section{The Normalization Model}
 \label{sec:logic-relat-with}
 
 \subsection{Overview of the Proof}
+
+Since the construction of the normalization model is rather intricate, it might
+be easy to get lost in the technical details and to miss the big idea. 
+% 
+Therefore, in hope that the reader will find it helpful, we start by giving a lengthy 
+bird's eye view of the proof with references and comparisons to the existing
+literature before diving head first into the actual proof in 
+\cref{sec:reducbility-proof-rel}.
 
 \paragraph*{Proving Normalization}
 
@@ -37,14 +60,14 @@ get stuck on the case of the application rule, because we cannot obtain that
 \( t~u \) is normalizing from the hypotheses that $t$ and $u$ are normalizing.
 %
 Still, reasoning by induction on the typing derivations is pretty much our only 
-option, as type theories are fundamentally inductive objects, as presented by 
+option, as type theories are fundamentally inductive objects, presented by 
 the inference rules.
 % 
 Thus what we really need is a better induction hypothesis, one that implies
 normalization of well-typed terms but is also preserved by all the inference 
 rules of the type theory.
 
-When we are dealing with a type theory that is as complex as \MLTT or \SetoidCC, 
+When we are dealing with a type theory that is as sophisticated as \MLTT or \SetoidCC, 
 the typical induction hypotheses get very complex, with cases specifically 
 tailored to handle each basic type and a lot of interdependence.
 % 
@@ -70,7 +93,7 @@ of Tait~\sidecite{Tait67}, or its reinterpretation in categorical language
 that goes by the name \emph{gluing}~\sidecite{shulman_2015}.
 
 In \sidecite{Abel:POPL2018}, Abel \etal present a normalization model for a 
-subset of \MLTT that includes one universe level, dependent products and 
+subset of \MLTT that includes one predicative universe, dependent products and 
 natural numbers with large elimination.
 % 
 They build their model in intensional type theory with induction-recursion, 
@@ -82,39 +105,40 @@ of decidability of the conversion.
 In this chapter, we will extend their model to show normalization and decidability
 of conversion for the full system \SetoidCC.
 % 
-We formalized a significant portion of the proof in \Agda, which handles two 
-predicative universes, the impredicative universe of propositions, dependent 
-products, natural numbers and the observational equality. 
+We formalized a our proofs in \Agda for a significant subset of \SetoidCC that
+includes two predicative universes, the impredicative universe of propositions, 
+dependent products, natural numbers and the observational equality. 
 % 
 Links to our code will be scattered thoughout the chapter, but 
 the main file can be consulted at \refAgdaRoot{Everything}.
 
-\paragraph*{The Model of Abel \etal}
+\paragraph*{Informal summary of the model of Abel \etal}
 % 
-Abel \etal start by defining reducibility, three proof-relevant predicates on untyped 
-terms that are associated to ``well-behaved'' types \( A \) of sort \( \Univ \) in 
-a context \( \Gamma \):
+Abel \etal start by defining the \emph{reducibility predicates}. 
+Reducibility predicates are three proof-relevant predicates on untyped 
+terms that are associated to some types of the theory:
 % 
 \begin{itemize}
-\item the unary predicate \( {\tytmR{\ell}{\Gamma}{\_}{A}{\Univ}} \) which 
-  defines the set of \emph{reducible terms} of type \( A \),
-\item the binary relation \( {\eqtmR{\ell}{\Gamma}{\_}{\_}{A}{\Univ}} \), 
-  which defines \emph{reducible equality} between two reducible terms of type \( A \),
-\item and the unary predicate \( {\eqtyR{\ell}{\Gamma}{A}{\_}{\Univ}} \) which 
-  defines the set of types \emph{reducibly equal} to \( A \).
+\item the unary predicate \( {\tytmReco{\ell}{\Gamma}{\_}{A}{\Univ}} \) 
+  defines the set of \emph{reducible terms} of type \( A \) in context \( \Gamma \),
+\item the binary relation \( {\eqtmReco{\ell}{\Gamma}{\_}{\_}{A}{\Univ}} \), 
+  defines \emph{reducible equality} between two reducible terms of type \( A \) in context \( \Gamma \),
+\item and the unary predicate \( {\eqtyReco{\ell}{\Gamma}{A}{\_}{\Univ}} \) 
+  defines the set of types \emph{reducibly equal} to \( A \) in context \( \Gamma \).
 \end{itemize}
 % 
-Whenever a type \( A \) is equipped with these three reducibility predicates, we write 
-\( \tytyR{\ell}{\Gamma}{A}{\Univ} \) and we call \( A \) a \emph{reducible type}.
+Whenever a type \( A \) is equipped with these three reducibility predicates in a
+context \( \Gamma \), we write \( \tytyReco{\ell}{\Gamma}{A}{\Univ} \) and we call 
+\( A \) a \emph{reducible type}.
 
-A reducibility predicate typically characterizes the behaviour that ``well-behaved''
-terms of type \( A \) should have: for instance, a term \( t \) is deemed
+A typical reducibility predicate characterizes the behaviour that ``well-behaved''
+terms of type \( A \) should exhibit: for instance, a term \( t \) is deemed
 to be a reducible inhabitant of type \( B \to C \) if it reduces to a term 
 \( {t'} \) in weak-head normal form, such that \( {t'} \) applied to
 any reducible term of type \( B \) produces a reducible term of type \( C \)
 (up to some technical details).
 
-The reducibility predicates are indexed by a level \( \ell \), which reflects 
+The reducibility predicates are also indexed by a level \( \ell \), which reflects 
 the predicative nature of the universe hierarchy of \MLTT: reducibility is 
 first defined at level $0$ to characterize types and terms that inhabit the 
 smallest universe \( \Type_0 \).
@@ -124,8 +148,8 @@ that applies to types and terms that live in \( \Type_1 \) -- in the case of
 the type \( \Type_0 : \Type_1 \), they define
 \[
 \begin{array}{rcl}
-  \tytmR{1}{\Gamma}{A}{\Type_0}{\Type_1} & := & \tytyR{0}{\Gamma}{A}{\Type_0} \\
-  \eqtmR{1}{\Gamma}{A}{B}{\Type_0}{\Type_1} & := & \eqtyR{0}{\Gamma}{A}{B}{\Type_0}. 
+  \tytmReco{1}{\Gamma}{A}{\Type_0}{\Type_1} & := & \tytyReco{0}{\Gamma}{A}{\Type_0} \\
+  \eqtmReco{1}{\Gamma}{A}{B}{\Type_0}{\Type_1} & := & \eqtyReco{0}{\Gamma}{A}{B}{\Type_0}. 
 \end{array}
 \]
 % 
@@ -140,18 +164,25 @@ that the validity model supports all the inference rules of their fragment of
 \MLTT, and thus that every well-typed term can be interpreted in the validity
 model. Since validity implies normalization, this concludes the proof.
 
+If we want to construct a similar model for \SetoidCC, we will need to add
+support for impredicative proof-irrelevant propositions and the observational 
+equality.
+
 \paragraph*{Adding Proof-Irrelevant Types}
 % 
 In~\sidecite{gilbert:hal-01859964}, Gilbert \etal extend the model of 
-Abel \etal to support definitionally proof-irrelevant types.
-% 
-They achieve this by extending the reduction rules to the inhabitants of 
-proof-irrelevant types, and they prove normalization for both relevant
-terms and irrelevant proofs.
+Abel \etal to add a universe of definitionally proof-irrelevant types.
+Contrary to the universe \( \sProp \) of \SetoidCC, their universe is
+predicative, and only contains \( \Pi \)-types and the false proposition.
+
+In their proof, Gilbert \etal extend the reduction rules to the inhabitants of 
+proof-irrelevant types, and they go on to prove normalization for both relevant
+and irrelevant terms.
 %
-From there, Gilbert \etal derive an easy proof of consistency: any proof of 
-the false proposition \( \Empty \) in an an empty context will reduce to a
-weak head normal form, and the only weak head normal forms that can inhabit 
+From their model, Gilbert \etal also obtain a proof of consistency for \MLTT 
+extended with predicative proof-irrelevant types: any proof of the false 
+proposition \( \Empty \) in an an empty context will reduce to a weak head 
+normal form, and the only weak head normal forms that can inhabit 
 \( \Empty \) are neutral terms. 
 % 
 But since there are no variables in the empty context, neutral terms cannot 
@@ -159,10 +190,11 @@ exist, so \( \Empty \) has no inhabitant in the empty context.
 
 However, this strategy is not applicable in our setting. Contrary to the theory
 studied by Gilbert \etal, \SetoidCC relies crucially on proof-irrelevant 
-axioms, which do not have any clear reduction rule or normal forms.
+axioms such as \( \castreflName \), which do not have any clear reduction rule 
+or normal forms.
 %
-Therefore we drop the idea of having reduction rules for inhabitants of 
-propositions, and we only prove normalization for proof-relevant terms.
+Therefore we will drop the idea of having reduction rules for inhabitants of 
+propositions, and we will only prove normalization for proof-relevant terms.
 %
 We argue that this is more faithful to the philosophy of computational
 irrelevance, and results in a proof that is completely agnostic about
@@ -183,23 +215,28 @@ Therefore, if we want to show canonicity, we need to show that there is no proof
 of \( \Empty \) in the empty context -- in other words, that the theory is 
 consistent.
 
+We will get around this issue by constructing two models: the normalization model
+that provides us with normalization proofs, and a set-theoretic model from 
+which we will derive a consistency proof for \SetoidCC. This second model is 
+presented in \cref{sec:cons-seto-model}.
+
 \paragraph*{Adding Support for Impredicativity} 
 % 
 Impredicativity is famously difficult to model in reducibility proofs, because
 it breaks the well-foundedness of the type hierarchy: impredicative dependent
-products may have an arbitrarily large codomain, while still being at the 
+products may have an arbitrarily large domain, while still being at the 
 bottom of the universe hierarchy.
 % 
-The standard way to build a normalization model that avoids self-referential
-problems is to use \emph{reducibility candidates}, the device introduced by 
-Girard~\sidecite{girard72} to prove normalization for System F.
+The standard way to build a normalization model for impredicative theories that 
+avoids self-referential issues is to use \emph{reducibility candidates}, the 
+device introduced by Girard~\sidecite{girard72} to prove normalization for System F.
 % 
 Fortunately, in \SetoidCC the impredicative dependent products are 
-propositions, and thus proof-irrelevant. This means we do not have to
-prove any normalization result for their inhabitants, so we will not need
-Girard's reducibility candidates.
+propositions, and thus proof-irrelevant. As we explained above, we do
+not prove normalization for computationally irrelevant terms, so we will not 
+need Girard's reducibility candidates.
 
-However, we still need to define reducibility for inhabitants of \( \sProp \),
+However, we still need to define reducibility for \( \sProp \),
 which is a proof-relevant type. And since its sort is \( \Type_0 \), the 
 reducibility predicates for \( \sProp \) should be defined at level 0, without
 any knowledge of the model for higher universes. 
@@ -213,56 +250,85 @@ for any reducible element of the domain.
 But an impredicative dependent product may have an aribitrarily large domain,
 so this definition will not work.
 % 
-We break out of that circularity by defining a weaker notion of reducibility 
+We will break out of the circularity by defining a weaker notion of reducibility 
 for impredicative types that does not provide any control on the domain and 
 codomain of dependent products.
 
-Interestingly, this weakened reducibility means that we cannot prove the 
-fundamental lemma directly on the rules we presented in \cref{ch:observational}, 
+Interestingly, this weakened reducibility means that we will not be able to prove 
+the fundamental lemma directly on the rules we presented in \cref{ch:observational}, 
 which omit plenty of well-formedness hypotheses for the sake of readability 
 (for instance, the rule~\nameref{infrule:pi-intro} does not ask for 
 well-formedness of the involved types).
 % 
 In their model, Abel \etal were able to collect this redundant info in the 
-reducibility predicates, but we are not, so we prove our theorem for more
+reducibility predicates, but we are not, so we will prove our theorem for more
 verbose inference rules.
 % 
 Once the fundamental lemma is proved, we will be able to show that the rules
 of \cref{ch:observational} do in fact contain sufficient information to recover
 these additional hypotheses (see \cref{sec:normalization-consequences}).
 
-\subsection{Reducibility for the Proof-Relevant Layer}
+This concludes our bird's eye view of the proof. It only remains to roll up our 
+sleeves and unfold our strategy.
+% 
+\sideremark{We will present a somewhat informal version of the proof where some technical 
+details are left implicit, and encourage the reader who is interested in
+complete formal proofs to have a look at the \Agda development.}
 
-We start by presenting the definition of reducibility for the relevant
-fragment, closely following \sidecitet{Abel:POPL2018}.
-%
-For pedagogical reasons, we will present a somewhat informal version
-of the proof where some arguments are left implicit, and encourage the reader 
-who is interested in the technical details to have a look at the \Agda 
-formalization.
-%
-While our formal proof and the definition in \refAgda{}{LogicalRelation} only 
-model a subset of \SetoidCC with three reducibility levels, it should be quite 
-clear that the same technique works for any finite number of levels.
+\subsection{Defining Reducibility}
+\label{sec:reducbility-proof-rel}
 
-The reducibility predicates are defined by induction-recursion, as detailed
-in \cref{fig:logrel-ind-rec}.
+Following Abel \etal \cite{Abel:POPL2018}, our constructions starts with the 
+definition of the four reducibility predicates, which are also annotated with
+a sort in our version -- see \cref{fig:log-rel-judgments}.
+
+\begin{figure*}[!h]
+  \[
+\begin{array}{lr}
+  \tytyR{\ell}{\Gamma}{A}{\Univ} & \text{A is a reducible type of sort \( \Univ \) at level \( \ell \) in context \( \Gamma \)} \\
+  \eqtyR{\ell}{\Gamma}{A}{B}{\Univ} & \text{A and B are reducibly equal types of sort \( \Univ \) at level \( \ell \) in context \( \Gamma \)} \\
+  \tytmR{\ell}{\Gamma}{t}{A}{\Univ} & \text{t is a reducible term at level \( \ell \) of type \( A \) in context \( \Gamma \)} \\
+  \eqtmR{\ell}{\Gamma}{t}{u}{A}{\Univ} & \qquad\text{t and u are reducibly equal terms at level \( \ell \) of type \( A \) in context \( \Gamma \)}
+\end{array}
+\]
+\caption{The four reducibility predicates}
+\label{fig:log-rel-judgments}
+\end{figure*}
+
+These reducibility predicates are defined by induction-recursion, as 
+illustrated in \cref{fig:logrel-ind-rec}.
 %
-The reducible types are defined inductively with eleven constructors, one for 
-every type former of \SetoidCC and one for neutral types. 
+The reducible types are defined inductively with eleven constructors, one 
+corresponding to each basic type former of \SetoidCC and one for neutral types. 
 % 
 Each constructor takes as argument a proof of an auxiliary predicate of the 
 form \( \Gamma \Vdash_X t \) that packs information specific to the 
-corresponding type, that we will define individually.
+type \( X \), that we will define below.
 %
+% \sideremark{This technically means that the reducibility predicates for
+% terms and equalities should have an extra argument of type 
+% \( \tytyR{\ell}{\Gamma}{A}{\Univ} \). However, we leave this argument 
+% implicit
+% (cf \refAgda{}{Irrelevance}), .}
+% 
 The logical relations on terms and equalities are simultaneously
-defined by recursion on \( \tytyR{\ell}{\Gamma}{A}{\Univ} \), using
+defined by recursion on proofs of \( \tytyR{\ell}{\Gamma}{A}{\Univ} \), using
 more auxiliary predicates.
+
+Remark that some type that we defined in \cref{ch:observational} do not appear 
+in the definition of reducibility.
+% 
+First, we do not need to account for \( \Unit \), existential types 
+or propositional truncation, because they are defined in terms of \( \Empty \)
+and dependent products.
 %
-This technically means that these judgments should have an extra
-argument of type \( \tytyR{\ell}{\Gamma}{A}{\Univ} \), but since it
-will turn out that all such derivations give rise to equivalent judgments
-(cf \refAgda{}{Irrelevance}), we leave this argument implicit.
+What's more, the observational equality does not appear in the definition
+either.
+This is because it does not play the role of a type constructor, but
+rather that of a destructor that computes by pattern-matching on types.
+Therefore, all types with the shape \( \Obseq[A]{t}{u} \) will reduce to
+simpler types, unless they are neutral, in which case they are handled
+by the generic rule for neutral terms.
 
 \begin{figure*}
   \begin{small}
@@ -340,6 +406,8 @@ will turn out that all such derivations give rise to equivalent judgments
 %% As is customary in reducibility proofs~\sidecite{girard72}, these
 %% judgments imply normalization, are closed under weak head expansion,
 %% and are verified by all neutral terms.
+
+\subsection{Reducibility for the Proof-Relevant Layer}
 
 We now give the definition of all these auxiliary predicates, starting
 with the predicates for neutral types.
@@ -745,7 +813,7 @@ fragment, which must be defined independently from the rest of the model
 to ensure a well-founded definition.
 
 Since there is no computation whatsoever in proof-irrelevant types,
-their inhabitants don't interact with other terms. This allows us
+their inhabitants do not interact with other terms. This allows us
 to give a generic definition for reducibility of terms and term
 equality, that will work for any \( X \in \{ \mathrm{ne}, \bot, {\Pi \mathsf{i}}\} \) :
 %
@@ -762,21 +830,6 @@ convertible.
 % 
 It only remains to define the reducibility of types and type equality
 for neutrals, $\Empty$ and the impredicative dependent products.
-
-Now, the reader probably noticed that not all types appear in our definition
-of reducibility.
-% 
-First, note that we do not need to account for \( \Unit \), existential types 
-or propositional truncation, as they are defined in terms of \( \Empty \)
-and dependent products.
-%
-Second, the observational equality does not appear in the definition
-either.
-This is because it does not play the role of a type constructor, but
-rather that of a destructor that computes by pattern-matching on types.
-Therefore, a type of the shape \( \Obseq[A]{t}{u} \) is never in normal
-form, unless if it is neutral (in which case the generic rule for neutral
-terms applies).
 
 \paragraph{Proof-irrelevant Neutral Types}
 
@@ -869,6 +922,13 @@ the false proposition, or an impredicative dependent product.
 Now that we have completed our definition of reducibility, we prove
 some auxiliary lemmas:
 
+\begin{lemma}[Escape lemma] \phantom{a}
+  \begin{enumerate}
+    \item If \( \tytmR{\ell}{\Gamma}{t}{A}{\Univ} \) then \( \tytmannotated{\Gamma}{t}{A}{\Univ} \).
+    \item If \( \eqtmR{\ell}{\Gamma}{t}{u}{A}{\Univ} \) then \( \eqtmannotated{\Gamma}{t}{u}{A}{\Univ} \).
+  \end{enumerate}
+\end{lemma}
+
 \begin{lemma} \phantom{a}
   \begin{enumerate}
   \item Given a context \( \Gamma \), the reducible equality \( \eqtyR{\ell}{\Gamma}{A}{B}{\Univ} \) is
@@ -903,7 +963,7 @@ some auxiliary lemmas:
   \end{enumerate}
 \end{lemma}
 
-All these lemmas are proved by straightforward induction. The interested reader can find
+All these lemmas are proved by a straightforward induction. The interested reader can find
 formal proofs in \refAgda{LogicalRelation.}{Properties}.
 
 \subsection{Building a Model From Reducibility}
@@ -931,50 +991,96 @@ But our induction hypothesis only provides that \( t \) is reducible, and we
 have no obvious way to show that reducibility is stable under substitution by
 reducible terms.
 
-Thus, following \sidecitet{Abel:POPL2018}, we define the notion of 
-\emph{validity}, which is the closure of reducibility under substitution 
-\refAgda{LogicalRelation.}{Substitution}.
-%
-\[
-a
-\]
-\[ {\small \inferrule{\forall \Delta\ \sigma \to \
-      \metaimply{\ctxV{\Delta}}{\metaimply{\tytyS{\Delta}{\sigma}{\Gamma}}{
-          \left \{ \begin{array}{l}
-                     \tytyR{\ell}{\Delta}{A[\sigma]}{\Type{}} \\
-                     \forall \sigma' \to
-                     \metaimply{\tytyS{\Delta}{\sigma'}{\Gamma}
-                     }{\metaimply{\eqtyS{\Delta}{\sigma}{\sigma'}{\Gamma}}{\eqtyR{\ell}{\Delta}{A[\sigma]}{A[\sigma']}{\Type{}}
-                     }}
-               \end{array}\right . }}
-}
-{\tytyV{\ell}{\Gamma}{A}{\Type{}}}
-}\]
-%
-In the definition above, $\Delta$ is valid context (noted $\ctxV{\Delta}$, meaning
-that the context is composed of valid types) and a
-substitution $\sigma$ is valid, noted $\tytyS{\Delta}{\sigma}{\Gamma}$,
-when it substitutes only reducible terms. Similarly, two valid
-substitutions $\sigma$ and $\sigma'$ are equal, noted
-$\eqtyS{\Delta}{\sigma}{\sigma'}{\Gamma}$, when they substitute
-reducibly equal terms.
+Thus, following \sidecitet{Abel:POPL2018}, we define 
+the notion of \emph{validity}, which is the closure of reducibility under substitution 
+\refAgda{LogicalRelation.}{Substitution}. 
+% 
+Validity consists of seven predicates.
+\begin{itemize}
+\item The unary predicate on substitutions \( \substV{\Delta}{\_}{\Gamma} \) 
+defines \emph{valid substitutions} from \( \Delta \) to \( \Gamma \) as telescopes
+of reducible terms. 
+\sideremark{We write \( \Delta \to \Gamma \) for the type of substitutions from
+\( \Delta \) to \( \Gamma \). Given a substitution \( \sigma \) and a term 
+\( t \), we can substitute the free variables of \( t \) to produce the term
+\( t[\sigma] \).}
+\item The binary predicate on substitutions \( \eqsubstV{\Delta}{\_}{\_}{\Gamma} \) 
+defines \emph{valid equality} of substitutions from \( \Delta \) to \( \Gamma \) as
+telescopes of reducible equalities.
+\item The unary predicate on terms \( \tytyV{\ell}{\Gamma}{\_}{\Univ} \) defines
+\emph{valid types} of sort \( \Univ \) in a context \( \Gamma \) as types that are 
+reducible under any valid substitution, and that preserve valid equality of
+substitutions.
+\item The binary relation on terms \( \eqtyV{\ell}{\Gamma}{\_}{\_}{\Univ} \), 
+defines \emph{valid equality} between two valid types in context \( \Gamma \) as
+reducible equality under any valid substitution.
+\item The unary predicate on terms \( \tytmV{\ell}{\Gamma}{\_}{A}{\Univ} \) 
+defines \emph{valid inhabitants} of a valid type \( A \) in context \( \Gamma \) as
+terms that are reducible inhabitants of \( A \) under any valid substitution,
+and that preserve valid equality of substitutions.
+\item The binary relation on terms \( \eqtmV{\ell}{\Gamma}{\_}{\_}{A}{\Univ} \) 
+defines \emph{valid equality} between two valid inhabitants of a valid type \( A \) in 
+context \( \Gamma \) as reducible equality under any valid substitution.
+\item The unary predicate on contexts \( \ctxV{\_} \), defines \emph{valid contexts},
+as lists of valid types.
+\end{itemize}
 
-There are similar notions of validity for terms, equality of
-types and equality of terms. For instance, when $A$ is a valid
-type, the validity of a term $t$ at $A$ is defined as
+\begin{figure*}
+  \begin{small}
+  \begin{flalign*}
+  \begin{array}{lcl}
+    \ctxV{\_} & :       & (\Gamma : \Context) \to \AgdaSet{} \\
+    \ctxV{\_} & \bnfis  & \emptyctxV\ :\ {\ctxV{\emptyctx}} \\
+              & \sep    & \extctxVname\ :\ ([\Gamma] : \ctxV{\Gamma}) \to
+                          \tytyV{\ell}{\Gamma}{A}{\Univ} \to \ctxV{\extctxannotated{\Gamma}{A}{\Univ}}
+  \end{array} &&
+  \end{flalign*}
 
-\[
-{\small
-  \inferrule{\forall \Delta\ \sigma \to \metaimply{\ctxV{\Delta}}{\metaimply{\tytyS{\Delta}{\sigma}{\Gamma}}{
-        \left \{ \begin{array}{l}
-           \tytmR{\ell}{\Delta}{t[\sigma]}{A[\sigma]}{\Type{}} \\
-                   \forall \sigma' \to
-                   \ \metaimply{\tytyS{\Delta}{\sigma'}{\Gamma} }{\metaimply{\eqtyS{\Delta}{\sigma}{\sigma'}{\Gamma}}{\eqtmR{\ell}{\Delta}{t[\sigma]}{t[\sigma']}{A[\sigma]}{\Type{}} }}
-                 \end{array} \right .}}
-         }
-         {\tytmV{\ell}{\Gamma}{t}{A}{\Type{}}}
-       }
-\]
+  % Validity of types
+  \begin{flalign*}
+  \begin{array}{lcl}
+  \tytyV{\ell}{\_}{\_}{\_} & : & (\Gamma : \Context) \to (A : \Term) \to (\Univ : \Sort) \to \{ \ctxV{\Gamma} \} \to \AgdaSet{} \\
+  \tytyV{\ell}{\Gamma}{A}{\Univ} & = & \forall\ \sigma\ \tau \to \substV{\Delta}{\sigma}{\Gamma}
+                   \ \to\  \tytyR{\ell}{\Delta}{A[\sigma]}{\Univ} \\
+                   & & \times\quad \eqsubstV{\Delta}{\sigma}{\tau}{\Gamma}
+                   \ \to\ \eqtyR{\ell}{\Delta}{A[\sigma]}{A[\tau]}{\Univ}
+  \end{array} &&
+  \end{flalign*}
+
+  % Validity of substitutions
+  \begin{flalign*}
+  \begin{array}{lcl}
+  \substV{\_}{\_}{\_} & : & (\Gamma\ \Delta : \Context) \to (\sigma : \Delta \to \Gamma) \to \{ \ctxV{\Gamma} \} \to \AgdaSet{} \\
+  \substV{\Delta}{\sigma}{\emptyctx} & = & {\textcolor{AgdaDatatype} \top} \\
+  \substV{\Delta}{t, \sigma}{(\extctxannotated{\Gamma}{A}{\Univ})} & = &
+                   \substV{\Delta}{\sigma}{\Gamma}
+                   \enskip \times \enskip \tytmR{\ell}{\Delta}{t}{A[\sigma]}{\Univ}
+  \end{array} &&
+  \end{flalign*}
+
+  \begin{flalign*}
+  \begin{array}{lcl}
+  \eqsubstV{\_}{\_}{\_}{\_} & : & (\Gamma\ \Delta : \Context) \to (\sigma\ \tau : \Delta \to \Gamma) \to \{ \ctxV{\Gamma} \} \to \AgdaSet{} \\
+  \eqsubstV{\Delta}{\sigma}{\tau}{\emptyctx} & = & {\textcolor{AgdaDatatype} \top} \\
+  \eqsubstV{\Delta}{t, \sigma}{u, \tau}{(\extctxannotated{\Gamma}{A}{\Univ})} & = &
+                   \eqsubstV{\Delta}{\sigma}{\tau}{\Gamma}
+                   \enskip \times \enskip \eqtmR{\ell}{\Delta}{t}{u}{A[\sigma]}{\Univ}
+  \end{array} &&
+  \end{flalign*}
+  \end{small}
+
+  \caption{Inductive recursive definition of validity of contexts, types and substitutions}
+  \label{fig:validity-indrec}
+\end{figure*}
+
+In \cref{fig:validity-indrec}, we use induction recursion to define a 
+valid context inductively as a telescope of valid types; while we 
+simultaneously define valid types, valid substitutions and 
+valid equality of substitutions by recursion on a valid context.
+% 
+The valid type equality, valid terms and valid term equality do not need to be 
+part of the inductive-recursive block and can be defined \textit{a posteriori}
+in a straightforward manner -- see \refAgda{LogicalRelation.}{Substitution}.
 
 \subsection{The Fundamental Lemma}
 \label{sec:fundamental-lemma}
@@ -994,13 +1100,12 @@ rules of \SetoidCC, or equivalently, that validity defines a model of
 The lemma is proved by a mutual induction on derivations for well-formed 
 contexts, types, type equality, terms and term equality. 
 % 
-Our extension to a cumulative hierarchy of universes and to the new 
-proof-relevant types requires numerous changes to the proof of Abel \etal, 
-but these do not pose any major difficulty -- albeit the proof
-is by no means trivial, as the arguments have to be spelled out in
+Our various extensions of the model require numerous changes to the proof of 
+Abel \etal, but most of these do not pose any major difficulty -- albeit the 
+proof is by no means trivial, as the arguments have to be spelled out in
 excruciating detail.
 
-Therefore, we focus on the three features of \SetoidCC that are more
+Therefore, we focus on the three features of \SetoidCC that are the most
 disruptive: the observational equality, the \( \castName \) operator, and
 the impredicative dependent products 
 (Rules \nameref{infrule:eq-form}, \nameref{infrule:cast}, and \nameref{infrule:pi-irr-form}).
@@ -1186,25 +1291,14 @@ canonicity theorem:
 
 In order to prove that convertibity is decidable for \SetoidCC, we need to 
 devise a conversion checking algorithm, and then prove that it is both
-sound and complete.
+correct and complete.
 
-To do so, we define \emph{algorithmic conversion} as a relation on well-typed 
+To do so, we follow \sidecitet{Abel:POPL2018} and define 
+\emph{algorithmic conversion} as a relation on well-typed 
 terms \( t \) and \( u \) of type \( A \) in context \( \Gamma \).
 $\algoeqtmannotated{\Gamma}{t}{u}{A}{\Univ}$.
 %
 This algorithmic conversion keeps track of the relevance information,
-\begin{itemize}
-  \item In case \( A \) is a proposition, \( t \) and \( u \) are 
-    computationally irrelevant, so the algorighmic conversion holds
-    between \( t \) and \( u \).
-  \item In case \( A \) is a positive proof-relevant type, then \( t \) and
-    \( u \) have weak head normal forms \( t' \) and \( u' \) according to 
-    the normalization theorem. 
-    % 
-    The algorithmic equality between \( t \) and \( u \) holds
-    if the head constructors of \( t' \) and \( u' \) are identical, then the 
-    algorithmic equality holds if it holds on all the sub-terms.
-\end{itemize}
 and uses it to either give an immediate answer in case \( t \) and
 \( u \) are irrelevant, or compute their weak-head normal forms using
 the normalization theorem, then compare their head constructor, and possibly apply the algorithm
@@ -1213,10 +1307,11 @@ recursively in case \( t \) and \( u \) are relevant.
 Correctness of this algorithmic conversion is direct as the rules used are
 subsumed by the general conversion judgement \refAgda{Conversion.}{Soundness}.
 
-Showing that the algorithmic conversion is also complete is more complex.
+Showing that the algorithmic conversion is also complete is more involved.
 %
-It basically amounts to replaying the fundamental lemma with a definition of the logical
-relation that uses algorithmic conversion instead of the general conversion
+The main ingredient is more or less a re-enactment of our proof of the 
+fundamental lemma, but with a definition of reducibility that
+uses algorithmic conversion instead of the definitional equality of \SetoidCC.
 \refAgda{Conversion.Consequences.}{Completeness}.
 %
 In our formal proof, we follow \sidecitet{Abel:POPL2018} in factoring the two
@@ -1227,22 +1322,21 @@ in the definition of the logical relation \refAgda{Typed.}{EqualityRelation}.
 \begin{theorem}[Equivalence of conversion and algorithmic conversion]
   \label{thm:algoconv}
     Given two terms $t$ and $u$ such that
-    $\tytmannotated{\Gamma}{t}{A}{\Type{}}$ and
-    $\tytmannotated{\Gamma}{u}{A}{\Type{}}$, we have that
-
-    $$ \eqtmannotated{\Gamma}{t}{u}{A}{\Type{}} \Longleftrightarrow\algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}.$$
+    $\tytmannotated{\Gamma}{t}{A}{\Univ}$ and
+    $\tytmannotated{\Gamma}{u}{A}{\Univ}$, we have that
+    $$ \eqtmannotated{\Gamma}{t}{u}{A}{\Univ} \Longleftrightarrow\algoeqtmannotated{\Gamma}{t}{u}{A}{\Type{}}.$$
 \end{theorem}
 
 It still remains to provide a decision procedure for the algorithmic
 conversion \refAgda{Conversion.}{Decidable}.
 %
-Given two terms $t$ and $u$ well-typed at $A : \Type{}$ in context
+Given two terms $t$ and $u$ well-typed at $A : \Univ$ in context
 $\Gamma$, we can apply the fundamental lemma plus the reflexivity of
-the logical relation to get the fact that $\eqtmR{\ell}{\Gamma}{t}{t}{A}{\Type{}}$
+the logical relation to get the fact that $\eqtmR{\ell}{\Gamma}{t}{t}{A}{\Univ}$
 and similarly for $u$.
 %
-Because reducibly equal terms are also algorithmically convertible, we
-have $\algoeqtmannotated{\Gamma}{t}{t}{A}{\Type{}}$ (and similarly for $u$).
+Because reducibly equal terms are also algorithmically convertible by the escape lemma, we
+have $\algoeqtmannotated{\Gamma}{t}{t}{A}{\Univ}$ (and similarly for $u$).
 %
 Then the decision procedure is done by double induction on the proofs
 that $t$ and $u$ are reflexive for the algorithmic conversion.
@@ -1254,6 +1348,7 @@ contains the fact that $t$ strongly normalizes, because
 $t$ can be recursively put in whnf.
 
 \subsection{Decidability of Typing}
+\label{sec:decidable-typing}
 
 Now that we have an algorithm that decides conversion, we can rely on the
 work of \sidecitet{meven_thesis} on bidirectional type-checking, who explain 
@@ -1364,30 +1459,42 @@ Thus, we also have the fundamental lemma for the economic type system:
 \label{sec:analys-norm-proof}
 
 Both the informal normalization proof presented in \cref{sec:logic-relat-with}
-and its formalized version take place in a somewhat sophisticated metatheory: 
+and its formalized version in \Agda take place in a somewhat sophisticated metatheory: 
 Martin-Löf Type Theory extended with induction-recursion.
 %
-However, in order to control the computational complexity of the proof terms
-more finely, we explain how to re-enact the proof in a weaker meta-theory.
+In this section, we explain how to re-enact the proof in a weaker meta-theory in 
+order to control the computational complexity of the proof terms more finely.
 
-\subsection{The Computational Power of \SetoidCC}
+\subsection{The Computational Expressivity of \SetoidCC}
 
-Proof terms in \SetoidCC can be considered as \emph{programs}, at least in the 
-sense of being terms of a lambda-calculus with additional operators.
+Proof-relevant terms in \SetoidCC are \emph{programs}, at least in the sense of 
+being terms in a lambda-calculus with additional operators.
 % 
-As evidenced by the normalization theorem, \SetoidCC is not Turing-complete:
-all programs extracted from well-typed terms are guaranteed to terminate.
+As such, they may be extracted and evaluated just like regular programs -- 
+and in fact, evaluating open terms is pretty much what our type-checking 
+algorithm from \cref{sec:decidable-typing} does.
 % 
-Therefore, it makes sense to ask what is the computational power of 
-\SetoidCC: what are the integer functions 
+Therefore, it makes sense to investigate the computational complexity of 
+these proof terms: which integer functions
 % 
 \sideremark{We restrict our attention to functions from \( \Nat \) to 
   \( \Nat \), because higher-order computability is a complex topic with many 
   non-equivalent definitions.}
 % 
-can be expressed as well-typed terms?
+can be expressed as proof terms?
 
-To derive a lower bound for the computational power, we simply remark 
+As an aside, we must mention that these considerations are not a useful measure 
+of the feasability of type-checking.
+% 
+Indeed, most proof assistants based on type theory have ridiculously high 
+worst-case complexity, but they are still very efficient in practice! 
+% 
+However, investigating the expressive power of proof terms is still a
+worthwile endeavor, as it provides us with information on the kinds of mathematical
+statements that can be proved in the proof-relevant fragment of \SetoidCC: for 
+instance, is it possible to show normalization of System F?
+
+To derive a lower bound for the computational expressivity, we simply remark 
 that Martin-Löf type theory is a subset of \SetoidCC, provided we use a 
 definition of \MLTT that does not support more inductive types than our 
 definition of \SetoidCC.
