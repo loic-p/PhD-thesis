@@ -1219,8 +1219,10 @@ satisfies the same typing rule:
 where the auxiliary operator \( \metaop{eq}_{\metaop{J}} \) is defined by
 \[
 \begin{array}{rcl}
-	\eqJ{A}{t}{B}{t'}{e} & : & \Obseq{B\ t\ \refl{t}{}}{B\ t'\ e} \\
-	\eqJ{A}{t}{B}{t'}{e} & := & \transport{A}{t}{\lam{A}{\Depfun[e']{\Obseq{t}{x}}{\Obseq{B\ t\ \refl{t}{t}}{B\ x\ e'}}}}{\lambda\ e'\ .\ \metaop{refl}}{t'}{e}\ e.
+	\eqJ{A}{t}{B}{t'\!}{e} & \!:\! & \Obseq{B\ t\ \refl{t}{}}{B\ t'\ e} \\
+	\eqJ{A}{t}{B}{t'\!}{e} & \!:=\! & \metaop{transp}({A}, {t}, 
+    {\lambda\ x\ .\ {\Depfun[e'\!]{\Obseq{t}{x}}{\Obseq{B\ t\ \refl{t}{t}}{B\ x\ e'\!}}}}, \\ 
+    & & \phantom{\metaop{transp}(}{\lambda\ e' .\ \metaop{refl}}, {t'}, {e})\ e.
 \end{array}
 \]
 
@@ -1273,9 +1275,9 @@ Following his ideas, we extend \SetoidCC with \( \metaop{Id} \)-types:
 \begin{mathpar}
   \inferrule{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
-			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{\Id{A}{t}{x}}{\Univ}}}
-			\\ \tytm{\Gamma}{b}{B\ t\ \id{t}}}
-			{\red{\Gamma}{\J{A}{t}{B}{b}{t}{\id{t}}}{u}{B\ t\ \id{t}}}
+			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{\Id{A}{t}{x}}{\Type_j}}}
+			\\ \tytm{\Gamma}{u}{B\ t\ \id{t}}}
+			{\red{\Gamma}{\J{A}{t}{B}{u}{t}{\id{t}}}{u}{B\ t\ \id{t}}}
 \end{mathpar}
 % 
 These rules mimic the behavior of Martin-Löf identity types, quotiented so they 
