@@ -32,13 +32,14 @@ a proof-irrelevant proposition.
 % 
 The observational equality has strong selling points: not only does it validate 
 the principle of Uniqueness of Identity Proofs (UIP) by definition because of 
-computational irrelevance, but it also is equipped with reduction rules that 
+computational irrelevance, but it is also equipped with reduction rules that 
 bake in useful reasoning principles such as function extensionality and proposition 
 extensionality.
 
 But being computationally irrelevant also has its drawbacks. Because the equality
-proofs pack no information, the eliminator \( \castName \) computes on types constructors, 
-which means that it will fully reduce only when applied to closed types.
+proofs carry no information, the eliminator for the observational equality 
+computes on types constructors instead. This means that \( \castName \) will 
+only reduce fully when it is applied to closed types.
 % 
 To make up for this weakness, \SetoidCC provides the axiom \( \castreflName \) 
 which is a proof of observational equality between a reflexive cast and the
@@ -71,10 +72,10 @@ computation rule.
 \end{mathpar}
 
 But it is also better than the Martin-Löf identity type, as it validates the 
-signature extensionality principles of \SetoidCC, which are namely UIP, function 
+signature reasoning principles of \SetoidCC that are UIP, function 
 extensionality and proposition extensionality.
 % 
-However, computing on reflexivity comes at a price. For the inductive equality,
+However, computing on reflexivity comes at a price: for the inductive equality,
 the principle of UIP only holds up to a propositional equality, and the same 
 goes for function extensionality and proposition extensionality.
 
@@ -82,17 +83,17 @@ All in all, the difference is rather subtle. The two relations are logically
 equivalent, but they do not satisfy the exact same computation rules.
 % 
 As if the distinction between propositional and definitional equality 
-wasn't confusing enough for newcomers to type theory!
+wasn't a sufficient source of confusion for newcomers to type theory!
 
 \subsection{The System \SetoidCCplus}
 
-In hope to reconciliate these two propositional equalities and get the best of 
-both worlds, we will attempt to extend \SetoidCC with a \( J \) eliminator for 
-the observational equality that supports the computation rule. 
-
-First, we remark that the problem can be reduced to modifying the behavior of 
-the \( \castName \) operator, so that it validates 
-rule~\nameref{infrule:cast-refl-plus}.
+In hope to reconciliate these two propositional equalities, we introduce a 
+variation on the observational calculus of constructions, that we call 
+\SetoidCCplus. 
+% 
+This new system supports all the rules of \cref{ch:observational}, plus the rule 
+\nameref{infrule:cast-refl-plus} which promotes the \( \castreflName \) axiom
+to a definitional equality.
 % 
 \begin{mathpar}
 	\inferrule[Cast-Refl+]
@@ -103,26 +104,77 @@ rule~\nameref{infrule:cast-refl-plus}.
   \ilabel{infrule:cast-refl-plus}
 \end{mathpar}
 
-Indeed, the more general \( J \) eliminator can be defined from 
-\( \castName \) as described in \cref{sec:inductive-equality}, and in presence
-of rule~\nameref{infrule:cast-refl-plus} it will satisfy the computation rule 
-on reflexivity as a definitional equality.
-
-We use the name \SetoidCCplus for the variant of the observational calculus of
-constructions that supports rule~\nameref{infrule:cast-refl-plus}.
+In \SetoidCCplus, we can define a \( J \) eliminator for the observational
+equality that computes on reflexivity.
 % 
-Naturally, this extends the convertibility relation, meaning that we
-need new algorithms to decide conversion for \SetoidCCplus terms.
+\sideremark{ Recall that we defined \\ \( J(A, t, B, u, t', e) := \) \\
+  \( \cast{B\ t\ \metaop{refl}}{B\ t' e}{\eqJ{A}{t}{B}{t'\!}{e}}{u} \)}
+% 
+To do so, we simply replicate the definition described in 
+\cref{sec:inductive-equality}, and in presence of 
+rule~\nameref{infrule:cast-refl-plus} it will actually satisfy the 
+computation rule on reflexivity as a definitional equality.
+% 
+Therefore, the observational equality of \SetoidCCplus really has the best
+of both worlds: not only is it definitionally proof irrelevant, but its eliminator 
+also supports the computation rule on reflexivity by definition.
+
+Naturally, extending the convertibility relation of \SetoidCC means that we
+need a new algorithm to decide conversion for \SetoidCCplus terms.
 % 
 We will describe two such algorithms below, but unfortunately we are not
 able to supplement either with a proof of correction. 
 We leave these as conjectures for further work.
 
-\paragraph{Implementing \nameref{infrule:cast-refl-plus} with reduction}
+\subsection{Implementing \nameref{infrule:cast-refl-plus} with reduction rules}
 
-The first idea that comes to mind is to add new reduction rules for 
-\( \cast{A}{B}{e}{t} \), so that it will actually reduce to \( t \) in case the
+The first idea that comes to mind is to add a new reduction rule for 
+\( \cast{A}{B}{e}{t} \) so that it will actually reduce to \( t \) in case the
 types \( A \) and \( B \) are convertible.
+% 
+\begin{mathpar}
+	\inferrule[Cast-Refl-Red]
+		{%\tytm{\Gamma}{A}{\Univ_i}
+			\tytmannotated{\Gamma}{t}{A}{\Type_i} \\
+      \tytm{\Gamma}{B}{\Type_i} \\
+			\tytmannotated{\Gamma}{e}{\Obseq[{\Type_i}]{A}{B}}{\sProp} \\
+      \eqtm{\Gamma}{A}{B}{\Type_i}}
+		{\red{\Gamma}{\cast{A}{B}{e}{t}}{t}{A}}
+  \ilabel{infrule:cast-refl-red}
+\end{mathpar}
+
+This is a bit too enthusiastic however, as adding such a general rule to the 
+system conflicts with the reduction rules for \( \castName \) on type 
+constructors.
+% 
+For instance, in the case of a \( \castName \) between two
+convertible \( \Pi \)-types, both rule \nameref{infrule:cast-refl-red} and 
+\nameref{inferrule:cast-pi} apply.
+
+\sideremark{Remark that this critical pair can be unified, but only by 
+reducing under a binder, which is not allowed in the weak-head reduction 
+strategy. In fact this is the case for all critical pairs introduced by
+rule \nameref{infrule:cast-refl-red}, meaning that the deep reduction
+strategy is confluent for \SetoidCCplus.}
+\begin{center}
+\begin{tikzpicture}
+  \node[label=above:{\( \cast{\Depfun{A}{B}}{\Depfun{A}{B}}{\metaop{refl}}{f} \)}] (A) at (0, 0) {} ;
+  \node[label=south west:{\( f \)}] (B) at (-2, -0.5) {} ;
+  \node[label=below:{\( \begin{array}{l} \lambda\ x\ .\ \metaop{cast}({\subst{B}{a}}, {\subst{B}{a}},
+    \\ \phantom{\lambda\ x\ .\ \metaop{cast}}{\metaop{refl}}, {f\ \cast{A}{A}{\metaop{refl}}{x}}) \end{array} \)}]
+    (C) at (2, -0.5) {} ;
+  \draw [double distance=1.5pt, -{Implies}] (1,0) -- (2,-0.5) ;
+  \draw [double distance=1.5pt, -{Implies}] (-1,0) -- (-2,-0.5) ;
+\end{tikzpicture}
+\end{center}
+
+Since rule~\nameref{infrule:cast-refl-red} is admissible for closed terms
+and interferes with the reduction rules on constructors, we can restrict
+its application to situations where \( A \) and \( B \) are neutral types.
+% 
+This way, we recover a deterministic reduction strategy, although we lose 
+stability of weak-head reduction under substitution.
+% 
 \begin{mathpar}
 	\inferrule[Cast-Refl-Neutral]
 		{%\tytm{\Gamma}{A}{\Univ_i}
@@ -135,9 +187,20 @@ types \( A \) and \( B \) are convertible.
   \ilabel{infrule:cast-refl-neutral}
 \end{mathpar}
 
-A consequence is that now reduction is intertwined with conversion checking,
-which makes for meta-theory that is much more difficult.
- 
+Still, even the determinized rule~\nameref{infrule:cast-refl-neutral} is by no 
+means innocuous, as it dramatically changes the behavior of the system: 
+% 
+unlike all the other reduction rules of \SetoidCCplus, it is not triggered by 
+a redex consisting of a destructor applied to a constructor, but rather by a 
+convertibility premise.
+% 
+As a consequence, weak-head reduction is now deeply intertwined with conversion
+checking. When computing the head normal form of a term, it might be necessary
+to check convertibility of two terms, which requires putting them in weak head 
+normal form, etc.
+
+\paragraph*{Normalization}
+
 Type casting operators that reduce on identical types have a long history in
 type theory. 
 % 
@@ -159,10 +222,10 @@ But normalization models for impredicative type theories are usually built
 using reducibility candidates, which rely crucially on parametricity to 
 work.
 
-Fortunately, we do not expect that the same problems apply to our reduction 
-rules for \SetoidCCplus, because \( \castName \) only computes in the 
-predicative fragment and proof-irrelevance once again comes to our rescue 
-in the impredicative layer.
+Fortunately, we expect that our system \SetoidCCplus will avoid these issues, 
+because \( \castName \) only computes in the predicative fragment and 
+proof-irrelevance once again comes to our rescue in the impredicative 
+layer.
 % 
 Therefore, we feel justified in conjecturing that this system is in fact 
 normalizing.
@@ -173,14 +236,17 @@ normalizing.
 \end{conjecture}
 
 As further evidence for this conjecture, we remark that the situation is very 
-similar to reduction rules for \( \castName \) on type constructors 
-(\ie the rules of \SetoidCC) which are certainly not parametric either.
+similar to reduction rules for \( \castName \) on type constructors, 
+which are certainly not parametric either.
 % 
-In \cref{sec:proof-rel-impred}, we will show that extending these rules to a
-proof-relevant impredicative universe breaks normalization, but we were still
-able to prove normalization for \SetoidCC in \cref{ch:metatheory}. 
+In fact, in \cref{sec:proof-rel-impred} we will show that extending these rules 
+to a proof-relevant impredicative universe breaks normalization for the exact 
+same reason.
+% 
+Nonetheless, by restricting computation to the predicative layer, we were able 
+to prove normalization for \SetoidCC in \cref{ch:metatheory}. 
 
-\paragraph{Implementing \nameref{infrule:cast-refl-plus} in conversion only}
+\subsection{Implementing \nameref{infrule:cast-refl-plus} in conversion checking}
 
 
 
