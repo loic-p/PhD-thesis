@@ -3,6 +3,163 @@
 \chapter{Intensional Type Theory}
 \labch{layout}
 
+Dependent type theories and in particular \MLTT, as originally
+developed by~\sidecitet{MARTINLOF197573}, provide an adequate framework
+for developing constructive mathematics and certifying software.
+%
+A core aspect of \MLTT is the coexistence of two distinct notions of
+equality: a \emph{definitional} equality that records the equations
+automated by the system, and a \emph{propositional} equality that is
+a type internal to the system and thus can be used to do equational
+reasoning.
+%
+However, the propositional equality of \MLTT lacks some extensionality
+principles that pervade mathematical reasoning, such as function
+extensionality (funext). Since they are generally considered desirable, these
+principles are sometimes added as axioms, but doing so results in a system
+with weaker computational properties.
+
+Throughout the years, several options
+to obtain a more extensional version of propositional equality while preserving
+computation have been explored. The most successful lines of work can be roughly divided into two
+groups: the ones using an observational equality, and the ones using a
+cubical equality.
+%
+Both notions build on the following fundamental idea: in order to obtain
+sufficient extensionality principles, the behavior of equality in a given
+type should be explicitly specified for every type instead of using a single
+definition that is parametric over the types.
+
+The work on observational equality originated from the study of
+the setoid model of type theory \sidecite{hofmann95,altenkirch99}, and
+a first attempt at a proper type theory that supports an observational
+equality satisfying funext has been been proposed in~\sidecite{altenkirchAl:plpv2007}.
+%
+In these systems, observational equality equips every type with a setoid
+structure. This setoidal equality satisfies the uniqueness of identity proofs (UIP),
+which states that all proofs of an equality are equal; in other words,
+equality is proof-irrelevant.
+
+The other line of work is more recent and takes its roots in the
+formulation of the univalence axiom~\sidecite{kapulkin2012simplicial,hottbook},
+which gives a new meaning to the equality between types: two types are
+equal when they equivalent. This can be understood as an extensionality
+principle for the universe of types.
+%
+In their search for a computational interpretation of
+univalence, \sidecitet{cubicaltt} developed a notion of cubical equality,
+which satisfies funext and univalence, but is incompatible with UIP.
+
+Thus, observational equality and cubical equality are two diverging
+directions for providing propositional equality with more extensionality.
+\sidecitet{hts-sota,Altenkirch2016ExtendingHT,Capriotti17} advocate that the
+two solutions are actually complementary and can be integrated to
+a single system with two universe hierarchies, one that satisfies
+univalence and the other that satisfies UIP.
+%
+While cubical type theory has been thoroughly investigated and even
+implemented in the \Agda proof assistant~\sidecitet{cubical-agda},
+observational equality has not reached a comparable level of maturity.
+%
+Recent attempts to design a type theory based on observational equality
+are either lacking an algorithm for type checking~\sidecitet{sterling_et_al:LIPIcs:2019:10538}, or restricted to a single
+universe and having computational properties only up to a
+conjecture~\sidecitet{Altenkirch2019}. Indeed, the latter relies on computation
+in an enriched version of \MLTT that features a universe of definitionally
+proof-irrelevant types (noted hereafter $\sProp$) as recently proposed
+by~\sidecitet{gilbert:hal-01859964}, along with a proof-irrelevant identity type
+that supports a strong eliminator. This theory has not been justified yet,
+and it has even been shown not to be normalizing in presence of
+impredicativity~\sidecitet{lmcs:6606}.
+
+In this paper, we define \SetoidTT, the first extension of \MLTT +
+$\sProp$ with an observational equality that satisfies UIP, funext
+and propext, and supports quotient types and countably many universes
+---with a proof of normalization and canonicity formalized in \Agda.\footnote{The formalization is available at
+  \url{https://github.com/CoqHott/logrel-mltt/}, references to a
+  particular file are done using \refAgda{}{myfile} which
+  directly points to the corresponding file on github.}
+%
+Firstly, we remark that this theory can only be derived in a system with
+some level of cumulativity, as it is required for certain
+computation rules to be well-typed. This makes explicit some difficulties
+that do not show up in previous works.
+%
+Second, we remark that our version of observational equality can be equipped
+with two elimination principles: a notion of type cast (or coercion) for
+proof-relevant types, and the standard eliminator of \MLTT for
+proof-irrelevant types, thus making all the setoidal structure
+derivable from the standard eliminator.
+%
+Funext and propext are obtained by specifying the right
+computation rules for observational equality whereas UIP is obtained
+for free by interpreting observational equality in $\sProp$.
+
+The proof of normalization and canonicity is based on the use
+of logical relations defined in \Agda using induction-recursion as
+initially developed by \sidecitet{Abel:POPL2018} and later extended to
+$\sProp$ by~\sidecitet{gilbert:hal-01859964}.
+%
+Compared to previous work on formalized normalization proofs, we have added the support
+for a cumulative hierarchy with two universes, and we make a clear distinction
+between inhabitants of proof-irrelevant types, which have no computational
+behavior, and inhabitants of proof-relevant types, which do.
+%
+This key change allows us to add new principles in $\sProp$ without
+having to supply them with a computational behavior, trivializing for
+instance the management of higher coherences of the cubical interpretation.
+%
+In counterpart for this added flexibility, normalization does not directly
+imply canonicity anymore, and a separate proof of consistency of the
+theory is required to derive canonicity.
+%
+This proof is done by defining a model for \SetoidTT, but as
+consistency is the only consequence that we need from the existence of
+a model, the model can be defined in an extensional setting.
+
+To illustrate the simplicity of extending \MLTT+$\sProp$ to \SetoidTT,
+we have implemented a simple version in
+\Agda using rewrite rules, as recently introduced
+by~\sidecitet{taming_of_the_rew} (file \refAgdaRoot{setoid\_rr}).
+
+\section{Related work}
+
+Compared to~\sidecite{altenkirchAl:plpv2007}, the most important ingredient in \SetoidTT is the
+use of definitional proof-irrelevance.
+%
+This added flexibility in computations allows our recursors to enjoy proper computational
+behavior on open terms, and it also lets us seamlessly treat universe hierarchies.
+%
+Moreover, the normalization proof for OTT relies on a normalization conjecture for a different
+theory, unlike the normalization proof for \SetoidTT.
+
+In~\sidecite{Altenkirch2019}, the authors define a setoid model in \( \MLTT+\sProp \). Then, they
+interpret a version of \MLTT with proof-irrelevant identity types that support propext and
+funext in their model, thereby providing a computational interpretation of these principles.
+%
+However, handling universes in their model requires some additions to \( \MLTT+\sProp \), and
+the resulting theory is only conjectured to be normalizing.
+%
+In contrast to this, \SetoidTT is a full-fledged type theory and does not require any external
+model to compute.
+
+Compared to XTT~\sidecite{sterling_et_al:LIPIcs:2019:10538}, the strengths of \SetoidTT are a
+normalization strategy that exhibits canonicity, as well a full proof that conversion and typing
+are decidable. These properties allow us to present a concrete implementation of our system
+in a proof assistant.
+%
+In XTT however, Sterling\etal show that typing cannot be decidable, as there is no way to deduce
+\( \Obseq{A}{A'} \) and \( \Obseq{B}{B'} \) from a proof of \( \Obseq{A \times B}{A' \times B'} \).
+%
+In order to fix this shortcoming, they suggest adding a ``typecase'' operator, but
+argue against it since it forces the universe to be closed, thereby severely constraining the
+possible semantics.
+%
+In \SetoidTT, we obtain the injectivity of type contructors from the behavior of observational
+equality in the universe. These rules somewhat constrain the semantics---for instance, we cannot
+interpret \SetoidTT in set theory using a Grothendieck universe as the interpretation of \( \Type \)---but our universe remains open to the addition of arbitrary types.
+
+
 \section{the two problems being solved}
 
 Intensional computation with extensional principles

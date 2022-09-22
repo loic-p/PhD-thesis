@@ -248,7 +248,50 @@ to prove normalization for \SetoidCC in \cref{ch:metatheory}.
 
 \subsection{Implementing \nameref{infrule:cast-refl-plus} in conversion checking}
 
+In conclusion to the previous section, our attempt at implementing 
+rule~\nameref{infrule:cast-refl-plus} with reduction is not a resounding 
+success.
+% 
+The resulting reduction strategy cannot be defined independently from 
+conversion checking, and it is not even stable under substitution.
+% 
+At that point, it is not clear that we gain much by performing said reductions.
 
+We are tempted to draw a parallel with \( \eta \)-equality of functions. 
+% 
+Just like rule~\nameref{infrule:cast-refl-plus}, the \( \eta \)-equality rule 
+does not fit the general pattern of reducing a redex, and it does not lend 
+itself too well to implementation \textit{via} reduction rules either -- both the
+\( \eta \)-expansion and the \( \eta \)-reduction ideas are unsatisfying
+\sidecite{meven_eta}.
+% 
+\sideremark{This is also how our conversion checking algorithm from 
+\cref{ch:metatheory} proceeds.}
+In practice, all major proof assistants chose to implement \( \eta \) during 
+the conversion checking phase: when the algorithm needs to decide 
+convertibility between a function and a neutral term, it performs an \( \eta \)
+expansion of the neutral term and calls itself recursively.
+
+Therefore, we suggest to keep the well-behaved reduction rules of \SetoidCC,
+and to handle rule~\nameref{infrule:cast-refl-plus} during conversion checking.
+% 
+When the algorithm needs to decide convertibility between a term of the form 
+\( \cast{A}{B}{e}{t} \) where \( A \) and \( B \) are two neutral terms, and a
+term \( u \) in weak-head normal form that is not a \( \castName \), then the 
+algorithm starts by deciding convertibility of \( A \) and \( B \). 
+% 
+In case \( A \) and \( B \) are indeed convertible, then the algorithm can 
+remove the \( \castName \) and simply call itself recursively \( t \) and 
+\( u \).
+% 
+If \( A \) and \( B \) are not convertible, then the algorithm gives a negative 
+answer.
+
+\begin{conjecture}
+  The algorithm sketched above decides conversion for \SetoidCCplus.
+\end{conjecture}
+
+We leave the investigation of this question for future works.
 
 \section{Heterogeneous Equality}
 
