@@ -17,7 +17,7 @@ the computational properties of \MLTT.
 We start in \cref{sec:generalities} with some informal considerations about the system, 
 then we delve into a detailed description of the typing rules in 
 \cref{sec:typing-rules}, and finally we conclude 
-with a few examples and an overview of the meta-theoretical properties of
+with an overview of the meta-theoretical properties of
 \SetoidCC in \cref{sec:properties}.
 
 \section{Overview of the Observational Calculus of Constructions}
@@ -33,13 +33,13 @@ The proof-relevant types inhabit the universe hierarchy \( \Type_i \).
 This layer works exactly like usual Martin-Löf Type Theory, and
 contains familiar types
 \sideremark{In fact, \MLTT can be embedded in the proof-relevant layer of
-\SetoidCC.}
+\SetoidCC as we will see.}
 such as the type of natural numbers, \( \Pi \)-types, \( \Sigma \)-types or 
 universes; but also new types such as subset types and quotient types that
 we will introduce in due course.
 % 
 Generally speaking, proof-relevant objects correspond to mathematical 
-constructions or programs, depending on which side of the Curry-Howard 
+constructions or programs depending on which side of the Curry-Howard 
 correspondance you are most familiar with.
 
 The second layer corresponds to the impredicative universe of propositions 
@@ -49,7 +49,8 @@ Indeed, propositions are \emph{definitionally proof-irrelevant types}, which
 means that any two inhabitants of a type \( \tm{A}{\sProp} \) are convertible
 simply by virtue of having type \( A \):
 % 
-\sideremark{We use the triple equal symbol \( \equiv \) to denote convertibility.}
+\sideremark{We use the triple equal symbol \( \equiv \) to denote convertibility, 
+also referred to as definitional equality.}
 % 
 \[
 \inferrule{\tytm{\Gamma}{A}{\sProp} \\ \tytm{\Gamma}{t, u}{A}}{\eqtm{\Gamma}{t}{u}{A}}
@@ -136,7 +137,7 @@ prescribe the behavior of the observational equality on their inhabitants.
 \subsection{Eliminating Equality with Type Casting}
 \label{sec:cast-intro}
 
-For the observational equality to be of any use, we need a way to
+For the observational equality to be of any interest, we need a way to
 use it in constructions and proofs: 
 % 
 \sideremark{This principle is called the Leibniz rule. It should apply
@@ -252,7 +253,7 @@ such as \( \top \) for the true proposition or \( \metaop{ap} \) for the proof
 that functions preserve the observational equality (cf \cref{sec:cast-intro}).
 % 
 We will introduce them throughout the chapter, but for convenience they are 
-collected in appendix \shepherd{TODO}.
+collected in appendix \ref{sec:ap:sugar}.
 % 
 The capture-avoiding substitution of a variable \( x \) in a term \( A \) by the 
 term \( t \) is noted \( \subst{B}{t} \).
@@ -305,21 +306,21 @@ term \( t \) is noted \( \subst{B}{t} \).
 \subsection{Structure of the Rules}
 
 The typing rules of \SetoidCC are based on four different judgments: 
-\sideremark{In all the judgments, \( \Univ \) is either \( \Type_i \) or \( \sProp \).
-Note that the reduction only makes sense for proof-relevant terms, so it does not 
-to mention the sort.}
 \begin{center}
   \begin{tabular}{lr}
 	\( \wfctx{\Gamma} \) & {the context \( \Gamma \) is well-formed} \\
 	\( \tytmannotated{\Gamma}{t}{A}{\Univ} \) & {the term \( t \) has type \( A \) in context \( \Gamma \)} \\
 	\( \eqtmannotated{\Gamma}{t}{u}{A}{\Univ} \) & {\( t \) and \( u \) are convertible at type \( A \) in context \( \Gamma \)} \\
-	\( \redannotated{\Gamma}{t}{u}{A}{\Univ} \) & \qquad {the term \( t \) reduces to \( u \) at type \( A \) in context \( \Gamma \)}
+	\( \redannotated{\Gamma}{t}{u}{A}{\Type_i} \) & \qquad {the term \( t \) reduces to \( u \) at type \( A \) in context \( \Gamma \)}
   \end{tabular}
+  \sideremark[*-4]{In all the judgments, \( \Univ \) is either \( \Type_i \) or \( \sProp \).
+  Note that the reduction only makes sense for proof-relevant terms, so it will never
+  apply to a term in \( \sProp \).}
 \end{center}
 The typing and convertibility rules define the algebraic theory of 
 \SetoidCC, while the reduction rules describe a weak-head normalization 
 algorithm that we will use to compute normal forms for the well-typed 
-terms.
+terms (see \cref{sec:weak-head}).
 % 
 In case the type is a sort \( \Univ \), we shorten 
 \( {\tytmannotated{\Gamma}{A}{\Univ}{\Univ^+}} \)
@@ -408,7 +409,8 @@ On top of this, we need to add bureaucratic congruence rules which make sure
 that each constructor preserves the judgmental equality 
 (say for instance, if \( t \equiv u \) then \( \suc{t} \equiv \suc{u} \)).
 % 
-Since these rules present little interest, we do not reproduce them here.
+Since these rules present little interest, we do not reproduce them here and
+refer the interested reader to appendix \ref{sec:ap:cong}.
 
 \subsection{The Logical Layer}
 
@@ -679,7 +681,9 @@ the usual lambda-abstraction and application, with \( \beta \)-reduction and
 		{\tytmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t}{B}{\Type_i}}
 		{\tytmannotated{\Gamma}{\lam{A}{t}}{\Depfunannotated{A}{B}{\Univ}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(i, \Univ)}}}
 	\ilabel{infrule:pi-intro}
-	\and
+\end{mathpar}
+% 
+\begin{mathpar}
 	\inferrule[App-Rel]
 		{\tytmannotated{\Gamma}{t}{\Depfunannotated{A}{B}{\Univ}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(i, \Univ)}}
 			\\ \tytmannotated{\Gamma}{u}{A}{\Univ}}
@@ -693,7 +697,12 @@ the usual lambda-abstraction and application, with \( \beta \)-reduction and
 			\\ \tytmannotated{\Gamma}{u}{A}{\Univ}}
 		{\redannotated{\Gamma}{(\lam{A}{t})\ u}{\subst{t}{u}}{\subst{B}{u}}{\Type_i}}
 	\ilabel{inferrule:beta-red}
-	\and
+\end{mathpar}
+% 
+\sideremark{Because reduction implies conversion (rule \nameref{inferrule:red-conv}), rule \nameref{inferrule:beta-red} 
+	introduces both a reduction rule and a definitional equality.}
+% 
+\begin{mathpar}
 	\inferrule[$\eta$-Eq]
 		{\tytmannotated{\Gamma}{t, u}{\Depfunannotated{A}{B}{}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(i, \Univ)}}
 			\\ \eqtmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t\ x}{u\ x}{B}{\Type_i}}
@@ -1072,7 +1081,7 @@ but since this structure is not built in \MLTT, all the functions between
 setoids, all the predicates, etc... have to be supplemented with
 bureaucratic equality preservation lemmas.
 
-In \SetoidCC however, every type is already a setoid (with the observational 
+In \SetoidCC however, every type is naturally a setoid (with the observational 
 equality) and every term preserves the setoid equality by construction. 
 This is a very comfortable setting for quotients, that can thus be added to the
 theory -- provided the relation that induces the quotient is proof-irrelevant.
@@ -1090,7 +1099,7 @@ manipulate in \SetoidCC.
 Quotient types are defined on a type \( A \) equipped with an
 equivalence relation on \( A \).
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
+  \inferrule[Quotient-Form]{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytmannotated{\Gamma}{R}{\Fun{A}{\Fun{A}{\sProp}}}{\Type_i}
 			\\ \tytmannotated{\Gamma}{R_r}{\Depfun{A}{R\ x\ x}}{\sProp}
 			\\ \tytmannotated{\Gamma}{R_s}{\Depfun[x,y]{A}{\Fun{R\ x\ y}{R\ y\ x}}}{\sProp}
@@ -1098,8 +1107,8 @@ equivalence relation on \( A \).
 			{\tytm{\Gamma}{\Quo{A}{(R,R_r,R_s,R_t)}}{\Type_i}}
 \end{mathpar}
 Since the proofs of reflexivity, symmetry and transitivity appear
-everywhere but are proof-irrelevant, we will generally omit them in the
-assumptions of the rules, and write \( \Quo{A}{R} \) instead of
+everywhere but are proof-irrelevant, we will abreviate them as \( \mathsf{isrel}(R) \) in
+the assumptions of the rules, and we write \( \Quo{A}{R} \) instead of
 \( \Quo{A}{(R,R_r,R_s,R_t)} \).
 
 The only constructor of quotient types is the canonical projection: from an element \( t \) of
@@ -1107,11 +1116,15 @@ The only constructor of quotient types is the canonical projection: from an elem
 two canonical projections reduces to \( R \).
 %
 \begin{mathpar}
-  \inferrule{\tytmannotated{\Gamma}{t}{A}{\Type_i}}
+  \inferrule[Quotient-Proj]{\tytmannotated{\Gamma}{t}{A}{\Type_i}
+  			\\ \tytmannotated{\Gamma}{R}{\Fun{A}{\Fun{A}{\sProp}}}{\Type_i}
+			\\ \mathsf{isrel}(R)}
 			{\tytmannotated{\Gamma}{\quo{t}}{\Quo{A}{R}}{\Type_i}}
   \and
-  \inferrule{\tytmannotated{\Gamma}{t}{A}{\Type_i}
-			\\ \tytmannotated{\Gamma}{u}{A}{\Type_i}}
+  \inferrule[Quotient-Proj-Eq]{\tytmannotated{\Gamma}{t}{A}{\Type_i}
+			\\ \tytmannotated{\Gamma}{u}{A}{\Type_i}
+			\\ \tytmannotated{\Gamma}{R}{\Fun{A}{\Fun{A}{\sProp}}}{\Type_i}
+			\\ \mathsf{isrel}(R)}
 			{\red{\Gamma}{\Obseq[\Quo{A}{R}]{\quo{t}}{\quo{u}}}{R\ t\ u}{\sProp}}
 \end{mathpar}
 % 
@@ -1119,9 +1132,9 @@ The definition of $\castName$ between two quotient types reduces when
 the casted term is a canonical projection.
 %
 \begin{mathpar}
-  \inferrule{\tytmannotated{\Gamma}{e}{\Obseq[\Type]{\Quo{A}{R}}{\Quo{A'}{R'}}}{\sProp}
+  \inferrule[Quotient-Proj-Cast]{\tytmannotated{\Gamma}{e}{\Obseq[\Type_i]{\Quo{A}{R}}{\Quo{A'}{R'}}}{\sProp}
 	\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}}
-  {\red{\Gamma}{\cast{\Quo{A}{R}}{\Quo{A'}{R'}}{e}{\quo{t}}}{\quo{\cast{A}{A'}{\fst{e}}{t}}}{\Quo{A}{R'}}}
+  {\redannotated{\Gamma}{\cast{\Quo{A}{R}}{\Quo{A'}{R'}}{e}{\quo{t}}}{\quo{\cast{A}{A'}{\fst{e}}{t}}}{\Quo{A}{R'}}{\Type_i}}
 \end{mathpar}
 
 Observational equality between two quotient types reduces to equality
@@ -1129,10 +1142,12 @@ of the (proof-relevant part of the) telescopes that define each
 quotient:
 % 
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
+  \inferrule[Quotient-Eq]{\tytm{\Gamma}{A}{\Type_i}
 	\hspace{2em} \tytm{\Gamma}{R}{\Fun{A}{\Fun{A}{\sProp}}}
+	\\ \mathsf{isrel}(R)
 	\\ \tytm{\Gamma}{A'}{\Type_i}
 	\\ \tytm{\Gamma}{R'}{\Fun{A'}{\Fun{A'}{\sProp}}}
+	\\ \mathsf{isrel}(R')
 	\\ x' :=  \cast{A}{A'}{e}{x}
 	\\ y' :=  \cast{A}{A'}{e}{y}}
 	{\redmultiline{\Gamma}{\Obseq[\Type]{\Quo{A}{R}}{\Quo{A'}{R'}}}
@@ -1146,21 +1161,21 @@ function out of a quotient \( \Quo{A}{R} \), it suffices to give a function \( t
 such that if \( R \ x \ y \), then their images under \( t_\pi \) are equal.
 % 
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{B}{\Fun{\Quo{A}{R}}{\Univ}}
+  \inferrule[Quotient-Elim]{\tytm{\Gamma}{B}{\Fun{\Quo{A}{R}}{\Univ}}
 			\\ \tytm{\Gamma}{t_\pi}{\Depfun{A}{B\ \quo{x}}}
 			\\ \tytm{\Gamma}{t_\sim}{\Depfun[x,y]{A}{\Depfun[e]{R\ x\ y}{\Obseq[B\ \quo{x}]{(t_\pi\ x)}{\cast{B\ \quo{y}}{B\ \quo{x}}{B\ \sym{e}}{t_\pi\ y}}}}}
 			\\ \tytm{\Gamma}{u}{\Quo{A}{R}}}
-			{\tytm{\Gamma}{\quorec{B}{t_\pi}{t_\sim}{u}}{B\ u}}
+			{\tytmannotated{\Gamma}{\quorec{B}{t_\pi}{t_\sim}{u}}{B\ u}{\Univ}}
 \end{mathpar}
 % 
 The eliminator for quotient types has the obvious computation rule
 % 
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{B}{\Fun{\Quo{A}{R}}{\Univ}}
+  \inferrule[Quotient-Proj-Elim]{\tytm{\Gamma}{B}{\Fun{\Quo{A}{R}}{\Type_i}}
 			\\ \tytm{\Gamma}{t_\pi}{\Depfun{A}{B\ \quo{x}}}
 			\\ \tytm{\Gamma}{t_\sim}{\Depfun[x,y]{A}{\Depfun[e]{R\ x\ y}{\Obseq[B\ \quo{x}]{(t_\pi\ x)}{\cast{B\ \quo{y}}{B\ \quo{x}}{B\ \sym{e}}{t_\pi\ y}}}}}
 			\\ \tytm{\Gamma}{u}{A}}
-			{\red{\Gamma}{\quorec{B}{t_\pi}{t_\sim}{\quo{u}}}{t_\pi\ u}{B\ (\quo{u})}}
+			{\redannotated{\Gamma}{\quorec{B}{t_\pi}{t_\sim}{\quo{u}}}{t_\pi\ u}{B\ (\quo{u})}{\Type_i}}
 \end{mathpar}
 %
 On top of this, quotients also come with the appropriate substitution and 
@@ -1215,28 +1230,28 @@ Another typical use of $\Boxt{}$ is to define a singleton
 Box types can be defined with the following rules:
 % 
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A}{\sProp}}
+  \inferrule[Box-Form]{\tytm{\Gamma}{A}{\sProp}}
 			{\tytm{\Gamma}{\Boxt{A}}{\Type_0}}
   \and
-  \inferrule{\tytmannotated{\Gamma}{t}{A}{\sProp}}
+  \inferrule[Box-Proof]{\tytmannotated{\Gamma}{t}{A}{\sProp}}
 			{\tytmannotated{\Gamma}{\boxt{t}}{\Boxt{A}}{\Type_0}}
   \and
-  \inferrule{\tytmannotated{\Gamma}{t,u}{\Boxt{A}}{\Type_0}}
+  \inferrule[Box-Proof-Eq]{\tytmannotated{\Gamma}{t,u}{\Boxt{A}}{\Type_0}}
 			{\red{\Gamma}{\Obseq[\Boxt{A}]{t}{u}}{\Unit}{\sProp}}
 \end{mathpar}
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A}{\sProp}
+  \inferrule[Unbox]{\tytm{\Gamma}{A}{\sProp}
 			\\ \tytm{\Gamma}{t}{\Boxt{A}}}
 			{\tytm{\Gamma}{\unboxt{t}}{A}}
   \and
-  \inferrule{\tytm{\Gamma}{A,B}{\sProp}}
+  \inferrule[Box-Eq]{\tytm{\Gamma}{A,B}{\sProp}}
 			{\red{\Gamma}
 			  {\Obseq[\Type]{\Boxt{A}}{\Boxt{B}}}
 			  {\Obseq[\sProp]{A}{B}}
 			  {\sProp}}
 \end{mathpar}
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A, B}{\sProp}
+  \inferrule[Box-Proof-Cast]{\tytm{\Gamma}{A, B}{\sProp}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{e}{\Obseq[\Type]{\Boxt{A}}{\Boxt{B}}}}
 			{\red{\Gamma}{\cast{\Boxt{A}}{\Boxt{B}}{e}{\boxt{t}}}{\boxt{\cast{A}{B}{e}{t}}}{\Boxt{B}}}
@@ -1306,21 +1321,21 @@ type, and was solved by \sidecitet{Swan_2016}.
 Following his ideas, we extend \SetoidCC with \( \metaop{Id} \)-types:
 % 
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
+  \inferrule[Id-Form]{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{u}{A}}
 			{\tytm{\Gamma}{\Id{A}{t}{u}}{\Type_i}}
   \and
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
+  \inferrule[Idrefl]{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}}
 			{\tytm{\Gamma}{\id{t}}{\Id{A}{t}{t}}}
 \end{mathpar}
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{e,e'}{\Id{A}{t}{u}}}
-			{\red{\Gamma}{\Obseq[\Id{A}{t}{u}]{e}{e'}}{\Unit}{\sProp[i]}}
+  \inferrule[Id-Proof-Eq]{\tytm{\Gamma}{e,e'}{\Id{A}{t}{u}}}
+			{\red{\Gamma}{\Obseq[\Id{A}{t}{u}]{e}{e'}}{\Unit}{\sProp}}
 \end{mathpar}
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
+  \inferrule[J]{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{\Id{A}{t}{x}}{\Univ}}}
 			\\ \tytm{\Gamma}{u}{B\ t\ \id{t}}
@@ -1329,7 +1344,7 @@ Following his ideas, we extend \SetoidCC with \( \metaop{Id} \)-types:
 			{\tytm{\Gamma}{\J{A}{t}{B}{u}{t'}{e}}{B\ t'\ e}}
 \end{mathpar}
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
+  \inferrule[J-Idrefl]{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{\Id{A}{t}{x}}{\Type_j}}}
 			\\ \tytm{\Gamma}{u}{B\ t\ \id{t}}}
@@ -1343,7 +1358,7 @@ Observational equality between two identity types is defined as equality of the
 telescopes of arguments, as for the quotient type:
 %
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
+  \inferrule[Id-Eq]{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{u}{A}
 			\\ \tytm{\Gamma}{A'}{\Type_i}
@@ -1376,7 +1391,7 @@ In order to fix this, we add a term $\idpath{e} $ that turns any inhabitant of
 \( \Obseq[A]{t}{u} \) into an inhabitant of \( \Id{A}{t}{u} \).
 % 
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
+  \inferrule[Idpath]{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{u}{A}
 			\\ \tytm{\Gamma}{e}{\Obseq[A]{t}{u}}}
@@ -1386,7 +1401,7 @@ In order to fix this, we add a term $\idpath{e} $ that turns any inhabitant of
 Then, the computation rule for cast on $\id{t}$ can be defined as:
 %
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A, A'}{\Type_i}
+  \inferrule[Cast-Idrefl]{\tytm{\Gamma}{A, A'}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{t',u'}{A'}
 			\\ \tytm{\Gamma}{e}{\Obseq{\Id{A}{t}{t}}{\Id{A'}{t'}{u'}}}}
@@ -1399,7 +1414,7 @@ Then, the computation rule for cast on $\id{t}$ can be defined as:
 We also need to account for this additional constructor in reduction rules:
 % 
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A}{\Type_i}
+  \inferrule[J-Idpath]{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{\Id{A}{t}{x}}{\Type_j}}}
 			\\ \tytm{\Gamma}{b}{B\ t\ \id{t}}
@@ -1411,7 +1426,7 @@ We also need to account for this additional constructor in reduction rules:
 			  {B\ t'\ \idpath{e}}}
 \end{mathpar}
 \begin{mathpar}
-  \inferrule{\tytm{\Gamma}{A, A'}{\Type_i}
+  \inferrule[Cast-Idpath]{\tytm{\Gamma}{A, A'}{\Type_i}
 			\\ \tytm{\Gamma}{t, u}{A}
 			\\ \tytm{\Gamma}{e}{\Obseq[A]{t}{u}}
 			\\ \tytm{\Gamma}{t',u'}{A'}
@@ -1454,25 +1469,62 @@ it only satisfies UIP up to a propositional equality.
 \end{itemize}
 
 \subsection{Weak-head Reduction}
+\label{sec:weak-head}
 
-For our definition of reduction to be complete, we need to add bureaucratic rules that
-reduce the scrutinees of eliminators to {\em weak-head normal form} (whnf),
-so the eliminator can then reduce by case analysis on the whnf.
-%
-Weak-head normal forms correspond to relevant terms that cannot be
-reduced (\cref{fig:whnf-neutral}).
-%
-They are either terms with a constructor in head position, or a neutral term, which
-correspond to the stuck terms that can not exist in an empty
-context. Neutral terms are either variables, eliminators applied to another neutral
-term, or obtained from an inhabitant of \( \Empty \).
+All the rules that we enunciated so far provide us with a complete description 
+of the typing discipline and of the definitional equality of \SetoidCC. But our 
+reduction rules are still incomplete.
+
+Indeed, so far we have only defined reduction rules for redexes consisting of an 
+eliminator applied to a constructor. 
+% 
+\sideremark{In the case of rule \cref{inferrule:beta-red}, the application is
+considered as an eliminator, and the lambda-abstraction as a constructor.}
+% 
+To complete our reduction rules into a proper evaluation strategy, we need to 
+define a class of \emph{normal forms} and add the necessary rules to evaluate 
+an arbitrary program down to a normal form.
+
+In this thesis, we use a typed, deterministic \emph{weak head} reduction 
+strategy: 
+\begin{itemize}
+\item If a term has a constructor or a variable in head position, then it is a 
+	normal form, and does not reduce further.
+\item If a term has an eliminator in head position, we reduce all the scrutinees 
+	of that eliminator down to normal form. Then, if all the scrutinees have a 
+	constructor in head position, we simplify the redex and restart the reduction process 
+	on the result. Otherwise, we have a normal form.
+\end{itemize} 
+Constructors are all those tokens that are introduced by introduction rules,
+including \( \zero \) and \( \metaop{S} \) but also type formers (except for the
+observational equality) and lambda-abstractions.
+
+On the other hand eliminators are introduced by elimination rules, and they
+include tokens like \( \color{RoyalBlue}{\Nat}\metaop{-elim} \) but also 
+applications, \( \castName \) or the observational equality type.
+% 
+An argument of an eliminator is said to be a \emph{scrutinee} when it may 
+trigger a computation rule if it contains a term with a constructor in head 
+position. 
+% 
+Note that an eliminator might have several scrutinees, for instance in 
+\( \cast{A}{B}{e}{t} \) both \( A \) and \( B \) are scrutinees.
+
+In particular, we never reduce under a constructor, hence the name ``weak''.
+% 
+The substitution rules that implement reduction of scrutinees to weak-head normal
+form are described in appendix \ref{sec:ap:subst}.
+
+The normal forms for our weak head reduction strategy are the \emph{weak head normal forms} 
+(whnfs), defined in \cref{fig:whnf-neutral}. 
+% 
+A whnf is either a term with a constructor in head position, or a \emph{neutral term},
+\ie a term that cannot be reduced to a normal form because it is stuck on a
+variable, a proof of \( \Empty \) or a cast along a non-diagonal equality.
 %
 In \SetoidCC, inhabitants of a proof-irrelevant type are never
 considered as whnf, as there is no notion of reduction of
 proof-irrelevant terms.
-%
-The substitution rules that implement reduction of scrutinees to weak-head normal
-form are described in the appendix.
 
 \begin{figure}[!h]
   \begin{small}
@@ -1506,11 +1558,7 @@ form are described in the appendix.
   \caption{Weak-head normal and neutral forms}
   \label{fig:whnf-neutral}
 \end{figure}
-
-\section{Examples}
 \label{sec:examples}
-
-\shepherd{TODO, if I have time left}
 
 \section{Overview of the Meta-Theory}
 \label{sec:properties}
