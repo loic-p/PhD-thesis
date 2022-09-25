@@ -7,7 +7,8 @@
 % \sideremark{The \SetoidCC acronym stands for the ``Observational Calculus of 
 % Constructions''.}
 In this chapter we present our system \SetoidCC, which is a flavor of 
-Altenkirch and McBride's observational type theory \cite{altenkirchAl:plpv2007}.
+Altenkirch, McBride and Swierstra's observational type theory 
+\cite{altenkirchAl:plpv2007}.
 % 
 \SetoidCC extends Martin-Löf Type Theory with support for impredicative 
 propositions and an observational equality that satisfies UIP, function 
@@ -343,24 +344,24 @@ observational equality on top of this.
 \subsection{Generic Rules}
 
 \paragraph*{Contexts}
-Rules~\nameref{infrule:ctx-nil}, \nameref{infrule:ctx-cons} and \nameref{infrule:var} describe the
+Rules~\nameref{inferrule:ctx-nil}, \nameref{inferrule:ctx-cons} and \nameref{inferrule:var} describe the
 usual formation of contexts and typing of variables. 
 % 
 \begin{mathpar}
 	\inferrule[Ctx-Nil]
 		{ }
 		{\wfctx{\emptyctx}}
-	\ilabel{infrule:ctx-nil}
+	\ilabel{inferrule:ctx-nil}
 	\and
 	\inferrule[Ctx-Cons]
 		{\wfctx{\Gamma} \\ \tytm{\Gamma}{A}{\Univ}}
 		{\wfctx{\extctxannotated{\Gamma}{A}{\Univ}}}
-	\ilabel{infrule:ctx-cons}
+	\ilabel{inferrule:ctx-cons}
 	\and
 	\inferrule[Var]
 		{\wfctx{\Gamma} \\ \inctx{\Gamma}{A}{\Univ}}
 		{\tytmannotated{\Gamma}{x}{A}{\Univ}}
-	\ilabel{infrule:var}
+	\ilabel{inferrule:var}
 \end{mathpar}
 
 \paragraph*{Conversion}
@@ -374,24 +375,24 @@ proof-irrelevant terms.
 		{\tytmannotated{\Gamma}{t}{A}{\Univ}
 			\\ \eqtm{\Gamma}{A}{B}{\Univ}}
 		{\tytmannotated{\Gamma}{t}{B}{\Univ}}
-	\ilabel{infrule:conv}
+	\ilabel{inferrule:conv}
 	\and
 	\inferrule[Refl]
 		{\tytmannotated{\Gamma}{t}{A}{\Univ}}
 		{\eqtmannotated{\Gamma}{t}{t}{A}{\Univ}}
-	\ilabel{infrule:reflexivity}
+	\ilabel{inferrule:reflexivity}
 \end{mathpar}
 \begin{mathpar}
 	\inferrule[Sym]
 		{\eqtmannotated{\Gamma}{t}{u}{A}{\Univ}}
 		{\eqtmannotated{\Gamma}{u}{t}{A}{\Univ}} 
-	\ilabel{infrule:sym}
+	\ilabel{inferrule:sym}
 	\and
 	\inferrule[Trans]
 		{\eqtmannotated{\Gamma}{t}{t'}{A}{\Univ}
 			\and \eqtmannotated{\Gamma}{t'}{u}{A}{\Univ}}
 		{\eqtmannotated{\Gamma}{t}{u}{A}{\Univ}}
-	\ilabel{infrule:trans}
+	\ilabel{inferrule:trans}
 \end{mathpar}
 \begin{mathpar}
 	\inferrule[Red-Conv]
@@ -402,7 +403,7 @@ proof-irrelevant terms.
 	\inferrule[Proof-Irrelevance]
 		{\tytmannotated{\Gamma}{t,u}{A}{\sProp}}
 		{\eqtmannotated{\Gamma}{t}{u}{A}{\sProp}}
-	\ilabel{infrule:proof-irrelevance}
+	\ilabel{inferrule:proof-irrelevance}
 \end{mathpar}
 
 On top of this, we need to add bureaucratic congruence rules which make sure
@@ -428,18 +429,18 @@ since this type lives in the proof-irrelevant world.}
 			\tytm{\extctxannotated{\Gamma}{A}{\Univ}}{B}{\sProp}}
 		{\tytm{\Gamma}{\Depfunannotated{A}{B}{\Univ}{\Univ}{\sProp}}{\sProp}}
 		{}
-	\ilabel{infrule:pi-irr-form}
+	\ilabel{inferrule:pi-irr-form}
 	\and
 	\inferrule[Fun-Irr]
 		{\tytmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t}{B}{\sProp}}
 		{\tytmannotated{\Gamma}{\lam{A}{t}}{\Depfun{A}{B}}{\sProp}}
-	\ilabel{infrule:pi-irr-intro}
+	\ilabel{inferrule:pi-irr-intro}
 	\and
 	\inferrule[App-Irr]
 		{\tytmannotated{\Gamma}{t}{\Depfun{A}{B}}{\sProp}
 			\\ \tytmannotated{\Gamma}{u}{A}{\Univ}}
 		{\tytmannotated{\Gamma}{t\ u}{\subst{B}{u}}{\sProp}}
-	\ilabel{infrule:pi-irr-elim}
+	\ilabel{inferrule:pi-irr-elim}
 \end{mathpar}
 % 
 If the domain \( A \) is proof-relevant, then the \( \Pi \)-type plays 
@@ -511,8 +512,8 @@ To represent absurdity, \SetoidCC features the false
 proposition $\Empty$, from which we can define the true proposition 
 $\Unit$.
 
-Besides its formation rule (Rule~\nameref{infrule:empty-form}), the false proposition
-comes with an elimination principle (Rule~\nameref{infrule:empty-elim}) that 
+Besides its formation rule (Rule~\nameref{inferrule:empty-form}), the false proposition
+comes with an elimination principle (Rule~\nameref{inferrule:empty-elim}) that 
 applies to both proof-irrelevant and proof-relevant types.
 \sideremark{This large elimination rule means that we could not replace 
 \( \Empty \) with some impredicative encoding.}
@@ -521,13 +522,13 @@ applies to both proof-irrelevant and proof-relevant types.
 	\inferrule[$\Empty$-Form]
 		{\wfctx{\Gamma}}
 		{\tytm{\Gamma}{\Empty}{\sProp}}
-	\ilabel{infrule:empty-form}
+	\ilabel{inferrule:empty-form}
 	\and
 	\inferrule[$\Empty$-Elim]
 		{\tytm{\Gamma}{A}{\Univ}
 			\\ \tytmannotated{\Gamma}{t}{\Empty}{\sProp}}
 		{\tytmannotated{\Gamma}{\emptyrec{A}{t}}{A}{\Univ}}
-	\ilabel{infrule:empty-elim}
+	\ilabel{inferrule:empty-elim}
 \end{mathpar}
 % 
 In the theory implemented by \Coq, this rule constitutes the 
@@ -567,13 +568,13 @@ reflexivity constructor $\refl{t}{A}$.
 			\tytmannotated{\Gamma}{t}{A}{\Type_i}
 			\\ \tytmannotated{\Gamma}{u}{A}{\Type_i}}
 		{\tytm{\Gamma}{\Obseq[A]{t}{u}}{\sProp}}
-	\ilabel{infrule:eq-form}
+	\ilabel{inferrule:eq-form}
 	\and
 	\inferrule[Refl]
 		{% \tytm{\Gamma}{A}{\Type_i} \\
 			\tytmannotated{\Gamma}{t}{A}{\Type_i}}
 		{\tytmannotated{\Gamma}{\refl{t}{A}}{\Obseq[A]{t}{t}}{\sProp}}
-	\ilabel{infrule:refl}
+	\ilabel{inferrule:refl}
 \end{mathpar}
 %
 The equality type of \SetoidCC should not be seen as a type former like
@@ -593,7 +594,7 @@ To transport a proof of a proposition along an observational equality,
 			%\quad \tytmannotated{\Gamma}{t'}{A}{\Univ}
 			\quad \tytmannotated{\Gamma}{e}{\Obseq[A]{t}{t'}}{\sProp}}
 		{\tytmannotated{\Gamma}{\transport{A}{t}{B}{u}{t'}{e}}{\subst[x]{B}{t'}}{\sProp}}
-	\ilabel{infrule:transport-prop}
+	\ilabel{inferrule:transport-prop}
 \end{mathpar}
 %
 Since it only ever constructs computationally irrelevant terms, this eliminator
@@ -614,7 +615,7 @@ two propositionally equal proof relevant types.
 			\tytmannotated{\Gamma}{e}{\Obseq[{\Univ}]{A}{B}}{\sProp}
 			\quad \tytmannotated{\Gamma}{t}{A}{\Univ}}
 		{\tytmannotated{\Gamma}{\cast{A}{B}{e}{t}}{B}{\Univ}}
-	\ilabel{infrule:cast}
+	\ilabel{inferrule:cast}
 \end{mathpar}
 % 
 Note that our cast operation also applies to proof-irrelevant
@@ -643,11 +644,11 @@ identity.
 			\tytmannotated{\Gamma}{t}{A}{\Type_i} \\
 			\tytmannotated{\Gamma}{e}{\Obseq[{\Type_i}]{A}{A}}{\sProp}}
 		{\tytmannotated{\Gamma}{\castrefl{A}{t}}{\Obseq[A]{t}{\cast{A}{A}{e}{t}}}{\sProp}}
-	\ilabel{infrule:cast-refl}
+	\ilabel{inferrule:cast-refl}
 \end{mathpar}
 % 
 In \cref{ch:extensions}, we study a slight variant of \SetoidCC dubbed \SetoidCCplus
-where the rule \nameref{infrule:cast-refl} holds up to definitional equality, but its 
+where the rule \nameref{inferrule:cast-refl} holds up to definitional equality, but its 
 normalization and canonicity are only conjectural.
 
 \subsection{Dependent products}
@@ -669,7 +670,7 @@ if \( \Univ \) is \( \Type_j \), and to \( \Type_i \) if \( \Univ \) is \( \sPro
 			\tytm{\extctxannotated{\Gamma}{A}{\Univ}}{B}{\Type_i}}
 		{\tytm{\Gamma}{\Depfunannotated{A}{B}{\Univ}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(i,\Univ)}}}
 		{}
-	\ilabel{infrule:pi-form}
+	\ilabel{inferrule:pi-form}
 \end{mathpar}
 %
 The introduction and elimination rules for dependent products correspond to
@@ -680,7 +681,7 @@ the usual lambda-abstraction and application, with \( \beta \)-reduction and
 	\inferrule[Fun-Rel]
 		{\tytmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t}{B}{\Type_i}}
 		{\tytmannotated{\Gamma}{\lam{A}{t}}{\Depfunannotated{A}{B}{\Univ}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(i, \Univ)}}}
-	\ilabel{infrule:pi-intro}
+	\ilabel{inferrule:pi-intro}
 \end{mathpar}
 % 
 \begin{mathpar}
@@ -688,7 +689,7 @@ the usual lambda-abstraction and application, with \( \beta \)-reduction and
 		{\tytmannotated{\Gamma}{t}{\Depfunannotated{A}{B}{\Univ}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(i, \Univ)}}
 			\\ \tytmannotated{\Gamma}{u}{A}{\Univ}}
 		{\tytmannotated{\Gamma}{t\ u}{\subst{B}{u}}{\Type_i}}
-	\ilabel{infrule:pi-elim}
+	\ilabel{inferrule:pi-elim}
 \end{mathpar}
 % 
 \begin{mathpar}
@@ -707,7 +708,7 @@ the usual lambda-abstraction and application, with \( \beta \)-reduction and
 		{\tytmannotated{\Gamma}{t, u}{\Depfunannotated{A}{B}{}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(i, \Univ)}}
 			\\ \eqtmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t\ x}{u\ x}{B}{\Type_i}}
 		{\eqtmannotated{\Gamma}{t}{u}{\Depfunannotated{A}{B}{}{\Univ}{\Type_i}}{\Type_{\mathrm{max}(i, \Univ)}}}
-	\ilabel{infrule:eta}
+	\ilabel{inferrule:eta}
 \end{mathpar}
 
 Furthermore, since dependent products are proof-relevant types, we must add
@@ -734,7 +735,7 @@ dependent sums, but a positive version would be just as straightforward.
 			\tytm{\extctxannotated{\Gamma}{A}{\Type_i}}{B}{\Type_j}}
 		{\tytm{\Gamma}{\Depsumannotated{A}{B}{\Univ}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
 		{}
-	\ilabel{infrule:sigma-form}
+	\ilabel{inferrule:sigma-form}
 \end{mathpar}
 % 
 \begin{mathpar}
@@ -743,16 +744,16 @@ dependent sums, but a positive version would be just as straightforward.
 			\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}
 			\\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\Type_j}}
 		{\tytmannotated{\Gamma}{\relpair{t}{u}}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
-	\ilabel{infrule:pair}
+	\ilabel{inferrule:pair}
 	\\\
 	\inferrule[Fst]
 		{\tytmannotated{\Gamma}{t}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
 		{\tytmannotated{\Gamma}{\relfst{t}}{A}{\Type_i}}
-	\ilabel{infrule:fst}
+	\ilabel{inferrule:fst}
 	\ \inferrule[Snd]
 		{\tytmannotated{\Gamma}{t}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
 		{\tytmannotated{\Gamma}{\relsnd{t}}{\subst{B}{\relfst{t}}}{\Type_j}}
-	\ilabel{infrule:snd}
+	\ilabel{inferrule:snd}
 \end{mathpar}
 % 
 \begin{mathpar}
@@ -761,20 +762,20 @@ dependent sums, but a positive version would be just as straightforward.
 			\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}
 			\\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\Type_j}}
 		{\redannotated{\Gamma}{\relfst{\relpair{t}{u}}}{t}{A}{\Type_i}}
-	\ilabel{infrule:fst-pair}
+	\ilabel{inferrule:fst-pair}
 	\and 
 	\inferrule[Snd-Pair]
 		{\tytm{\extctxannotated{\Gamma}{A}{\Type_i}}{B}{\Type_j} 
 			\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}
 			\\ \tytmannotated{\Gamma}{u}{\subst{B}{t}}{\Type_j}}
 		{\redannotated{\Gamma}{\relsnd{\relpair{t}{u}}}{u}{\subst{B}{t}}{\Type_j}}
-	\ilabel{infrule:snd-pair}
+	\ilabel{inferrule:snd-pair}
 \end{mathpar}
 \begin{mathpar}
 	\inferrule[\( \eta \)-Depsum]
 		{\tytmannotated{\Gamma}{t}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
 		{\eqtmannotated{\Gamma}{t}{\relpair{\relfst{t}}{\relsnd{t}}}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
-	\ilabel{infrule:fst}
+	\ilabel{inferrule:fst}
 \end{mathpar}
 
 The observational equality between two inhabitants of a dependent sum reduces
@@ -795,7 +796,7 @@ a premise.}
 \subsection{Natural numbers}
 
 The proof-relevant type of natural numbers $\Nat$ is the usual inductive
-datatype from \MLTT. Note that its eliminator (rule~\nameref{infrule:nat-elim}) applies
+datatype from \MLTT. Note that its eliminator (rule~\nameref{inferrule:nat-elim}) applies
 indifferently to proof-relevant types and propositions, but the computation 
 rules are only necessary in the proof-relevant case.
 % 
@@ -803,17 +804,17 @@ rules are only necessary in the proof-relevant case.
 	\inferrule[$\Nat$-Form]
 		{\wfctx{\Gamma}}
 		{\tytm{\Gamma}{\Nat}{\Type_0}}
-	\ilabel{infrule:nat-form}
+	\ilabel{inferrule:nat-form}
 	\and
 	\inferrule[Zero]
 		{\wfctx{\Gamma}}
 		{\tytmannotated{\Gamma}{\zero}{\Nat}{\Type_0}}
-	\ilabel{infrule:zero}
+	\ilabel{inferrule:zero}
 	\and
 	\inferrule[Suc]
 		{\tytmannotated{\Gamma}{n}{\Nat}{\Type_0}}
 		{\tytmannotated{\Gamma}{\suc{n}}{\Nat}{\Type_0}}
-	\ilabel{infrule:suc}
+	\ilabel{inferrule:suc}
 \end{mathpar}
 \begin{mathpar}
 	\inferrule[$\Nat$-Elim]
@@ -822,10 +823,10 @@ rules are only necessary in the proof-relevant case.
 			\\ \tytmannotated{\Gamma}{t_S}{\Depfun[n]{\Nat}{\Fun{A\ n}{A\ (\suc{n})}}}{\Univ}
 			\\ \tytmannotated{\Gamma}{n}{\Nat}{\Type_0}}
 		{\tytmannotated{\Gamma}{\natrec{A}{t_0}{t_S}{n}}{A\ n}{\Univ}}
-	\ilabel{infrule:nat-elim}
+	\ilabel{inferrule:nat-elim}
 \end{mathpar}
 % 
-\sideremark{Remark that rule~\nameref{infrule:nat-elim} applies to both 
+\sideremark{Remark that rule~\nameref{inferrule:nat-elim} applies to both 
 	proof relevant and proof irrelevant predicates, but the computation rules
 	\nameref{inferrule:nat-elim-zero} and \nameref{inferrule:nat-elim-suc}
 	only apply to proof relevant predicates. Reduction rules are pointless
@@ -894,7 +895,7 @@ the propositions, which are not convertible to one another despite being proof-i
 	\inferrule[Univ-Prop]
 		{\wfctx{\Gamma}}
 		{\tytm{\Gamma}{\sProp}{\Type_0}}
-	\ilabel{infrule:univ-prop}
+	\ilabel{inferrule:univ-prop}
 \end{mathpar}
 
 The observational equality between two inhabitants of \( \sProp \) reduces to
@@ -920,7 +921,7 @@ case of the dependent conjunction.}
 	\inferrule[Univ-Rel]
 		{\wfctx{\Gamma}}
 		{\tytm{\Gamma}{\Type_i}{\Type_{i+1}}}
-	\ilabel{infrule:univ-prop}
+	\ilabel{inferrule:univ-prop}
 \end{mathpar}
 
 The observational equality on inhabitants of \( \Type \) computes by recursively
@@ -1053,7 +1054,7 @@ by applying \( \castName \) to the projections of the original one.
 	\inferrule[Cast-$\Sigma$]
 		{\tytm{\Gamma}{e}{\Obseq[{\Type}]{\Depsum{A}{B}}{\Depsum{A'}{B'}}}
 			\\ \tytmannotated{\Gamma}{t}{\Depsum{A}{B}}{\Type}
-			\\ a' := \cast{A}{A}{\fst{e}}{\relfst{t}}}
+			\\ a' := \cast{A}{A'}{\fst{e}}{\relfst{t}}}
 		{\redmultiline{\Gamma}
 			{\cast{\Depsum{A}{B}}{\Depsum{A'}{B'}}{e}{t}}
 			{\relpair{a'}{\cast{\subst{B}{\relfst{t}}}{\subst{B'}{a'}}{\snd{e}}{\relsnd{t}}}}

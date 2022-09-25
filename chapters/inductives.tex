@@ -1,6 +1,6 @@
 \setchapterimage[6cm]{seaside}
 \setchapterpreamble[u]{\margintoc}
-\chapter{Extensions of \SetoidCC}
+\chapter{Optional Features of \SetoidCC}
 \labch{extensions}
 
 In this chapter, we investigate several variants and extensions of \SetoidCC.
@@ -10,7 +10,12 @@ operator so that it reduces when applied to a reflexive identity proof.
 We propose a normalization algorithm for the resulting system, and we 
 conjecture that it always terminates on well-typed terms.
 
-In \cref{sec:heterogenous}
+Then in \cref{sec:heterogeneous}, we go over two alternative presentations of the 
+observational equality: a heterogeneous equality and an equality with no
+reduction rules.
+
+In \cref{sec:general-inductives}, we explain how to add general indexed 
+inductive types in \SetoidCC, and we discuss some difficulties with parameters.
 
 Finally, in \cref{sec:proof-rel-impred} we add a universe \( \Prop \) of 
 proof-\emph{relevant} impredicative types to \SetoidCC to increase
@@ -31,7 +36,7 @@ On the one hand, we have the observational equality \( \Obseq[A]{t}{u} \),
 a proof-irrelevant proposition.
 % 
 The observational equality has strong selling points: not only does it validate 
-the principle of Uniqueness of Identity Proofs (UIP) by definition because of 
+the principle of Uniqueness of Identity Proofs by definition thanks 
 computational irrelevance, but it is also equipped with reduction rules that 
 bake in useful reasoning principles such as function extensionality and proposition 
 extensionality.
@@ -92,7 +97,7 @@ variation on the observational calculus of constructions, that we call
 \SetoidCCplus. 
 % 
 This new system supports all the rules of \cref{ch:observational}, plus the rule 
-\nameref{infrule:cast-refl-plus} which promotes the \( \castreflName \) axiom
+\nameref{inferrule:cast-refl-plus} which promotes the \( \castreflName \) axiom
 to a definitional equality.
 % 
 \begin{mathpar}
@@ -101,7 +106,7 @@ to a definitional equality.
 			\tytmannotated{\Gamma}{t}{A}{\Type_i} \\
 			\tytmannotated{\Gamma}{e}{\Obseq[{\Type_i}]{A}{A}}{\sProp}}
 		{\eqtmannotated{\Gamma}{\cast{A}{A}{e}{t}}{t}{A}{\Type_i}}
-  \ilabel{infrule:cast-refl-plus}
+  \ilabel{inferrule:cast-refl-plus}
 \end{mathpar}
 
 In \SetoidCCplus, we can define a \( J \) eliminator for the observational
@@ -112,7 +117,7 @@ equality that computes on reflexivity.
 % 
 To do so, we simply replicate the definition described in 
 \cref{sec:inductive-equality}, and in presence of 
-rule~\nameref{infrule:cast-refl-plus} it will actually satisfy the 
+rule~\nameref{inferrule:cast-refl-plus} it will actually satisfy the 
 computation rule on reflexivity as a definitional equality.
 % 
 Therefore, the observational equality of \SetoidCCplus really has the best
@@ -126,7 +131,7 @@ We will describe two such algorithms below, but unfortunately we are not
 able to supplement either with a proof of correction. 
 We leave these as conjectures for further work.
 
-\subsection{Implementing \nameref{infrule:cast-refl-plus} with reduction rules}
+\subsection{Implementing \nameref{inferrule:cast-refl-plus} with reduction rules}
 
 The first idea that comes to mind is to add a new reduction rule for 
 \( \cast{A}{B}{e}{t} \) so that it will actually reduce to \( t \) in case the
@@ -140,7 +145,7 @@ types \( A \) and \( B \) are convertible.
 			\tytmannotated{\Gamma}{e}{\Obseq[{\Type_i}]{A}{B}}{\sProp} \\
       \eqtm{\Gamma}{A}{B}{\Type_i}}
 		{\red{\Gamma}{\cast{A}{B}{e}{t}}{t}{A}}
-  \ilabel{infrule:cast-refl-red}
+  \ilabel{inferrule:cast-refl-red}
 \end{mathpar}
 
 This is a bit too enthusiastic however, as adding such a general rule to the 
@@ -148,14 +153,14 @@ system conflicts with the reduction rules for \( \castName \) on type
 constructors.
 % 
 For instance, in the case of a \( \castName \) between two
-convertible \( \Pi \)-types, both rule \nameref{infrule:cast-refl-red} and 
+convertible \( \Pi \)-types, both rule \nameref{inferrule:cast-refl-red} and 
 \nameref{inferrule:cast-pi} apply.
 
 \sideremark{Remark that this critical pair can be unified, but only by 
 reducing under a binder, which is not allowed in the weak-head reduction 
 strategy. In fact this is the case for all critical pairs introduced by
-rule \nameref{infrule:cast-refl-red}, meaning that the deep reduction
-strategy is confluent for \SetoidCCplus.}
+rule \nameref{inferrule:cast-refl-red}, meaning that if we could devise a
+deep reduction strategy for \SetoidCCplus that is non-deterministic but confluent.}
 \begin{center}
 \begin{tikzpicture}
   \node[label=above:{\( \cast{\Depfun{A}{B}}{\Depfun{A}{B}}{\metaop{refl}}{f} \)}] (A) at (0, 0) {} ;
@@ -168,7 +173,7 @@ strategy is confluent for \SetoidCCplus.}
 \end{tikzpicture}
 \end{center}
 
-Since rule~\nameref{infrule:cast-refl-red} is admissible for closed terms
+Since rule~\nameref{inferrule:cast-refl-red} is admissible for closed terms
 and interferes with the reduction rules on constructors, we can restrict
 its application to situations where \( A \) and \( B \) are neutral types.
 % 
@@ -184,10 +189,10 @@ stability of weak-head reduction under substitution.
       \eqtm{\Gamma}{A}{B}{\Type_i} \\
       \text{\( A \) and \( B \) neutral}}
 		{\red{\Gamma}{\cast{A}{B}{e}{t}}{t}{A}}
-  \ilabel{infrule:cast-refl-neutral}
+  \ilabel{inferrule:cast-refl-neutral}
 \end{mathpar}
 
-Still, even the determinized rule~\nameref{infrule:cast-refl-neutral} is by no 
+Still, even the determinized rule~\nameref{inferrule:cast-refl-neutral} is by no 
 means innocuous, as it dramatically changes the behavior of the system: 
 % 
 unlike all the other reduction rules of \SetoidCCplus, it is not triggered by 
@@ -246,10 +251,10 @@ same reason.
 Nonetheless, by restricting computation to the predicative layer, we were able 
 to prove normalization for \SetoidCC in \cref{ch:metatheory}. 
 
-\subsection{Implementing \nameref{infrule:cast-refl-plus} in conversion checking}
+\subsection{Implementing \nameref{inferrule:cast-refl-plus} in conversion checking}
 
 In conclusion to the previous section, our attempt at implementing 
-rule~\nameref{infrule:cast-refl-plus} with reduction is not a resounding 
+rule~\nameref{inferrule:cast-refl-plus} with reduction is not a resounding 
 success.
 % 
 The resulting reduction strategy cannot be defined independently from 
@@ -259,7 +264,7 @@ At that point, it is not clear that we gain much by performing said reductions.
 
 We are tempted to draw a parallel with \( \eta \)-equality of functions. 
 % 
-Just like rule~\nameref{infrule:cast-refl-plus}, the \( \eta \)-equality rule 
+Just like rule~\nameref{inferrule:cast-refl-plus}, the \( \eta \)-equality rule 
 does not fit the general pattern of reducing a redex, and it does not lend 
 itself too well to implementation \textit{via} reduction rules either -- both the
 \( \eta \)-expansion and the \( \eta \)-reduction ideas are unsatisfying
@@ -273,11 +278,11 @@ convertibility between a function and a neutral term, it performs an \( \eta \)
 expansion of the neutral term and calls itself recursively.
 
 Therefore, we suggest to keep the well-behaved reduction rules of \SetoidCC,
-and to handle rule~\nameref{infrule:cast-refl-plus} during conversion checking.
+and to handle rule~\nameref{inferrule:cast-refl-plus} during conversion checking.
 % 
 When the algorithm needs to decide convertibility between a term of the form 
 \( \cast{A}{B}{e}{t} \) where \( A \) and \( B \) are two neutral terms, and a
-term \( u \) in weak-head normal form that is not a \( \castName \), then the 
+term \( u \) in weak-head normal form that is not a \( \castName \), the 
 algorithm starts by deciding convertibility of \( A \) and \( B \). 
 % 
 In case \( A \) and \( B \) are indeed convertible, then the algorithm can 
@@ -293,9 +298,148 @@ answer.
 
 We leave the investigation of this question for future works.
 
-\section{Heterogeneous Equality}
+\section{Variations on the Observational Equality}
+\label{sec:heterogeneous}
 
-\section{General Inductive Schemes}
+\subsection{A Proof-Irrelevant Heterogeneous Equality}
+
+In \SetoidCC, we can form the observational equality of two terms only when 
+they have the same type. 
+% 
+In other words the observational equality is homogeneous -- just like the 
+definitional equality, the inductive equality, or most equalities routinely 
+considered by type theorists.
+% 
+But when they introduced Observational Type Theory, Altenkirch, McBride and 
+Swierstra decided to use a heterogenous 
+equality~\sidecite{altenkirchAl:plpv2007}, arguing that it results in simpler
+rules.
+
+It is not too difficult to modify the presentation of \SetoidCC so that it uses a
+proof-irrelevant heterogeneous equality \textit{à la} Altenkirch \etal instead 
+of the homogeneous observational equality.
+% 
+First, we change the formation rule of the equality so that it applies between
+two terms with different types:
+% 
+\begin{mathpar}
+  \inferrule[Heterogenous-Eq-Form]
+    {\tytmannotated{\Gamma}{t}{A}{\Type_i}
+    \\ \tytmannotated{\Gamma}{u}{B}{\Type_i}}
+    {\tytm{\Gamma}{\Heteq{t}{A}{u}{B}}{\sProp}}
+  \and
+\end{mathpar}
+
+Note that unlike the ``path-over'' equality of cubical type theory, we do not 
+ask for a proof of equality between \( A \) and \( B \) to form the type
+\( \Heteq{t}{A}{u}{B} \).
+% 
+We also replace rules \nameref{inferrule:refl},
+\nameref{inferrule:transport-prop} and \nameref{inferrule:cast} with the 
+following:
+\begin{mathpar}
+  \inferrule[Heterogeneous-Transport-\( \sProp \)]
+		{%\tytm{\Gamma}{A}{\Type_i}
+    \tytmannotated{\Gamma}{t}{A}{\Type_i}
+    \\ \tytm{\extctx[x]{\extctx[X]{\Gamma}{\Type_i}}{X}}{B}{\sProp} 
+    \\ \tytmannotated{\Gamma}{u}{\subst[x]{\subst[X]{B}{A}}{t}}{\sProp}
+    \\ \tytmannotated{\Gamma}{t'}{A'}{\Type_i}
+    \\ \tytmannotated{\Gamma}{e}{\Heteq{t}{A}{t'}{A'}}{\sProp}}
+  {\tytmannotated{\Gamma}{\hettransport{A}{t}{B}{u}{A'}{t'}{e}}{\subst[x]{\subst[X]{B}{A'}}{t'}}{\sProp}}
+\end{mathpar}
+\begin{mathpar}
+	\inferrule[Heterogeneous-Cast]
+		{% \tytm{\Gamma}{A}{\Univ_i}   \quad \tytm{\Gamma}{B}{\Univ_i}
+			\tytmannotated{\Gamma}{e}{\Heteq{A}{\Univ}{B}{\Univ}}{\sProp}
+			\quad \tytmannotated{\Gamma}{t}{A}{\Univ}}
+		{\tytmannotated{\Gamma}{\cast{A}{B}{e}{t}}{B}{\Univ}}
+  \and
+  \inferrule[Heterogeneous-Refl]
+    {\tytmannotated{\Gamma}{t}{A}{\Type_i}}
+    {\tytmannotated{\Gamma}{\refl{t}{t}}{\Heteq{t}{A}{t}{A}}{\sProp}}
+\end{mathpar}
+
+From a computational perspective, the heterogeneous equality is similar
+to the homogeneous equality.
+% 
+The type \( \Heteq{t}{A}{u}{B} \) is an eliminator that computes by comparing 
+the head constructors of the types \( A \) and \( B \). 
+% 
+If the constructors match, the heterogeneous equality follows the computation rule that
+describes equality for the corresponding type former, and if they do not match 
+the proposition reduces to \( \Empty \)
+\sideremark{Reducing to \( \Empty \) on non-matching types is optional. It is 
+  a reasonable axiom, but it also adds an unnecessary constraint on the models 
+  of the theory.}.
+ 
+Naturally, we must also adjust the reduction rules that describe equality on the 
+type formers. For instance, the heterogeneous equality between two dependent pairs 
+now reads as follows:
+% 
+\begin{mathpar}
+  \inferrule[Heterogeneous-Eq-Pair]{\tytmannotated{\Gamma}{t,u}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}} 
+			{\redmultiline{\Gamma}{\Heteq{t}{\Sigma A B}{u}{\Sigma A B}}{(\Heteq{\relfst{t}}{A}{\relfst{u}}{A})
+				\land {(\Heteq{\relsnd{t}}{B[\relfst{t}]}{\relsnd{u}}{B[\relfst{u}]})}}{\sProp}}
+\end{mathpar}
+
+Remark that contrary to rule \nameref{inferrule:eq-pair}, we do not need to use
+type casting to state equality between the second projections. 
+% 
+This is exactly what makes the heterogeneous equality nicer than the homogeneous 
+equality: it can be defined independently from \( \castName \).
+
+Other than making the system more modular, replacing the observational equality with the 
+heterogeneous variant does not change the behavior of \SetoidCC too much. 
+% 
+It seems safe to assume that all the meta-theory that we developed in
+\cref{ch:metatheory} would work just as well in this context.
+Thus the choice between homogeneous and heterogeneous is a matter of taste
+more than anything else.
+
+\subsection{Equality Without Computation}
+
+The exact nature of the observational equality does not matter
+much.
+% 
+\sideremark{Two types are incompatible if their head constructors are 
+  different. Since \( \castName \) between incompatible types are stuck terms, we want
+  to make sure they can't be formed in the empty context, lest we get 
+  non-canonical integers.}
+% 
+As a computationally irrelevant property, its sole purpose is to add a 
+logical constraint to \( \castName \) so that it becomes impossible to cast 
+between two incompatible types in an empty context.
+
+Therefore, any alternative definition fine as long as it does not add 
+equalities between incompatible types in an empty context, and as long as it allows us to
+give a type to all the reduction rules for \( \castName \). 
+% 
+For instance, a \( \castName \) between two dependent sums reduces to a pair of 
+\( \castName \) (rule~\nameref{inferrule:cast-sigma}), which means that in 
+particular, we need to derive a proof of \( \Obseq[\Type]{A}{A'} \) from a proof of 
+\( \Obseq[\Type]{\Depsum{A}{B}}{\Depsum{A'}{B'}} \).
+
+But there is really nothing that requires these derivations to come from 
+reduction rules. In fact, we can completely do away with the computation rules
+for the observational equality, and replace them with proof-irrelevant axioms
+-- for instance the following two axioms for equality on dependent sums:
+\[
+\begin{array}{lcl}
+\metaop{eq{-}fst} & : & \Obseq[\Type]{\Depsum{A}{B}}{\Depsum{A'}{B'}} \enskip \to \enskip \Obseq[\Type]{A}{A'} \\
+\metaop{eq{-}snd} & : & \Pi (e : \Obseq[\Type]{\Depsum{A}{B}}{\Depsum{A'}{B'}}) \enskip . \\
+& & \enskip \Pi (a : A)\ .\ \Obseq[\Type]{\subst{B}{a}}{\subst{B'}{\cast{A}{A'}{\metaop{eq{-}fst}\ e}{a}}}.
+\end{array}
+\]
+
+And the resulting system still enjoys pretty much all the properties of 
+\SetoidCC, except that the proof of function extensionality is not given by 
+reflexivity anymore.
+% 
+Avoiding computation rules for equality may be a good idea for implementation 
+in a proof assistant, as they tend to make terms grow in size unnecessarily.
+
+\section{General Inductive Types}
+\label{sec:general-inductives}
 
 \subsection{Parameters and Universes}
 

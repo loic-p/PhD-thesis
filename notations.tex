@@ -133,6 +133,7 @@
 \newcommand{\HoTT}{\ensuremath{\mathsf{HoTT}}\xspace}
 \newcommand{\SetoidTT}{\ensuremath{\mathsf{TT}^\mathrm{obs}}\xspace}
 \newcommand{\SetoidCC}{\ensuremath{\mathsf{CC}^\mathrm{obs}}\xspace}
+\newcommand{\SetoidCCtitle}{{\textsf{CC}\textsuperscript{obs}}}
 \newcommand{\SetoidCCW}{\ensuremath{\mathsf{CC}^{\mathrm{obs}, \mathsf{W}}}\xspace}
 \newcommand{\SetoidCCplus}{\ensuremath{\mathsf{CC}^\mathrm{obs+}}\xspace}
 
@@ -240,6 +241,7 @@
 \newcommand{\snd}[1]{\metaop{snd}({#1})}
 
 \newcommand{\Obseq}[3][]{#2 \sim_{#1} #3}
+\newcommand{\Heteq}[4]{#1~{{}_{#2}\!\!\sim_{#4}}~#3}
 \newcommand{\refl}[2]{\metaop{refl}(#1)}
 \newcommand{\sym}[1]{{#1}^{-1}}
 \newcommand{\transitivity}[2]{{#1}\cdot{#2}}
@@ -248,6 +250,7 @@
 \newcommand{\cast}[4]{\castName(#1,#2,#3,#4)}
 \newcommand{\transportName}{\metaop{transp}}
 \newcommand{\transport}[6]{\transportName(#1,#2,#3,#4,#5,#6)}
+\newcommand{\hettransport}[7]{\transportName(#1,#2,#3,#4,#5,#6,#7)}
 \newcommand{\castreflName}{\metaop{castrefl}}
 \newcommand{\castrefl}[2]{\castreflName(#1,#2)}
 

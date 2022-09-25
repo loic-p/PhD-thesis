@@ -257,7 +257,7 @@ codomain of dependent products.
 Interestingly, this weakened reducibility means that we will not be able to prove 
 the fundamental lemma directly on the rules we presented in \cref{ch:observational}, 
 which omit plenty of well-formedness hypotheses for the sake of readability 
-(for instance, the rule~\nameref{infrule:pi-intro} does not ask for 
+(for instance, the rule~\nameref{inferrule:pi-intro} does not ask for 
 well-formedness of the involved types).
 % 
 In their model, Abel \etal were able to collect this redundant info in the 
@@ -971,7 +971,7 @@ formal proofs in \refAgda{LogicalRelation.}{Properties}.
 
 While reducibility is the main ingredient to our normalization proof, it is not 
 strong enough to define a model of \SetoidCC. For instance, reducibility is not 
-preserved by the lambda-abstraction rule~\nameref{infrule:pi-intro}:
+preserved by the lambda-abstraction rule~\nameref{inferrule:pi-intro}:
 \[
 	\inferrule[Fun-Rel]
 		{\tytmannotated{\extctxannotated{\Gamma}{A}{\Univ}}{t}{B}{\Type_i}}
@@ -1108,7 +1108,7 @@ excruciating detail.
 Therefore, we focus on the three features of \SetoidCC that are the most
 disruptive: the observational equality, the \( \castName \) operator, and
 the impredicative dependent products 
-(Rules \nameref{infrule:eq-form}, \nameref{infrule:cast}, and \nameref{infrule:pi-irr-form}).
+(Rules \nameref{inferrule:eq-form}, \nameref{inferrule:cast}, and \nameref{inferrule:pi-irr-form}).
 
 \begin{lemma}[Reducibility of cast]\label{reducibilitycast}
 Given any level \( \ell \), in a well-formed context \( \Gamma \), if:
@@ -1199,20 +1199,20 @@ bulk of the proof: they occupy approximately 5,000 lines of Agda
 code and most of the time required to check the whole proof is spent on them.
 
 \begin{lemma}
-  The rules \nameref{infrule:pi-irr-form}, \nameref{infrule:pi-irr-intro} and \nameref{infrule:pi-irr-elim} preserve validity.
+  The rules \nameref{inferrule:pi-irr-form}, \nameref{inferrule:pi-irr-intro} and \nameref{inferrule:pi-irr-elim} preserve validity.
 \end{lemma}
 
 \begin{proof}
-  The case of the formation rule \nameref{infrule:pi-irr-form} is easy, as 
+  The case of the formation rule \nameref{inferrule:pi-irr-form} is easy, as 
   proving reducibility of a proof-irrelevant \( \Pi \)-type only requires 
   proving that the domain and codomain are well-typed, which we obtain from 
   the validity hypotheses.
 
-  The case of the lambda-abstraction rule \nameref{infrule:pi-irr-intro} is 
+  The case of the lambda-abstraction rule \nameref{inferrule:pi-irr-intro} is 
   also a one-liner, because proving reducibility of an inhabitant of a 
   proof-irrelevant type is only a matter of showing that it is well-typed.
 
-  The case of the elimination rule \nameref{infrule:pi-irr-elim} is more 
+  The case of the elimination rule \nameref{inferrule:pi-irr-elim} is more 
   interesting: the conclusion needs us to prove that \( \subst{B}{u} \) is
   a valid proposition for any valid inhabitant \( u : A \), and then that
   \( t\ u \) is well-typed.
@@ -1221,7 +1221,7 @@ code and most of the time required to check the whole proof is spent on them.
   on \( B \), because our definition of reducibility for impredicative dependent
   products is very weak (definition \ref{def:reducibility-impred-pi}).
   % 
-  We circumvent this problem by replacing rule \nameref{infrule:pi-irr-elim}
+  We circumvent this problem by replacing rule \nameref{inferrule:pi-irr-elim}
   with the following typing rule, which adds well-formedness hypotheses for
   the domain and codomain of the \( \Pi \)-type.
   % 
