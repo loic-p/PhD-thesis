@@ -3,20 +3,21 @@
 \chapter{Optional Features of \SetoidCC}
 \labch{extensions}
 
-In this chapter, we investigate several variants and extensions of \SetoidCC.
+In this chapter, we investigate several variants and extensions of the
+observational calculus of constructions.
 
 In \cref{sec:cast-refl}, we add a computation rule to the \( \castName \)
 operator so that it reduces when applied to a reflexive identity proof. 
 We propose a normalization algorithm for the resulting system, and we 
 conjecture that it always terminates on well-typed terms.
-
+% 
 Then in \cref{sec:heterogeneous}, we go over two alternative presentations of the 
 observational equality: a heterogeneous equality and an equality with no
 reduction rules.
-
+% 
 In \cref{sec:general-inductives}, we explain how to add general indexed 
-inductive types in \SetoidCC, and we discuss some difficulties with parameters.
-
+inductive types to the system, and we discuss some difficulties with parameters.
+% 
 Finally, in \cref{sec:proof-rel-impred} we add a universe \( \Prop \) of 
 proof-\emph{relevant} impredicative types to \SetoidCC to increase
 its computational power.
@@ -36,19 +37,19 @@ On the one hand, we have the observational equality \( \Obseq[A]{t}{u} \),
 a proof-irrelevant proposition.
 % 
 The observational equality has strong selling points: not only does it validate 
-the principle of Uniqueness of Identity Proofs by definition thanks 
-computational irrelevance, but it is also equipped with reduction rules that 
+the principle of uniqueness of identity proofs by definition (thanks to
+computational irrelevance), but it is also equipped with reduction rules that 
 bake in useful reasoning principles such as function extensionality and proposition 
 extensionality.
 
-But being computationally irrelevant also has its drawbacks. Because the equality
+But being computationally irrelevant also has its drawbacks: because the equality
 proofs carry no information, the eliminator for the observational equality 
-computes on types constructors instead. This means that \( \castName \) will 
+has to compute on types constructors instead. This means that \( \castName \) will 
 only reduce fully when it is applied to closed types.
 % 
 To make up for this weakness, \SetoidCC provides the axiom \( \castreflName \) 
-which is a proof of observational equality between a reflexive cast and the
-identity.
+which is a proof of observational equality between a cast along reflexivity and the
+identity function.
 % 
 \sideremark{Note that the rule for \( \castreflName \) is phrased with an 
   arbitrary proof of equality between \( A \) and itself. This is equivalent
@@ -62,10 +63,10 @@ identity.
 		{\tytmannotated{\Gamma}{\castrefl{A}{t}}{\Obseq[A]{t}{\cast{A}{A}{e}{t}}}{\sProp}}
 \end{mathpar}
 
-On the other hand, we have the inductive equality \( \Id{A}{t}{u} \), which is
-a proof-relevant analogue of the Martin-Löf identity type --
+On the other hand, we have the inductive equality \( \Id{A}{t}{u} \) which is
+a proof-relevant inductive type, analogue of the Martin-Löf identity type.
 % 
-and as such, it comes equipped with the usual \( \metaop{J} \) eliminator and its
+As such, it comes equipped with the usual \( \metaop{J} \) eliminator and its
 computation rule. 
 % 
 \begin{mathpar}
@@ -76,7 +77,7 @@ computation rule.
 			{\red{\Gamma}{\J{A}{t}{B}{u}{t}{\id{t}}}{u}{B\ t\ \id{t}}}
 \end{mathpar}
 
-But it is also better than the Martin-Löf identity type, as it validates the 
+\( \metaop{Id} \) is also stronger than the Martin-Löf identity type since it validates the 
 signature reasoning principles of \SetoidCC that are UIP, function 
 extensionality and proposition extensionality.
 % 
@@ -112,7 +113,7 @@ to a definitional equality.
 In \SetoidCCplus, we can define a \( J \) eliminator for the observational
 equality that computes on reflexivity.
 % 
-\sideremark{ Recall that we defined \\ \( J(A, t, B, u, t', e) := \) \\
+\sideremark{The \( J \) eliminator for the observational equality is defined as \\ \( J(A, t, B, u, t', e) := \) \\
   \( \cast{B\ t\ \metaop{refl}}{B\ t' e}{\eqJ{A}{t}{B}{t'\!}{e}}{u} \)}
 % 
 To do so, we simply replicate the definition described in 
@@ -133,8 +134,8 @@ We leave these as conjectures for further work.
 
 \subsection{Implementing \nameref{inferrule:cast-refl-plus} with reduction rules}
 
-The first idea that comes to mind is to add a new reduction rule for 
-\( \cast{A}{B}{e}{t} \) so that it will actually reduce to \( t \) in case the
+The first idea that we might want to try is to add a new reduction rule for 
+\( \cast{A}{B}{e}{t} \), so that it will actually reduce to \( t \) in case the
 types \( A \) and \( B \) are convertible.
 % 
 \begin{mathpar}
@@ -148,19 +149,14 @@ types \( A \) and \( B \) are convertible.
   \ilabel{inferrule:cast-refl-red}
 \end{mathpar}
 
-This is a bit too enthusiastic however, as adding such a general rule to the 
-system conflicts with the reduction rules for \( \castName \) on type 
-constructors.
+This is a bit careless however, as this rule breaks the determinstic property
+of our weak-head reduction strategy.
+% because of conflicts with the reduction rules for \( \castName \) on type constructors.
 % 
 For instance, in the case of a \( \castName \) between two
 convertible \( \Pi \)-types, both rule \nameref{inferrule:cast-refl-red} and 
 \nameref{inferrule:cast-pi} apply.
-
-\sideremark{Remark that this critical pair can be unified, but only by 
-reducing under a binder, which is not allowed in the weak-head reduction 
-strategy. In fact this is the case for all critical pairs introduced by
-rule \nameref{inferrule:cast-refl-red}, meaning that if we could devise a
-deep reduction strategy for \SetoidCCplus that is non-deterministic but confluent.}
+% 
 \begin{center}
 \begin{tikzpicture}
   \node[label=above:{\( \cast{\Depfun{A}{B}}{\Depfun{A}{B}}{\metaop{refl}}{f} \)}] (A) at (0, 0) {} ;
@@ -173,9 +169,21 @@ deep reduction strategy for \SetoidCCplus that is non-deterministic but confluen
 \end{tikzpicture}
 \end{center}
 
-Since rule~\nameref{inferrule:cast-refl-red} is admissible for closed terms
-and interferes with the reduction rules on constructors, we can restrict
-its application to situations where \( A \) and \( B \) are neutral types.
+\sideremark{In fact, the reader can check that all critical pairs introduced by
+rule \nameref{inferrule:cast-refl-red} can be unified by reducing under binders.
+Therefore, this rule is more reasonable in the context of a deep reduction 
+strategy.}
+% 
+Note that we need to reduce under the \( \lambda \)-abstraction to unify this
+critical pair, but reducing under binders is not allowed in the weak-head 
+reduction strategy. 
+% 
+A non-deterministic \emph{and} non-confluent reduction strategy is no good,
+so rule~\nameref{inferrule:cast-refl-red} is not a reasonable addition to
+the weak-head reduction.
+
+To avoid such conflicts with the reduction rules on constructors, we can 
+restrict our rule to apply only when \( A \) and \( B \) are neutral types.
 % 
 This way, we recover a deterministic reduction strategy, although we lose 
 stability of weak-head reduction under substitution.
@@ -192,15 +200,15 @@ stability of weak-head reduction under substitution.
   \ilabel{inferrule:cast-refl-neutral}
 \end{mathpar}
 
-Still, even the determinized rule~\nameref{inferrule:cast-refl-neutral} is by no 
-means innocuous, as it dramatically changes the behavior of the system: 
+Still, rule~\nameref{inferrule:cast-refl-neutral} is by no 
+means innocuous, as it dramatically changes the behavior of the system.
 % 
-unlike all the other reduction rules of \SetoidCCplus, it is not triggered by 
+Unlike all the other reduction rules of \SetoidCCplus, it is not triggered by 
 a redex consisting of a destructor applied to a constructor, but rather by a 
 convertibility premise.
 % 
-As a consequence, weak-head reduction is now deeply intertwined with conversion
-checking. When computing the head normal form of a term, it might be necessary
+As a consequence, it deeply intertwines weak-head reduction with conversion
+checking: when computing the head normal form of a term, it might be necessary
 to check convertibility of two terms, which requires putting them in weak head 
 normal form, etc.
 
@@ -219,8 +227,8 @@ This incompatibility between impredicativity and type casting can be
 interpreted as a consequence of the breakage of parametricity.
 %
 Indeed, the operator \( {\castName : (A\ B\ : \Type_i) \to A \to B} \) 
-is fundamentally anti-parametric, because in case \( A \equiv B \) it
-reduces to \( t \) which satisfies the parametricity predicate associated 
+is fundamentally anti-parametric because in case \( A \equiv B \) it
+reduces to \( t \), which satisfies the parametricity predicate associated 
 to \( A \) but not necessarily the predicate associated to \( B \).
 % 
 But normalization models for impredicative type theories are usually built
@@ -262,7 +270,7 @@ conversion checking, and it is not even stable under substitution.
 % 
 At that point, it is not clear that we gain much by performing said reductions.
 
-We are tempted to draw a parallel with \( \eta \)-equality of functions. 
+Here, it is tempting to draw a parallel with the \( \eta \)-equality of functions. 
 % 
 Just like rule~\nameref{inferrule:cast-refl-plus}, the \( \eta \)-equality rule 
 does not fit the general pattern of reducing a redex, and it does not lend 
@@ -277,20 +285,40 @@ the conversion checking phase: when the algorithm needs to decide
 convertibility between a function and a neutral term, it performs an \( \eta \)
 expansion of the neutral term and calls itself recursively.
 
-Therefore, we suggest to keep the well-behaved reduction rules of \SetoidCC,
-and to handle rule~\nameref{inferrule:cast-refl-plus} during conversion checking.
+Therefore we suggest that it might be wise to imitate this strategy for 
+\nameref{inferrule:cast-refl-plus}, \ie to give up on an implementation 
+\textit{via} reduction rules and to handle that equality during conversion 
+checking instead.
 % 
-When the algorithm needs to decide convertibility between a term of the form 
-\( \cast{A}{B}{e}{t} \) where \( A \) and \( B \) are two neutral terms, and a
-term \( u \) in weak-head normal form that is not a \( \castName \), the 
-algorithm starts by deciding convertibility of \( A \) and \( B \). 
+More concretely, we propose the following informal algorithm for conversion 
+checking in \SetoidCCplus:
 % 
-In case \( A \) and \( B \) are indeed convertible, then the algorithm can 
-remove the \( \castName \) and simply call itself recursively \( t \) and 
-\( u \).
-% 
-If \( A \) and \( B \) are not convertible, then the algorithm gives a negative 
-answer.
+\begin{figure}[!h]
+\[
+\begin{array}{l}
+\textbf{Input:} \enskip \text{A context \( \Gamma \), three terms \( A \), \( t \), \( u \), and an integer \( i \).} \\
+\textbf{Output:} \enskip \text{`yes' if \( \eqtmannotated{\Gamma}{t}{u}{A}{\Type_i} \), `no' otherwise.} \\
+\textbf{Begin} \\
+\quad A \longleftarrow \text{the weak head normal form of \( A \)} \\
+\quad t \longleftarrow \text{the weak head normal form of \( t \)} \\
+\quad u \longleftarrow \text{the weak head normal form of \( u \)} \\
+\quad \textbf{if} \enskip \text{\( A \) starts with a type constructor} \enskip \textbf{then} \\
+\quad \quad \text{proceed as usual} \\
+\quad \textbf{else} \\
+\quad \quad \textbf{if} \enskip t = \cast{B}{C}{e}{t'} \enskip \textbf{and} \enskip \text{\( u \) does not start with \( \castName \)} \enskip \textbf{then}\\
+\quad \quad \quad \text{do a recursive call to decide whether \( \eqtm{\Gamma}{B}{C}{\Type_i} \)} \\
+\quad \quad \quad \textbf{if} \enskip \text{`yes'} \enskip \textbf{then} \\
+\quad \quad \quad \quad \text{do a recursive call on \( t' \) and \( u \)} \\
+\quad \quad \quad \textbf{if} \enskip \text{`no'} \enskip \textbf{then} \\
+\quad \quad \quad \quad \textbf{return} \enskip \text{`no'} \\
+\quad \quad \textbf{else if} \enskip \text{\( t \) does not start with \( \castName \)} \enskip \textbf{and} \enskip u = \cast{B}{C}{e}{u'} \enskip \textbf{then} \\
+\quad \quad \quad \text{do a recursive call on \( B \) and \( C \), \textit{etc}, as above} \\
+\quad \quad \textbf{else} \\
+\quad \quad \quad \text{proceed as usual}
+\end{array}
+\]
+\caption{Conversion checking algorithm for \SetoidCCplus}
+\end{figure}
 
 \begin{conjecture}
   The algorithm sketched above decides conversion for \SetoidCCplus.
@@ -303,21 +331,25 @@ We leave the investigation of this question for future works.
 
 \subsection{A Proof-Irrelevant Heterogeneous Equality}
 
-In \SetoidCC, we can form the observational equality of two terms only when 
-they have the same type. 
+In \SetoidCC, we can form the observational 
+equality of two terms only when they have the same type. 
 % 
 In other words the observational equality is homogeneous -- just like the 
 definitional equality, the inductive equality, or most equalities routinely 
 considered by type theorists.
 % 
-But when they introduced Observational Type Theory, Altenkirch, McBride and 
+But when they introduced observational type theory, Altenkirch, McBride and 
 Swierstra decided to use a heterogenous 
 equality~\sidecite{altenkirchAl:plpv2007}, arguing that it results in simpler
 rules.
+% 
+In this section, we show that it is not too difficult to modify the 
+presentation of \SetoidCC so that it uses a proof-irrelevant heterogeneous 
+equality instead of the homogeneous observational equality.
 
-It is not too difficult to modify the presentation of \SetoidCC so that it uses a
-proof-irrelevant heterogeneous equality \textit{à la} Altenkirch \etal instead 
-of the homogeneous observational equality.
+% It is not too difficult to modify the presentation of \SetoidCC so that it uses a
+% proof-irrelevant heterogeneous equality \textit{à la} Altenkirch \etal instead 
+% of the homogeneous observational equality.
 % 
 First, we change the formation rule of the equality so that it applies between
 two terms with different types:
@@ -333,7 +365,7 @@ two terms with different types:
 Note that unlike the ``path-over'' equality of cubical type theory, we do not 
 ask for a proof of equality between \( A \) and \( B \) to form the type
 \( \Heteq{t}{A}{u}{B} \).
-% 
+
 We also replace rules \nameref{inferrule:refl},
 \nameref{inferrule:transport-prop} and \nameref{inferrule:cast} with the 
 following:
@@ -359,22 +391,25 @@ following:
     {\tytmannotated{\Gamma}{\refl{t}{t}}{\Heteq{t}{A}{t}{A}}{\sProp}}
 \end{mathpar}
 
-From a computational perspective, the heterogeneous equality is similar
-to the homogeneous equality.
+From a computational perspective, the heterogeneous equality does not play
+the role of a type former, but rather that of an eliminator of the 
+universe -- just like the homogeneous observational equality.
 % 
-The type \( \Heteq{t}{A}{u}{B} \) is an eliminator that computes by comparing 
-the head constructors of the types \( A \) and \( B \). 
+In other words, the term \( \Heteq{t}{A}{u}{B} \) computes by comparing the 
+head constructors of the types \( A \) and \( B \).
 % 
-If the constructors match, the heterogeneous equality follows the computation rule that
-describes equality for the corresponding type former, and if they do not match 
-the proposition reduces to \( \Empty \)
-\sideremark{Reducing to \( \Empty \) on non-matching types is optional. It is 
+If the constructors happen to match, \( \Heteq{t}{A}{u}{B} \) reduces to the
+definition of the observational equality for the corresponding base type,
+% 
+and if \( A \) and \( B \) have incompatible head constructors, then 
+\( \Heteq{t}{A}{u}{B} \) reduces to \( \Empty \)
+\sideremark[*-3]{Reducing to \( \Empty \) on non-matching types is optional. It is 
   a reasonable axiom, but it also adds an unnecessary constraint on the models 
   of the theory.}.
- 
-Naturally, we must also adjust the reduction rules that describe equality on the 
-type formers. For instance, the heterogeneous equality between two dependent pairs 
-now reads as follows:
+
+Naturally, we also adjust the rules that describe equality on the base types. 
+For instance, the heterogeneous equality between two dependent pairs now reads 
+as follows:
 % 
 \begin{mathpar}
   \inferrule[Heterogeneous-Eq-Pair]{\tytmannotated{\Gamma}{t,u}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}} 
@@ -392,17 +427,16 @@ Other than making the system more modular, replacing the observational equality 
 heterogeneous variant does not change the behavior of \SetoidCC too much. 
 % 
 It seems safe to assume that all the meta-theory that we developed in
-\cref{ch:metatheory} would work just as well in this context.
+\cref{ch:metatheory} would work just as well with a heterogeneous equality.
 Thus the choice between homogeneous and heterogeneous is a matter of taste
-more than anything else.
+more than anything.
 
 \subsection{Equality Without Computation}
 
-The exact nature of the observational equality does not matter
-much.
+In fact, the exact nature of the observational equality does not really matter.
 % 
-\sideremark{Two types are incompatible if their head constructors are 
-  different. Since \( \castName \) between incompatible types are stuck terms, we want
+\sideremark{Two types are incompatible if they start with different head constructors. 
+  Since \( \castName \) between incompatible types are stuck terms, we want
   to make sure they can't be formed in the empty context, lest we get 
   non-canonical integers.}
 % 
@@ -438,329 +472,438 @@ reflexivity anymore.
 Avoiding computation rules for equality may be a good idea for implementation 
 in a proof assistant, as they tend to make terms grow in size unnecessarily.
 
-\section{General Inductive Types}
+\section{Indexed Inductive Types}
 \label{sec:general-inductives}
 
+In our presentation of the system, we described the type of natural numbers, 
+% 
+\sideremark{Technically speaking, the dependent sums of \SetoidCC are 
+  \emph{negative}, meaning they are defined with projections and an eta-equality 
+  rule, not as an inductive type with a single constructor.
+  Close enough.}
+% 
+the dependent sums and the inductive equality which are three examples of
+inductive types.
+% 
+Together, they cover the three fundamental features of inductive types: 
+recursion, type dependency, and indices. 
+% 
+But in practice, proof assistant users are understandably not too fond
+of encoding their inductive definitions with these three basic types -- 
+the standard approach is rather to have a general scheme for inductive 
+definitions.
+\sideremark{It is actually not even possible to encode W-types with 
+  \( \Nat \), \( \Sigma \) and \( \metaop{Id} \).}
+
+In this section, we explain how to extend \SetoidCC with a scheme for indexed 
+inductive types.
+% 
+Now, general inductive schemes have this unfortunate tendency to unleash 
+notation hell, with vectors of parameters, indices and constructors. 
+% 
+We will not be able to escape this completely, but we still make some 
+simplifying assumptions:
+% 
+no mutual definitions, only one index in the type signature and only one 
+argument per constructor... concretely, a generic definition might look like this.
+\sideremark{If necessary, we can still use dependent sums to pack multiple 
+  indices or parameters in this definition.}
+\[
+\begin{array}{l}
+\mathsf{Inductive}\ I : A \to \Type_i := \\
+\sep \quad c_0 \enskip : \enskip \Depfun{B_0}{I\ t_0}\\
+\sep \quad ... \\
+\sep \quad c_n \enskip : \enskip \Depfun{B_n}{I\ t_n}
+\end{array}
+\]
+
+To be well-formed, this definition is subject to the usual strict positivity 
+condition: \( I \) cannot appear in a negative position in 
+\( B_0, ..., B_n \), and it cannot appear at all in \( t_0, ..., t_n \).
+
+The elimination rule generated by this definition is
+\[
+\inferrule[Ind-elim]
+  {\tytm{\Gamma}{P}{\Depfun{A}{I\ x \to \Univ}}
+  \\ \{ \enskip \tytm{\Gamma}{p_i}{\Depfun{B_i}{P\ t_i\ (c_i\ x)}} \enskip \}_{1 \le i \le n}
+  \\ \tytm{\Gamma}{a}{A}
+  \\ \tytm{\Gamma}{u}{I\ a}}
+  {\tytmannotated{\Gamma}{\metaop{Ind{-}elim}(P, p_1, ..., p_n, a, u)}{P\ a\ u}{\Univ}}
+\]
+
+
+\subsection{Heterogeneous Alternative Version}
+
 \subsection{Parameters and Universes}
+
+\subsection{Quotient-Inductive Types}
 
 \section{Proof-Relevant Impredicativity}
 \label{sec:proof-rel-impred}
 
-In dependent type theory, a sort \( \sProp \) is said to be
-\emph{impredicative} if it is closed under dependent products over any index
-type: for all types \( A \) and functions \( \tm{B}{A \to \sProp} \),
-the dependent product \( \Depfun{A}{B\ x} \) is in \( \sProp \).
-%
-In particular, impredicativity allows the definition of self-referential propositions,
-which quantify over the type \( \sProp \) of all propositions and may thus
-be applied to themselves.
-%
-In addition to providing a tremendous amount of logical power, impredicativity is
-a crucial ingredient in common mathematical constructions, such as
-Tarski's fixed point theorem or lattice theory~\sidecite{paco}.
-%
-On the other side of the coin, a predicative hierarchy $(\varType_i)_{i \in \Nat}$
-requires dependent products to inhabit a higher universe level
-than their domain and codomain: for all types \( A : \varType_i \) and functions
-\( \tm{B}{A \to \varType_j} \), the dependent product
-\( \Depfun{A}{B\ x} \) is in \( \varType_{max(i,j)} \).
-%
-While the latter is easier to model, as the universes $\varType_i$ can be
-constructed incrementally by induction on the level $i$, it results
-in a theory that is less flexible in practice, whether the mention of
-levels is explicit (as in \Agda) or implicit (as in \Coq).
-%
-Impredicative propositions make for an altogether
-more comfortable framework, in which less universe levels have to
-be dealt with.
+\subsection{\SetoidCC versus \CIC}
 
-While impredicativity is a prominent feature of the Calculus of
-Constructions~\sidecite{Coquand-CC}, and by extension of \Coq, it is
-absent from the standard presentation of Martin-Löf type theory
-(\MLTT~\sidecite{MARTINLOF197573}), and not available in \Agda.
-%
-This reluctance may be explained by the sheer difficulty of designing models
-to reason about impredicative theories, and by the numerous incompatibility
-results, from \sidecitet{hurkens95} paradox to the more recent proof by
-\sidecitet{lmcs:6606} that a naive implementation of uniqueness of identity
-proofs (UIP) via definitionally proof-irrelevant equalities breaks \Coq's
-normalization algorithm on impredicative propositions.
+Our system is named the ``Observational Calculus of Constructions''
+to highlight the similarities with the Predicative Calculus of Inductive 
+Constructions, the type theory which serves as the base of the \Coq proof 
+assistant \sidecite{pcuic}.
+% 
+Most notably, both systems enforce a separation between an impredicative 
+universe of propositions and a hierarchy of predicative universes, with the
+idea that the predicative layer cannot tell apart two proofs of a same 
+proposition.
 
-However, as noted by Abel and Coquand, it is not clear whether that last
-result stems from a deep incompatibility between UIP and impredicativity,
-or if it is an artifact of an inadequate type-checking algorithm.
+% Despite this superficial resemblance, the two systems do not 
+% As we explained in \cref{sec:analys-norm-proof}, the 
+
+But there is an important difference in the treatment of impredicativity: 
+% 
+\sideremark{Mind the different notation: \( \sProp \) is the proof-\emph{irrelevant}
+universe of propositions from \SetoidCC, and \( \Prop \) is the proof-\emph{relevant}
+universe of propositions from \CIC.}
+% 
+contrary to \SetoidCC, the impredicative universe \( \Prop \) of \CIC is 
+\emph{computationally relevant}. By this, we mean that there is no 
+analogue of the rule \nameref{inferrule:proof-irrelevance}.
+% 
+Therefore, in \CIC proofs of propositions are subject to computation rules, just 
+like the terms that inhabit the predicative sorts; and the normalization theorem 
+applies to both layers.
+
+Furthermore, \CIC allows inductive definitions in the universe of propositions \( \Prop \).
+% 
+Just like regular inductive types, an inductive proposition may have parameters, 
+indices, many constructors with arguments, \etc
+% 
+but its eliminator is restricted to propositional predicates in order 
+to avoid paradoxes. For instance, here is what an inductive definition of the 
+\emph{propositional} integers might look like in \CIC:
+\[
+\begin{array}{l}
+\mathsf{Inductive}\ \Natprop : \Prop := \\
+| \enskip \zero : \Natprop \\
+| \enskip \sucName : \Natprop \to \Natprop
+\end{array}
+\]
+
+They work just like the usual integers, except that they cannot be eliminated
+into a type that is not a proposition.
+
+However, there is an exception to this elimination constraint: if the inductive proposition is a 
+\emph{subsingleton}, \ie it has at most one constructor and all constructor 
+arguments are propositions, then
+% 
+\defnote[*-4]{large elimination}{An inductive type is said to support large 
+elimination if its eliminator can be used with arbitrary predicates.}
+% 
+is allowed.
+% 
+Large elimination of subsingletons is very important, as it plays the role of 
+a bridge that connects the two layers of \CIC, and allows some of the raw
+logical power of impredicativity to leak to the predicative layer.
+% 
+More concretely, we can use impredicativity and large elimination to define 
+all the integer functions that are provably computable in higher-order Peano
+Arithemetic as terms of type \( \Nat \to \Nat \) in the predicative layer 
+(and then some more!).
+
+Compare this situation to \SetoidCC, where most propositions are defined
+using impredicative encodings.
+Since impredicative encodings do not provide large elimination principles, 
+the only propositions that may be eliminated into the predicative layer are 
+the false proposition (\textit{via} \( \emptyrecName \)) and the observational 
+equality (\textit{via} \( \castName \)).
+% 
+\sideremark{The observational equality is technically not an inductive proposition, but its
+  role is similar enough to the inductive equality that it makes sense to compare
+  \( \castName \) to a large elimination principle.}
+% 
+This impoverished communication between the two layers confines the power of 
+impredicativity is confined to the proof-irrelevant layer: 
+while it may be possible to define very complex functions as \textit{via}
+an impredicative encoding of their graph, there is no way to apply them to
+proof-relevant integers.
+% 
+As a result, \SetoidCC cannot define more functions in the proof-relevant
+layer than \MLTT (see \cref{sec:analys-norm-proof}), 
+despite being an impredicative type theory.
+
+This whole story makes a rather compelling argument for the addition of
+inductive propositions with subsingleton elimination to \SetoidCC.
+% 
+Unfortunately, proof irrelevance is a serious obstacle:
+% 
+how is the eliminator supposed to compute when we destroyed all computational
+information from the proofs? 
+% 
+In the case of the observational equality we can get by with computation on 
+types, but there is no way this trick generalizes to all subsingleton 
+propositions. 
+% 
+A more in-depth discussion of the difficulties with large elimination of
+a proof-irrelevant accessibility predicate can be found in the work of Gilbert
+\etal \sidecite{gilbert:hal-01859964}.
+
+% \subsection{The Accessibility Predicate}
+
+% Examples of subsingleton inductive propositions include the false proposition,
+% the inductive equality, and the accessibility predicate.
+% \[
+% \begin{array}{l}
+% \mathsf{Inductive}\ \Acc\ (A : \Type)\ (R : A \to A \to \sProp) : A \to \sProp := \\
+% | \enskip \accintro : \Depfun[x]{A}{(\Depfun[y]{A}{(R\ y\ x \to \Acc\ A\ R\ y)})} \to \Acc\ A\ R\ x
+% \end{array}
+% \]
+
+% Given a type \( A \) and a propositional relation \( R \) on \( A \), the 
+% accessibility predicate for \( R \) characterizes those elements of \( A \) 
+% whose tree of predecessors for \( R \) is well-founded.
+% % 
+% The accessibility predicate is a rather advanced tool, but its large 
+% elimination principle plays an important role in the extraction of algorithms 
+% from functions defined \textit{via} an impredicative encoding of their graph 
+% \sidecite{bragamethod}.
+
+% \[
+% \begin{array}{l}
+% \Acc{-}\mathsf{elim}\ \{A : \mathsf{Type}\}\ \{R : A \to A \to \sProp\}\ (P : A \to \Univ) :
+% \\ \hspace{2em}((x : A) \to
+% \\ \hspace{4em} ((y : A) \to R\ y\ x \to \Acc\ R\ y) \to
+% \\ \hspace{4em} ((y : A) \to R\ y\ x \to P\ y) \to P\ x) \to
+% \\ \hspace{2em} (x : A) \to \Acc\ R\ x \to P\ x
+% \end{array}
+% \]
+
+\subsection{Extending \SetoidCC with the Power of Proof-Relevant Impredicativity}
+
+Since \( \sProp \) cannot support subsingleton elimination, it seems that the 
+only way to recover the full power of impredicativity in \SetoidCC is to extend 
+% 
+the system with an impredicative universe of proof-\emph{relevant} propositions 
+\( \Prop \). 
+% 
+Now this new universe cannot replace \( \sProp \), because 
+proof-irrelevant axioms play an important role in the definition of the
+the observational equality. 
+% 
+Therefore, in this section we study an extension of \SetoidCC that supports both \( \sProp \) 
+and \( \Prop \) in the same system.
+% 
+\begin{mathpar}
+    \inferrule[Univ-Prop]
+      {\wfctx{\Gamma}}
+      {\tytm{\Gamma}{\sProp}{\Type_0}}
+  \and
+    \inferrule[Univ-Prop-Rel]
+      {\wfctx{\Gamma}}
+      {\tytm{\Gamma}{\Prop}{\Type_0}}
+\end{mathpar}
+
+Having two different universes of propositions is a bit confusing! But their
+roles do not overlap that much: while \( \sProp \) is used to enforce 
+proof-irrelevant logical constraint on types (including the observational 
+equality), \( \Prop \) is only here as a tool for impredicative definitions.
+% 
+Since \( \Prop \) is an inhabitant of the universe \( \Type_0 \), it means we can form
+observational equalities between inhabitants of \( \Prop \).
+% 
+How should they compute?
+
+A first idea is to mimic the rule for \( \sProp \) and define the 
+observational equality as logical equivalence. This way, we get propositional
+extensionality for the proof-relevant propositions.
+% 
+\sideremark{Since the observational equality is a proof-irrelevant proposition,
+we need the squash to convert that equivalence to an element of
+\( \sProp \).}
+% 
+\begin{mathpar}
+	\inferrule[Eq-$\Prop$]
+		{\tytm{\Gamma}{A}{\Prop}
+			\\ \tytm{\Gamma}{B}{\Prop}}
+		{\red{\Gamma}{\Obseq[{\Prop}]{A}{B}}{\Squash{\Prod{(\Fun{A}{B})}{(\Fun{B}{A})}}}{\sProp}}
+	\ilabel{inferrule:eq-sprop}
+\end{mathpar}
+
+Unfortunately, this definition is problematic from a computational perspective:
+% 
+if  \( t \) is an inhabitant of some proof-relevant proposition \( A \), then 
+we should be able to obtain an inhabitant of \( B \) from a proof of 
+\( \Obseq[\Prop]{A}{B} \). 
+% 
+But since the proof of equality is a \emph{squashed} equivalence, we have no
+way to use it to compute an element of \( B \).
+
+A second idea is to mimic the observational equality on the predicative 
+universes, \ie to pick reduction rules according to the head constructors of the
+propositions. 
+% 
+Then, we extend the \( \castName \) operaator to work with proof-relevant propositions.
+% 
+This idea seems more reasonable, but it turns out to have the very unfortunate
+consequence of making conversion checking undecidable.
+
+\begin{theorem}
+  If we extend \( \castName \) to the universe of proof-relevant impredicative
+  propositions \( \Prop \), then conversion becomes undecidable.
+\end{theorem}
+
+The proof of this fact will occupy us for the remainder of this section.
+
+\paragraph{Outline of the Proof of Undecidability}
+
+We need to be careful though, as past experiments of adding a
+proof-irrelevant equality to Coq that have been mentioned
+in~\sidecite{gilbert:hal-01859964} have resulted in breakage of
+normalization of open terms~\sidecite{lmcs:6606}.
 %
-Clarifying this issue seems especially important given the renewed
-interest in definitional proof-irrelevance and UIP shown by the community
-in recent years~\sidecite{sterling_et_al:LIPIcs:2019:10538,pujet:hal-03367052,Altenkirch2019}.
+
+However the argument of Abel and Coquand relies on the fact that
+equality behaves as the usual Martin-Löf Identity Type, which is an
+inductive type that computes via the \( J \)-eliminator.
 %
-For instance, the recent presentation \SetoidTT of observational
-equality of \sidecitet{pujet:hal-03367052} has an equality which can be
-eliminated using a cast operator that computes differently from the
-usual eliminator of Martin-Löf identity type, as used by \sidecitet{lmcs:6606}.
+In \SetoidCC, elimination of equality is done using the cast operator
+which is quite different, as it computes by comparing the normal forms
+of the source and target types, which intertwines normalization and
+conversion checking in sophisticated ways.
+
+Unfortunately, it turns out that \SetoidCC is not compatible with \( \Prop \)
+either.
+%
+In fact, we show in this section that it is possible to use a modified
+version of Abel and Coquand's argument to show undecidability of
+type-checking for open terms in presence of \( \Prop \), both for
+\SetoidCC and the theory of \sidecitet{lmcs:6606}.
+
+The idea of the proof is rather simple:
+%
+on the one hand, impredicativity makes it possible to give a type to the term
+\[
+\Delta_f := \lambda x .\ f\ (x\ x)
+\]
+for any well-typed function \( f \) of type \( \Fun{(\Fun{\Nat}{\Nat})}{(\Fun{\Nat}{\Nat})} \), which is one half of the fixed point
+combinator \( Y_f := \Delta_f\ \Delta_f \).
+%
+On the other hand, \( \castName \) can be used to convert between any two types
+in an inconsistent context, in a way that does not block reduction.
+This allows us to apply \( \Delta_f \) to itself (up to a cast) and obtain
+an approximation of \( Y_f \).
+%
+Then, using these pseudo-fixed points, we can build a term that loops through the
+iterates of any integer function:
+%
+\begin{theorem}
+  Let \( g \) be any closed term of type \( \Fun{\Nat}{\Nat} \), where \( \Nat \)
+  denotes the inductive natural numbers in \( \Prop \).
+  %
+  In an inconsistent context, one can define a term \( \mathrm{dec}_g \)
+  of type \( \Nat \) which is convertible to 0 if and only if there is a positive integer
+  \( n \) such that \( g^n\ 1 = 0 \), and diverges otherwise.
+\end{theorem}
+%
+Of course, the existence of such an integer is not decidable in general,
+thus conversion and typing are undecidable for \SetoidCC + \( \Prop \).
+%
+As an aside, note that this construction can also be carried out in
+\( \sProp \) if we add proof-irrelevant natural numbers. But it does
+not cause any issue, as we have a simple way to check for convertibility of
+proof-irrelevant terms: having the same type is sufficient! For this reason,
+we never perform reduction in the proof-irrelevant layers, and need not
+to worry about these potentially divergent terms.
+
+\paragraph{Definition of an Approximate Fixed Point Combinator}
+
+Let \( f \) be a closed function of type \( \Fun{(\Fun{\Nat}{\Nat})}{(\Fun{\Nat}{\Nat})} \).
+%
+In an inconsistent context, we can derive a term
+\[
+    e : \Depfun[X\ Y]{\Prop}{\Obseq{X}{Y}}
+\]
+that allows us to freely cast between any two types.
+%
+We can use it to derive our approximate fixpoint combinator by defining
+\begin{align*}
+  \bot &:= \Depfun[X]{\Prop}{X}\\
+  \Delta_f &:= \lam{\bot}{f\ (x\ (\Fun{\bot}{\Fun{\Nat}{\Nat}})\ x)}\\
+  \Delta_f' &:= \lam[X]{\Prop}{\cast{\Fun{\bot}{\Fun{\Nat}{\Nat}}}{X}{e}{\Delta_f}}\\
+  Y_f &:= \Delta_f\ \Delta_f'
+\end{align*}
+Technically, it turns out that \( Y_f \) does not exactly behave like
+a fixpoint combinator because of additional casts appearing during the
+reduction.
+%
+A tedious but straightforward computation in \SetoidCC shows that
+\begin{align*}
+  Y_f &= \Delta_f\ \Delta_f'\\
+      &= f\ (\alpha\ (\Delta_f\ (\beta\ \Delta_f')))\\
+      &= f\ (\alpha\ (f\ (\alpha^2\ (\Delta_f\ (\beta^3\ \Delta_f')))))\\
+      &= f\ (\alpha\ (f\ (\alpha^2\ (f\ (\alpha^4\ (\Delta_f\ (\beta^7\ \Delta_f')))))))\\
+      &= ...
+\end{align*}
+where \( \alpha := \lambda x.\ {\cast{\Fun{\Nat}{\Nat}}{\Fun{\Nat}{\Nat}}{e}{x}} \)
+and \( \beta := \lambda x.\ {\cast{\bot}{\bot}{e}{x}} \).
+
+However, this behavior is sufficient for our purposes, since all the \( \alpha \) disappear
+when the function is applied to an actual integer.
+%
+Therefore, given a closed function \( g \) of type \( \Fun{\Nat}{\Nat} \) that
+terminates on all integer inputs, we instantiate \( f \) with
+\[
+  \lam[p]{\Fun{\Nat}{\Nat}}{\lam[n]{\Nat}{{\natrec{\Nat}{0}{p\ (g\ n)}{n}}}}
+\]
+and we obtain that \( Y_f\ 1 \) reduces to 0 if there exists a \( n \) such that
+\( g^n\ 1 = 0 \), and diverges (for any reduction strategy) otherwise.
 
 
-In this paper, we show that impredicativity is harmless when confined
-to a sort of definitionally proof-irrelevant propositions, as it is never
-necessary to compute with irrelevant proof terms.
-%
-As a result, we are able to extend \SetoidTT with impredicativity while
-preserving definitional UIP and all extensionality principles that come
-with an observational type theory (such as propositional or function
-extensionality).
-%
-The resulting system, dubbed \SetoidCC, still enjoys
-normalization via inductive-recursive logical relations---no
-realizability model is needed---and decidability of type-checking.
-%
-This result has been formalized in \Agda using the framework of
-\sidecitet{Abel:POPL2018}.\footnote{see anonymous supplementary
-  materials.}
-%
-The fact that a proof scheme that has been designed with predicative
-theories in mind carries through in an impredicative setting
-may come as a surprise.
-%
-The crux of the proof is to realize that we can get away with
-remarkably little structure in the interpretation of the impredicative
-dependent products and sums, to the extent that we do not even mention the
-interpretation of the domain and codomain.
-%
-We manage to prove the soundness of our normalization model
-despite this weaker induction hypothesis by using a \emph{paranoid}
-version of the type system, which can then be proven equivalent to the
-\emph{economic} version (a terminology introduced by
-\sidecitet{andrej17:paranoid}).
+By defining $\castName$ using the elimination principle of the
+inductive equality, the same result applies to the
+theory of \sidecitet{lmcs:6606}, even if the reduction of $Y_f$ is
+slightly different.
 
-%
-Furthermore, we prove that normalization for \SetoidCC can be
-carried in plain Martin-Löf type theory with indexed inductive types,
-thereby showing that this impredicative universe does not contribute
-to the computational power of the proof-relevant fragment at all,
-despite the increase in logical power.
-%
-We also investigate the possibility of recovering the lost computational power
-from a proof-relevant impredicative universe, hoping that the different
-computational behaviour of \SetoidCC would allow us to circumvent Abel and
-Coquand's argument, but alas, it does not. In fact, a slightly modified
-argument shows undecidability of type-checking in presence of a
-proof-relevant impredicative universe.
-%
-Therefore, we exhibit a tradeoff between the additional comfort of
-UIP and extensionality principles, or the possibility to compute with
-impredicative functions.
+\paragraph{Conversion is Undecidable}
 
-Finally, because our normalization proof does not imply logical
-consistency, we define a model of \SetoidCC in ZF Set
-theory.
+\SetoidCC is expressive enough to encode Turing machines so that
+knowing whether there exists a \( n \) such that \( g^n\ 1 = 0 \) is
+undecidable in general.
 %
-This shows that the computational content of \SetoidCC can be studied
-without impredicativity in the metatheory, while the study of the
-logical content of \SetoidCC fundamentally requires impredicativity in
-the metatheory.
-
-\paragraph{Plan of the paper}
-
-In \cref{sec:an-impr-type}, we present the syntax and typing rules of
-\SetoidCC, focusing on the differences with respect to \SetoidTT.
+To complete the proof of undecidability of conversion, we still need
+to show that a term that diverges for any reduction strategy is not
+convertible to $0$. In other words, we need to show that conversion is
+not degenerate.
 %
-Then, we develop the logical relation
-framework that shows normalization and decidability of conversion for
-\SetoidCC (\cref{sec:logic-relat-with}).
-%
-In \cref{sec:analys-norm-proof}, we show that \SetoidCC and \MLTT with
-indexed inductive types can
-actually express the exact same integer functions
-  as closed terms of type \( \Fun{\Nat}{\Nat} \) by simplifying the
-  logical relation framework to avoid the use of induction-recursion.
-  %
-  Finally, we show logical consistency of \SetoidCC in
-  \cref{sec:cons-seto-model} and adapt the undecidability argument in
-  presence of a proof-relevant impredicative universe of
-  \sidecitet{lmcs:6606} to our setting in \cref{sec:setoidcc-with-an}.
+To establish this, we consider a variation on the standard results of untyped
+lambda-calculus (\sidecite{Barendregt}) showing that diverging terms
+cannot be equal to a normal form, by using confluence of the system
+and the fact that equality of two terms $t$ and $u$ corresponds to the
+existence of a zig-zag of reduction $t \Rightarrow^* t_1 \Leftarrow^*
+t_2\Rightarrow^*\dots \Leftarrow^* u$.
 
-  \section{\SetoidCC with an imprecative universe has undecidable type-checking}
-  \label{sec:setoidcc-with-an}
-  
-  The system we have presented so far has an impredicative universe
-  \( \sProp \) of \emph{strict} propositions, which contains the observational
-  equality and the false proposition with the corresponding large
-  elimination principles.
-  %
-  In other words, \( \sProp \) provides the user with a complete Heyting
-  algebra of truth values, as is frequently assumed even in constructive
-  mathematics.
-  % TO BE DONE \sidecite{TODO}.
-  
-  However, \( \sProp \) is still a bit weaker than the impredicative
-  universe \( \Prop \) of the Calculus of Inductive Constructions:
-  \( \Prop \) allows large elimination for all the \emph{singleton}
-  inductive types, that is the inductive types with only one constructor
-  whose arguments all have sort \( \Prop \).
-  %
-  This includes equality, but also the accessibility predicate from which
-  we can obtain some constructive choice principles (as discussed in \sidecite{forster:LIPIcs:2021:13455} that may
-  come in handy for mathematics.
-  
-  Thus one may wonder if we can add \( \Prop \) to \SetoidCC alongside the
-  universe of strict propositions, using the same computation rules as for the
-  proof-relevant fragment of \SetoidCC so that it can provide us with
-  more logical power while still enjoying extensionality principles.
-  %
-  We need to be careful though, as past experiments of adding a
-  proof-irrelevant equality to Coq that have been mentioned
-  in~\sidecite{gilbert:hal-01859964} have resulted in breakage of
-  normalization of open terms~\sidecite{lmcs:6606}.
-  %
-  
-  However the argument of Abel and Coquand relies on the fact that
-  equality behaves as the usual Martin-Löf Identity Type, which is an
-  inductive type that computes via the \( J \)-eliminator.
-  %
-  In \SetoidCC, elimination of equality is done using the cast operator
-  which is quite different, as it computes by comparing the normal forms
-  of the source and target types, which intertwines normalization and
-  conversion checking in sophisticated ways.
-  %
-  Unfortunately, it turns out that \SetoidCC is not compatible with \( \Prop \)
-  either.
-  %
-  In fact, we show in this section that it is possible to use a modified
-  version of Abel and Coquand's argument to show undecidability of
-  type-checking for open terms in presence of \( \Prop \), both for
-  \SetoidCC and the theory of \sidecitet{lmcs:6606}.
-  
-  \subsection{Outline}
-  
-  The idea of the proof is rather simple:
-  %
-  on the one hand, impredicativity makes it possible to give a type to the term
-  \[
-  \Delta_f := \lambda x .\ f\ (x\ x)
-  \]
-  for any well-typed function \( f \) of type \( \Fun{(\Fun{\Nat}{\Nat})}{(\Fun{\Nat}{\Nat})} \), which is one half of the fixed point
-  combinator \( Y_f := \Delta_f\ \Delta_f \).
-  %
-  On the other hand, \( \castName \) can be used to convert between any two types
-  in an inconsistent context, in a way that does not block reduction.
-  This allows us to apply \( \Delta_f \) to itself (up to a cast) and obtain
-  an approximation of \( Y_f \).
-  %
-  Then, using these pseudo-fixed points, we can build a term that loops through the
-  iterates of any integer function:
-  %
-  \begin{theorem}
-    Let \( g \) be any closed term of type \( \Fun{\Nat}{\Nat} \), where \( \Nat \)
-    denotes the inductive natural numbers in \( \Prop \).
-    %
-    In an inconsistent context, one can define a term \( \mathrm{dec}_g \)
-    of type \( \Nat \) which is convertible to 0 if and only if there is a positive integer
-    \( n \) such that \( g^n\ 1 = 0 \), and diverges otherwise.
-  \end{theorem}
-  %
-  Of course, the existence of such an integer is not decidable in general,
-  thus conversion and typing are undecidable for \SetoidCC + \( \Prop \).
-  %
-  As an aside, note that this construction can also be carried out in
-  \( \sProp \) if we add proof-irrelevant natural numbers. But it does
-  not cause any issue, as we have a simple way to check for convertibility of
-  proof-irrelevant terms: having the same type is sufficient! For this reason,
-  we never perform reduction in the proof-irrelevant layers, and need not
-  to worry about these potentially divergent terms.
-  
-  \subsection{Definition of an Approximate Fixed Point Combinator}
-  
-  Let \( f \) be a closed function of type \( \Fun{(\Fun{\Nat}{\Nat})}{(\Fun{\Nat}{\Nat})} \).
-  %
-  In an inconsistent context, we can derive a term
-  \[
-     e : \Depfun[X\ Y]{\Prop}{\Obseq{X}{Y}}
-  \]
-  that allows us to freely cast between any two types.
-  %
-  We can use it to derive our approximate fixpoint combinator by defining
-  \begin{align*}
-    \bot &:= \Depfun[X]{\Prop}{X}\\
-    \Delta_f &:= \lam{\bot}{f\ (x\ (\Fun{\bot}{\Fun{\Nat}{\Nat}})\ x)}\\
-    \Delta_f' &:= \lam[X]{\Prop}{\cast{\Fun{\bot}{\Fun{\Nat}{\Nat}}}{X}{e}{\Delta_f}}\\
-    Y_f &:= \Delta_f\ \Delta_f'
-  \end{align*}
-  Technically, it turns out that \( Y_f \) does not exactly behave like
-  a fixpoint combinator because of additional casts appearing during the
-  reduction.
-  %
-  A tedious but straightforward computation in \SetoidCC shows that
-  \begin{align*}
-    Y_f &= \Delta_f\ \Delta_f'\\
-        &= f\ (\alpha\ (\Delta_f\ (\beta\ \Delta_f')))\\
-        &= f\ (\alpha\ (f\ (\alpha^2\ (\Delta_f\ (\beta^3\ \Delta_f')))))\\
-        &= f\ (\alpha\ (f\ (\alpha^2\ (f\ (\alpha^4\ (\Delta_f\ (\beta^7\ \Delta_f')))))))\\
-        &= ...
-  \end{align*}
-  where \( \alpha := \lambda x.\ {\cast{\Fun{\Nat}{\Nat}}{\Fun{\Nat}{\Nat}}{e}{x}} \)
-  and \( \beta := \lambda x.\ {\cast{\bot}{\bot}{e}{x}} \).
-  
-  However, this behavior is sufficient for our purposes, since all the \( \alpha \) disappear
-  when the function is applied to an actual integer.
-  %
-  Therefore, given a closed function \( g \) of type \( \Fun{\Nat}{\Nat} \) that
-  terminates on all integer inputs, we instantiate \( f \) with
-  \[
-    \lam[p]{\Fun{\Nat}{\Nat}}{\lam[n]{\Nat}{{\natrec{\Nat}{0}{p\ (g\ n)}{n}}}}
-  \]
-  and we obtain that \( Y_f\ 1 \) reduces to 0 if there exists a \( n \) such that
-  \( g^n\ 1 = 0 \), and diverges (for any reduction strategy) otherwise.
-  
-  
-  By defining $\castName$ using the elimination principle of the
-  inductive equality, the same result applies to the
-  theory of \sidecitet{lmcs:6606}, even if the reduction of $Y_f$ is
-  slightly different.
-  
-  \subsection{Conversion is Undecidable}
-  
-  \SetoidCC is expressive enough to encode Turing machines so that
-  knowing whether there exists a \( n \) such that \( g^n\ 1 = 0 \) is
-  undecidable in general.
-  %
-  To complete the proof of undecidability of conversion, we still need
-  to show that a term that diverges for any reduction strategy is not
-  convertible to $0$. In other words, we need to show that conversion is
-  not degenerate.
-  %
-  To establish this, we consider a variation on the standard results of untyped
-  lambda-calculus (\sidecite{Barendregt}) showing that diverging terms
-  cannot be equal to a normal form, by using confluence of the system
-  and the fact that equality of two terms $t$ and $u$ corresponds to the
-  existence of a zig-zag of reduction $t \Rightarrow^* t_1 \Leftarrow^*
-  t_2\Rightarrow^*\dots \Leftarrow^* u$.
-  
-  In \CIC, confluence of reduction has been formally proven by
-  \sidecitet{coqcoqcorrect}, by using the standard Tait-Martin Löf
-  method~\sidecite{takahashi1989parallel} making use of parallel
-  reduction.
-  %
-  Extending the proof of confluence for \SetoidCC is straightforward for
-  the reduction involving the cast operator and the equality type, as
-  they do not add any critical pair.
-  
-  The only difficulty is to additionally account for $\eta$-conversion
-  and proof-irrelevance in the conversion to get a similar notion of
-  zig-zag.
-  %
-  Actually, $\eta$-conversion can be turned into an
-  $\eta$-reduction rule and for proof-irrelevance, we can use the fact
-  that because no reduction depends on the shape of a proof-irrelevant
-  terms, proof-irrelevance commutes with reduction.
-  So in \SetoidCC + $\Prop$, any proof of conversion between $t$ and $u$
-  can be seen as a zig-zag up to proof-irrelevance
-  %
-  $t \Rightarrow^* t_1 \equiv_{pi} t_1' \Leftarrow^*
-  t_2\Rightarrow ^* t_2' \equiv_{pi} \dots \Leftarrow^* u$ where $\equiv_{pi}$ is syntactic
-  equality up-to applications of proof-irrelevance.
-  %
-  From this, using confluence, we conclude to any term that it convertible to $0$ can be
-  reduced to $0$, so a term that diverges for any reduction strategy
-  cannot be convertible to $0$.
-  
-  Again, a similar proof can be done in the theory of \sidecitet{lmcs:6606}.
+In \CIC, confluence of reduction has been formally proven by
+\sidecitet{coqcoqcorrect}, by using the standard Tait-Martin Löf
+method~\sidecite{takahashi1989parallel} making use of parallel
+reduction.
+%
+Extending the proof of confluence for \SetoidCC is straightforward for
+the reduction involving the cast operator and the equality type, as
+they do not add any critical pair.
+
+The only difficulty is to additionally account for $\eta$-conversion
+and proof-irrelevance in the conversion to get a similar notion of
+zig-zag.
+%
+Actually, $\eta$-conversion can be turned into an
+$\eta$-reduction rule and for proof-irrelevance, we can use the fact
+that because no reduction depends on the shape of a proof-irrelevant
+terms, proof-irrelevance commutes with reduction.
+So in \SetoidCC + $\Prop$, any proof of conversion between $t$ and $u$
+can be seen as a zig-zag up to proof-irrelevance
+%
+$t \Rightarrow^* t_1 \equiv_{pi} t_1' \Leftarrow^*
+t_2\Rightarrow ^* t_2' \equiv_{pi} \dots \Leftarrow^* u$ where $\equiv_{pi}$ is syntactic
+equality up-to applications of proof-irrelevance.
+%
+From this, using confluence, we conclude to any term that it convertible to $0$ can be
+reduced to $0$, so a term that diverges for any reduction strategy
+cannot be convertible to $0$.
+
+Again, a similar proof can be done in the theory of \sidecitet{lmcs:6606}.

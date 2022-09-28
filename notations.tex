@@ -124,7 +124,7 @@
 
 % Type Theories
 
-\newcommand{\CIC}{\ensuremath{\mathsf{CIC}}\xspace}
+\newcommand{\CIC}{\ensuremath{\mathsf{pCIC}}\xspace}
 \newcommand{\MLTT}{\ensuremath{\mathsf{MLTT}}\xspace}
 \newcommand{\MLTTW}{\ensuremath{\mathsf{MLTT}^\mathsf{W}}\xspace}
 \newcommand{\sMLTT}{\ensuremath{\mathsf{sMLTT}}\xspace}
@@ -200,12 +200,17 @@
 \newcommand\metaop[1]{{\color{RoyalBlue}{\mathsf{#1}}}}
 
 \newcommand{\Nat}{\mathbb{N}}
+\newcommand{\Natprop}{\mathbb{N}_{\mathrm{prop}}}
 \newcommand{\zero}{\metaop{0}}
 \newcommand{\sucName}{\metaop{S}}
 \newcommand{\suc}[1]{\sucName\ #1}
 \newcommand{\natrec}[4]{{\color{RoyalBlue}\Nat} \metaop{-elim}({#1},{#2},{#3},{#4})}
 
 \newcommand{\Bool}{\mathsf{Bool}}
+
+\newcommand{\Acc}{\metaop{Acc}}
+\newcommand{\accintro}{\metaop{Acc{-}intro}}
+\newcommand{\accelim}{\metaop{Acc{-}elim}}
 
 \newcommand{\Depsum}[3][x]{\Sigma (\tm{#1}{#2}).\, {#3}}
 \newcommand{\Sig}[3][x]{\Sigma (\tm{#1}{#2}).\, {#3}}
@@ -256,6 +261,7 @@
 
 \newcommand{\Empty}{\bot}
 \newcommand{\emptyrec}[2]{{\color{RoyalBlue}\bot}\metaop{-elim}({#1}, {#2})}
+\newcommand{\emptyrecName}{{\color{RoyalBlue}\bot}\metaop{-elim}}
 
 \newcommand{\Unit}{\top}
 \newcommand{\unit}{*}

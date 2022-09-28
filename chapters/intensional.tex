@@ -159,6 +159,122 @@ In \SetoidTT, we obtain the injectivity of type contructors from the behavior of
 equality in the universe. These rules somewhat constrain the semantics---for instance, we cannot
 interpret \SetoidTT in set theory using a Grothendieck universe as the interpretation of \( \Type \)---but our universe remains open to the addition of arbitrary types.
 
+\section{Impred}
+
+
+
+In dependent type theory, a sort \( \sProp \) is said to be
+\emph{impredicative} if it is closed under dependent products over any index
+type: for all types \( A \) and functions \( \tm{B}{A \to \sProp} \),
+the dependent product \( \Depfun{A}{B\ x} \) is in \( \sProp \).
+%
+In particular, impredicativity allows the definition of self-referential propositions,
+which quantify over the type \( \sProp \) of all propositions and may thus
+be applied to themselves.
+%
+In addition to providing a tremendous amount of logical power, impredicativity is
+a crucial ingredient in common mathematical constructions, such as
+Tarski's fixed point theorem or lattice theory~\sidecite{paco}.
+%
+On the other side of the coin, a predicative hierarchy $(\varType_i)_{i \in \Nat}$
+requires dependent products to inhabit a higher universe level
+than their domain and codomain: for all types \( A : \varType_i \) and functions
+\( \tm{B}{A \to \varType_j} \), the dependent product
+\( \Depfun{A}{B\ x} \) is in \( \varType_{max(i,j)} \).
+%
+While the latter is easier to model, as the universes $\varType_i$ can be
+constructed incrementally by induction on the level $i$, it results
+in a theory that is less flexible in practice, whether the mention of
+levels is explicit (as in \Agda) or implicit (as in \Coq).
+%
+Impredicative propositions make for an altogether
+more comfortable framework, in which less universe levels have to
+be dealt with.
+
+While impredicativity is a prominent feature of the Calculus of
+Constructions~\sidecite{Coquand-CC}, and by extension of \Coq, it is
+absent from the standard presentation of Martin-Löf type theory
+(\MLTT~\sidecite{MARTINLOF197573}), and not available in \Agda.
+%
+This reluctance may be explained by the sheer difficulty of designing models
+to reason about impredicative theories, and by the numerous incompatibility
+results, from \sidecitet{hurkens95} paradox to the more recent proof by
+\sidecitet{lmcs:6606} that a naive implementation of uniqueness of identity
+proofs (UIP) via definitionally proof-irrelevant equalities breaks \Coq's
+normalization algorithm on impredicative propositions.
+
+However, as noted by Abel and Coquand, it is not clear whether that last
+result stems from a deep incompatibility between UIP and impredicativity,
+or if it is an artifact of an inadequate type-checking algorithm.
+%
+Clarifying this issue seems especially important given the renewed
+interest in definitional proof-irrelevance and UIP shown by the community
+in recent years~\sidecite{sterling_et_al:LIPIcs:2019:10538,pujet:hal-03367052,Altenkirch2019}.
+%
+For instance, the recent presentation \SetoidTT of observational
+equality of \sidecitet{pujet:hal-03367052} has an equality which can be
+eliminated using a cast operator that computes differently from the
+usual eliminator of Martin-Löf identity type, as used by \sidecitet{lmcs:6606}.
+
+
+In this paper, we show that impredicativity is harmless when confined
+to a sort of definitionally proof-irrelevant propositions, as it is never
+necessary to compute with irrelevant proof terms.
+%
+As a result, we are able to extend \SetoidTT with impredicativity while
+preserving definitional UIP and all extensionality principles that come
+with an observational type theory (such as propositional or function
+extensionality).
+%
+The resulting system, dubbed \SetoidCC, still enjoys
+normalization via inductive-recursive logical relations---no
+realizability model is needed---and decidability of type-checking.
+%
+This result has been formalized in \Agda using the framework of
+\sidecitet{Abel:POPL2018}.\footnote{see anonymous supplementary
+  materials.}
+%
+The fact that a proof scheme that has been designed with predicative
+theories in mind carries through in an impredicative setting
+may come as a surprise.
+%
+The crux of the proof is to realize that we can get away with
+remarkably little structure in the interpretation of the impredicative
+dependent products and sums, to the extent that we do not even mention the
+interpretation of the domain and codomain.
+%
+We manage to prove the soundness of our normalization model
+despite this weaker induction hypothesis by using a \emph{paranoid}
+version of the type system, which can then be proven equivalent to the
+\emph{economic} version (a terminology introduced by
+\sidecitet{andrej17:paranoid}).
+
+%
+Furthermore, we prove that normalization for \SetoidCC can be
+carried in plain Martin-Löf type theory with indexed inductive types,
+thereby showing that this impredicative universe does not contribute
+to the computational power of the proof-relevant fragment at all,
+despite the increase in logical power.
+%
+We also investigate the possibility of recovering the lost computational power
+from a proof-relevant impredicative universe, hoping that the different
+computational behaviour of \SetoidCC would allow us to circumvent Abel and
+Coquand's argument, but alas, it does not. In fact, a slightly modified
+argument shows undecidability of type-checking in presence of a
+proof-relevant impredicative universe.
+%
+Therefore, we exhibit a tradeoff between the additional comfort of
+UIP and extensionality principles, or the possibility to compute with
+impredicative functions.
+
+Finally, because our normalization proof does not imply logical
+consistency, we define a model of \SetoidCC in ZF Set
+theory.
+%
+This shows that the computational content of \SetoidCC can be studied
+without impredicativity in the metatheory, while the study of the
+logical content of \SetoidCC fundamentally requires impredicativity in
+the metatheory. 
 
 \section{the two problems being solved}
 
@@ -188,3 +304,13 @@ McBride et al : Epigram 2
 Altenkirch, Boulier, Kaposi, Tabareau :
 
 Sterling :
+
+\section{to put somewhere}
+
+impossible to have canonicity for equality
+
+explain the n+4
+
+\sideremark{The \Coq proof assistant extends to the base calculus
+of constructions
+Predicative Calculus of Cumulative Inductive Constructions \cite{pcuic}}
