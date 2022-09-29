@@ -314,3 +314,20 @@ explain the n+4
 \sideremark{The \Coq proof assistant extends to the base calculus
 of constructions
 Predicative Calculus of Cumulative Inductive Constructions \cite{pcuic}}
+
+Mixing type coercion operators and impredicative propositions is well known to 
+be a minefield:
+% % 
+% in his seminal work on System F, Girard already shows that adding an operator 
+% \( {J : \forall A\ B\ .\ A \to B} \) with the reduction rule
+% \( {J\ A\ A\ t \Rightarrow t} \) breaks normalization \sidecite{girard72}.
+in recent years, Coquand and Abel showed that the interaction of the two features 
+breaks normalization in the type theory of \Lean \sidecite{lmcs:6606}.
+% 
+Still, they leave an open question: is there a way to decide conversion without
+
+% And does the same argument applies to the observational equality of \SetoidCC, 
+% which computes in a different way?
+ 
+% As we will see, the answers to those questions are respectively ``no'' and 
+% ``yes''.

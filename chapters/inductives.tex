@@ -1,6 +1,6 @@
 \setchapterimage[6cm]{seaside}
 \setchapterpreamble[u]{\margintoc}
-\chapter{Optional Features of \SetoidCC}
+\chapter{Optional Features and Extensions of \SetoidCC}
 \labch{extensions}
 
 In this chapter, we investigate several variants and extensions of the
@@ -738,141 +738,166 @@ A second idea is to mimic the observational equality on the predicative
 universes, \ie to pick reduction rules according to the head constructors of the
 propositions. 
 % 
-Then, we extend the \( \castName \) operaator to work with proof-relevant propositions.
+Then, we extend the \( \castName \) operator to work with proof-relevant propositions, 
+too
+\begin{mathpar}
+	\inferrule[Cast-\( \Prop \)]
+		{% \tytm{\Gamma}{A}{\Univ_i}   \quad \tytm{\Gamma}{B}{\Univ_i}
+			\tytmannotated{\Gamma}{e}{\Obseq[{\Prop}]{A}{B}}{\sProp}
+			\quad \tytmannotated{\Gamma}{t}{A}{\Prop}}
+		{\tytmannotated{\Gamma}{\cast{A}{B}{e}{t}}{B}{\Prop}}
+\end{mathpar}
 % 
+along with reduction rules for \( \cast{A}{B}{e}{t} \) when \( A \) and \( B \) have
+matching head constructors, just like the predicative \( \castName \).
 This idea seems more reasonable, but it turns out to have the very unfortunate
 consequence of making conversion checking undecidable.
 
 \begin{theorem}
   If we extend \( \castName \) to the universe of proof-relevant impredicative
-  propositions \( \Prop \), then conversion becomes undecidable.
+  propositions \( \Prop \) that supports inductive definitions, then conversion 
+  becomes undecidable.
 \end{theorem}
 
 The proof of this fact will occupy us for the remainder of this section.
 
 \paragraph{Outline of the Proof of Undecidability}
+% 
+Our proof is based on the argument of Abel and Coquand \sidecite{lmcs:6606},
+that we enhance to a proof of undecidability.
+% 
+The main idea is to use impredicativity and \( \castName \) to 
+approximate a fixed-point combinator.
 
-We need to be careful though, as past experiments of adding a
-proof-irrelevant equality to Coq that have been mentioned
-in~\sidecite{gilbert:hal-01859964} have resulted in breakage of
-normalization of open terms~\sidecite{lmcs:6606}.
-%
-
-However the argument of Abel and Coquand relies on the fact that
-equality behaves as the usual Martin-Löf Identity Type, which is an
-inductive type that computes via the \( J \)-eliminator.
-%
-In \SetoidCC, elimination of equality is done using the cast operator
-which is quite different, as it computes by comparing the normal forms
-of the source and target types, which intertwines normalization and
-conversion checking in sophisticated ways.
-
-Unfortunately, it turns out that \SetoidCC is not compatible with \( \Prop \)
-either.
-%
-In fact, we show in this section that it is possible to use a modified
-version of Abel and Coquand's argument to show undecidability of
-type-checking for open terms in presence of \( \Prop \), both for
-\SetoidCC and the theory of \sidecitet{lmcs:6606}.
-
-The idea of the proof is rather simple:
-%
-on the one hand, impredicativity makes it possible to give a type to the term
+Given a proof-relevant proposition \( A : \Prop \) and a function
+\( f : A \to A \), impredicativity makes it possible to give a type to the 
+term
 \[
 \Delta_f := \lambda x .\ f\ (x\ x)
 \]
-for any well-typed function \( f \) of type \( \Fun{(\Fun{\Nat}{\Nat})}{(\Fun{\Nat}{\Nat})} \), which is one half of the fixed point
-combinator \( Y_f := \Delta_f\ \Delta_f \).
+which is one half of the fixed point combinator \( Y_f := \Delta_f\ \Delta_f \).
 %
-On the other hand, \( \castName \) can be used to convert between any two types
-in an inconsistent context, in a way that does not block reduction.
-This allows us to apply \( \Delta_f \) to itself (up to a cast) and obtain
-an approximation of \( Y_f \).
+We cannot complete the combinator though, as the type of \( \Delta_f \) does 
+not allow self-application.
+% 
+But in an inconsistent context, \( \castName \) can be used to convert between 
+any two types whatsoever.
+% 
+Thus we can apply \( \Delta_f \) to a type-cast of \( \Delta_f \), which 
+results in a term that is somewhat similar to a fixed-point combinator.
+
+Then, using this pseudo-fixed point combinator, we can build a term that 
+loops through the iterates of any integer function:
 %
-Then, using these pseudo-fixed points, we can build a term that loops through the
-iterates of any integer function:
+\sideremark{Recall that \( \Natprop \) is the inductive type of 
+  natural numbers in \( \Prop \).}
+% 
+\begin{lemma}
+  Let \( g \) be a closed term of type \( \Fun{\Natprop}{\Natprop} \).
+
+  In an inconsistent context, we can form a term \( \mathrm{dec}_g \)
+  of type \( \Natprop \) which is convertible to 0 if there is 
+  a positive integer \( n \) such that \( g^n\ 1 \equiv 0 \), and diverges otherwise.
+\end{lemma}
 %
-\begin{theorem}
-  Let \( g \) be any closed term of type \( \Fun{\Nat}{\Nat} \), where \( \Nat \)
-  denotes the inductive natural numbers in \( \Prop \).
-  %
-  In an inconsistent context, one can define a term \( \mathrm{dec}_g \)
-  of type \( \Nat \) which is convertible to 0 if and only if there is a positive integer
-  \( n \) such that \( g^n\ 1 = 0 \), and diverges otherwise.
-\end{theorem}
-%
-Of course, the existence of such an integer is not decidable in general,
-thus conversion and typing are undecidable for \SetoidCC + \( \Prop \).
-%
-As an aside, note that this construction can also be carried out in
-\( \sProp \) if we add proof-irrelevant natural numbers. But it does
-not cause any issue, as we have a simple way to check for convertibility of
-proof-irrelevant terms: having the same type is sufficient! For this reason,
-we never perform reduction in the proof-irrelevant layers, and need not
-to worry about these potentially divergent terms.
+Of course, this is too much to ask of a conversion checking algorithm.
+% 
+Depending on the definition of \( g \), deciding whether \( \mathrm{dec}_g \) is 
+convertible to \( 0 \) might amount to deciding whether a Turing machine
+halts.
+% 
+Therefore conversion and typing are undecidable for \SetoidCC + \( \Prop \).
+
+Remark that we can perform the exact same construction in \( \sProp \)
+if we add proof-irrelevant natural numbers. 
+% 
+But it does not cause any decidability issue, as we have a simple way to check 
+for convertibility of proof-irrelevant terms: having the same type is 
+sufficient! 
+% 
+For this reason, we never perform reduction in the proof-irrelevant layers, and 
+need not worry about these potentially divergent terms.
 
 \paragraph{Definition of an Approximate Fixed Point Combinator}
 
-Let \( f \) be a closed function of type \( \Fun{(\Fun{\Nat}{\Nat})}{(\Fun{\Nat}{\Nat})} \).
-%
-In an inconsistent context, we can derive a term
+In an inconsistent context \( \Gamma \), we can use \( \emptyrecName \) to 
+derive a term
 \[
-    e : \Depfun[X\ Y]{\Prop}{\Obseq{X}{Y}}
+    e \enskip : \enskip \Depfun[X\ Y]{\Prop}{\Obseq{X}{Y}}
 \]
 that allows us to freely cast between any two types.
 %
-We can use it to derive our approximate fixpoint combinator by defining
-\begin{align*}
-  \bot &:= \Depfun[X]{\Prop}{X}\\
-  \Delta_f &:= \lam{\bot}{f\ (x\ (\Fun{\bot}{\Fun{\Nat}{\Nat}})\ x)}\\
-  \Delta_f' &:= \lam[X]{\Prop}{\cast{\Fun{\bot}{\Fun{\Nat}{\Nat}}}{X}{e}{\Delta_f}}\\
-  Y_f &:= \Delta_f\ \Delta_f'
-\end{align*}
-Technically, it turns out that \( Y_f \) does not exactly behave like
-a fixpoint combinator because of additional casts appearing during the
-reduction.
+We will use it to derive an approximate fixed point for any closed term \( f \) 
+of type \( \Fun{(\Fun{\Natprop}{\Natprop})}{(\Fun{\Natprop}{\Natprop})} \).
 %
-A tedious but straightforward computation in \SetoidCC shows that
-\begin{align*}
-  Y_f &= \Delta_f\ \Delta_f'\\
-      &= f\ (\alpha\ (\Delta_f\ (\beta\ \Delta_f')))\\
-      &= f\ (\alpha\ (f\ (\alpha^2\ (\Delta_f\ (\beta^3\ \Delta_f')))))\\
-      &= f\ (\alpha\ (f\ (\alpha^2\ (f\ (\alpha^4\ (\Delta_f\ (\beta^7\ \Delta_f')))))))\\
-      &= ...
-\end{align*}
-where \( \alpha := \lambda x.\ {\cast{\Fun{\Nat}{\Nat}}{\Fun{\Nat}{\Nat}}{e}{x}} \)
-and \( \beta := \lambda x.\ {\cast{\bot}{\bot}{e}{x}} \).
-
-However, this behavior is sufficient for our purposes, since all the \( \alpha \) disappear
-when the function is applied to an actual integer.
-%
-Therefore, given a closed function \( g \) of type \( \Fun{\Nat}{\Nat} \) that
-terminates on all integer inputs, we instantiate \( f \) with
+Consider the following definitions: 
 \[
-  \lam[p]{\Fun{\Nat}{\Nat}}{\lam[n]{\Nat}{{\natrec{\Nat}{0}{p\ (g\ n)}{n}}}}
+  \begin{array}{rclrl}
+  \independent &:=& \Depfun[X]{\Prop}{X} & : & \Prop \\
+  \Delta_f &:=& \lam{\bot}{f\ (x\ (\Fun{\independent}{\Fun{\Natprop}{\Natprop}})\ x)} & : & \independent \to \Natprop \to \Natprop\\
+  \Delta_f' &:=& \lam[X]{\Prop}{\cast{\Fun{\independent}{\Fun{\Natprop}{\Natprop}}}{X}{e}{\Delta_f}} & : & \independent \\
+  Y_f &:=& \Delta_f\ \Delta_f' & : & \Natprop \to \Natprop
+  \end{array}
 \]
-and we obtain that \( Y_f\ 1 \) reduces to 0 if there exists a \( n \) such that
-\( g^n\ 1 = 0 \), and diverges (for any reduction strategy) otherwise.
 
+The term \( Y_f \) is the one that will play the role of a fixed point for \( f \).
+% 
+It is only an \emph{approximate} fixed point though, because it is not quite 
+convertible to \( f\ Y_f \).   
+%
+Instead, a tedious but straightforward computation using the definitional equality of 
+\SetoidCC + \( \Prop \) shows that
+% 
+\begin{align*}
+  \Gamma \vdash Y_f \enskip &\equiv \enskip \Delta_f\ \Delta_f' \quad : \quad \Natprop \to \Natprop\\
+      &\equiv \enskip f\ (\alpha\ (\Delta_f\ (\beta\ \Delta_f')))\\
+      &\equiv \enskip f\ (\alpha\ (f\ (\alpha^2\ (\Delta_f\ (\beta^3\ \Delta_f')))))\\
+      &\equiv \enskip f\ (\alpha\ (f\ (\alpha^2\ (f\ (\alpha^4\ (\Delta_f\ (\beta^7\ \Delta_f')))))))\\
+      &\equiv \enskip ...
+\end{align*}
+where we define the auxiliary functions \( \alpha \) and \( \beta \) as:
+\[
+\begin{array}{lcl}
+\alpha & := & \lambda x.\ {\cast{\Fun{\Natprop}{\Natprop}}{\Fun{\Natprop}{\Natprop}}{e}{x}} \\
+\beta & := & \lambda x.\ {\cast{\independent}{\independent}{e}{x}}.
+\end{array}
+\]
 
-By defining $\castName$ using the elimination principle of the
-inductive equality, the same result applies to the
-theory of \sidecitet{lmcs:6606}, even if the reduction of $Y_f$ is
-slightly different.
+Thus, \( Y_f \) is only a fixed point combinator up to a bunch of reflexive \( \castName \).
+% 
+This behavior is sufficient for our purposes, since all the \( \alpha \) disappear
+when the function \( Y_f \) is applied to an actual integer.
+%
+Now, given a closed term \( g \) of type \( \Fun{\Natprop}{\Natprop} \) that
+terminates on all canonical inputs, we pose
+\[
+  f \enskip := \enskip \lam[p]{\Fun{\Natprop}{\Natprop}}{\lam[n]{\Natprop}{{\natrec{\Natprop}{0}{p\ (g\ n)}{n}}}}
+\]
+
+and \sideremark{Here, the values 0 and 1 should be understood as the corresponding 
+  church integers in \( \Natprop \).}
+% 
+we obtain that \( Y_f\ 1 \) reduces to 0 if there exists a \( n \) such that
+\( g^n\ 1 \equiv 0 \), but diverges (for any reduction strategy) otherwise.
+
+% By defining $\castName$ using the elimination principle of the
+% inductive equality, the same result applies to the
+% theory of \sidecitet{lmcs:6606}, even if the reduction of $Y_f$ is
+% slightly different.
 
 \paragraph{Conversion is Undecidable}
 
-\SetoidCC is expressive enough to encode Turing machines so that
-knowing whether there exists a \( n \) such that \( g^n\ 1 = 0 \) is
+\SetoidCC is expressive enough to encode Turing machines, so
+knowing whether there exists a \( n \) such that \( g^n\ 1 \equiv 0 \) is
 undecidable in general.
 %
 To complete the proof of undecidability of conversion, we still need
 to show that a term that diverges for any reduction strategy is not
 convertible to $0$. In other words, we need to show that conversion is
 not degenerate.
-%
+
 To establish this, we consider a variation on the standard results of untyped
-lambda-calculus (\sidecite{Barendregt}) showing that diverging terms
+lambda-calculus \sidecite{barendregt} showing that diverging terms
 cannot be equal to a normal form, by using confluence of the system
 and the fact that equality of two terms $t$ and $u$ corresponds to the
 existence of a zig-zag of reduction $t \Rightarrow^* t_1 \Leftarrow^*
@@ -906,4 +931,14 @@ From this, using confluence, we conclude to any term that it convertible to $0$ 
 reduced to $0$, so a term that diverges for any reduction strategy
 cannot be convertible to $0$.
 
-Again, a similar proof can be done in the theory of \sidecitet{lmcs:6606}.
+\paragraph{Is this situation salvageable?}
+% 
+As we see, there is no obvious way to define how the observational equality 
+should compute between elements of \( \Prop \). 
+% 
+Is the system \SetoidCC + \( \Prop \) doomed, then?
+
+Long story short, we do not know. Maybe there is a way to define a system that
+is better compartmentalized, so that both \( \sProp \) and \( \Prop \) can 
+interact with the predicative layer without interacting together. 
+One can hope...
