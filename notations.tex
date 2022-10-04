@@ -51,6 +51,7 @@
   decorations.markings, calc, backgrounds}
 \usepackage{tikz-cd}
 \usepackage{floatrow}
+\usepackage{cancel}
 
 \DeclareMathAlphabet{\mathbbm}{U}{bbm}{m}{n}
 
@@ -180,13 +181,13 @@
 %% Universes
 
 \newcommand{\Prop}{\mathbb{P}}
-\newcommand{\varProp}{\mathrm{Prop}}
+\newcommand{\varProp}{\mathsf{Prop}}
 \newcommand{\sProp}{\Omega}
-\newcommand{\varsProp}{\mathrm{sProp}}
+\newcommand{\varsProp}{\mathsf{sProp}}
 \newcommand{\hProp}{\oblset{hProp}}
 
 \newcommand{\Type}{\mathcal{U}}
-\newcommand{\varType}{\mathrm{Type}}
+\newcommand{\varType}{\mathsf{Type}}
 
 \newcommand{\Univ}{\mathfrak{s}}
 
@@ -200,7 +201,7 @@
 \newcommand\metaop[1]{{\color{RoyalBlue}{\mathsf{#1}}}}
 
 \newcommand{\Nat}{\mathbb{N}}
-\newcommand{\Natprop}{\mathbb{N}_{\mathrm{prop}}}
+\newcommand{\Natprop}{\mathbb{N}_{\mathsf{prop}}}
 \newcommand{\zero}{\metaop{0}}
 \newcommand{\sucName}{\metaop{S}}
 \newcommand{\suc}[1]{\sucName\ #1}
@@ -222,7 +223,7 @@
 
 \newcommand{\Quo}[2]{{#1}/{#2}}
 \newcommand{\quo}[1]{\pi(#1)}
-\newcommand{\quorec}[4]{\metaop{Q\mathrm{-}elim}(#1,#2,#3,#4)}
+\newcommand{\quorec}[4]{\metaop{Q\mathsf{-}elim}(#1,#2,#3,#4)}
 
 \newcommand{\Id}[3]{\metaop{Id}(#1,#2,#3)}
 \newcommand{\id}[1]{\metaop{Idrefl}(#1)}
@@ -232,7 +233,7 @@
 
 \newcommand{\Boxt}[1]{\square{#1}}
 \newcommand{\boxt}[1]{\diamond{#1}}
-\newcommand{\unboxt}[1]{\metaop{\Box\mathrm{-elim}}(#1)}
+\newcommand{\unboxt}[1]{\metaop{\Box\mathsf{-elim}}(#1)}
 
 %% Proof-irrelevant Datatypes
 
@@ -268,7 +269,7 @@
 
 \newcommand{\Squash}[1]{\| #1 \|}
 \newcommand{\squash}[1]{| #1 |}
-\newcommand{\unsquash}[3]{\metaop{\mathrm{S}\mathrm{-elim}}(#1,#2,#3)}
+\newcommand{\unsquash}[3]{\metaop{\mathsf{S}\mathsf{-elim}}(#1,#2,#3)}
 
 \newcommand{\CubicalPath}{\metaop{Path}}
 
@@ -287,6 +288,7 @@
 \newcommand\dashEco{\vdash_{e}}
 
 \newcommand{\wfctx}[2][]{#1 \vdash #2}
+\newcommand{\tyty}[3][]{#1 #2 \vdash #3}
 \newcommand{\tytm}[4][]{#1 #2 \vdash #3 : #4}
 \newcommand{\tytmPara}[4][]{#1 #2 \dashPar #3 : #4}
 \newcommand{\tytmEco}[4][]{#1 #2 \dashEco #3 : #4}
@@ -314,7 +316,7 @@
 \newcommand{\Depfunannotated}[6][x]{\Pi_{}^{#5, #6} (\tm{#1}{#2}).\, {#3}}
 \newcommand{\Depsumannotated}[6][x]{\Sigma_{}^{#5, #6} (\tm{#1}{#2}).\, {#3}}
 \newcommand{\Existsannotated}[5][x]{\exists (\tm{#1}{#2}).\, {#3}}
-\newcommand{\castannotated}[5]{\mathrm{cast}^{#5}(#1,#2,#3,#4)}
+\newcommand{\castannotated}[5]{\mathsf{cast}^{#5}(#1,#2,#3,#4)}
 
 
 

@@ -24,3 +24,23 @@ through \emph{higher inductive types} (HITs) that allow spaces to be
 directly represented as types with nontrivial equality/path
 constructors.
 
+\section{lol}
+
+The other line of work is more recent and takes its roots in the
+formulation of the univalence axiom~\sidecite{kapulkin2012simplicial,hottbook},
+which gives a new meaning to the equality between types: two types are
+equal when they equivalent. This can be understood as an extensionality
+principle for the universe of types.
+%
+In their search for a computational interpretation of
+univalence, \sidecitet{cubicaltt} developed a notion of cubical equality,
+which satisfies funext and univalence, but is incompatible with UIP.
+
+Thus, observational equality and cubical equality are two diverging
+directions for providing propositional equality with more extensionality.
+\sidecitet{hts-sota,Altenkirch2016ExtendingHT,Capriotti17} advocate that the
+two solutions are actually complementary and can be integrated to
+a single system with two universe hierarchies, one that satisfies
+univalence and the other that satisfies UIP.
+
+

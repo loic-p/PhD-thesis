@@ -228,6 +228,10 @@ out in \cref{sec:inductive-equality}.
 \section{The Formal System \SetoidCC}
 \label{sec:typing-rules}
 
+\subsection{Algebraic Theory or Typed Lambda-Calculus?}
+
+\shepherd{TODO}
+
 \subsection{Syntax}
 
 The syntax of the sorts, contexts, terms and types of the system is
@@ -1205,12 +1209,20 @@ with a simple lambda-term:
 \]
 
 The propositional truncation of \SetoidCC is reminiscent of the
-propositional truncation from Homotopy Type Theory, but there is an important 
-difference:
+propositional truncation used in Homotopy Type Theory, but the eliminator
+is much less flexible.
 % 
-\shepherd{in \HoTT, the notion of being a proposition (hprop) is defined in the
-logic, while in \SetoidCC it is a syntactical concept. Meaning that 
-truncated info will never get back to the proof-relevant layer or smth.}
+Indeed, in \HoTT the propositional truncation may be eliminated into any type 
+\( A \), provided we can show that all the inhabitants of \( A \) are 
+propositionally equal.
+% 
+But in \SetoidCC, propositions are \emph{strict}, meaning that being a 
+proposition is about the definitional equality and not the propositional 
+equality. 
+% 
+Thus the eliminator would ideally apply to any type whose inhabitants are 
+all convertible -- but since we cannot reason internally about the definitional
+equality, we restrict elimination to types of sort \( \sProp \).
 
 \paragraph*{Box Types}
 % 
@@ -1484,18 +1496,11 @@ considered as an eliminator, and the lambda-abstraction as a constructor.}
 % 
 To complete our reduction rules into a proper evaluation strategy, we need to 
 define a class of \emph{normal forms} and add the necessary rules to evaluate 
-an arbitrary program down to a normal form.
+an arbitrary program down to a normal form. 
+% 
+To this end, we introduce the notions of constructors, destructors and 
+scrutinees.
 
-In this thesis, we use a typed, deterministic \emph{weak head} reduction 
-strategy: 
-\begin{itemize}
-\item If a term has a constructor or a variable in head position, then it is a 
-	normal form, and does not reduce further.
-\item If a term has an eliminator in head position, we reduce all the scrutinees 
-	of that eliminator down to normal form. Then, if all the scrutinees have a 
-	constructor in head position, we simplify the redex and restart the reduction process 
-	on the result. Otherwise, we have a normal form.
-\end{itemize} 
 Constructors are all those tokens that are introduced by introduction rules,
 including \( \zero \) and \( \metaop{S} \) but also type formers (except for the
 observational equality) and lambda-abstractions.
@@ -1511,7 +1516,18 @@ position.
 Note that an eliminator might have several scrutinees, for instance in 
 \( \cast{A}{B}{e}{t} \) both \( A \) and \( B \) are scrutinees.
 
-In particular, we never reduce under a constructor, hence the name ``weak''.
+Now we can describe our evaluation strategy. We use a typed, deterministic 
+\emph{weak head} reduction: 
+\begin{itemize}
+\item If a term has a constructor or a variable in head position, then it is a 
+	weak head normal form, and does not reduce further.
+\item If a term has an eliminator in head position, we reduce all the scrutinees 
+	of that eliminator down to normal form. Then, if all the scrutinees have a 
+	constructor in head position, we simplify the redex and restart the reduction process 
+	on the result. Otherwise, we have a weak head normal form.
+\end{itemize} 
+
+In particular, we never reduce under a constructor, hence the name ``weak head''.
 % 
 The substitution rules that implement reduction of scrutinees to weak-head normal
 form are described in appendix \ref{sec:ap:subst}.
@@ -1580,9 +1596,11 @@ All the theorems of this section will be proved in \cref{ch:metatheory}.
 	In the empty context, there is no proof of \( \Empty \).
 \end{theorem}
 
-A theory is called consistent if it is impossible to use it to derive a contradiction. It goes
+Our system is consistent in the sense that it is impossible to use it to derive a contradiction. It goes
 without saying that this property is of utmost importance if one wants to build interesting
-mathematics. When proving a theory consistent, one should pay some attention to the meta-theory
+mathematics. 
+% 
+When proving a theory consistent, one should pay some attention to the meta-theory
 where reasoning takes place, as a consistency result is really a reduction of the consistency of
 the theory to the consistency of the meta-theory.
 
@@ -1595,9 +1613,17 @@ the theory to the consistency of the meta-theory.
 	\( t \), we eventually reach a deep normal form.
 \end{theorem}
 
-If a type theory features reduction rules, one may want to make sure that by repeatedly applying
-said rules, all terms eventually reach a normal form that cannot be reduced further.
-One says that the reduction strategy is normalizing.
+The adjective \emph{normal} deserves a bit of discussion. 
+% 
+Ideally, the normal form of a term should be a distinguished representative 
+of its equivalence class under convertibility -- and thus any two convertible 
+terms should have the same normal form, so that checking convertibility is reduced
+to comparing the normal forms.
+% 
+However our deep reduction strategy does not \( \eta \)-expand/reduce
+terms, meaning that normal forms are only unique up to \( \eta \)-equivalence.
+This is not too much of an issue, since \( \eta \)-equivalence of \( \beta \)-normal 
+well-typed terms is easy to decide -- we just put them in \( \eta \)-long form.
 
 \begin{theorem}[Canonicity of \( \Nat \)]
 	If a term \( t \) has type \( \Nat \) in the empty context, then there 
@@ -1659,7 +1685,7 @@ Of course, \SetoidCC is not
 \defnote{conservative}{An extension \( \mathcal{T}' \) of a theory 
 \( \mathcal{T} \) is said to be conservative when it proves no new
 theorems that can be stated in \( \mathcal{T} \)} 
-over \MLTT, as it becomes possible to prove function extensionality 
+over \MLTT, as it is possible to prove function extensionality 
 and UIP for the inductive equality.
 % 
 Still, there is a precise sense in which \SetoidCC does not offer more
@@ -1671,7 +1697,7 @@ computational power than \MLTT.
 	\MLTT.
 \end{theorem}
 
-This is quite surprising at first, because \SetoidCC is impredicative, and thus
+This may come as a surprise, because \SetoidCC is impredicative, and thus
 should be much more powerful than a predicative theory such as \MLTT. 
 % 
 Well, in a way, it is! The impredicativity allows us to prove the existence
@@ -1703,11 +1729,23 @@ collapse the propositions to a two-valued set. Now, there happens to be a
 class of ``constructive-set-like'' categories that play an important role
 in mathematics, called \emph{Grothendieck toposes}. And indeed, we will
 prove in \cref{ch:metatheory} that
-\marginpar{\shepherd{Should I talk about toposes? I don't really care about them tbh}}
 
 \begin{theorem}
 	\SetoidCC has models in all Grothendieck toposes.
 \end{theorem}
+
+However, \SetoidCC does not validate all the reasoning principles that are
+available in the theory of elementary toposes. In particular, the most glaring omission is the
+principle of unique choice, which states that given any relation 
+\( R : A \to B \to \sProp \) we can build a choice function if we know that \( R \)
+is the graph of a functional relation.
+\sideremark{The unique existence quantifier \( {\ExistsUnique{A}{P\ x}} \) is defined as
+the following proposition:\\
+\( {\varExists{A}{(P\ x \land \Pi\ y\ .\ {P\ y \to \Obseq{x}{y}})}}. \)}
+% 
+\[
+	\Depfun{A}{\ExistsUnique[y]{B}{R\ x\ y}} \quad \to \quad \Depsum[f]{\Fun{A}{B}}{\Depfun{A}{R\ x\ (f\ x)}}.
+\]
 
 With this, we conclude our overview of the Observational Calculus of 
 Constructions and we turn to the next chapter, in which we will develop the

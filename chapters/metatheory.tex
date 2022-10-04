@@ -179,7 +179,7 @@ In their proof, Gilbert \etal extend the reduction rules to the inhabitants of
 proof-irrelevant types, and they go on to prove normalization for both relevant
 and irrelevant terms.
 %
-From their model, Gilbert \etal also obtain a proof of consistency for \MLTT 
+From their model, they also obtain a proof of consistency for \MLTT 
 extended with predicative proof-irrelevant types: any proof of the false 
 proposition \( \Empty \) in an an empty context will reduce to a weak head 
 normal form, and the only weak head normal forms that can inhabit 
@@ -214,6 +214,9 @@ from a proof of \( \Empty \).
 Therefore, if we want to show canonicity, we need to show that there is no proof 
 of \( \Empty \) in the empty context -- in other words, that the theory is 
 consistent.
+% 
+This idea of deriving canonicity from consistency already appeared in the work 
+of Altenkirch \etal \sidecite{altenkirchAl:plpv2007}.
 
 We will get around this issue by constructing two models: the normalization model
 that provides us with normalization proofs, and a set-theoretic model from 
@@ -255,18 +258,20 @@ for impredicative types that does not provide any control on the domain and
 codomain of dependent products.
 
 Interestingly, this weakened reducibility means that we will not be able to prove 
-the fundamental lemma directly on the rules we presented in \cref{ch:observational}, 
-which omit plenty of well-formedness hypotheses for the sake of readability 
+the fundamental lemma directly on the economic rules we presented 
+in \cref{ch:observational}, which omit plenty of well-formedness hypotheses for 
+the sake of readability 
+% 
 (for instance, the rule~\nameref{inferrule:pi-intro} does not ask for 
 well-formedness of the involved types).
 % 
-In their model, Abel \etal were able to collect this redundant info in the 
-reducibility predicates, but we are not, so we will prove our theorem for more
-verbose inference rules.
+In their work, Abel \etal were able to define the model directly on the economic 
+rules by collecting the well-formedness hypotheses in the reducibility predicates --
+but we are not, so we will construct our model using more verbose inference rules.
 % 
-Once the fundamental lemma is proved, we will be able to show that the rules
-of \cref{ch:observational} do in fact contain sufficient information to recover
-these additional hypotheses (see \cref{sec:normalization-consequences}).
+Once the fundamental lemma is proved, we will be able to show that the economic 
+rules of \cref{ch:observational} do in fact contain sufficient information to 
+recover these additional hypotheses (see \cref{sec:normalization-consequences}).
 
 This concludes our bird's eye view of the proof. It only remains to roll up our 
 sleeves and unfold our strategy.
@@ -315,7 +320,7 @@ The logical relations on terms and equalities are simultaneously
 defined by recursion on proofs of \( \tytyR{\ell}{\Gamma}{A}{\Univ} \), using
 more auxiliary predicates.
 
-Remark that some type that we defined in \cref{ch:observational} do not appear 
+Remark that some types that we defined in \cref{ch:observational} do not appear 
 in the definition of reducibility.
 % 
 First, we do not need to account for \( \Unit \), existential types 
@@ -1226,10 +1231,10 @@ code and most of the time required to check the whole proof is spent on them.
   the domain and codomain of the \( \Pi \)-type.
   % 
   \sideremark{Even though this change of rules gives the impression that the
-    rules we presented in \cref{ch:observational} are informal rules that
-    omit important premises, it is not the case: in \cref{sec:remov-paran-prem},
-    we will show that the simplified rules of \cref{ch:observational} are 
-    in fact equivalent to the rules with all the required hypotheses.}
+    economic rules we presented in \cref{ch:observational} omit essential premises, 
+    it is in fact not the case. 
+    In \cref{sec:remov-paran-prem}, we will show that the economic rules contain 
+    sufficient information to recover all the necessary premises.}
   % 
   \[
     \inferrule[App-Irr']{\tytm{\Gamma}{A}{\Univ} \\
@@ -1355,9 +1360,9 @@ work of \sidecitet{meven_thesis} on bidirectional type-checking, who explain
 how to obtain an algorithm for type-checking provided that the
 theory enjoys subject reduction and decidability of conversion.
 
-\shepherd{TODO if I have time left: an overview of bidirectional type checking?? probably a bad idea lol}
+% \shepherd{TODO if I have time left: an overview of bidirectional type checking?? probably a bad idea lol}
 
-\subsection{Simplifying Paranoid Typing Rules}
+\subsection{Inferring Premises from Economic Typing Rules}
 
 Recall that in our construction of the normalization model, impredicativity 
 forced us to give a definition of reducibility for proof-irrelevant 
@@ -1365,10 +1370,9 @@ forced us to give a definition of reducibility for proof-irrelevant
 proof-relevant \( \Pi \)-types.
 % 
 As a consequence, we were not able to prove the fundamental lemma 
-directly on the typing rules of \cref{ch:observational}, and we
+directly on the economic inference rules of \cref{ch:observational}, and we
 circumvented this issue by adding well-formedness hypotheses to several
-rules. For instance, the rule for application of a proof-irrelevant
-function
+rules. For instance, the rule for application of a proof-irrelevant function
 \[
 \inferrule[App-Irr]
 {\tytmannotated{\Gamma}{t}{\Depfun{A}{B}}{\sProp}
@@ -1386,12 +1390,12 @@ of the function.
           {\tytmannotated{\Gamma}{t\ u}{\subst{B}{u}}{\sProp}}
 \]
 
-Therefore, the reader may wonder if the rules that we enunciated in 
-\cref{ch:observational} are approximate rules and need to be extended 
-with the omitted well-formedness premises for types, contexts, etc.
+Therefore, the reader may wonder if the economic rules are only approximations 
+which need to be extended with the omitted well-formedness premises for types, 
+contexts, etc.
 % 
-In this section, we show that it is not the case, and that the simplified 
-rules are in fact equivalent to the fully extended rules.
+In this section, we show that it is not the case, and that the economic 
+rules are in fact equivalent to the full rules.
 
 \sideremark{The terminology is in reference to Bauer \etal \cite{andrej17:paranoid}.}
 % 

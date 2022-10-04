@@ -1,66 +1,306 @@
 \setchapterimage[6cm]{seaside}
 \setchapterpreamble[u]{\margintoc}
-\chapter{Intensional Type Theory}
-\labch{layout}
+\chapter{Equality in Intensional Type Theory}
+\labch{intro_observational}
 
-Dependent type theories and in particular \MLTT, as originally
-developed by~\sidecitet{MARTINLOF197573}, provide an adequate framework
-for developing constructive mathematics and certifying software.
-%
-A core aspect of \MLTT is the coexistence of two distinct notions of
-equality: a \emph{definitional} equality that records the equations
-automated by the system, and a \emph{propositional} equality that is
-a type internal to the system and thus can be used to do equational
-reasoning.
-%
-However, the propositional equality of \MLTT lacks some extensionality
-principles that pervade mathematical reasoning, such as function
-extensionality (funext). Since they are generally considered desirable, these
-principles are sometimes added as axioms, but doing so results in a system
-with weaker computational properties.
+\section{Introduction}
 
-Throughout the years, several options
-to obtain a more extensional version of propositional equality while preserving
-computation have been explored. The most successful lines of work can be roughly divided into two
-groups: the ones using an observational equality, and the ones using a
-cubical equality.
-%
-Both notions build on the following fundamental idea: in order to obtain
-sufficient extensionality principles, the behavior of equality in a given
-type should be explicitly specified for every type instead of using a single
-definition that is parametric over the types.
+If you have ever used a proof assistant based on intensional type theory such as
+\Coq, \Agda or {\Lean} -- and there is a good chance that you have if you are 
+reading this thesis -- then you probably know that equality can be a real headache.
 
-The work on observational equality originated from the study of
-the setoid model of type theory \sidecite{hofmann95,altenkirch99}, and
-a first attempt at a proper type theory that supports an observational
-equality satisfying funext has been been proposed in~\sidecite{altenkirchAl:plpv2007}.
-%
-In these systems, observational equality equips every type with a setoid
-structure. This setoidal equality satisfies the uniqueness of identity proofs (UIP),
-which states that all proofs of an equality are equal; in other words,
-equality is proof-irrelevant.
+On the one hand, we have the \emph{definitional} equality, which records the 
+equations that the proof assistant handles silently for us.
+% 
+\sideremark{In proof assistants based on ZF set theory such as Metamath,
+  the theorem \( 2+2=4 \) does requires a proof. And this proof involves hundreds of 
+  auxiliary lemmas.}
+% 
+For instance, the terms \( 2+2 \) and \( 4 \) are definitionally equal, meaning that we 
+can use them interchangeably in our proofs without having to worry about 
+proving their equality by hand.
+% 
+In a dependently typed setting, this minimal amount of automation is absolutely vital; 
+lest we have to insert explicit coercions every time we want to say, use a term 
+of type \( \mathsf{Vector}\ (2+2) \) as a term of type \( \mathsf{Vector}\ 4 \).
+
+But unfortunately not everything is a natural 
+number\sidenote{[citation needed]}, and mathematical proofs
+frequently deal with equalities between infinitary objects such as functions and 
+sets.
+% 
+And there is no algorithm that can decide whether
+two functions of type \( \Nat \to \Nat \) are pointwise equal.
+% 
+Thus in practice, the definitional equality is limited to 
+\( \beta \eta \iota \delta \) equalities, with perhaps some extensions
+such as \Agda's rewrite rules~\sidecite{taming_of_the_rew}.
+
+Since the system will not be able to fully automate all equalities away, 
+we need facilities to reason about them.
+% 
+This is why intensional type theories provide a second notion of equality, 
+called the \emph{propositional} equality. 
+% 
+Contrary to the definitional equality, this one is a available internally in
+the language of type theory, so that we may use it to state and prove theorems.
+% 
+In all three major proof assistants based on type theory, the propositional 
+equality is implemented as an inductive type, after the pioneer work of Martin-Löf~\sidecite{MartinLoef75}.
+% 
+\begin{mathpar}
+  \inferrule{\tyty{\Gamma}{A}
+			\\ \tytm{\Gamma}{t}{A}
+			\\ \tytm{\Gamma}{u}{A}}
+			{\tyty{\Gamma}{t =_A u}}
+  \and
+  \inferrule{\tyty{\Gamma}{A}
+			\\ \tytm{\Gamma}{t}{A}}
+			{\tytm{\Gamma}{\mathsf{refl}_t}{t =_A t}}
+\end{mathpar}
+\sideremark{In these typing rules \( {t =_A u} \) is a type, while 
+  \( {t \equiv u} \) will be used to denote that \( t \) and \( u \) are 
+  definitionally equal.}
+\begin{mathpar}
+  \inferrule{\tyty{\Gamma}{A}
+			\\ \tytm{\Gamma}{t}{A}
+			\\ \tytm{\Gamma}{B}{\Depfun{A}{\Fun{t =_A x}{\Univ}}}
+			\\ \tytm{\Gamma}{u}{B\ t\ \mathsf{refl}_t}
+			\\ \tytm{\Gamma}{t'}{A}
+			\\ \tytm{\Gamma}{e}{t =_A t'}}
+			{\tytm{\Gamma}{\mathsf{J}(A,t,B,u,t',e)}{B\ t'\ e}}
+\end{mathpar}
+\begin{mathpar}
+  \inferrule{[...]}
+			{\red{\Gamma}{\mathsf{J}(A,t,B,u,t,\mathsf{refl}_t)}{u}{B\ t\ \mathsf{refl}_t}}
+\end{mathpar}
+
+These few rules are sufficient to define an equivalence relation that contains
+the definitional equality, and that can be used to rewrite terms and coerce
+between equal types (using the \( \mathsf{J} \) operator).
+% 
+However, the propositional equality does not quite meet the standards of the 
+mathematical equality. 
+%  
+It is really more of an equality between programs, and as such it lacks 
+important reasoning principles such as \emph{function extensionality}, which
+stipulates that equality between functions amounts to pointwise equality:
+% 
+\[
+  f =_{A \to B} g \quad \xcancel{\longleftrightarrow} \quad \Depfun{A}{f\ x =_B g\ x}
+\]
+
+In fact, two closed terms are equal for the propositional equality if
+and only if they are definitionally equal.
+This means that it is not even possible to prove that the functions
+\( {\lambda\ n\ .\ n+1} \) and \( {\lambda\ n\ .\ 1+n} \) are equal!
+
+\subsection{Types and Propositions}
+
+Another major difference with the common practice of mathematics is the 
+attachment to the Curry-Howard correspondence between proofs and programs:
+equality is a \emph{type}, and equality proofs are \emph{programs}.
+% 
+As such, equality proofs are first class values like the natural numbers
+or the functions, and we can reason about them or evaluate them just as well.
+
+Now, while the possibility to evaluate proofs is a core tenet of the Curry-Howard
+doctrine, the typical equality proof does not exhibit a very interesting 
+computational behavior -- it can only ever evaluate to a proof by reflexivity.
+% 
+As a consequence, the programs 
+\defnote{extracted}{Extraction produces a program in an external programming 
+  language by erasing type information.} 
+from proofs that use equational reasoning 
+tend to spend a lot of time passing around equality proofs, until they 
+simplify to a proof by reflexivity and can be safely discarded.
+
+This less-than-ideal state of affairs led the \Coq proof assistant to introduce
+a special sort \( \varProp \) for types whose proofs are to be erased during 
+program extraction~\sidecite{letouzey04}.
+% 
+By putting the propositional equality in \( \varProp \) along with the other logical 
+constraints that do not play any role in computation, \Coq recovers reasonably good 
+performances for extracted programs (perhaps at the expense of a small 
+unfaithfulness to the Curry-Howard church).
+
+The \Lean proof assistant goes a step further and introduces of sort 
+\( \varsProp \) for \emph{strict propositions}~\sidecite{lean}.
+% 
+\sideremark{Nowadays strict propositions are also available in \Coq and
+  \Agda, although they do not use them for the propositional equality.}
+% 
+The strict propositions are proof-irrelevant, meaning that any two inhabitants 
+of a strict proposition \( A \) are definitionally equal simply by virtue of having 
+type \( A \).
+% 
+\[
+\inferrule{\tytm{\Gamma}{A}{\varsProp} \\ \tytm{\Gamma}{t, u}{A}}{\eqtm{\Gamma}{t}{u}{A}}
+\]
+% 
+Putting the propositional equality in \( \varsProp \) is not exactly innocuous.
+% 
+It means that any proof of propositional equality between two convertible 
+terms is now a proof by reflexivity -- or in other words, \Lean satisfies 
+a strict version of the principle of uniqueness of identity proofs (UIP).
+% 
+As a consequence, the \( J \) eliminator of \Lean reduces whenever it is applied to 
+definitionally equal terms.
+\begin{mathpar}
+  \inferrule{[...] \\ \eqtm{\Gamma}{t}{t'}{A}}
+			{\red{\Gamma}{\mathsf{J}(A,t,B,u,t',e)}{u}{B\ t'\ e}}
+\end{mathpar}
+
+While this rule is logically sound, Abel and Coquand showed that having it
+in an 
+\defnote{impredicative sort}{A sort is said to be impredicative if it is 
+  closed under dependent products over any index type: for all types 
+  \( A \) and functions \( {\tm{B}{A \to \varsProp}} \), the dependent product 
+  \( \Depfun{A}{B\ x} \) is in \( \varsProp \).}
+such as \Lean's \( \varsProp \) leads to a failure of normalization for open 
+terms~\sidecite{lmcs:6606}.
+% 
+Thus the type-checker of \Lean is not guaranteed to terminate on all inputs,
+and the decidability of its equational theory remains an open question.
+
+% As such, we can reason about equality proofs just like we might reason about
+% natural numbers, and in particular we can form the type of equalities between 
+% two proofs of an equality.
+% % 
+% Since the equality type represents a mathematical proposition, we might expect
+% that the equality proofs carry no interesting information, \ie that any two proofs
+% of the same equality are equal.
+% % 
+% This is called the principle of \emph{uniqueness of identity proofs} (UIP), 
+% but it is not validated by the Martin-Löf inductive equality:
+% \sideremark{In \Agda, the uniqueness of identity proofs is derivable, because
+%   the elimination rules for indexed inductive types are stronger than the
+%   \( \mathsf{J} \) eliminator~\cite{Coquand92b}.}
+% % 
+% \[
+% e_1, e_2 : x =_A y \quad \xcancel{\vdash} \quad e_1 =_{x =_A y} e_2
+% \]
+% % 
+% although it is impossible to exhibit two closed equality proofs that are not 
+% definitionally equal.
+
+\subsection{Recovering Extensionality in Intensional Type Theory}
+
+Developing sophisticated mathematics without the principle of 
+function extensionality is not an easy task.
+Consequently, the community has explored several options to recover a more 
+conventional equality throughout the years.
+
+\paragraph*{Extensionality axioms}
+% 
+The most obvious way to recover a missing reasoning principle is simply to
+postulate it as an axiom. 
+% 
+For instance, the axiom \textsf{functional\_extensionality\_dep} is available 
+in \Coq's standard library.
+% 
+\sideremark{Note that in \Coq and \Lean it is still possible to extract a program 
+  from a proof that postulates function extensionality, because the axiom
+  is erased during extraction.}
+The downside of using axioms is that they do not play so well with the 
+computational properties of intensional type theory:
+% 
+% intensional type theory is built around the proofs-as-programs correspondence, 
+% and every existence proof doubles as an algorithm that computes the witness
+% of existence.
+% 
+applying the \( J \) eliminator to an equality obtained \textit{via} an axiom
+will only result in a stuck term.
+
+\paragraph*{Setoids}
+% 
+A standard technique to recover extensionality principles without breaking the
+proofs-as-programs correspondance is to use \emph{setoids}~\sidecite{hofmann95},
+\ie to replace types with pairs \( (|A|, e_A) \) of a carrier type \( |A| \)
+and an equivalence relation \( e_A \) on \( |A| \) 
+(the \emph{setoid equality} of \( A \)).
+% 
+We then restrict our attention to functions that preserve the setoid equality, 
+and we bake function extensionality into the setoid equality of function types.
+
+Working with setoids is not exactly pleasant, as we need to supplement every
+definition with bureaucratic proofs of preservation of the setoid equalities,
+even though all available constructs in type theory do respect function 
+extensionality~\sidecite{Altenkirch99}.
+% 
+Basically, we need to do the work of a compiler by hand.
+% 
+The \Coq proof assistant provides some automation to deal with setoids through 
+tactics, but these solutions do not scale painlessly to large developments -- 
+to the point that the community has coined the term \emph{setoid hell} to refer 
+to these issues.
+
+\paragraph*{Alternative type theories}
+% 
+Since extensionality axioms are problematic because they block 
+computation, type theorists have explored numerous ways to extend intensional
+type theory with new computational rules that handle the desired axioms.
+% 
+The most successful lines of work can be roughly divided into two groups: the 
+ones that replace the inductive propositional equality with an \emph{observational equality}, 
+and the ones that replace it with a \emph{univalent equality}.
+% 
+% In the first half of this thesis, we will restrict our attention to the first 
+% group. The univalent equality is at the center of the second half, and we 
+% invite the interested reader to have a look at \cref{ch:hott}.
+
+\subsection{Observational Type Theory}
+
+The observational equality has its roots in the work of Hofmann and 
+Altenkirch on the setoid model of type theory~\cite{hofmann95,altenkirch99}.
+% 
+By interpreting types as setoids, they are able to model
+\defnote{ITT+funext}{ITT+funext stands for intensional type theory extended 
+  with function extensionality.}
+in an intensional type theory extended with strict propositions.
+Since these strict propositions do not conflict with the proofs-as-programs 
+interpretation, the setoid model provides a way to evaluate proofs that use a 
+function extensionality axiom by evaluating their interpretation.
+
+Following this first step, Altenkirch McBride and Swierstra developed observational type
+theory (OTT), an extension of intensional type theory that brings the main insights 
+of the setoid model back to the world of syntax~\sidecite{altenkirchAl:plpv2007}.
+% 
+Since the interpretation of the propositional equality \( {t =_A u} \) in the setoid 
+model is a strict proposition defined by induction on the type \( A \), OTT 
+replaces the inductive propositional equality with the \emph{observational equality}, an operator 
+\( t \sim_A u \) that computes an equivalence relation by 
+recursion on \( A \). 
+% 
+This equivalence relation is a strict proposition, and thus the observational equality satisfies the
+principle of UIP in addition to function extensionality.
+
+The observational equality has seen some new and exciting developments in recent 
+years, such as the work of Sterling \etal who revisit it under the lens of 
+cubical type theory~\sidecite{sterling-angiuli-gratzer:2022} or the setoid
+type theory of Altenkirch \etal~\sidecite{Altenkirch2019}.
+% 
+Still, observational type theory has yet to reach a level of maturity 
+comparable to that of univalent type theories.
+% 
+In particular, there is still no support for the observational equality in
+major proof assistants, despite some valiant efforts~\sidecite{mcbride-autopsy}.
+
+\subsection{Univalent Type Theory}
 
 The other line of work is more recent and takes its roots in the
 formulation of the univalence axiom~\sidecite{kapulkin2012simplicial,hottbook},
 which gives a new meaning to the equality between types: two types are
-equal when they equivalent. This can be understood as an extensionality
-principle for the universe of types.
+equal when they are equivalent. 
+% 
+This can be understood as an extensionality principle for the universe of types.
 %
 In their search for a computational interpretation of
 univalence, \sidecitet{cubicaltt} developed a notion of cubical equality,
-which satisfies funext and univalence, but is incompatible with UIP.
+which satisfies function extensionality and univalence, but is incompatible with UIP.
 
-Thus, observational equality and cubical equality are two diverging
-directions for providing propositional equality with more extensionality.
-\sidecitet{hts-sota,Altenkirch2016ExtendingHT,Capriotti17} advocate that the
-two solutions are actually complementary and can be integrated to
-a single system with two universe hierarchies, one that satisfies
-univalence and the other that satisfies UIP.
-%
-While cubical type theory has been thoroughly investigated and even
-implemented in the \Agda proof assistant~\sidecitet{cubical-agda},
-observational equality has not reached a comparable level of maturity.
-%
+\section{Contributions}
+
 Recent attempts to design a type theory based on observational equality
 are either lacking an algorithm for type checking~\sidecitet{sterling_et_al:LIPIcs:2019:10538}, or restricted to a single
 universe and having computational properties only up to a
@@ -71,6 +311,14 @@ by~\sidecitet{gilbert:hal-01859964}, along with a proof-irrelevant identity type
 that supports a strong eliminator. This theory has not been justified yet,
 and it has even been shown not to be normalizing in presence of
 impredicativity~\sidecitet{lmcs:6606}.
+
+Furthermore, Altenkirch \etal sketch a normalization proof for observational 
+type theory by explaining how to simulate the reduction behavior 
+
+Normalization ``proof'', canonicity from consistency, proof-irrelevant axioms 
+are fine, heterogeneous equality.
+
+McBride et al : Epigram 2
 
 In this paper, we define \SetoidTT, the first extension of \MLTT +
 $\sProp$ with an observational equality that satisfies UIP, funext
@@ -120,48 +368,10 @@ a model, the model can be defined in an extensional setting.
 To illustrate the simplicity of extending \MLTT+$\sProp$ to \SetoidTT,
 we have implemented a simple version in
 \Agda using rewrite rules, as recently introduced
-by~\sidecitet{taming_of_the_rew} (file \refAgdaRoot{setoid\_rr}).
-
-\section{Related work}
-
-Compared to~\sidecite{altenkirchAl:plpv2007}, the most important ingredient in \SetoidTT is the
-use of definitional proof-irrelevance.
-%
-This added flexibility in computations allows our recursors to enjoy proper computational
-behavior on open terms, and it also lets us seamlessly treat universe hierarchies.
-%
-Moreover, the normalization proof for OTT relies on a normalization conjecture for a different
-theory, unlike the normalization proof for \SetoidTT.
-
-In~\sidecite{Altenkirch2019}, the authors define a setoid model in \( \MLTT+\sProp \). Then, they
-interpret a version of \MLTT with proof-irrelevant identity types that support propext and
-funext in their model, thereby providing a computational interpretation of these principles.
-%
-However, handling universes in their model requires some additions to \( \MLTT+\sProp \), and
-the resulting theory is only conjectured to be normalizing.
-%
-In contrast to this, \SetoidTT is a full-fledged type theory and does not require any external
-model to compute.
-
-Compared to XTT~\sidecite{sterling_et_al:LIPIcs:2019:10538}, the strengths of \SetoidTT are a
-normalization strategy that exhibits canonicity, as well a full proof that conversion and typing
-are decidable. These properties allow us to present a concrete implementation of our system
-in a proof assistant.
-%
-In XTT however, Sterling\etal show that typing cannot be decidable, as there is no way to deduce
-\( \Obseq{A}{A'} \) and \( \Obseq{B}{B'} \) from a proof of \( \Obseq{A \times B}{A' \times B'} \).
-%
-In order to fix this shortcoming, they suggest adding a ``typecase'' operator, but
-argue against it since it forces the universe to be closed, thereby severely constraining the
-possible semantics.
-%
-In \SetoidTT, we obtain the injectivity of type contructors from the behavior of observational
-equality in the universe. These rules somewhat constrain the semantics---for instance, we cannot
-interpret \SetoidTT in set theory using a Grothendieck universe as the interpretation of \( \Type \)---but our universe remains open to the addition of arbitrary types.
-
-\section{Impred}
+by~\sidecitet{taming_of_the_rew} (file \refAgdaRoot{setoid\_rr}). 
 
 
+\subsection{Definitional Proof Irrelevance}
 
 In dependent type theory, a sort \( \sProp \) is said to be
 \emph{impredicative} if it is closed under dependent products over any index
@@ -276,38 +486,53 @@ without impredicativity in the metatheory, while the study of the
 logical content of \SetoidCC fundamentally requires impredicativity in
 the metatheory. 
 
-\section{the two problems being solved}
 
-Intensional computation with extensional principles
+\section{Related work}
 
-Normalization of proof-irrelevant impredicative universe with elimination of false and equality
+Compared to~\sidecite{altenkirchAl:plpv2007}, the most important ingredient in \SetoidTT is the
+use of definitional proof-irrelevance.
+%
+This added flexibility in computations allows our recursors to enjoy proper computational
+behavior on open terms, and it also lets us seamlessly treat universe hierarchies.
+%
+Moreover, the normalization proof for OTT relies on a normalization conjecture for a different
+theory, unlike the normalization proof for \SetoidTT.
 
-\section{history of setoids}
+In~\sidecite{Altenkirch2019}, the authors define a setoid model in \( \MLTT+\sProp \). Then, they
+interpret a version of \MLTT with proof-irrelevant identity types that support propext and
+funext in their model, thereby providing a computational interpretation of these principles.
+%
+However, handling universes in their model requires some additions to \( \MLTT+\sProp \), and
+the resulting theory is only conjectured to be normalizing.
+%
+In contrast to this, \SetoidTT is a full-fledged type theory and does not require any external
+model to compute.
 
-Hofmann : Extensional concepts in intensional type theory (PhD thesis, 95)
-
-First model of ETT in ITT. Does not support universes because no proof-relevant equality.
-
-Altenkirch : Extensional Equality in Intensional Type Theory (LICS99)
-
-Full model of ETT in ITT + sProp, using CwF of setoids.
-
-Altenkirch, McBride : 
-
-Altenkirch, McBride : Observational Equality, Now! (PLPV07)
-
-Normalization ``proof'', canonicity from consistency, proof-irrelevant axioms 
-are fine, heterogeneous equality.
-
-McBride et al : Epigram 2
-
-Altenkirch, Boulier, Kaposi, Tabareau :
-
-Sterling :
+Compared to XTT~\sidecite{sterling_et_al:LIPIcs:2019:10538}, the strengths of \SetoidTT are a
+normalization strategy that exhibits canonicity, as well a full proof that conversion and typing
+are decidable. These properties allow us to present a concrete implementation of our system
+in a proof assistant.
+%
+In XTT however, Sterling\etal show that typing cannot be decidable, as there is no way to deduce
+\( \Obseq{A}{A'} \) and \( \Obseq{B}{B'} \) from a proof of \( \Obseq{A \times B}{A' \times B'} \).
+%
+In order to fix this shortcoming, they suggest adding a ``typecase'' operator, but
+argue against it since it forces the universe to be closed, thereby severely constraining the
+possible semantics.
+%
+In \SetoidTT, we obtain the injectivity of type contructors from the behavior of observational
+equality in the universe. These rules somewhat constrain the semantics---for instance, we cannot
+interpret \SetoidTT in set theory using a Grothendieck universe as the interpretation of \( \Type \)---but our universe remains open to the addition of arbitrary types.
 
 \section{to put somewhere}
 
+Allais and McBride on computation on refl
+
+Bob atkey on observational equality that does not reduce
+
 impossible to have canonicity for equality
+
+inductive equality is predicative
 
 explain the n+4
 
