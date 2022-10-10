@@ -1,20 +1,20 @@
 \setchapterimage[6cm]{seaside}
 \setchapterpreamble[u]{\margintoc}
-\chapter{Equality in Intensional Type Theory}
+\chapter{Introduction}
 \labch{intro_observational}
 
-\section{Introduction}
+\section{Equality in Intensional Type Theory}
 
 If you have ever used a proof assistant based on intensional type theory such as
 \Coq, \Agda or {\Lean} -- and there is a good chance that you have if you are 
 reading this thesis -- then you probably know that equality can be a real headache.
 
-On the one hand, we have the \emph{definitional} equality, which records the 
+On the one hand we have the \emph{definitional} equality (also called conversion), which records the 
 equations that the proof assistant handles silently for us.
 % 
 \sideremark{In proof assistants based on ZF set theory such as Metamath,
-  the theorem \( 2+2=4 \) does requires a proof. And this proof involves hundreds of 
-  auxiliary lemmas.}
+  the theorem \( 2+2=4 \) does requires a proof. Although it is elementary,
+  this proof involves hundreds of auxiliary lemmas!}
 % 
 For instance, the terms \( 2+2 \) and \( 4 \) are definitionally equal, meaning that we 
 can use them interchangeably in our proofs without having to worry about 
@@ -29,11 +29,11 @@ number\sidenote{[citation needed]}, and mathematical proofs
 frequently deal with equalities between infinitary objects such as functions and 
 sets.
 % 
-And there is no algorithm that can decide whether
+And of course there is no algorithm that can decide whether
 two functions of type \( \Nat \to \Nat \) are pointwise equal.
 % 
 Thus in practice, the definitional equality is limited to 
-\( \beta \eta \iota \delta \) equalities, with perhaps some extensions
+\( \beta / \eta / \iota \) equalities, with perhaps some extensions
 such as \Agda's rewrite rules~\sidecite{taming_of_the_rew}.
 
 Since the system will not be able to fully automate all equalities away, 
@@ -42,25 +42,24 @@ we need facilities to reason about them.
 This is why intensional type theories provide a second notion of equality, 
 called the \emph{propositional} equality. 
 % 
-Contrary to the definitional equality, this one is a available internally in
+Contrary to the definitional equality, this one is available internally in
 the language of type theory, so that we may use it to state and prove theorems.
 % 
 In all three major proof assistants based on type theory, the propositional 
 equality is implemented as an inductive type, after the pioneer work of Martin-Löf~\sidecite{MartinLoef75}.
 % 
+\sideremark{The propositional equality \( \Indeq{A}{t}{u} \) is a type, while the
+  definitional equality \( \eqtm{\Gamma}{t}{u}{A} \) is a typing judgment.}
 \begin{mathpar}
   \inferrule{\tyty{\Gamma}{A}
 			\\ \tytm{\Gamma}{t}{A}
 			\\ \tytm{\Gamma}{u}{A}}
-			{\tyty{\Gamma}{t =_A u}}
+			{\tyty{\Gamma}{\Indeq{A}{t}{u}}}
   \and
   \inferrule{\tyty{\Gamma}{A}
 			\\ \tytm{\Gamma}{t}{A}}
-			{\tytm{\Gamma}{\mathsf{refl}_t}{t =_A t}}
+			{\tytm{\Gamma}{\indrefl{t}}{\Indeq{A}{t}{t}}}
 \end{mathpar}
-\sideremark{In these typing rules \( {t =_A u} \) is a type, while 
-  \( {t \equiv u} \) will be used to denote that \( t \) and \( u \) are 
-  definitionally equal.}
 \begin{mathpar}
   \inferrule{\tyty{\Gamma}{A}
 			\\ \tytm{\Gamma}{t}{A}
@@ -75,116 +74,212 @@ equality is implemented as an inductive type, after the pioneer work of Martin-L
 			{\red{\Gamma}{\mathsf{J}(A,t,B,u,t,\mathsf{refl}_t)}{u}{B\ t\ \mathsf{refl}_t}}
 \end{mathpar}
 
-These few rules are sufficient to define an equivalence relation that contains
-the definitional equality, and that can be used to rewrite terms and coerce
-between equal types (using the \( \mathsf{J} \) operator).
-% 
-However, the propositional equality does not quite meet the standards of the 
-mathematical equality. 
-%  
-It is really more of an equality between programs, and as such it lacks 
-important reasoning principles such as \emph{function extensionality}, which
-stipulates that equality between functions amounts to pointwise equality:
-% 
-\[
-  f =_{A \to B} g \quad \xcancel{\longleftrightarrow} \quad \Depfun{A}{f\ x =_B g\ x}
-\]
+These few rules are enough to define an equivalence relation that contains
+the definitional equality, can be used to rewrite terms and can be used to coerce
+between equal types.
+%  (using the \( \mathsf{J} \) operator).
 
-In fact, two closed terms are equal for the propositional equality if
-and only if they are definitionally equal.
-This means that it is not even possible to prove that the functions
-\( {\lambda\ n\ .\ n+1} \) and \( {\lambda\ n\ .\ 1+n} \) are equal!
-
-\subsection{Types and Propositions}
-
-Another major difference with the common practice of mathematics is the 
+An important difference with the common practice of mathematics is the 
 attachment to the Curry-Howard correspondence between proofs and programs:
-equality is a \emph{type}, and equality proofs are \emph{programs}.
+equality is a \emph{type}, and equality proofs are \emph{programs}\sidenote{amen.}.
 % 
 As such, equality proofs are first class values like the natural numbers
 or the functions, and we can reason about them or evaluate them just as well.
 
-Now, while the possibility to evaluate proofs is a core tenet of the Curry-Howard
+\subsection{Types and Propositions}
+
+While the possibility to evaluate proofs is a core tenet of the Curry-Howard
 doctrine, the typical equality proof does not exhibit a very interesting 
-computational behavior -- it can only ever evaluate to a proof by reflexivity.
+computational behavior. 
 % 
+The term \( \indJ{A}{t}{P}{u}{t'}{e} \) just waits for \( e \) to reduce to
+a proof by reflexivity, in which case \( t \) and \( t' \) are convertible and
+the whole term can simply evaluate to \( u \). 
+
 As a consequence, the programs 
 \defnote{extracted}{Extraction produces a program in an external programming 
   language by erasing type information.} 
-from proofs that use equational reasoning 
-tend to spend a lot of time passing around equality proofs, until they 
-simplify to a proof by reflexivity and can be safely discarded.
-
+from proofs that use equational reasoning  tend to spend a lot of time passing 
+around equality proofs just to end up discarding them.
+% 
 This less-than-ideal state of affairs led the \Coq proof assistant to introduce
 a special sort \( \varProp \) for types whose proofs are to be erased during 
 program extraction~\sidecite{letouzey04}.
 % 
 By putting the propositional equality in \( \varProp \) along with the other logical 
 constraints that do not play any role in computation, \Coq recovers reasonably good 
-performances for extracted programs (perhaps at the expense of a small 
-unfaithfulness to the Curry-Howard church).
+performances for extracted programs. 
 
-The \Lean proof assistant goes a step further and introduces of sort 
+Technically this is a bit of an infrigement of the Curry-Howard discipline, as \( \varProp \) 
+effectively re-introduces a separation between propositions and data.
+% 
+But do not be mistaken: proofs of propositions still play their normal role in computations, and in 
+particular they may block the evaluation of open terms. 
+% 
+It is only when we extract an \emph{external} program that propositions become irrelevant.
+
+The \Lean proof assistant goes a step further and introduces the sort 
+% 
+\sideremark{The \Lean community uses the name \( \varProp \) for the sort of
+  strict propositions, but we will use \( \varsProp \) to avoid confusion with
+  non-strict propositions.}
+% 
 \( \varsProp \) for \emph{strict propositions}~\sidecite{lean}.
 % 
-\sideremark{Nowadays strict propositions are also available in \Coq and
-  \Agda, although they do not use them for the propositional equality.}
+% \sideremark{Nowadays strict propositions are also available in \Coq and
+%   \Agda, although they do not use them for the propositional equality.}
 % 
-The strict propositions are proof-irrelevant, meaning that any two inhabitants 
-of a strict proposition \( A \) are definitionally equal simply by virtue of having 
-type \( A \).
+Contrary to \Coq's propositions, the strict propositions are proof-irrelevant, 
+meaning that any two inhabitants of a strict proposition \( A \) are 
+definitionally equal simply by virtue of having type \( A \).
 % 
 \[
 \inferrule{\tytm{\Gamma}{A}{\varsProp} \\ \tytm{\Gamma}{t, u}{A}}{\eqtm{\Gamma}{t}{u}{A}}
 \]
-% 
+
 Putting the propositional equality in \( \varsProp \) is not exactly innocuous.
 % 
 It means that any proof of propositional equality between two convertible 
-terms is now a proof by reflexivity -- or in other words, \Lean satisfies 
-a strict version of the principle of uniqueness of identity proofs (UIP).
+terms is now undistinguishable from a proof by reflexivity since they have the 
+same type.
+% 
+In other words \Lean satisfies a strict version of the principle of \emph{uniqueness 
+of identity proofs} (UIP).
+
+Now non-reflexive equality proofs can't block computation anymore: the term
+\( \indJ{A}{t}{P}{u}{t}{e} \) is convertible to 
+\( \indJ{A}{t}{P}{u}{t}{\indrefl{t}} \), which should reduce!
 % 
 As a consequence, the \( J \) eliminator of \Lean reduces whenever it is applied to 
 definitionally equal terms.
 \begin{mathpar}
-  \inferrule{[...] \\ \eqtm{\Gamma}{t}{t'}{A}}
+  \inferrule[J-conv]{[...] \\ \eqtm{\Gamma}{t}{t'}{A}}
 			{\red{\Gamma}{\mathsf{J}(A,t,B,u,t',e)}{u}{B\ t'\ e}}
+      \ilabel{infrule:J-conv}
 \end{mathpar}
 
-While this rule is logically sound, Abel and Coquand showed that having it
-in an 
-\defnote{impredicative sort}{A sort is said to be impredicative if it is 
-  closed under dependent products over any index type: for all types 
-  \( A \) and functions \( {\tm{B}{A \to \varsProp}} \), the dependent product 
-  \( \Depfun{A}{B\ x} \) is in \( \varsProp \).}
-such as \Lean's \( \varsProp \) leads to a failure of normalization for open 
-terms~\sidecite{lmcs:6606}.
+But while this rule is logically sound, Abel and Coquand showed that it leads to a 
+failure of normalization for open terms~\cite{lmcs:6606}.
 % 
-Thus the type-checker of \Lean is not guaranteed to terminate on all inputs,
-and the decidability of its equational theory remains an open question.
+\sideremark{It is known that \Lean's definitional equality is undecidable for
+  other, independent reasons~\cite{gilbert:hal-01859964}. But this certainly
+  did not prevent the \Lean community from developing a large amount of 
+  mathematics.}
+% 
+Since the algorithms we use to check for convertibility rely on normalization, it 
+follows that adding rule~\nameref{infrule:J-conv} breaks our decision procedures
+for the definitional equality.
+% 
+As noted by Abel and Coquand, it is not clear whether this stems from a 
+fundamental incompatibility between impredicative strict propositions and the 
+propositional equality, or if a more clever strategy could solve this problem.
 
-% As such, we can reason about equality proofs just like we might reason about
-% natural numbers, and in particular we can form the type of equalities between 
-% two proofs of an equality.
-% % 
-% Since the equality type represents a mathematical proposition, we might expect
-% that the equality proofs carry no interesting information, \ie that any two proofs
-% of the same equality are equal.
-% % 
-% This is called the principle of \emph{uniqueness of identity proofs} (UIP), 
-% but it is not validated by the Martin-Löf inductive equality:
-% \sideremark{In \Agda, the uniqueness of identity proofs is derivable, because
-%   the elimination rules for indexed inductive types are stronger than the
-%   \( \mathsf{J} \) eliminator~\cite{Coquand92b}.}
-% % 
-% \[
-% e_1, e_2 : x =_A y \quad \xcancel{\vdash} \quad e_1 =_{x =_A y} e_2
-% \]
-% % 
-% although it is impossible to exhibit two closed equality proofs that are not 
-% definitionally equal.
+\subsection{Impredicativity}
 
-\subsection{Recovering Extensionality in Intensional Type Theory}
+In dependent type theory, a sort is said to be \emph{impredicative} if it is 
+closed under dependent products over any index type. 
+% 
+For instance the sort of \Coq propositions is impredicative, because for all 
+types \( A \) and functions \( \tm{B}{A \to \varProp} \) the dependent product 
+\( \Depfun{A}{B\ x} \) is in \( \varProp \).
+% The same goes for \Lean's strict propositions.
+
+Impredicativity allows some amount of self-reference into the type system: 
+we can use it to form a proposition \( P \) which quantifies over the type 
+\( \varProp \) of all propositions, a type that contains \( P \).
+% 
+A classic example is the impredicative encoding of the false proposition.
+\[
+\Depfun[X]{\varProp}{X} \quad : \quad \varProp
+\]
+
+Compare this situation with the \emph{predicative} hierarchy 
+$(\varType_i)_{i \in \Nat}$ 
+% 
+\sideremark{In the case of \Coq the predicative universes are technically not
+  indexed by integers, but the system maintains a graph of level constraints that
+  effectively does the same job.}
+% 
+of non propositional types.
+In the non-propositional world, dependent products are forced to inhabit a 
+universe level that is higher than both the level of their domain and the level
+of their codomain:
+% 
+given a type \( A : \varType_i \) and a function \( {\tm{B}{A \to \varType_j}} \), 
+their dependent product \( \Depfun{A}{B\ x} \) is in 
+\( \varType_{\mathsf{max}(i,j)} \).
+ 
+Predicativity removes the possibility for self-reference: if we try to 
+replicate the encoding of the false proposition in \( \varType_0 \), the
+resulting type lands in the next universe.
+\[
+\Depfun[X]{\varType_0}{X} \quad : \quad \varType_1
+\]
+
+Playing with self-reference is always a dangerous game: 
+logical antinomies born of Russell's paradox are lurking in the shadows, and 
+might catch us if we get a bit too greedy with our logical principles. 
+% 
+For instance, Berardi's paradox shows that having excluded middle and booleans
+with large elimination in \( \varProp \) is inconsistent.
+% 
+Impredicativity also plays a central role in the non-normalizing term
+that Abel and Coquand derived from rule~\nameref{infrule:J-conv}~\sidecite{lmcs:6606}.
+
+In counterpart to this fragility, impredicativity greatly increases the
+expressive power of our logical system, and allows us to formulate important 
+mathematical constructions such as Tarski's fixed point theorem or nontrivial 
+complete lattices~\sidecite{paco}.
+% 
+Plus some theorems such as the normalization of System F outright cannot be 
+proved in a predicative theory.
+
+Different proof assistants have adopted different attitudes toward 
+impredicativity.
+% 
+On the one hand,
+% 
+\sideremark{Back in the day the \Coq proof assistant used impredicative sorts
+  for both computational data and proofs, but the development team switched to a 
+  theory that is more compatible with classical mathematics.}
+% 
+\Coq and \Lean both have an impredicative sort for propositions, in 
+parallel to the predicative universe hierarchy for the computationally 
+relevant types~\sidecite{Coq:manual,lean}.
+%
+On the other hand, the \Agda proof assistant does not support impredicativity
+and uses two predicative hierarchies instead, one for strict propositions and 
+one for types~\sidecite{agda261}.
+
+\section{Recovering Extensionality in Intensional Type Theory}
+
+The basic propositional equality that we defined as an inductive type does 
+not quite meet the standards of mathematical reasoning.
+% 
+In mathematics, two functions are considered equal when they agree on all 
+inputs -- this is the principle of \emph{function extensionality} --
+% 
+\sideremark{In particular, it is not possible to prove that the functions
+\( {\lambda\ n\ .\ n+1} \) and \( {\lambda\ n\ .\ 1+n} \) are equal.}
+% 
+but this principle is not derivable for the propositional equality in 
+intensional type theory.
+\[
+  \Indeq{A \to B}{f}{g} \quad \xcancel{\longleftrightarrow} \quad \Depfun{A}{\Indeq{B}{f\ x}{g\ x}}
+\]
+
+In fact, we can show that all proofs of propositional equality in an empty 
+context reduce to the definitional equality.
+% 
+This is a straightforward consequence of the normalization of well-typed terms:
+the sole closed normal form for an equality proof is \( \indrefl{t} \), which
+only type-checks if the two endpoints are convertible.
+% 
+And as we explained earlier, the definitional equality does not handle pointwise
+equality of functions.
+
+% All in all, the propositional equality is better thought of as an equality 
+% between programs than as an equality between mathematical objects.
 
 Developing sophisticated mathematics without the principle of 
 function extensionality is not an easy task.
@@ -196,12 +291,13 @@ conventional equality throughout the years.
 The most obvious way to recover a missing reasoning principle is simply to
 postulate it as an axiom. 
 % 
-For instance, the axiom \textsf{functional\_extensionality\_dep} is available 
-in \Coq's standard library.
-% 
 \sideremark{Note that in \Coq and \Lean it is still possible to extract a program 
   from a proof that postulates function extensionality, because the axiom
   is erased during extraction.}
+% 
+For instance, the axiom \textsf{functional\_extensionality\_dep} is available 
+in \Coq's standard library.
+% 
 The downside of using axioms is that they do not play so well with the 
 computational properties of intensional type theory:
 % 
@@ -249,31 +345,44 @@ and the ones that replace it with a \emph{univalent equality}.
 % group. The univalent equality is at the center of the second half, and we 
 % invite the interested reader to have a look at \cref{ch:hott}.
 
-\subsection{Observational Type Theory}
+\subsection{Observational Equality}
 
 The observational equality has its roots in the work of Hofmann and 
 Altenkirch on the setoid model of type theory~\cite{hofmann95,altenkirch99}.
 % 
-By interpreting types as setoids, they are able to model
+By interpreting types as setoids, they were able to model
 \defnote{ITT+funext}{ITT+funext stands for intensional type theory extended 
   with function extensionality.}
 in an intensional type theory extended with strict propositions.
+% 
 Since these strict propositions do not conflict with the proofs-as-programs 
 interpretation, the setoid model provides a way to evaluate proofs that use a 
 function extensionality axiom by evaluating their interpretation.
 
-Following this first step, Altenkirch McBride and Swierstra developed observational type
-theory (OTT), an extension of intensional type theory that brings the main insights 
-of the setoid model back to the world of syntax~\sidecite{altenkirchAl:plpv2007}.
+The central ingredient of the setoid model is the interpretation of the 
+universe.
 % 
-Since the interpretation of the propositional equality \( {t =_A u} \) in the setoid 
-model is a strict proposition defined by induction on the type \( A \), OTT 
-replaces the inductive propositional equality with the \emph{observational equality}, an operator 
-\( t \sim_A u \) that computes an equivalence relation by 
-recursion on \( A \). 
+Constructing a setoid of small setoids seemed difficult at first, because 
+the collection of all small setoids does not have a natural setoid equality;
+but this can be solved by using an 
+\defnote{inductive-recursive}{Induction-recursion is a powerful principle that 
+  allows us to define an inductive type \( A \) simultaneously with functions
+  defined by recursion on \( A \). It is supported by \Agda.}
+universe of codes on which the setoid equality and type coercion operators are 
+defined by recursion.
+
+Following this first step, Altenkirch McBride and 
+Swierstra~\sidecite{altenkirchAl:plpv2007} developed observational 
+type theory (OTT), an extension of intensional type theory that brings the main 
+insights of the setoid model back to the world of syntax:
 % 
-This equivalence relation is a strict proposition, and thus the observational equality satisfies the
-principle of UIP in addition to function extensionality.
+OTT introduces a new primitive operator called the \emph{observational equality} that 
+equips every type with a setoid structure defined by recursion on the universe.
+% 
+The result is a type theory that supports the principles of UIP and function 
+extensionality, and Altenkirch \etal prove that normalization of OTT terms 
+follows from a conjectured normalization result for type theory with 
+induction-recursion.
 
 The observational equality has seen some new and exciting developments in recent 
 years, such as the work of Sterling \etal who revisit it under the lens of 
@@ -286,18 +395,198 @@ comparable to that of univalent type theories.
 In particular, there is still no support for the observational equality in
 major proof assistants, despite some valiant efforts~\sidecite{mcbride-autopsy}.
 
-\subsection{Univalent Type Theory}
+\subsection{Univalent Equality}
 
-The other line of work is more recent and takes its roots in the
-formulation of the univalence axiom~\sidecite{kapulkin2012simplicial,hottbook},
-which gives a new meaning to the equality between types: two types are
-equal when they are equivalent. 
+The other line of work is more recent and takes its roots in
+Voevodsky's \emph{univalence axiom}~\sidecite{kapulkin2012simplicial,hottbook}.
+\[
+(A =_{\varType} B) \enskip \simeq \enskip  (A \simeq B)
+\]
+The univalence axiom gives a new meaning to the equality between types: 
 % 
-This can be understood as an extensionality principle for the universe of types.
-%
-In their search for a computational interpretation of
-univalence, \sidecitet{cubicaltt} developed a notion of cubical equality,
-which satisfies function extensionality and univalence, but is incompatible with UIP.
+\sideremark{The correct definition of an isomorphism between types is somewhat 
+  subtle, so we will simply take it as granted for the time being.}
+% 
+a witness of equality between \( A \) and \( B \) is now the same as an element of the type 
+\( A \simeq B \) of \emph{isomorphisms} between \( A \) and \( B \). 
+% 
+This extensionality principle for the universe of types has far reaching 
+consequences, including the principle of function extensionality.
+
+\paragraph*{Homotopy Type Theory}
+% 
+The univalence axiom departs from the standard mathematical usage of equality 
+in that equality can no longer be a proposition, since it now contains essential
+computational information. 
+% 
+For instance there are two distinct automorphisms of the type of booleans 
+(corresponding to the identity and the negation), and transporting along
+the identity is not the same as transporting along the negation.
+\sideremark{Transporting along an isomorphism amounts to an application of the
+  isomorphism, up to a propositional equality.}
+\[
+\begin{split}
+\indJ{\varType}{\mathsf{Bool}}{\lambda X\ .\ X}{\mathsf{true}}{\mathsf{Bool}}{\mathsf{id}} & \enskip =_{\mathsf{Bool}} \enskip \mathsf{true} \\
+\indJ{\varType}{\mathsf{Bool}}{\lambda X\ .\ X}{\mathsf{true}}{\mathsf{Bool}}{\mathsf{neg}} & \enskip =_{\mathsf{Bool}} \enskip \mathsf{false}
+\end{split}
+\]
+
+Thus when we use the univalence axiom, we must accept that types now contain 
+important information in their equality types. 
+% 
+But these equality types also contain information in their own equality types,
+and so on. 
+% 
+We end up with infinite towers of relevant equality types, all contained in the
+data of a type.
+
+\begin{figure}[!h]
+  \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+  \begin{minipage}{0.4\textwidth}
+    \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1,roundnode/.style={circle, fill=black, inner sep=0pt, minimum size=3.5pt}]
+    %uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
+
+    %Shape: Ellipse [id:dp3643970014729053] 
+    \draw  [fill={rgb, 255:red, 220; green, 220; blue, 220 }  ,fill opacity=1 ] (4,52.08) .. controls (4,26.36) and (34.86,5.5) .. (72.92,5.5) .. controls (110.98,5.5) and (141.83,26.36) .. (141.83,52.08) .. controls (141.83,77.81) and (110.98,98.67) .. (72.92,98.67) .. controls (34.86,98.67) and (4,77.81) .. (4,52.08) -- cycle ;
+    %Curve Lines [id:da06896022650610556] 
+    \draw    (42.51,28.73) .. controls (49.06,26.53) and (55.48,25.53) .. (61.61,25.53) .. controls (81.63,25.53) and (98.59,36.2) .. (107.29,50.91) .. controls (108.37,52.74) and (109.33,54.63) .. (110.14,56.57)(43.46,31.57) .. controls (49.69,29.48) and (55.78,28.53) .. (61.61,28.53) .. controls (80.48,28.53) and (96.5,38.56) .. (104.71,52.44) .. controls (105.72,54.15) and (106.61,55.92) .. (107.38,57.73) ;
+    %Curve Lines [id:da08140854638152761] 
+    \draw    (37.58,39.19) .. controls (41.3,54.8) and (53.94,65.9) .. (68.57,70.27) .. controls (72.96,71.58) and (77.53,72.28) .. (82.1,72.31) .. controls (82.22,72.31) and (82.34,72.31) .. (82.46,72.31) .. controls (89.71,72.31) and (96.96,70.63) .. (103.45,66.99)(34.66,39.89) .. controls (38.64,56.55) and (52.07,68.48) .. (67.72,73.14) .. controls (72.37,74.53) and (77.23,75.28) .. (82.08,75.31) .. controls (82.2,75.31) and (82.33,75.31) .. (82.46,75.31) .. controls (90.22,75.31) and (97.97,73.5) .. (104.92,69.61) ;
+    %Straight Lines [id:da7856762818241472] 
+    \draw    (74.28,35.66) -- (62.08,62.46)(71.55,34.42) -- (59.35,61.22) ;
+
+    \node[roundnode] (B0) at (37,33) {};
+    \node (C0) at (28,30) {\footnotesize{$a$}};
+    \node[roundnode] (B1) at (108,63) {};
+    \node (C1) at (118,68) {\footnotesize{$b$}};
+    \node (C2) at (88,24) {\footnotesize{$e_1$}};
+    \node (C3) at (64,80) {\footnotesize{$e_2$}};
+    \node (C4) at (77,52) {\footnotesize{$h$}};
+    \node (C5) at (130,90) {\footnotesize{$A$}};
+    \end{tikzpicture}
+  \end{minipage}
+  \begin{minipage}{0.4\textwidth}
+  \[
+    \begin{array}{l}
+      A : \varType_i \\
+      a : A \\
+      b : A \\
+      e_1 : \Indeq{A}{a}{b} \\
+      e_2 : \Indeq{A}{a}{b} \\
+      h : \Indeq{(\Indeq{A}{a}{b})}{e_1}{e_2}
+    \end{array}
+  \]
+  \end{minipage}
+  \caption{Graphical representation of a type with inhabitants and equalities}
+\end{figure}
+ 
+All in all, types do not really resemble sets anymore. 
+% 
+Voevodsky noticed that they are much closer to \emph{weak \( \infty \)-groupoids}, 
+a higher categorical gadget that plays an important role in homotopy theory, 
+the branch of math that studies spaces and their deformations.
+% 
+This is the starting point of \emph{homotopy type theory} (HoTT), a far-reaching analogy
+between homotopy theory and intensional type theory with the univalence 
+axiom~\cite{hottbook}.
+
+In homotopy theory, we think of types as spaces. Inhabitants of a type 
+play the role of its points, equalities between two terms correspond to paths
+between the points, equalities between two equalities are continuous
+deformations between the corresponding paths, and so on. 
+% 
+Naturally, functions between types are continuous in that they preserve
+equalities, and isomorphisms correspond to homotopy equivalences.
+
+Homotopy type theory also extends the notion of inductive type to 
+\emph{higher inductive types} (HITs), which feature constructors for equalities
+in addition to constructors for elements.
+% 
+HITs provide a variety of basic spaces, such as the circle, the sphere and
+the torus, but also a remarkably well-behaved notion of quotient types.
+% 
+\sideremark{The quotients defined in terms of HITs are effective}
+\[
+\begin{array}{l}
+\mathsf{Inductive}\enskip\mathsf{circle} : \varType_0\enskip := \\
+\sep \quad \mathsf{base} \enskip : \enskip \mathsf{circle}\\
+\sep \quad \mathsf{loop} \enskip : \enskip \Indeq{\mathsf{circle}}{\mathsf{base}}{\mathsf{base}} \\
+\\
+\mathsf{Inductive}\enskip\mathsf{quotient}\ (A : \varType_i)\ (R : A \to A \to \varType_i) : \varType_i\enskip := \\
+\sep \quad \mathsf{emb} \enskip : \enskip A \to \mathsf{quotient}\ A\ R \\
+\sep \quad \mathsf{quo} \enskip : \enskip \Depfun[a\ b]{A}{R\ a\ b \to \Indeq{...}{\mathsf{emb}\ a}{\mathsf{emb}\ b}} \\
+\end{array}
+\]
+
+Using higher inductive types and the univalence axiom it becomes possible to 
+prove a surprising amount of classical results from homotopy theory, rephrased
+to talk about types and equality:
+% 
+in his PhD thesis, Brunerie managed to show that the fourth homotopy group of
+the three-dimensional sphere has two elements~\sidecite{Brunerie16}.
+% 
+Since then, the HoTT community has developed extensive libraries of formalized
+univalent mathematics in \Coq~\sidecite{Bauer:2017:HLF:3018610.3018615} and
+\Agda~\sidecite{agda-unimath}.
+
+However, homotopy type theory is not exactly computational. The univalence
+axiom is, well, an axiom -- which means that the \( \mathsf{J} \) eliminator
+will not reduce when applied to an isomorphism converted to an equality 
+using univalence.
+% 
+Higher inductive types also block computation, because their elimination 
+principles are simply postulated as axioms.
+% 
+This situation is all the more disappointing as the features introduced by HoTT
+seem to follow the principles of constructive mathematics.
+
+\paragraph*{Cubical Type Theory}
+% 
+Subsequently, the type theory community directed its attention to the
+search for a computational interpretation of the univalent equality. 
+
+In 2014, Bezem \etal built a model of the univalence axiom in a constructive 
+set theory~\sidecite{BezemCoquandHuber14}.
+% 
+Their model interprets types as \emph{fibrant cubical sets}, a combinatorial
+model of weak \( \infty \)-groupoids that lends itself well to a constructive
+presentation.
+% 
+Although this model does not quite provide a computational interpretation of
+univalence, it laid the groundwork.
+
+This program came to fruition a year later with the introduction of \emph{cubical type theory}, an intensional 
+type theory based on the insights provided by the fibrant cubical 
+sets~\sidecite{cubicaltt}.
+% 
+Cubical type theory incorporates primitives from homotopy theory directly in 
+the typing judgments, and provides them with adequate computation rules.
+% 
+With this additional structure, it becomes possible to derive the principle of 
+univalence as a theorem, thereby getting an axiom-free univalent theory.
+% 
+On top of this, cubical type theory supports higher inductive types with
+natural elimination principles and computation rules. 
+
+In the years following its introduction, cubical type theory flourished into a 
+vibrant field of research.
+% 
+Many variations of the original system have been studied on paper~\cite{AngiuliHouHarper18,ABCFHL}
+and implemented in proof assistants~\cite{Cubicaltt, redtt} --
+% 
+among them, the \texttt{cubical} mode of the \Agda proof assistant~\sidecite{cubical-agda}
+is without a doubt the most successful implementation, as it has set the stage for several 
+large-scale formalization projects.
+% 
+On the side of the metatheoretical investication, Huber proved a canonicity 
+result~\sidecite{Huber16}, and Sterling and Angiuli obtained a normalization result
+\sidecite{sterling_normalization_cubical}.
+
+% There are multiple variations and implementations of cubical type
+% theory---the original formulation of \citet{CCHM} used an interval
+% endowed with the structure of a \emph{De Morgan algebra} while the
+% more recent \emph{cartesian} cubical type theories use an interval
+% with less structure~\cite{AngiuliHouHarper18,ABCFHL}. All of the
 
 \section{Contributions}
 

@@ -188,6 +188,7 @@
 
 \newcommand{\Type}{\mathcal{U}}
 \newcommand{\varType}{\mathsf{Type}}
+\newcommand{\varSet}{\mathsf{Set}}
 
 \newcommand{\Univ}{\mathfrak{s}}
 
@@ -230,6 +231,10 @@
 \newcommand{\idpath}[1]{\metaop{Idpath}(#1)}
 \newcommand{\J}[6]{\metaop{J}(#1,#2,#3,#4,#5,#6)}
 \newcommand{\eqJ}[5]{\metaop{eq_J}(#1,#2,#3,#4,#5)}
+
+\newcommand{\Indeq}[3]{{#2 =_{#1} #3}}
+\newcommand{\indrefl}[1]{\mathsf{refl}_{#1}}
+\newcommand{\indJ}[6]{\mathsf{J}(#1,#2,#3,#4,#5,#6)}
 
 \newcommand{\Boxt}[1]{\square{#1}}
 \newcommand{\boxt}[1]{\diamond{#1}}
@@ -294,6 +299,7 @@
 \newcommand{\tytmEco}[4][]{#1 #2 \dashEco #3 : #4}
 \newcommand{\tm}[2]{#1 : #2}
 \newcommand{\tytms}{\tytm}
+% \newcommand{\eqeq}[2]{#1 \equiv abd #2}
 \newcommand{\eqtm}[5][]{#1 #2 \vdash #3 \equiv #4 : #5}
 \newcommand{\red}[5][]{#1 #2 \vdash #3 \Rightarrow #4 : #5}
 \newcommand{\redT}[5][]{#1 #2 \vdash #3 \Rightarrow^* #4 : #5}
