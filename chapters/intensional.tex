@@ -14,7 +14,7 @@ equations that the proof assistant handles silently for us.
 % 
 \sideremark{In proof assistants based on ZF set theory such as Metamath,
   the theorem \( 2+2=4 \) does requires a proof. Although it is elementary,
-  this proof involves hundreds of auxiliary lemmas!}
+  this proof involves a surprising amount of auxiliary lemmas!}
 % 
 For instance, the terms \( 2+2 \) and \( 4 \) are definitionally equal, meaning that we 
 can use them interchangeably in our proofs without having to worry about 
@@ -98,7 +98,7 @@ the whole term can simply evaluate to \( u \).
 
 As a consequence, the programs 
 \defnote{extracted}{Extraction produces a program in an external programming 
-  language by erasing type information.} 
+  language by erasing some type information.} 
 from proofs that use equational reasoning  tend to spend a lot of time passing 
 around equality proofs just to end up discarding them.
 % 
@@ -113,7 +113,7 @@ performances for extracted programs.
 Technically this is a bit of an infrigement of the Curry-Howard discipline, as \( \varProp \) 
 effectively re-introduces a separation between propositions and data.
 % 
-But do not be mistaken: proofs of propositions still play their normal role in computations, and in 
+But make no mistake: proofs of propositions still play their normal role in computations, and in 
 particular they may block the evaluation of open terms. 
 % 
 It is only when we extract an \emph{external} program that propositions become irrelevant.
@@ -188,7 +188,8 @@ Impredicativity allows some amount of self-reference into the type system:
 we can use it to form a proposition \( P \) which quantifies over the type 
 \( \varProp \) of all propositions, a type that contains \( P \).
 % 
-A classic example is the impredicative encoding of the false proposition.
+A classic example is the impredicative encoding of the false proposition, 
+whose inhabitants can be eliminated into any other proposition:
 \[
 \Depfun[X]{\varProp}{X} \quad : \quad \varProp
 \]
@@ -243,13 +244,13 @@ On the one hand,
   for both computational data and proofs, but the development team switched to a 
   theory that is more compatible with classical mathematics.}
 % 
-\Coq and \Lean both have an impredicative sort for propositions, in 
-parallel to the predicative universe hierarchy for the computationally 
+\Coq and \Lean both have embraced impredicativity for their sort for propositions, 
+which cohabits with a predicative universe hierarchy used for the computationally 
 relevant types~\sidecite{Coq:manual,lean}.
 %
-On the other hand, the \Agda proof assistant does not support impredicativity
-and uses two predicative hierarchies instead, one for strict propositions and 
-one for types~\sidecite{agda261}.
+On the other hand, the \Agda proof assistant prefers not to support impredicativity 
+at all and uses two predicative hierarchies instead, 
+one for strict propositions and one for types~\sidecite{agda261}.
 
 \section{Recovering Extensionality in Intensional Type Theory}
 
@@ -367,7 +368,7 @@ the collection of all small setoids does not have a natural setoid equality;
 but this can be solved by using an 
 \defnote{inductive-recursive}{Induction-recursion is a powerful principle that 
   allows us to define an inductive type \( A \) simultaneously with functions
-  defined by recursion on \( A \). It is supported by \Agda.}
+  defined by recursion on \( A \).}
 universe of codes on which the setoid equality and type coercion operators are 
 defined by recursion.
 
@@ -410,18 +411,19 @@ The univalence axiom gives a new meaning to the equality between types:
 a witness of equality between \( A \) and \( B \) is now the same as an element of the type 
 \( A \simeq B \) of \emph{isomorphisms} between \( A \) and \( B \). 
 % 
-This extensionality principle for the universe of types has far reaching 
-consequences, including the principle of function extensionality.
+This can be seen as an extensionality principle for the universe of types, and
+adding it to intensional type theory has far reaching consequences. 
+In particular, univalience implies the principle of function extensionality.
 
 \paragraph*{Homotopy Type Theory}
 % 
-The univalence axiom departs from the standard mathematical usage of equality 
-in that equality can no longer be a proposition, since it now contains essential
+The univalence axiom departs from the standard mathematical usage of equality, 
+in that equality can no longer be a proposition since it now contains essential
 computational information. 
 % 
 For instance there are two distinct automorphisms of the type of booleans 
-(corresponding to the identity and the negation), and transporting along
-the identity is not the same as transporting along the negation.
+-- one corresponding to the identity and the other to negation -- and transporting along
+the identity is not the same as transporting along negation.
 \sideremark{Transporting along an isomorphism amounts to an application of the
   isomorphism, up to a propositional equality.}
 \[
@@ -480,7 +482,7 @@ data of a type.
   \caption{Graphical representation of a type with inhabitants and equalities}
 \end{figure}
  
-All in all, types do not really resemble sets anymore. 
+All in all, these types do not really resemble sets anymore. 
 % 
 Voevodsky noticed that they are much closer to \emph{weak \( \infty \)-groupoids}, 
 a higher categorical gadget that plays an important role in homotopy theory, 
@@ -499,13 +501,19 @@ Naturally, functions between types are continuous in that they preserve
 equalities, and isomorphisms correspond to homotopy equivalences.
 
 Homotopy type theory also extends the notion of inductive type to 
-\emph{higher inductive types} (HITs), which feature constructors for equalities
+\emph{higher inductive types} (HITs), which feature constructors for paths/equalities
 in addition to constructors for elements.
 % 
 HITs provide a variety of basic spaces, such as the circle, the sphere and
-the torus, but also a remarkably well-behaved notion of quotient types.
+the torus, but also a notion of quotient types.
 % 
-\sideremark{The quotients defined in terms of HITs are effective}
+\sideremark{This definition of the \textsf{circle} type might be surprising,
+  as it looks nothing like the expected space
+  \( \{ (x, y) \in \mathbb{R}^2\ |\ x^2 + y^2 = 1 \} \).
+  This is because types in HoTT are not \emph{topological} spaces, but rather
+  synthetic spaces built out of points, paths and higher dimensional faces.
+  As such, the \textsf{circle} is freely generated by a base point and a path
+  from that base point to itself.}
 \[
 \begin{array}{l}
 \mathsf{Inductive}\enskip\mathsf{circle} : \varType_0\enskip := \\
@@ -531,8 +539,8 @@ univalent mathematics in \Coq~\sidecite{Bauer:2017:HLF:3018610.3018615} and
 
 However, homotopy type theory is not exactly computational. The univalence
 axiom is, well, an axiom -- which means that the \( \mathsf{J} \) eliminator
-will not reduce when applied to an isomorphism converted to an equality 
-using univalence.
+will not reduce when applied to an equality that we obtained from an 
+isomorphism using univalence.
 % 
 Higher inductive types also block computation, because their elimination 
 principles are simply postulated as axioms.
@@ -552,35 +560,37 @@ Their model interprets types as \emph{fibrant cubical sets}, a combinatorial
 model of weak \( \infty \)-groupoids that lends itself well to a constructive
 presentation.
 % 
-Although this model does not quite provide a computational interpretation of
-univalence, it laid the groundwork.
+Although this model does not support anything like a computation rule, 
+it paved the way for a new approach to univalence.
 
-This program came to fruition a year later with the introduction of \emph{cubical type theory}, an intensional 
-type theory based on the insights provided by the fibrant cubical 
-sets~\sidecite{cubicaltt}.
+This program came to fruition a year later with the introduction of 
+\emph{cubical type theory}, an intensional type theory based on the insights 
+provided by the fibrant cubical sets~\sidecite{cubicaltt}.
 % 
-Cubical type theory incorporates primitives from homotopy theory directly in 
-the typing judgments, and provides them with adequate computation rules.
+This new system incorporates primitives from homotopy theory directly in the typing 
+judgments, and provides them with adequate computation rules.
 % 
 With this additional structure, it becomes possible to derive the principle of 
-univalence as a theorem, thereby getting an axiom-free univalent theory.
+univalence as a theorem, which makes cubical type theory an axiom-free univalent 
+theory.
 % 
-On top of this, cubical type theory supports higher inductive types with
-natural elimination principles and computation rules. 
+And since it satisfies a canonicity property~\sidecite{Huber16} and supports a
+normalization function for open terms~\sidecite{sterling_normalization_cubical}, 
+cubical type theory can be deemed fully computational.
+% 
+On top of this, it supports higher inductive types with
+natural elimination principles and computation rules~\sidecite{CavalloHarper19}.
+
 
 In the years following its introduction, cubical type theory flourished into a 
 vibrant field of research.
 % 
 Many variations of the original system have been studied on paper~\cite{AngiuliHouHarper18,ABCFHL}
-and implemented in proof assistants~\cite{Cubicaltt, redtt} --
+and implemented in proof assistants~\cite{Cubicaltt, redtt}.
 % 
-among them, the \texttt{cubical} mode of the \Agda proof assistant~\sidecite{cubical-agda}
-is without a doubt the most successful implementation, as it has set the stage for several 
+Among them, the \texttt{cubical} mode of the \Agda proof assistant~\sidecite{cubical-agda}
+is without a doubt the most successful implementation, and it has set the stage for several 
 large-scale formalization projects.
-% 
-On the side of the metatheoretical investication, Huber proved a canonicity 
-result~\sidecite{Huber16}, and Sterling and Angiuli obtained a normalization result
-\sidecite{sterling_normalization_cubical}.
 
 % There are multiple variations and implementations of cubical type
 % theory---the original formulation of \citet{CCHM} used an interval
