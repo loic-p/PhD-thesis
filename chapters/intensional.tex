@@ -1,9 +1,28 @@
 \setchapterimage[6cm]{seaside}
 \setchapterpreamble[u]{\margintoc}
-\chapter{Introduction}
+\chapter{Introduction in English}
 \labch{intro_observational}
 
-\section{Equality in Intensional Type Theory}
+% This thesis deals with dependent type theory, a discipline that lies at the 
+% intersection of mathematics, formal logic and computer science.
+
+% What is dependent type theory about?
+% % 
+% The answer is simple: it is high-level, functional programming language with a
+% type system that is so expressive that we can use it to express complex
+% logical constraints, ensuring that programs are correct simply by virtue of 
+% being well-typed.
+% % 
+% Well, not really. In fact dependent type theory is closer to a foundation for 
+% mathematics, one that is more faithful to the mathematical intuition than 
+% first-order set theory.
+% % 
+% But that leaves out the most interesting part of the picture!
+% % 
+% Type theory is a mathematical object in its own right, a sophisticated 
+% algebraic theory whose class of models 
+
+% \section{Equality in Intensional Type Theory}
 
 If you have ever used a proof assistant based on intensional type theory such as
 \Coq, \Agda or {\Lean} -- and there is a good chance that you have if you are 
@@ -748,13 +767,61 @@ This thesis builds upon three peer-reviewed papers:
 Additionally, the cubical translation of part 2 was the object of an extended 
 abstract presented at ICMS'20.
 
-\section{Notations and conventions}
+\section{Theories and Meta-Theories}
 
-\MLTT = no impred
+In the following chapters, we will be juggling with a fair amount of formal 
+systems -- mostly dependent type theories, but also a few first-order theories.
+% 
+Since the mapping between type theories and names seems to be rather 
+inconsistent in the literature, we fix our own convention:
 
-\CIC = impred
+\begin{tabular}{p{3em} p{0.82\textwidth} }
+\MLTT & 
+  Intensional Martin-Löf Type Theory designates a type theory with dependent 
+  products, a predicative hierarchy of universes and \emph{some amount} of 
+  inductive types~\cite{MartinLoef75}.
+  % 
+  We remain intentionally vague about which inductive types are included, and
+  we will use more explicit notations such as \( \MLTTW \) when such concerns become 
+  relevant.
+\end{tabular}
 
-Informal set theory vs \Agda vs \SetoidCC
+\begin{tabular}{p{3em} p{0.82\textwidth} }
+\CIC & 
+  The predicative Calculus of Inductive Constructions has all the features 
+  of \MLTT, plus a universe \( \varProp \) of impredicative propositions with
+  large elimination of subsingleton inductive types~\cite{Paulin15}.
+\end{tabular}
+
+\begin{tabular}{p{3em} p{0.82\textwidth} }
+\SetoidCC / \SetoidCCplus & 
+  The Obervational Calculus of Constructions is our implementation of 
+  observational type theory, which is presented in great detail in 
+  \cref{ch:observational}.
+  % 
+  The extended system \SetoidCCplus adds a rule for the computation of
+  type-casting on reflexive identity proofs, as described in 
+  \cref{ch:extensions}. 
+\end{tabular}
+
+As the bulk of this thesis deals with meta-theoretical properties of
+type theories, we will spend a lot of time treating them as mathematical 
+objects, \ie as a collection of syntax tokens and typing rules.
+% 
+But type theories are also mathematical frameworks in their own right, that
+we can use to prove theorems. 
+
+And indeed we will be doing a lot of mathematics inside type theories, often
+adopting an informal style to avoid overwhelming the reader with unsightly
+proof terms.
+% 
+When using type theory as our meta-theory, we will use the syntax and color 
+scheme of the \Agda proof assistant, for the simple reason that all of our
+formalization is done in \Agda.
+% 
+When no \Agda code appears, it is safe to assume that we are working without
+a specific framework in mind, as in most mathematical writing.
+
 
 \section{Related work}
 
