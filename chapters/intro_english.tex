@@ -413,7 +413,8 @@ Still, observational type theory has yet to reach a level of maturity
 comparable to that of univalent type theories.
 % 
 In particular, there is still no support for the observational equality in
-major proof assistants, despite some valiant efforts~\sidecite{mcbride-autopsy}.
+major proof assistants, despite some significant work in that 
+direction~\sidecite{mcbride-autopsy}.
 
 \subsection{Univalent Equality}
 
@@ -432,7 +433,7 @@ a witness of equality between \( A \) and \( B \) is now the same as an element 
 % 
 This can be seen as an extensionality principle for the universe of types, and
 adding it to intensional type theory has far reaching consequences. 
-In particular, univalience implies the principle of function extensionality.
+In particular, univalence implies the principle of function extensionality.
 
 \paragraph*{Homotopy Type Theory}
 % 
@@ -511,7 +512,7 @@ This is the starting point of \emph{homotopy type theory} (HoTT), a far-reaching
 between homotopy theory and intensional type theory with the univalence 
 axiom~\cite{hottbook}.
 
-In homotopy theory, we think of types as spaces. Inhabitants of a type 
+In HoTT, we think of types as spaces. Inhabitants of a type 
 play the role of its points, equalities between two terms correspond to paths
 between the points, equalities between two equalities are continuous
 deformations between the corresponding paths, and so on. 
@@ -673,10 +674,10 @@ We bridge that gap by building a set-theoretic model for \SetoidCC.
 
 This work solves several problems that were still open as far as we know:
 % 
-\sideremark{Altenkirch, McBride and Swierstra reduced normalization of 
-  observational type theory to a normalization conjecture for intensional 
-  type theory with induction-recursion, which has not been proven as far as we 
-  know.}
+% \sideremark{Altenkirch, McBride and Swierstra reduced normalization of 
+%   observational type theory to a normalization conjecture for intensional 
+%   type theory with induction-recursion, which has not been proven as far as we 
+%   know.}
 % 
 first and foremost, we get a proper proof of normalization and decidability for 
 observational type theory, which was conjectured by Altenkirch \etal
@@ -711,11 +712,11 @@ univalence.
 However, the prefascist translation is missing an important ingredient of
 that model, called the \emph{fibrancy structure}.
 
-Our contributions are twofold: fist we present a dissection of the prefascist 
-construction of Pédrot, explaining how it gets around the well-known 
+We add two new pages to this story: first, we present a dissection of 
+the prefascist construction of Pédrot, explaining how it gets around the well-known 
 difficulties of working with presheaves in intensional type theory.
 % 
-As a second step, we explain how to extend the translation with a notion of 
+Then we explain how to extend the translation with a notion of 
 fibrancy structure that should allow for an interpretation of the univalence
 axiom.
 
@@ -732,7 +733,7 @@ done in axiomatic HoTT.
 Our example results include:
 %
 \begin{itemize}
-\item The equivalence of the torus and two circles together with the
+\item The equivalence of the torus and the product of two circles together with the
   computation of their respective fundamental groups.
 \item The equivalence between direct definitions of low dimensional
   spheres, and alternative definitions using iterated suspensions.
@@ -755,7 +756,7 @@ This thesis builds upon three peer-reviewed papers:
 \begin{itemize}
 \item The development of synthetic homotopy theory in cubical type theory was 
   presented in a paper written with Anders Mörtberg published at 
-  CPP'20~\sidecite{cubical-homotopy}
+  CPP'20~\sidecite{cubical-homotopy}.
 \item The construction of a logical relation for a predicative version of 
   observational type theory is joint work with Nicolas Tabareau and was 
   presented at POPL'22~\sidecite{pujet:hal-03367052},

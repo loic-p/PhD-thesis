@@ -183,8 +183,8 @@ intelligente qui pourrait résoudre ce problème.
 
 \subsection{Imprédicativité}
 
-En théorie des types dépendants, une sorte est qualifiée d'\emph{imprédicative} 
-lorsqu'elle est close par produits dépendants indexés par n'importe quel type. 
+En théorie des types dépendants, une sorte est dite \emph{imprédicative} 
+quand elle est close par produits dépendants indexés par n'importe quel type. 
 % 
 Par exemple la sorte des propositions de \Coq est imprédicative, car pour tout 
 type \( A \) et toute fonction \( \tm{B}{A \to \varProp} \) le produit dépendant 
@@ -263,178 +263,178 @@ pour les propositions strictes et une pour les types~\sidecite{agda261}.
 
 \section{L'Extensionalité dans la Théorie des Types Intensionnelle}
 
-The basic propositional equality that we defined as an inductive type does 
-not quite meet the standards of mathematical reasoning.
+L'égalité propositionnelle simple que nous avons définie avec un type inductif 
+ne répond pas vraiment aux exigences du raisonnement mathématique. 
 % 
-In mathematics, two functions are considered equal when they agree on all 
-inputs -- this is the principle of \emph{function extensionality} --
+En mathématiques, deux fonctions sont considérées comme égales lorsqu'elles 
+coïncident sur tous les antécédants -- il s'agit du principe 
+d'\emph{extensionnalité des fonctions} -- 
 % 
-\sideremark{In particular, it is not possible to prove that the functions
-\( {\lambda\ n\ .\ n+1} \) and \( {\lambda\ n\ .\ 1+n} \) are equal.}
+\sideremark{En particulier, il est impossible de montrer que les fonctions
+\( {\lambda\ n\ .\ n+1} \) and \( {\lambda\ n\ .\ 1+n} \) sont égales.}
 % 
-but this principle is not derivable for the propositional equality in 
-intensional type theory.
+mais ce principe n'est pas démontrable pour l'égalité propositionnelle dans 
+la théorie des types intensionnelle.
 \[
   \Indeq{A \to B}{f}{g} \quad \xcancel{\longleftrightarrow} \quad \Depfun{A}{\Indeq{B}{f\ x}{g\ x}}
 \]
 
-In fact, we can show that all proofs of propositional equality in an empty 
-context reduce to the definitional equality.
+En fait, nous pouvons même prouver que toutes les preuves d'égalité 
+propositionnelle dans un contexte clos se réduisent à l'égalité définitionnelle. 
 % 
-This is a straightforward consequence of the normalization of well-typed terms:
-the sole closed normal form for an equality proof is \( \indrefl{t} \), which
-only type-checks if the two endpoints are convertible.
+C'est une conséquence directe de la normalisation des termes bien typés : 
+la seule forme normale close pour une preuve d'égalité est \( \indrefl{t} \), 
+terme qui n'est typable que si les deux membres de l'égalité sont convertibles. 
 % 
-And as we explained earlier, the definitional equality does not handle pointwise
-equality of functions.
+Et comme nous l'avons expliqué précédemment, l'égalité définitionnelle est 
+incapable de gérer l'égalité naturelle des fonctions. 
 
-% All in all, the propositional equality is better thought of as an equality 
-% between programs than as an equality between mathematical objects.
+Développer des mathématiques complexes sans le principe d'extensionnalité 
+des fonctions n'est pas une tâche facile. Par conséquent, notre communauté a 
+considéré plusieurs options pour retrouver une égalité plus conventionnelle au 
+fil des ans.
 
-Developing sophisticated mathematics without the principle of 
-function extensionality is not an easy task.
-Consequently, the community has explored several options to recover a more 
-conventional equality throughout the years.
+\paragraph*{Postuler des axiomes d'extensionnalité}
+% 
+Le moyen le plus simple de récupérer un principe de raisonnement manquant 
+est simplement de le postuler comme axiome. 
+% 
+\sideremark{Remarquons qu'avec \Coq et \Lean, il est possible d'extraire un 
+  programme à partir d'une preuve qui postule l'axiome d'extensionnalité des
+  fonctions, puisque cet axiome est une proposition et sera donc effacé lors
+  de l'extraction.}
+% 
+Par exemple, l'axiome \textsf{functional\_extensionality\_dep} est disponible 
+dans la bibliothèque standard de Coq. 
+% 
+L'utilisation d'axiomes a toutefois des inconvénients, car ils ne se comportent 
+pas très bien vis-à-vis des propriétés calculatoires de la théorie des types 
+intensionnelle : appliquer l'éliminateur \( \mathsf{J} \) à une égalité obtenue 
+via un axiome ne produira qu'un terme bloqué.
 
-\paragraph*{Extensionality axioms}
+\paragraph*{Utiliser des sétoïdes}
 % 
-The most obvious way to recover a missing reasoning principle is simply to
-postulate it as an axiom. 
+Une technique standard pour récupérer les principes d'extensionnalité sans entrer
+en conflit avec la correspondance preuves-programmes est d'utiliser des 
+\emph{sétoïdes}~\sidecite{hofmann95}, c'est-à-dire de remplacer les types par 
+des couples \( (|A|, e_A) \) d'un type \( |A| \) et d'une relation d'équivalence 
+\( e_A \) sur \( |A| \) (l'\emph{égalité sétoïdale} de \( A \)).
 % 
-\sideremark{Note that in \Coq and \Lean it is still possible to extract a program 
-  from a proof that postulates function extensionality, because the axiom
-  is erased during extraction.}
-% 
-For instance, the axiom \textsf{functional\_extensionality\_dep} is available 
-in \Coq's standard library.
-% 
-The downside of using axioms is that they do not play so well with the 
-computational properties of intensional type theory:
-% 
-% intensional type theory is built around the proofs-as-programs correspondence, 
-% and every existence proof doubles as an algorithm that computes the witness
-% of existence.
-% 
-applying the \( J \) eliminator to an equality obtained \textit{via} an axiom
-will only result in a stuck term.
+Nous pouvons alors considérer uniquement les fonctions qui préservent l'égalité 
+sétoïdale, et nous pouvons demander l'extensionnalité dans l'égalité sétoïdale 
+des types de fonctions.
 
-\paragraph*{Setoids}
+Travailler avec des sétoïdes n'est pas très agréable, car nous devons accompagner 
+chaque définition par des preuves bureaucratiques de préservation de l'égalité
+sétoïdale, alors même que toutes les constructions possibles en théorie des types 
+respectent naturellement l'extensionnalité des fonctions~\sidecite{Altenkirch99}. 
 % 
-A standard technique to recover extensionality principles without breaking the
-proofs-as-programs correspondance is to use \emph{setoids}~\sidecite{hofmann95},
-\ie to replace types with pairs \( (|A|, e_A) \) of a carrier type \( |A| \)
-and an equivalence relation \( e_A \) on \( |A| \) 
-(the \emph{setoid equality} of \( A \)).
+En un mot, nous devons faire le travail d'un compilateur à la main. 
 % 
-We then restrict our attention to functions that preserve the setoid equality, 
-and we bake function extensionality into the setoid equality of function types.
+\Coq implémente des tactiques pour traiter les sétoïdes plus efficacement, mais 
+elles supportent difficilement le passage à l'échelle de développements conséquents -- 
+au point que la communauté utilise le terme \emph{setoid hell} en référence à ces 
+problèmes.
 
-Working with setoids is not exactly pleasant, as we need to supplement every
-definition with bureaucratic proofs of preservation of the setoid equalities,
-even though all available constructs in type theory do respect function 
-extensionality~\sidecite{Altenkirch99}.
+\paragraph*{Changer la théorie}
 % 
-Basically, we need to do the work of a compiler by hand.
+Étant donné que les axiomes d'extensionnalité sont problématiques parce qu'ils 
+bloquent le calcul, les théoriciens des types ont envisagé plusieurs manières 
+d'étendre la théorie des types intensionnelle avec de nouvelles règles de calcul 
+pour gérer les axiomes souhaités. 
 % 
-The \Coq proof assistant provides some automation to deal with setoids through 
-tactics, but these solutions do not scale painlessly to large developments -- 
-to the point that the community has coined the term \emph{setoid hell} to refer 
-to these issues.
+Les travaux les plus fructueux peuvent être divisés en deux groupes : d'une part ceux qui 
+remplacent l'égalité propositionnelle inductive par une 
+\emph{égalité observationnelle}, et d'autre part ceux qui la remplacent par une 
+\emph{égalité univalente}.
 
-\paragraph*{Alternative type theories}
-% 
-Since extensionality axioms are problematic because they block 
-computation, type theorists have explored numerous ways to extend intensional
-type theory with new computational rules that handle the desired axioms.
-% 
-The most successful lines of work can be roughly divided into two groups: the 
-ones that replace the inductive propositional equality with an \emph{observational equality}, 
-and the ones that replace it with a \emph{univalent equality}.
-% 
-% In the first half of this thesis, we will restrict our attention to the first 
-% group. The univalent equality is at the center of the second half, and we 
-% invite the interested reader to have a look at \cref{ch:hott}.
+\subsection{L'Égalité Observationnelle}
 
-\subsection{Observational Equality}
+Les origines de l'égalité observationnelle remontent aux travaux de Hofmann et 
+Altenkirch sur le modèle sétoïdal de la théorie des types~\cite{hofmann95,altenkirch99}.
+% 
+En interprétant les types comme des sétoïdes, ils ont pu modéliser
+\defnote{ITT+funext}{ITT+funext est une abréviation pour la théorie des types intensionnelle 
+avec l'axiome d'extensionalité des fonctions.}
+dans une théorie des types intensionnelle étendue avec des propositions strictes. 
+Étant donné que ces propositions strictes n'entrent pas en conflit avec l'interprétation 
+des preuves en tant que programmes, le modèle sétoïdal fournit un moyen d'évaluer les 
+preuves qui utilisent l'axiome d'extensionnalité des fonctions, en évaluant leur 
+interprétation.
 
-The observational equality has its roots in the work of Hofmann and 
-Altenkirch on the setoid model of type theory~\cite{hofmann95,altenkirch99}.
+L'ingrédient central du modèle sétoïdal est l'interprétation de l'univers. 
 % 
-By interpreting types as setoids, they were able to model
-\defnote{ITT+funext}{ITT+funext stands for intensional type theory extended 
-  with function extensionality.}
-in an intensional type theory extended with strict propositions.
-% 
-Since these strict propositions do not conflict with the proofs-as-programs 
-interpretation, the setoid model provides a way to evaluate proofs that use a 
-function extensionality axiom by evaluating their interpretation.
+Construire un sétoïde qui contient tous les petits sétoïdes semble difficile 
+en première approche, car la collection de tous les petits sétoïdes n'a pas 
+d'égalité sétoïdale naturelle ; mais cela peut être résolu en utilisant un univers 
+\defnote{inductif-récursif}{L'induction-recursion est un principe logique puissant qui 
+  permet de définir un type inductif \( A \) simultanément avec des fonctions
+  définies par récursion sur \( A \).} 
+de codes sur lequel on définit récursivement l'égalité sétoïdale 
+ainsi qu'un opérateur de \emph{type-casting}.
 
-The central ingredient of the setoid model is the interpretation of the 
-universe.
+Suite à cette première étape, Altenkirch McBride et 
+Swierstra~\sidecite{altenkirchAl:plpv2007} ont développé la théorie des types 
+observationnelle (OTT), une extension de la théorie des types intensionnelle 
+qui ramène les idées du modèle sétoïdal dans le monde de la syntaxe : 
 % 
-Constructing a setoid of small setoids seemed difficult at first, because 
-the collection of all small setoids does not have a natural setoid equality;
-but this can be solved by using an 
-\defnote{inductive-recursive}{Induction-recursion is a powerful principle that 
-  allows us to define an inductive type \( A \) simultaneously with functions
-  defined by recursion on \( A \).}
-universe of codes on which the setoid equality and type coercion operators are 
-defined by recursion.
+OTT incorpore un nouvel opérateur primitif appelé 
+\emph{égalité observationnelle} qui dote chaque type d'une structure de sétoïde 
+définie par récursion sur l'univers. 
+% 
+Grâce à cela, OTT implémente les principes d'UIP et d'extensionnalité des 
+fonctions, et de plus Altenkirch \etal prouvent que la normalisation des termes 
+OTT découle d'un résultat de normalisation conjecturé pour la théorie des types 
+avec induction-récursion.
 
-Following this first step, Altenkirch McBride and 
-Swierstra~\sidecite{altenkirchAl:plpv2007} developed observational 
-type theory (OTT), an extension of intensional type theory that brings the main 
-insights of the setoid model back to the world of syntax:
+L'égalité observationnelle a connu un certain renouveau ces dernières années, 
+avec notamment les travaux de Sterling et al. qui la revisitent sous l'angle 
+de la théorie des types cubique~\sidecite{sterling-angiuli-gratzer:2022} ou bien
+les travaux sur \emph{setoid type theory} d'Altenkirch \etal~\sidecite{Altenkirch2019}. 
 % 
-OTT introduces a new primitive operator called the \emph{observational equality} that 
-equips every type with a setoid structure defined by recursion on the universe.
+Toutefois, la théorie des types observationnelle n'a pas encore atteint un niveau 
+de maturité comparable à celui des théories des types univalentes. 
 % 
-The result is a type theory that supports the principles of UIP and function 
-extensionality, and Altenkirch \etal prove that normalization of OTT terms 
-follows from a conjectured normalization result for type theory with 
-induction-recursion.
+En particulier, il n'existe toujours pas de support pour l'égalité 
+observationnelle dans les principaux assistants de preuve, bien que des
+travaux aient été menés dans cette direction~\sidecite{mcbride-autopsy}.
 
-The observational equality has seen some new and exciting developments in recent 
-years, such as the work of Sterling \etal who revisit it under the lens of 
-cubical type theory~\sidecite{sterling-angiuli-gratzer:2022} or the setoid
-type theory of Altenkirch \etal~\sidecite{Altenkirch2019}.
-% 
-Still, observational type theory has yet to reach a level of maturity 
-comparable to that of univalent type theories.
-% 
-In particular, there is still no support for the observational equality in
-major proof assistants, despite some valiant efforts~\sidecite{mcbride-autopsy}.
+\subsection{L'Égalité Univalente}
 
-\subsection{Univalent Equality}
-
-The other line of work is more recent and takes its roots in
-Voevodsky's \emph{univalence axiom}~\sidecite{kapulkin2012simplicial,hottbook}.
+La seconde famille de travaux, plus récente, remonte à la formulation de
+l'\emph{axiome d'univalence} de Voevodsky~\sidecite{kapulkin2012simplicial,hottbook}.
 \[
 (A =_{\varType} B) \enskip \simeq \enskip  (A \simeq B)
 \]
-The univalence axiom gives a new meaning to the equality between types: 
-% 
-\sideremark{The correct definition of an isomorphism between types is somewhat 
-  subtle, so we will simply take it as granted for the time being.}
-% 
-a witness of equality between \( A \) and \( B \) is now the same as an element of the type 
-\( A \simeq B \) of \emph{isomorphisms} between \( A \) and \( B \). 
-% 
-This can be seen as an extensionality principle for the universe of types, and
-adding it to intensional type theory has far reaching consequences. 
-In particular, univalience implies the principle of function extensionality.
 
-\paragraph*{Homotopy Type Theory}
+L'axiome d'univalence donne un sens nouveau à l'égalité entre les types : 
 % 
-The univalence axiom departs from the standard mathematical usage of equality, 
-in that equality can no longer be a proposition since it now contains essential
-computational information. 
+\sideremark{Donner une bonne définition d'un isomorphisme entre deux types est
+  plus subtil qu'il n'y paraît. Pour éviter trop de digressions dans notre 
+  introduction, nous supposerons que cette définition nous est donnée.}
 % 
-For instance there are two distinct automorphisms of the type of booleans 
--- one corresponding to the identity and the other to negation -- and transporting along
-the identity is not the same as transporting along negation.
-\sideremark{Transporting along an isomorphism amounts to an application of the
-  isomorphism, up to a propositional equality.}
+se donner un témoin d'égalité entre \( A \) et \( B \) revient à se donner un 
+élément du type \( A \simeq B \) des \emph{isomorphismes} entre \( A \) et \( B \). 
+% 
+L'univalence peut être vue comme un principe d'extensionnalité pour l'univers 
+des types, et l'ajouter à la théorie des types intensionnelle entraîne des 
+conséquences remarquables. 
+% 
+En particulier, l'axiome d'univalence implique le principe d'extensionnalité des 
+fonctions.
+
+\paragraph*{La Théorie des Types Homotopique}
+% 
+L'axiome d'univalence s'éloigne de l'usage habituel de l'égalité en mathématiques,
+en ce sens que l'égalité ne peut plus être une proposition puisqu'elle contient 
+désormais des informations essentielles pour le calcul.  
+% 
+Par exemple, il existe deux automorphismes distincts du type des booléens -- 
+l'un correspondant à l'identité et l'autre à la négation -- et transporter un terme avec 
+l'identité ne donne pas les mêmes résultats que le transport avec la négation.
+% 
+\sideremark{Transporter une terme \( t : A \) avec un isomorphisme \( f : A \simeq B \) 
+  revient à appliquer l'isomorphisme à \( t \), à une égalité propositionnelle près.}
 \[
 \begin{split}
 \indJ{\varType}{\mathsf{Bool}}{\lambda X\ .\ X}{\mathsf{true}}{\mathsf{Bool}}{\mathsf{id}} & \enskip =_{\mathsf{Bool}} \enskip \mathsf{true} \\
@@ -442,14 +442,15 @@ the identity is not the same as transporting along negation.
 \end{split}
 \]
 
-Thus when we use the univalence axiom, we must accept that types now contain 
-important information in their equality types. 
+Ainsi lorsque nous utilisons l'axiome d'univalence, nous devons accepter que 
+les types contiennent maintenant des informations importantes dans leurs types 
+d'égalité. 
 % 
-But these equality types also contain information in their own equality types,
-and so on. 
+Mais ces types d'égalité contiennent également des informations dans leurs 
+propres types d'égalité, et ainsi de suite. 
 % 
-We end up with infinite towers of relevant equality types, all contained in the
-data of a type.
+Nous nous retrouvons donc avec des tours infinies de types d'égalité 
+potentiellement utiles pour le calcul, tous contenus dans la donnée d'un type.
 
 \begin{figure}[!h]
   \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
@@ -488,326 +489,335 @@ data of a type.
     \end{array}
   \]
   \end{minipage}
-  \caption{Graphical representation of a type with inhabitants and equalities}
+  \caption{Représentation graphique d'un type avec des habitants et des égalités}
 \end{figure}
- 
-All in all, these types do not really resemble sets anymore. 
-% 
-Voevodsky noticed that they are much closer to \emph{weak \( \infty \)-groupoids}, 
-a higher categorical gadget that plays an important role in homotopy theory, 
-the branch of math that studies spaces and their deformations.
-% 
-This is the starting point of \emph{homotopy type theory} (HoTT), a far-reaching analogy
-between homotopy theory and intensional type theory with the univalence 
-axiom~\cite{hottbook}.
 
-In homotopy theory, we think of types as spaces. Inhabitants of a type 
-play the role of its points, equalities between two terms correspond to paths
-between the points, equalities between two equalities are continuous
-deformations between the corresponding paths, and so on. 
+Somme toute, avec l'axiome d'univalence les types ne se comportent plus 
+tellement comme des ensembles. 
 % 
-Naturally, functions between types are continuous in that they preserve
-equalities, and isomorphisms correspond to homotopy equivalences.
+Voevodsky a remarqué qu'ils ressemblent bien plus à des 
+\emph{\( \infty \)-groupoïdes faibles}, un gadget catégorique qui joue un rôle 
+important dans la théorie de l'homotopie, la branche des mathématiques qui 
+étudie les espaces et leurs déformations. 
+% 
+C'est le point de départ de la \emph{théorie des types homotopique} (HoTT), une 
+analogie profonde entre la théorie de l'homotopie et la théorie des types 
+intensionnelle avec l'axiome d'univalence~\cite{hottbook}.
 
-Homotopy type theory also extends the notion of inductive type to 
-\emph{higher inductive types} (HITs), which feature constructors for paths/equalities
-in addition to constructors for elements.
+Lorsque nous faisons de la théorie des types homoptopique, nous considérons les 
+types comme des espaces. Les habitants d'un type jouent le rôle de points, 
+les égalités entre deux termes correspondent aux chemins entre les points, les 
+égalités entre deux égalités sont des déformations continues entre les chemins 
+correspondants, et ainsi de suite. 
 % 
-HITs provide a variety of basic spaces, such as the circle, the sphere and
-the torus, but also a notion of quotient types.
+Logiquement, les fonctions entre deux types sont continues (car elles
+préservent les égalités), et les isomorphismes correspondent aux équivalences 
+d'homotopie. 
+
+La théorie des types par homotopie étend également la notion de type inductif 
+aux \emph{types inductifs supérieurs} (abrégés en HITs pour \emph{higher inductive types}), 
+qui comportent des constructeurs de chemins/égalités en plus des constructeurs d'éléments. 
 % 
-\sideremark{This definition of the \textsf{circle} type might be surprising,
-  as it looks nothing like the expected space
+Les HIT fournissent des outils pour construire des espaces basiques comme le cercle, 
+la sphère et le tore, mais également de quoi former des types quotients.
+% 
+\sideremark{La définition du type \textsf{circle} peut être surprenante au premier 
+  abord, car elle ne ressemble absolument pas à l'espace attendu
   \( \{ (x, y) \in \mathbb{R}^2\ |\ x^2 + y^2 = 1 \} \).
-  This is because types in HoTT are not \emph{topological} spaces, but rather
-  synthetic spaces built out of points, paths and higher dimensional faces.
-  As such, the \textsf{circle} is freely generated by a base point and a path
-  from that base point to itself.}
+  En effet les types en HoTT ne correspondent pas à des espaces \emph{topologiques}, mais 
+  plutôt à une notion synthétique d'espaces construits à partir de points, de lignes, de
+  faces de dimensions supérieures, \etc
+  Ainsi le type \textsf{circle} est librement engendré par un point et 
+  un chemin qui relie ce point avec lui-même.}
 \[
 \begin{array}{l}
 \mathsf{Inductive}\enskip\mathsf{circle} : \varType_0\enskip := \\
 \sep \quad \mathsf{base} \enskip : \enskip \mathsf{circle}\\
 \sep \quad \mathsf{loop} \enskip : \enskip \Indeq{\mathsf{circle}}{\mathsf{base}}{\mathsf{base}} \\
-\\
+\end{array}
+\]
+\[
+\begin{array}{l}
 \mathsf{Inductive}\enskip\mathsf{quotient}\ (A : \varType_i)\ (R : A \to A \to \varType_i) : \varType_i\enskip := \\
 \sep \quad \mathsf{emb} \enskip : \enskip A \to \mathsf{quotient}\ A\ R \\
 \sep \quad \mathsf{quo} \enskip : \enskip \Depfun[a\ b]{A}{R\ a\ b \to \Indeq{...}{\mathsf{emb}\ a}{\mathsf{emb}\ b}} \\
 \end{array}
 \]
 
-Using higher inductive types and the univalence axiom it becomes possible to 
-prove a surprising amount of classical results from homotopy theory, rephrased
-to talk about types and equality:
+En utilisant des types inductifs supérieurs et l'axiome d'univalence, il devient
+possible de prouver un nombre surprenant de résultats classiques de la théorie 
+de l'homotopie, reformulés pour parler de types et d'égalité : 
 % 
-in his PhD thesis, Brunerie managed to show that the fourth homotopy group of
-the three-dimensional sphere has two elements~\sidecite{Brunerie16}.
+dans sa thèse, Brunerie a réussi à montrer que le quatrième groupe d'homotopie 
+de la sphère tridimensionnelle a deux éléments~\sidecite{Brunerie16}. 
 % 
-Since then, the HoTT community has developed extensive libraries of formalized
-univalent mathematics in \Coq~\sidecite{Bauer:2017:HLF:3018610.3018615} and
-\Agda~\sidecite{agda-unimath}.
+Depuis lors, la communauté HoTT a développé des bibliothèques de 
+mathématiques univalentes conséquentes, à l'aide des assistants de preuve
+\Coq~\sidecite{Bauer:2017:HLF:3018610.3018615} et \Agda~\sidecite{agda-unimath}.
 
-However, homotopy type theory is not exactly computational. The univalence
-axiom is, well, an axiom -- which means that the \( \mathsf{J} \) eliminator
-will not reduce when applied to an equality that we obtained from an 
-isomorphism using univalence.
+Toutefois, la théorie des types homotopique n'est pas une théorie qui 
+\emph{calcule}. L'axiome d'univalence est un axiome (comme le nom l'indique!), 
+ce qui signifie que l'éliminateur \( \mathsf{J} \) se contente de produire un 
+terme bloqué lorsqu'il est appliqué à une égalité obtenue à partir d'un 
+isomorphisme. 
 % 
-Higher inductive types also block computation, because their elimination 
-principles are simply postulated as axioms.
+Les types inductifs supérieurs ne sont pas compatibles avec le calcul non plus, 
+car leurs principes d'élimination sont postulés comme des axiomes. 
 % 
-This situation is all the more disappointing as the features introduced by HoTT
-seem to follow the principles of constructive mathematics.
+Cette situation est d'autant plus décevante que les fonctionnalités introduites 
+par HoTT semblent respecter les principes des mathématiques constructives.
 
-\paragraph*{Cubical Type Theory}
+\paragraph*{La Théorie des Types Cubique}
 % 
-Subsequently, the type theory community directed its attention to the
-search for a computational interpretation of the univalent equality. 
+Suite aux travaux de Voevodsky, la communauté des théoriciens des types
+s'est penchée sur la question du comportement calculatoire de l'égalité 
+univalente.
 
-In 2014, Bezem Coquand and Huber built a model of the univalence axiom in a constructive 
-set theory~\sidecite{BezemCoquandHuber14}.
+En 2014, Bezem Coquand et Huber ont construit le premier modèle de l'axiome d'univalence 
+dans une théorie des ensembles constructive~\sidecite{BezemCoquandHuber14}.
 % 
-Their model interprets types as \emph{fibrant cubical sets}, a combinatorial
-model of weak \( \infty \)-groupoids that lends itself well to a constructive
-presentation.
+Leur modèle interprète les types comme des \emph{ensembles cubiques fibrants}, un 
+objet combinatoire utilisé pour modéliser les \( \infty \)-groupoïdes faibles qui se prête 
+bien à une présentation constructive. 
 % 
-Although this model is not developed in type theory and does not support 
-anything that resembles type theoretic computation, it paved the way for a new 
-understanding of univalence.
+Bien que le modèle de Bezem \etal ne comporte rien qui puisse ressembler à une 
+règle de calcul, les ensembles cubiques se sont avérés être une manière fructueuse
+de réaliser le potentiel constructif de l'univalence.
 
-This program came to fruition a year later with the introduction of 
-\emph{cubical type theory}, an intensional type theory based on the insights 
-provided by the fibrant cubical sets~\sidecite{cubicaltt}.
+Ce programme s'est concrétisé un an plus tard avec l'introduction de la 
+\emph{théorie des types cubiques}, une théorie des types intensionnelle enrichie 
+avec les idées apportées par les ensembles cubiques fibrants~\sidecite{cubicaltt}.
 % 
-This new system incorporates primitives from homotopy theory directly in the typing 
-judgments, and provides them with adequate computation rules.
+Ce nouveau système incorpore des primitives homotopiques directement dans les 
+jugements de typage, et les équipe avec des règles de calcul adéquates. 
 % 
-With this additional structure, it becomes possible to derive the principle of 
-univalence as a theorem, which makes cubical type theory an axiom-free univalent 
-theory.
+Grâce à cette structure supplémentaire, il devient possible de prouver 
+l'univalence comme un théorème, ce qui fait de la théorie des types cubiques une théorie 
+univalente sans axiome.
 % 
-And since it satisfies a canonicity property~\sidecite{Huber16} and supports a
-normalization function for open terms~\sidecite{sterling_normalization_cubical}, 
-cubical type theory can be deemed fully computational.
+Étant donné qu'elle satisfait une propriété de canonicité~\sidecite{Huber16} et admet 
+une fonction de normalisation pour les termes ouverts~\sidecite{sterling_normalization_cubical}, 
+la théorie des types cubique fournit une réponse solide à la question du comportement 
+calculatoire de l'univalence.
 % 
-On top of this, it supports higher inductive types with
-natural elimination principles and computation rules~\sidecite{CavalloHarper19}.
+En plus de cela, elle peut être étendue par des types inductifs supérieurs avec des 
+principes d'élimination et des règles de calcul naturels~\sidecite{CavalloHarper19}.
 
-In the years following its introduction, cubical type theory flourished into a 
-vibrant field of research.
+Dans les années qui ont suivi son introduction, la théorie des types cubiques a 
+évolué en un domaine de recherche dynamique. 
 % 
-Many variations of the original system have been studied on paper~\cite{AngiuliHouHarper18,ABCFHL}
-and implemented in proof assistants~\cite{Cubicaltt, redtt}.
+De nombreuses variante du système original ont été étudiées sous un angle 
+théorique~\cite{AngiuliHouHarper18,ABCFHL} et implémentées dans des assistants de 
+preuve~\cite{Cubicaltt, redtt}. 
 % 
-Among them, the \texttt{cubical} mode of the \Agda proof assistant~\sidecite{cubical-agda}
-is without a doubt the most successful implementation, and it has set the stage for several 
-large-scale formalization projects.
-
-% In particular, the 
-% % 
-% Since cubical type theory is supposed to be normalizing\sidenote{The theorem 
-%   proved by Angiuli and Sterling is not } and have canonical 
-% datatypes, any proof of a statement of the form \( \Depsum[n]{\Nat}{P\ n} \)
-% should evaluate to a pair of an integer \( n \) and a proof of \( P\ n \).
+Parmi celles-ci, le mode \texttt{cubical} d'\Agda est sans aucun doute l'implémentation 
+qui a rencontré le plus franc succès, avec plusieurs projets de formalisation de 
+grande envergure.
 
 \section{Contributions}
 
-\paragraph{The Observational Calculus of Constructions}
+\paragraph{Le Calcul des Constructions Observationnel}
 % 
-In the first part of this thesis, we study the meta-theoretical properties of the observational 
-equality.
+Dans la première partie de cette thèse, nous étudions les propriétés méta-théoriques 
+de l'égalité observationnelle. 
 % 
-To this end, we introduce a formal calculus based on the observational type theory
-of Altenkirch \textit{et al}, which we call the Observational Calculus of Constructions, or 
-\SetoidCC for short.
+Pour ce faire, nous introduisons un calcul formel basé sur la théorie des types 
+observationnelle d'Altenkirch \textit{et al}, que nous appelons le calcul 
+des constructions observationnel (abrégé en \SetoidCC). 
 % 
-\SetoidCC is based on dependent type theory with inductive types and an impredicative 
-universe of strict propositions. 
+\SetoidCC possède des types dépendants avec des types inductifs et un univers 
+imprédicatif de propositions strictes. 
 % 
-On top of this, it adds an implementation of the observational equality and a 
-primitive type casting operator, from which we can derive the principles of
-uniqueness of identity proofs, of function extensionality and of proposition
-extensionality.
+En plus de cela, on ajoute une implémentation de l'égalité observationnelle 
+et un opérateur primitif de \emph{type-castring} à partir desquels nous pouvons 
+dériver les principes d'unicité des preuves d'identité, d'extensionnalité des 
+fonctions et d'extensionnalité des propositions.
 % 
-\SetoidCC also supports the formation of the quotient of a type by a strict 
-equivalence relation.
+\SetoidCC permet également la formation de quotients d'un type par une relation 
+d'équivalence stricte.
 
-We equip our formal system with a reduction strategy that we use to prove a normalization 
-theorem, canonicity of the basic datatypes, and decidability of the typing
-relation.
+Nous équipons notre système formel d'une stratégie de réduction que nous utilisons 
+pour prouver un théorème de normalisation, la canonicité des types de données de 
+base et la décidabilité de la relation de typage. 
 % 
-These results are obtained through a normalization model, that we build in \Agda using
-the logical relations framework developed by Abel \etal~\sidecite{Abel:POPL2018}.
+Ces résultats sont obtenus grâce à un modèle de normalisation, que nous construisons 
+dans \Agda en utilisant le cadre des relations logiques développé par Abel 
+\etal~\sidecite{Abel:POPL2018}. 
 % 
-The normalization proof can be browsed at \refAgdaRoot{Everything}, but links to the code
-will be scattered throughout the relevant parts.
+La preuve de normalisation peut être consultée en ligne \refAgdaRoot{Everything}, 
+et des liens vers le code seront fournis à intervalles réguliers dans les chapitres 
+correspondants.
 
-To the best of our knowledge, our model introduces several innovations compared 
-to the existing literature on normalization proofs.
+À notre connaissance, notre modèle introduit plusieurs innovations par rapport 
+à la littérature existante sur les preuves de normalisation. 
 % 
-The most basic, but also the most important one is that we do not normalize the 
-proofs of strict propositions, contrary to the approach championed by 
-Gilbert \etal~\sidecite{gilbert:hal-01859964}. 
+La plus basique, mais aussi la plus importante, est que nous ne normalisons pas 
+les preuves de propositions strictes, contrairement à l'approche défendue par 
+Gilbert et al \etal~\sidecite{gilbert:hal-01859964}. 
 % 
-This allows us to not only support proof-irrelevant axioms, but also to handle 
-impredicativity without resorting to the usual reducibility candidates.
+Cela nous permet non seulement de supporter les axiomes \emph{proof-irrelevant}, 
+mais aussi de gérer l'imprédicativité sans avoir recours aux candidats de 
+réductibilité usuels. 
 % 
-Without the need for reducibility candidates, we can use a proof-irrelevant
-logical relation, which in turn lets us have non-parametric operators such
-as the observational equality and type-casting.
+Comme nous n'avons pas besoin des candidats de réductibilité, nous pouvons 
+utiliser une relation logique \emph{proof-irrelevant} pour notre preuve, ce 
+qui nous permet d'ajouter des opérateurs non paramétriques tels que l'égalité 
+observationnelle et le \emph{type-casting}. 
 % 
-In counterpart for this added flexibility, normalization does not directly
-imply canonicity anymore, and a separate proof of consistency of the
-theory is required to derive canonicity -- as suggested by McBride \etal in
-their observational type theory paper~\sidecite{AltenkirchMcBrideSwiestra07}.
+En échange de cette flexibilité, notre refus de normaliser les preuves de
+proposition a pour conséquence que la normalisation n'implique pas directement 
+la canonicité, et qu'une preuve de cohérence séparée est nécessaire pour 
+obtenir la canonicité -- comme suggéré par McBride \etal dans leur article sur 
+la théorie des types observationnelle~\sidecite{AltenkirchMcBrideSwiestra07}. 
 % 
-We bridge that gap by building a set-theoretic model for \SetoidCC.
+Nous réparons cette lacune en construisant un modèle de \SetoidCC en théorie 
+des ensembles. 
 
-This work solves several problems that were still open as far as we know:
+Ce travail résout plusieurs problèmes qui étaient encore ouverts à notre 
+connaissance : tout d'abord, nous obtenons une preuve complète de la 
+normalisation et de la décidabilité pour la théorie des types observationnelle, 
+déjà conjecturée par Altenkirch \etal. 
 % 
-\sideremark{Altenkirch, McBride and Swierstra reduced normalization of 
-  observational type theory to a normalization conjecture for intensional 
-  type theory with induction-recursion, which has not been proven as far as we 
-  know.}
+De plus, l'égalité de \SetoidCC vit dans une sorte imprédicative de propositions 
+strictes, tout comme l'égalité de \Lean. 
 % 
-first and foremost, we get a proper proof of normalization and decidability for 
-observational type theory, which was conjectured by Altenkirch \etal
+Nous montrons que nous pouvons interpréter l'éliminateur J de \Lean dans une 
+extension de \SetoidCC, tout en préservant la normalisation et la décidabilité 
+du typage. 
 % 
-Moreover, the equality of \SetoidCC lives in an impredicative universe 
-of strict propositions just like the equality of \Lean. 
-% 
-We show that we can interpret the \( \mathsf{J} \) eliminator of \Lean
-in an extension of \SetoidCC, while preserving normalization and decidability
-of the type-checking.
-% 
-This answers the question of Abel and Coquand about the compatibility of 
-proof-irrelevant impredicativity and UIP~\sidecite{lmcs:6606}.
+Ceci répond à la question d'Abel et Coquand sur la compatibilité de 
+l'imprédicativité et de l'étalité en tant que proposition stricte~\sidecite{lmcs:6606}.
 
-\paragraph{Toward a Cubical Translation}
+\paragraph{Vers une Traduction Cubique}
 % 
-In the second part, we work toward translating \HoTT into our observational
-calculus of constructions.
+Dans la deuxième partie, nous étudions la possibilité d'une traduction de 
+\HoTT dans notre calcul des constructions observationnel. 
 % 
-Since \SetoidCC is a computational type theory, such a translation would 
-provide a new way to compute with the univalence axiom.
+Puisque \SetoidCC est un système calculatoire, une telle traduction fournirait 
+une nouvelle façon de calculer avec l'axiome d'univalence. 
 
-The starting point of this part is the so-called ``prefascist'' translation of
-Pédrot that interprets every type of Martin-Löf type theory as a 
-\emph{presheaf} in an intensional type theory with strict 
-propositions~\sidecite{pedrot:prefascist}.
+Le point de départ de cette partie est la traduction dite ``préfasciste'' 
+de Pédrot qui interprète les types de la théorie de Martin-Löf comme des
+préfaisceaux dans une théorie des types intensionnelle avec des propositions 
+strictes~\sidecite{pedrot:prefascist}. 
 % 
-Presheaves are a categorical construction that subsumes many important
-objects, and among them the cubical sets that Coquand \etal used to model
-univalence.
+Les préfaisceaux sont une construction catégorique qui généralise de nombreux 
+objets algébriques, y compris les ensembles cubiques que Coquand \etal ont 
+utilisé pour modéliser l'univalence. 
 % 
-However, the prefascist translation is missing an important ingredient of
-that model, called the \emph{fibrancy structure}.
+Cependant il manque un ingrédient important à la traduction préfasciste
+comparé au modèle de Coquand \etal : les \emph{structures de fibration}.
 
-Our contributions are twofold: fist we present a dissection of the prefascist 
-construction of Pédrot, explaining how it gets around the well-known 
-difficulties of working with presheaves in intensional type theory.
+Nous ajoutons deux nouvelles pierres à cet édifice : dans un premier temps, 
+nous présentons une dissection de la construction préfasciste de Pédrot, 
+en expliquant comment elle contourne les difficultés bien connues des 
+préfaisceaux en théorie des types intensionnelle.
 % 
-As a second step, we explain how to extend the translation with a notion of 
-fibrancy structure that should allow for an interpretation of the univalence
-axiom.
+Dans un second temps, nous expliquons comment étendre la traduction préfasciste 
+avec une notion de structure de fibration qui devrait permettre une interprétation 
+de l'axiome d'univalence.
 
-\paragraph{Synthetic Cubical Homotopy Theory}
+\paragraph{Homotopie Synthétique en Théorie des Types Cubique}
 % 
-Finally, in the third part of this thesis, we aim to show the practical 
-gains of using a \emph{computational} system that supports univalence and 
-higher inductive types. 
+Enfin, dans la troisième partie de cette thèse, nous cherchons à montrer les 
+avantages pratiques du calcul dans l'utilisation d'un système univalent.
 % 
-To do so, we formalize a handful of classical results from homotopy theory 
-in cubical type theory, and we compare the process with similar formalizations
-done in axiomatic HoTT.
+Pour ce faire, nous formalisons plusieurs résultats classiques de la théorie 
+de l'homotopie en théorie des types cubiques, et nous comparons les preuves 
+obtenues avec des formalisations analogues qui postulent l'univalence et les
+HITs en tant qu'axiomes. 
 % 
-Our example results include:
+Notre panel de résultats inclut :
 %
 \begin{itemize}
-\item The equivalence of the torus and two circles together with the
-  computation of their respective fundamental groups.
-\item The equivalence between direct definitions of low dimensional
-  spheres, and alternative definitions using iterated suspensions.
-\item Definition of pushout together with a direct proof of the ``$3
-  \times 3$ lemma''.
-\item Definition of the join of two types and a proof that it is
-  associative. Using this we get two proofs, one
-  inspired by HoTT and a new direct cubical proof, that $\Sp^3$ is
-  equivalent to the join of two circles.
-\item Definitions of the Hopf fibration and a proof that its total
-  space is $\Sp^3$.
+\item L'équivalence entre le tore et le produit cartésien de deux cercles,
+  avec un calcul de leurs groupes fondamentaux respectifs.
+\item L'équivalence entre une définition directe des sphères de basses 
+  dimensions et une définition alternative à base de suspensions itérées.
+\item La définition du pushout homotopique avec une preuve directe du lemme
+  ``\( 3 \times 3 \)''
+\item La définition du joint de deux type et une preuve d'associativité. 
+  Avec ces éléments, nous obtenons deux preuves différentes que la sphère $\Sp^3$
+  est équivalente au joint de deux cercles.
+\item Une définition de la fibration de Hopf et une preuve que son espace total
+  est équivalent à la sphère $\Sp^3$.
 \end{itemize}
 
-This work was done in the \Agda proof assistant, and has been integrated to the
-standard library of cubical Agda~\sidecite{agda-cubical-library}.
+Ce travail a été formalisé dans l'assistant de preuves \Agda, et a été incorporé dans
+la bibliothèque standard de cubical Agda~\sidecite{agda-cubical-library}.
 
 \subsection{Publications}
 
-This thesis builds upon three peer-reviewed papers:
+Cette thèse s'appuie sur trois articles revus et publiés dans des conférences internationales:
 \begin{itemize}
-\item The development of synthetic homotopy theory in cubical type theory was 
-  presented in a paper written with Anders Mörtberg published at 
-  CPP'20~\sidecite{cubical-homotopy}
-\item The construction of a logical relation for a predicative version of 
-  observational type theory is joint work with Nicolas Tabareau and was 
-  presented at POPL'22~\sidecite{pujet:hal-03367052},
-  where it received the ``distinguished paper'' award.
-\item The treatment of impredicativity in observational type theory is also
-  joint work with Nicolas Tabareau. It has been conditionally accepted at
-  POPL'23. 
+\item Le travail sur le développement de l'homotopie synthétique en théorie
+  cubique des types a été présenté dans un article co-écrit avec Anders 
+  Mörtberg et publié à CPP'20~\sidecite{cubical-homotopy}.
+\item La construction d'une relation logique pour une version prédicative
+  de la théorie des types observationnelle a été réalisée en collaboration
+  avec Nicolas Tabareau, et a fait l'objet d'une publication à POPL'22~\sidecite{pujet:hal-03367052}.
+  Cet article a été nommé ``distinguished paper''.
+\item Le travail sur l'imprédicativité et son interaction avec l'égalité 
+  observationnelle a égélement été réalisé en collaboration avec Nicolas
+  Tabareau, et a été conditionnellement accepté à POPL'23. 
 \end{itemize}
-Additionally, the cubical translation of part 2 was the object of an extended 
-abstract presented at ICMS'20.
+En plus de cela, la traduction cubique étudiée en partie 2 a été l'objet d'un
+\emph{extended abstract} presenté à ICMS'20.
 
-\section{Theories and Meta-Theories}
+\section{Théories et Méta-Théories}
 
-In the following chapters, we will be juggling with a fair amount of formal 
-systems -- mostly dependent type theories, but also a few first-order theories.
+Dans les chapitres suivants, nous manipulerons un certain nombre de systèmes formels -- 
+principalement des théories de types dépendantes, mais également quelques théories 
+du premier ordre. 
 % 
-Since the mapping between type theories and names seems to be rather 
-inconsistent in the literature, we fix our own convention:
+Comme la correspondance entre les théories des types et les noms semble varier
+significativement d'un auteur à l'autre, nous fixons notre propre convention :
 
 \begin{tabular}{p{3em} p{0.82\textwidth} }
 \MLTT & 
-  Intensional Martin-Löf Type Theory designates a type theory with dependent 
-  products, a predicative hierarchy of universes and \emph{some amount} of 
-  inductive types~\cite{MartinLoef75}.
+  La Théorie des Types Intensionnelle de Martin-Löf désigne un système avec des 
+  produits dépendents, une hiérarchie prédicative d'univers et une \emph{certaine quantité} de 
+  types inductifs~\cite{MartinLoef75}.
   % 
-  We remain intentionally vague about which inductive types are included, and
-  we will use more explicit notations such as \( \MLTTW \) when such concerns become 
-  relevant.
+  Nous demeurons intentionnellement vagues au sujet des types inductifs.
+  Lorsque les inductifs jouent un rôle important, nous utiliserons des notations plus explicites
+  que nous introduirons au besoin.
 \end{tabular}
 
 \begin{tabular}{p{3em} p{0.82\textwidth} }
 \CIC & 
-  The predicative Calculus of Inductive Constructions has all the features 
-  of \MLTT, plus a universe \( \varProp \) of impredicative propositions with
-  large elimination of subsingleton inductive types~\cite{Paulin15}.
+  Le Calcul prédicatif des Constructions Inductives étend \MLTT 
+  avec une sorte imprédicative \( \varProp \), qui supporte l'élimination large 
+  des types inductifs sous-singletons~\cite{Paulin15}.
 \end{tabular}
 
 \begin{tabular}{p{3em} p{0.82\textwidth} }
 \SetoidCC / \SetoidCCplus & 
-  The Obervational Calculus of Constructions is our implementation of 
-  observational type theory, which is presented in great detail in 
-  \cref{ch:observational}.
+  Le Calcul des Constructions Observationnel désigne notre implémentation de 
+  la théorie des types observationnelle de McBride \etal 
+  Une présentation détaillée est donnée dans le chapitre \ref{ch:observational}.
   % 
-  The extended system \SetoidCCplus adds a rule for the computation of
-  type-casting on reflexive identity proofs, as described in 
-  \cref{ch:extensions}. 
+  Le système étendu \SetoidCCplus ajoute une règle supplémentaire pour le calcul
+  du \emph{type-casting} sur les preuves d'égalité réflexives, comme décrit dans le 
+  chapitre \ref{ch:extensions}. 
 \end{tabular}
 
-As the bulk of this thesis deals with meta-theoretical properties of
-type theories, we will spend a lot of time treating them as mathematical 
-objects, \ie as a collection of syntax tokens and typing rules.
+Comme la majeure partie de cette thèse traite des propriétés méta-théoriques 
+des théories des types, nous les traiterons généralement comme des objets 
+mathématiques, c'est-à-dire comme une collection de lexèmes
+et de règles de typage. 
 % 
-But type theories are also mathematical frameworks in their own right, that
-we can use to prove theorems. 
+Mais les théories des types sont également des théories mathématiques à part 
+entière, que nous pouvons utiliser pour prouver des théorèmes.
 
-And indeed we will be doing a lot of mathematics inside type theories, often
-adopting an informal style to avoid overwhelming the reader with unsightly
-proof terms.
+Et en effet, nous développerons beaucoup de mathématiques à l'intérieur de 
+théories des types, en adoptant généralement un style informel pour éviter 
+de submerger le lecteur avec des termes de preuve peu lisibles. 
 % 
-When using type theory as our meta-theory, we will use the syntax and color 
-scheme of the \Agda proof assistant, for the simple reason that all of our
-formalization is done in \Agda.
+Lorsque nous utilisons la théorie des types comme méta-théorie, nous utilisons 
+la syntaxe et le schéma de couleurs de l'assistant de preuve \Agda, pour la 
+simple raison que toutes nos formalisations sont effectuées en \Agda. 
 % 
-When no \Agda code appears, it is safe to assume that we are working without
-a specific framework in mind, as in most mathematical writing.
+Si aucun code en \Agda n'apparaît, il est raisonnable de supposer que nous travaillons 
+sans présupposer une méta-théorie précise, comme c'est le cas dans la majorité
+de la littérature mathématique.
