@@ -6,8 +6,8 @@
 \section{L'égalité dans la Théorie des Types Intensionnelle}
 
 Si vous avez déjà utilisé un assistant de preuve basé sur la théorie des types 
-intensionnelle comme \Coq, \Agda ou \Lean -- et il y a de fortes chances que 
-ce soit votre cas si vous êtes en train de lire cette thèse -- alors vous savez 
+intensionnelle comme \Coq, \Agda ou \Lean---et il y a de fortes chances que 
+ce soit votre cas si vous êtes en train de lire cette thèse---alors vous savez 
 sans doute que l'égalité peut être un véritable casse-tête.
 
 D'une part, nous avons l'égalité définitionnelle (également appelée conversion), 
@@ -267,13 +267,13 @@ L'égalité propositionnelle simple que nous avons définie avec un type inducti
 ne répond pas vraiment aux exigences du raisonnement mathématique. 
 % 
 En mathématiques, deux fonctions sont considérées comme égales lorsqu'elles 
-coïncident sur tous les antécédants -- il s'agit du principe 
-d'\emph{extensionnalité des fonctions} -- 
+coïncident sur tous les antécédants---il s'agit du principe 
+d'\emph{extensionnalité des fonctions}---mais
 % 
 \sideremark{En particulier, il est impossible de montrer que les fonctions
 \( {\lambda\ n\ .\ n+1} \) and \( {\lambda\ n\ .\ 1+n} \) sont égales.}
 % 
-mais ce principe n'est pas démontrable pour l'égalité propositionnelle dans 
+ce principe n'est pas démontrable pour l'égalité propositionnelle dans 
 la théorie des types intensionnelle.
 \[
   \Indeq{A \to B}{f}{g} \quad \xcancel{\longleftrightarrow} \quad \Depfun{A}{\Indeq{B}{f\ x}{g\ x}}
@@ -332,7 +332,7 @@ respectent naturellement l'extensionnalité des fonctions~\sidecite{Altenkirch99
 En un mot, nous devons faire le travail d'un compilateur à la main. 
 % 
 \Coq implémente des tactiques pour traiter les sétoïdes plus efficacement, mais 
-elles supportent difficilement le passage à l'échelle de développements conséquents -- 
+elles supportent difficilement le passage à l'échelle de développements conséquents---
 au point que la communauté utilise le terme \emph{setoid hell} en référence à ces 
 problèmes.
 
@@ -429,8 +429,8 @@ L'axiome d'univalence s'éloigne de l'usage habituel de l'égalité en mathémat
 en ce sens que l'égalité ne peut plus être une proposition puisqu'elle contient 
 désormais des informations essentielles pour le calcul.  
 % 
-Par exemple, il existe deux automorphismes distincts du type des booléens -- 
-l'un correspondant à l'identité et l'autre à la négation -- et transporter un terme avec 
+Par exemple, il existe deux automorphismes distincts du type des booléens---l'un 
+correspondant à l'identité et l'autre à la négation---et transporter un terme avec 
 l'identité ne donne pas les mêmes résultats que le transport avec la négation.
 % 
 \sideremark{Transporter une terme \( t : A \) avec un isomorphisme \( f : A \simeq B \) 
@@ -667,7 +667,7 @@ observationnelle et le \emph{type-casting}.
 En échange de cette flexibilité, notre refus de normaliser les preuves de
 proposition a pour conséquence que la normalisation n'implique pas directement 
 la canonicité, et qu'une preuve de cohérence séparée est nécessaire pour 
-obtenir la canonicité -- comme suggéré par McBride \etal dans leur article sur 
+obtenir la canonicité---comme suggéré par McBride \etal dans leur article sur 
 la théorie des types observationnelle~\sidecite{AltenkirchMcBrideSwiestra07}. 
 % 
 Nous réparons cette lacune en construisant un modèle de \SetoidCC en théorie 
@@ -766,8 +766,8 @@ En plus de cela, la traduction cubique étudiée en partie 2 a été l'objet d'u
 
 \section{Théories et Méta-Théories}
 
-Dans les chapitres suivants, nous manipulerons un certain nombre de systèmes formels -- 
-principalement des théories de types dépendantes, mais également quelques théories 
+Dans les chapitres suivants, nous manipulerons un certain nombre de systèmes formels---principalement 
+des théories de types dépendantes, mais également quelques théories 
 du premier ordre. 
 % 
 Comme la correspondance entre les théories des types et les noms semble varier

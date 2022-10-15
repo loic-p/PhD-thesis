@@ -164,10 +164,9 @@ Elimination of equalities into the proof-irrelevant layer is done with
 \( \transportName \). 
 % 
 Since the result is computationally irrelevant, this operator is not required 
-to satisfy any kind of equation -- in the proof-irrelevant world, all 
-equations hold true as long as they are well-typed --
-%
-and thus \( \transportName \) is merely an axiom that postulates the Leibniz
+to satisfy any kind of equation---in the proof-irrelevant world, all 
+equations hold true as long as they are well-typed---and
+thus \( \transportName \) is merely an axiom that postulates the Leibniz
 rule for propositional predicates, with no computation rules whatsoever.
 % 
 \[
@@ -783,7 +782,7 @@ dependent sums, but a positive version would be just as straightforward.
 \end{mathpar}
 
 The observational equality between two inhabitants of a dependent sum reduces
-to the equality of the first and second projections -- modulo a type casting, 
+to the equality of the first and second projections---modulo a type casting, 
 which is necessary for the second equality to type-check.
 % 
 \begin{mathpar}
@@ -1089,7 +1088,7 @@ bureaucratic equality preservation lemmas.
 In \SetoidCC however, every type is naturally a setoid (with the observational 
 equality) and every term preserves the setoid equality by construction. 
 This is a very comfortable setting for quotients, that can thus be added to the
-theory -- provided the relation that induces the quotient is proof-irrelevant.
+theory---provided the relation that induces the quotient is proof-irrelevant.
 %
 This can be seen as a limitation, as noticed
 by~\sidecitet{sterling_et_al:LIPIcs:2019:10538}, as it is generally
@@ -1221,7 +1220,7 @@ proposition is about the definitional equality and not the propositional
 equality. 
 % 
 Thus the eliminator would ideally apply to any type whose inhabitants are 
-all convertible -- but since we cannot reason internally about the definitional
+all convertible---but since we cannot reason internally about the definitional
 equality, we restrict elimination to types of sort \( \sProp \).
 
 \paragraph*{Box Types}
@@ -1275,7 +1274,7 @@ Box types can be defined with the following rules:
 
 \paragraph*{The J Eliminator for the Observational Equality}
 % 
-The reader may wonder if \SetoidCC extends Martin-Löf type theory -- 
+The reader may wonder if \SetoidCC extends Martin-Löf type theory---
 that is, whether a judgment of \MLTT is also a judgment in the proof-relevant
 fragment of \SetoidCC. 
 % 
@@ -1317,7 +1316,7 @@ definitionally equal to the fourth argument:
 	\J{A}{t}{P}{u}{t}{\refl{t}{t}} \ \equiv \ u
 \]
 but in \SetoidCC with our replacement for \( J \), this definitional equality 
-is weakened to a propositional equality in general -- it might hold by 
+is weakened to a propositional equality in general---it might hold by 
 definition when \( P \) is a closed term, but it certainly will not if \( P \) 
 is a variable. 
 % 
@@ -1397,7 +1396,7 @@ However, we quickly run into a problem:
 \end{mathpar}
 % 
 We cannot reduce this term to $\metaop{Idrefl}$, because \( t' \) and \( u' \)
-are not convertible in general -- \( e \) only provides us with a propositional 
+are not convertible in general---\( e \) only provides us with a propositional 
 equality \( \Obseq[A']{t'}{u'} \). 
 % 
 In order to fix this, we add a term $\idpath{e} $ that turns any inhabitant of 
@@ -1616,14 +1615,14 @@ the theory to the consistency of the meta-theory.
 The adjective \emph{normal} deserves a bit of discussion. 
 % 
 Ideally, the normal form of a term should be a distinguished representative 
-of its equivalence class under convertibility -- and thus any two convertible 
+of its equivalence class under convertibility---and thus any two convertible 
 terms should have the same normal form, so that checking convertibility is reduced
 to comparing the normal forms.
 % 
 However our deep reduction strategy does not \( \eta \)-expand/reduce
 terms, meaning that normal forms are only unique up to \( \eta \)-equivalence.
 This is not too much of an issue, since \( \eta \)-equivalence of \( \beta \)-normal 
-well-typed terms is easy to decide -- we just put them in \( \eta \)-long form.
+well-typed terms is easy to decide---we just put them in \( \eta \)-long form.
 
 \begin{theorem}[Canonicity of \( \Nat \)]
 	If a term \( t \) has type \( \Nat \) in the empty context, then there 

@@ -144,7 +144,7 @@ first defined at level $0$ to characterize types and terms that inhabit the
 smallest universe \( \Type_0 \).
 % 
 Then Abel \etal use reducibility at level 0 to define reducibility at level 1, 
-that applies to types and terms that live in \( \Type_1 \) -- in the case of
+that applies to types and terms that live in \( \Type_1 \)---in the case of
 the type \( \Type_0 : \Type_1 \), they define
 \[
 \begin{array}{rcl}
@@ -198,7 +198,7 @@ propositions, and we will only prove normalization for proof-relevant terms.
 %
 We argue that this is more faithful to the philosophy of computational
 irrelevance, and results in a proof that is completely agnostic about
-the proof-irrelevant content of the theory -- we could postulate any
+the proof-irrelevant content of the theory---we could postulate any
 consistent proof-irrelevant axiom (even excluded middle!) and the normalization 
 proof would carry through just as well.
 
@@ -212,7 +212,7 @@ layer, as \( \Empty \)-elim can build an inhabitant of any proof-relevant type
 from a proof of \( \Empty \).
 % 
 Therefore, if we want to show canonicity, we need to show that there is no proof 
-of \( \Empty \) in the empty context -- in other words, that the theory is 
+of \( \Empty \) in the empty context---in other words, that the theory is 
 consistent.
 % 
 This idea of deriving canonicity from consistency already appeared in the work 
@@ -266,8 +266,8 @@ the sake of readability
 well-formedness of the involved types).
 % 
 In their work, Abel \etal were able to define the model directly on the economic 
-rules by collecting the well-formedness hypotheses in the reducibility predicates --
-but we are not, so we will construct our model using more verbose inference rules.
+rules by collecting the well-formedness hypotheses in the reducibility predicates---but 
+we are not, so we will construct our model using more verbose inference rules.
 % 
 Once the fundamental lemma is proved, we will be able to show that the economic 
 rules of \cref{ch:observational} do in fact contain sufficient information to 
@@ -285,7 +285,7 @@ complete formal proofs to have a look at the \Agda development.}
 
 Following Abel \etal \cite{Abel:POPL2018}, our constructions starts with the 
 definition of the four reducibility predicates, which are also annotated with
-a sort in our version -- see \cref{fig:log-rel-judgments}.
+a sort in our version---see \cref{fig:log-rel-judgments}.
 
 \begin{figure*}[!h]
   \[
@@ -570,7 +570,7 @@ the presheaf exponential.}
 The reader might be wondering why do we generalize the last three premises 
 under any weakening. The simple explanation is that we want reducibility to be
 stable under weakening, and we won't be able to prove it by induction on the
-definition because of the negative occurences -- so we generalize any premise
+definition because of the negative occurences---so we generalize any premise
 that mentions reducibility on the left of an arrow.
 
 When $A$ is reducible to a dependent product, we define:
@@ -1085,7 +1085,7 @@ valid equality of substitutions by recursion on a valid context.
 % 
 The valid type equality, valid terms and valid term equality do not need to be 
 part of the inductive-recursive block and can be defined \textit{a posteriori}
-in a straightforward manner -- see \refAgda{LogicalRelation.}{Substitution}.
+in a straightforward manner---see \refAgda{LogicalRelation.}{Substitution}.
 
 \subsection{The Fundamental Lemma}
 \label{sec:fundamental-lemma}
@@ -1106,7 +1106,7 @@ The lemma is proved by a mutual induction on derivations for well-formed
 contexts, types, type equality, terms and term equality. 
 % 
 Our various extensions of the model require numerous changes to the proof of 
-Abel \etal, but most of these do not pose any major difficulty -- albeit the 
+Abel \etal, but most of these do not pose any major difficulty---albeit the 
 proof is by no means trivial, as the arguments have to be spelled out in
 excruciating detail.
 
@@ -1144,7 +1144,7 @@ Therefore, we know that \( \cast{A}{B}{e}{t} \) reduces to
 \( \lam[a']{F_B}{\cast{\subst{G_A}{a}}{\subst{G_B}{a'}}{\snd{e}\ a'}{t\ a}} \) where \( a \) is
 a shorthand for \( \cast{F_B}{F_A}{\sym{\fst{e}}}{a'} \), and \( \cast{A'}{B'}{e'}{t'} \) reduces
 similarly. By the weak head expansion lemma, it suffices to prove that these two normal forms are
-reducible, and reducibly equal at type \( \Depfun{F_B}{G_B} \) -- that is, we need to prove that
+reducible, and reducibly equal at type \( \Depfun{F_B}{G_B} \)---that is, we need to prove that
 \begin{itemize}
 \item applying either function to a reducible term results in a reducible term,
 \item applying the two functions to the same reducible term results in two reducibly equal terms,  
@@ -1474,7 +1474,7 @@ order to control the computational complexity of the proof terms more finely.
 Proof-relevant terms in \SetoidCC are \emph{programs}, at least in the sense of 
 being terms in a lambda-calculus with additional operators.
 % 
-As such, they may be extracted and evaluated just like regular programs -- 
+As such, they may be extracted and evaluated just like regular programs---
 and in fact, evaluating open terms is pretty much what our type-checking 
 algorithm from \cref{sec:decidable-typing} does.
 % 
@@ -1886,7 +1886,7 @@ same way.
 % 
 Moreover, if we compare two codes of the form \( (X \to Y ;\ \codepiuu\ ...) \), 
 the equality of the second member means that the domains and the codomains of 
-the function spaces are equal -- we recover the injectivity of the type formers.
+the function spaces are equal---we recover the injectivity of the type formers.
 
 \begin{figure}
    \begin{small}

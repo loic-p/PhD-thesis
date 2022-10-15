@@ -25,8 +25,8 @@
 \section{Equality in Intensional Type Theory}
 
 If you have ever used a proof assistant based on intensional type theory such as
-\Coq, \Agda or {\Lean} -- and there is a good chance that you have if you are 
-reading this thesis -- then you probably know that equality can be a real headache.
+\Coq, \Agda or {\Lean}---and there is a good chance that you have if you are 
+reading this thesis---then you probably know that equality can be a real headache.
 
 On the one hand we have the \emph{definitional} equality (also called conversion), which records the 
 equations that the proof assistant handles silently for us.
@@ -277,12 +277,12 @@ The basic propositional equality that we defined as an inductive type does
 not quite meet the standards of mathematical reasoning.
 % 
 In mathematics, two functions are considered equal when they agree on all 
-inputs -- this is the principle of \emph{function extensionality} --
+inputs---this is the principle of \emph{function extensionality}---but
 % 
 \sideremark{In particular, it is not possible to prove that the functions
 \( {\lambda\ n\ .\ n+1} \) and \( {\lambda\ n\ .\ 1+n} \) are equal.}
 % 
-but this principle is not derivable for the propositional equality in 
+this principle is not derivable for the propositional equality in 
 intensional type theory.
 \[
   \Indeq{A \to B}{f}{g} \quad \xcancel{\longleftrightarrow} \quad \Depfun{A}{\Indeq{B}{f\ x}{g\ x}}
@@ -347,8 +347,8 @@ extensionality~\sidecite{Altenkirch99}.
 Basically, we need to do the work of a compiler by hand.
 % 
 The \Coq proof assistant provides some automation to deal with setoids through 
-tactics, but these solutions do not scale painlessly to large developments -- 
-to the point that the community has coined the term \emph{setoid hell} to refer 
+tactics, but these solutions do not scale painlessly to large developments---to 
+the point that the community has coined the term \emph{setoid hell} to refer 
 to these issues.
 
 \paragraph*{Alternative type theories}
@@ -442,7 +442,7 @@ in that equality can no longer be a proposition since it now contains essential
 computational information. 
 % 
 For instance there are two distinct automorphisms of the type of booleans 
--- one corresponding to the identity and the other to negation -- and transporting along
+---one corresponding to the identity and the other to negation---and transporting along
 the identity is not the same as transporting along negation.
 \sideremark{Transporting along an isomorphism amounts to an application of the
   isomorphism, up to a propositional equality.}
@@ -558,7 +558,7 @@ univalent mathematics in \Coq~\sidecite{Bauer:2017:HLF:3018610.3018615} and
 \Agda~\sidecite{agda-unimath}.
 
 However, homotopy type theory is not exactly computational. The univalence
-axiom is, well, an axiom -- which means that the \( \mathsf{J} \) eliminator
+axiom is, well, an axiom---which means that the \( \mathsf{J} \) eliminator
 will not reduce when applied to an equality that we obtained from an 
 isomorphism using univalence.
 % 
@@ -667,7 +667,7 @@ as the observational equality and type-casting.
 % 
 In counterpart for this added flexibility, normalization does not directly
 imply canonicity anymore, and a separate proof of consistency of the
-theory is required to derive canonicity -- as suggested by McBride \etal in
+theory is required to derive canonicity---as suggested by McBride \etal in
 their observational type theory paper~\sidecite{AltenkirchMcBrideSwiestra07}.
 % 
 We bridge that gap by building a set-theoretic model for \SetoidCC.
@@ -771,7 +771,7 @@ abstract presented at ICMS'20.
 \section{Theories and Meta-Theories}
 
 In the following chapters, we will be juggling with a fair amount of formal 
-systems -- mostly dependent type theories, but also a few first-order theories.
+systems---mostly dependent type theories, but also a few first-order theories.
 % 
 Since the mapping between type theories and names seems to be rather 
 inconsistent in the literature, we fix our own convention:
