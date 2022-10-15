@@ -3,6 +3,35 @@
 \chapter{Synthetic Cubical Homotopy Theory}
 \labch{homotopy}
 
+After so much discussion of computation in type theory, we spend
+In this chapter, treats homotopical results
+
+We start with a short introduction to homotopy theory and a discussion of the
+kind of results that we will encounter in this chapter in \cref{sec:synthetic}.
+% 
+Then in \cref{sec:cubical-agda} we give an overview of cubical type theory and
+its implementation in \CubicalAgda, and we use it to prove some basic 
+results about the circle and the torus.
+% 
+In \cref{sec:susp-pushout} and \cref{sec:hopf} we study three important 
+constructions from homotopy theory: the suspensions, the homotopy pushout and
+the Hopf fibration.
+% 
+Finally, we compare our proofs with similar formalizations done in axiomatic
+HoTT in \cref{sec:comparison}.
+
+All the code that appears in this chapter is written in \Agda and has been
+integrated in the standard library of \CubicalAgda. 
+% 
+As a consequence we adopt the notations used in that library, which sometimes
+conflict with notations used in the previous chapters. 
+% 
+We will make sure to be explicit about it and introduce every notation in due 
+course.
+\paragraph*{}
+\section{Synthetic Homotopy Theory}
+\label{sec:synthetic}
+
 In recent years HoTT has been developed axiomatically using various
 proof assistants. Indeed, all of the major proof assistants based on
 type theory have HoTT libraries: \texttt{HoTT-Agda} \sidecite{hottagda}, \texttt{Coq-HoTT}
@@ -11,10 +40,10 @@ type theory have HoTT libraries: \texttt{HoTT-Agda} \sidecite{hottagda}, \texttt
 libraries, for example, the formalization of computations of many
 homotopy groups of spheres~\sidecite{pi1s1,pinsn,Brunerie16}, the
 Seifert-van Kampen theorem~\sidecite{seifertvankampen}, Blakers-Massey
-theorem~\sidecite{BlakersMassey} % , the Gysin sequence~\sidecite{Brunerie16}
-% \anders{I don't think this has been mechanized?}
-and Serre's spectral sequence \sidecite{vanDoorn18}. However, despite
-these successes some constructions have turned out to be surprisingly
+theorem~\sidecite{BlakersMassey}
+and Serre's spectral sequence \sidecite{vanDoorn18}. 
+
+However, despite these successes some constructions have turned out to be surprisingly
 difficult. An example of this is the proof that the torus is
 equivalent to the product of two circles: the first version required
 an impressive amount of complicated path algebra, worked out by
@@ -67,8 +96,6 @@ transport and composition. This results in a new way of mechanizing
 synthetic homotopy theory, leading to (arguably) more direct and
 elegant proofs that closely resemble the homotopical arguments.
 
-\paragraph{Contributions/Outline}
-
 The main goal of this chapter is to show the practical gains of using a
 system with native support for univalence and higher inductive types
 for formalizing synthetic homotopy theory. We exemplify this by
@@ -91,73 +118,163 @@ formalizing the following results from HoTT:
   space is $\Sp^3$ (\cref{sec:hopf}).
 \end{itemize}
 
-The paper ends with some discussions of future work and a comparison
-with related work in the HoTT libraries of the major proof assistants
-based on type theory (\cref{sec:conclusions}).
+\section{Cubical Type Theory and \CubicalAgda}
+\label{sec:cubical-agda}
 
-\section{Cubical Agda}
-
-The cubical type theory that \texttt{Cubical Agda} is based on is
+The cubical type theory that \CubicalAgda is based on is
 heavily inspired by the one of \sidecitet{CCHM}, more precisely on the
 variation outlined by \sidecitet{CHM} that is well-suited for HITs. The
 goal of this section is to give sufficient background for readers not
-familiar with cubical type theory and \texttt{Cubical Agda} to be able
+familiar with cubical type theory and \CubicalAgda to be able
 to understand the examples in this paper. Readers who are familiar
-with \texttt{Cubical Agda} can hence skip this section and we refer
+with \CubicalAgda can hence skip this section and we refer
 curious readers to the paper of \sidecitet{cubicalagda} for a
 comprehensive technical treatment of all of the features of
-\texttt{Cubical Agda}.
+\CubicalAgda.
 
 \subsection{The Interval and Path Types}
 
-The first addition to make \texttt{Agda} \emph{cubical} is an interval
-type \func{I} with endpoints \con{i0} and \con{i1}. This plays the
-role of the real interval $[0,1] \subset \mathbb{R}$ in homotopy
-theory, however in \texttt{Cubical Agda} this is a purely formal
-object. A variable \var{i} : \func{I} represents a point varying
-continuously between the two endpoints. The interval is equipped with
-three basic operations: \emph{minimum} (\func{\_∧\_} : \func{I} $\to$
-\func{I} $\to$ \func{I}), \emph{maximum} (\func{\_∨\_} : \func{I}
-$\to$ \func{I} $\to$ \func{I}) and \emph{reversal} (\func{∼{}\_} :
-\func{I} $\to$ \func{I}). These operations form a \emph{De Morgan
-  algebra}, that is, a bounded distributive lattice
-$(\con{i0},\con{i1},\func{\_∧\_},\func{\_∨\_})$ with a De Morgan
-involution \func{∼{}\_}.
+The first addition to upgrade intensional type theory into cubical type theory is an 
+\emph{interval} type \func{I} 
+% 
+\sideremark{There is a technicality here: the interval is a special 
+  ``non-fibrant'' type which does not live in the universe of regular ``fibrant'' types.
+  It is safe to ignore this detail in first approach.}
+% 
+with two endpoints \con{i0} and \con{i1}. 
+% 
+This type plays the role of the real interval $[0,1] \subset \mathbb{R}$ in 
+homotopy theory, except that in cubical type theory the interval is a purely 
+formal object: it does not contain anything like real numbers.
+ 
+A variable \var{i} : \func{I} should be tought of as a point varying continuously 
+between the two endpoints. The interval is equipped with three basic operations: 
+\emph{minimum} (\func{\_∧\_} : \func{I} $\to$ \func{I} $\to$ \func{I}), 
+\emph{maximum} (\func{\_∨\_} : \func{I} $\to$ \func{I} $\to$ \func{I}) and 
+\emph{reversal} (\( {\func{∼{}\_} : \func{I} \to \func{I}} \)). 
+% 
+The interval with these operations has the structure of a \emph{De Morgan algebra}, \ie a bounded 
+distributive lattice $(\con{i0},\con{i1},\func{\_∧\_},\func{\_∨\_})$ with a 
+De Morgan involution \func{∼{}\_}.
 
-A function out of the interval into one of \texttt{Agda}'s universes
-of types (\func{Set} \var{ℓ}) represents a line between two types. By
-iterating this we obtain squares, cubes and hypercubes of types making
-\texttt{Agda} inherently \emph{cubical}. It is often useful to specify
-the endpoints of a line, which is done via \emph{path types} (we omit
-the quantification of the universe level \var{ℓ} for readability):
+A function out of the interval into a type \( A \) should be thought of as a 
+\emph{line} in the space \( A \).
+\sideremark{Even though \func{I} is non-fibrant, we can form function spaces
+  into regular types such as \( \func{I} \to A \), and the resulting type is
+  itself a regular type.}
+
+\begin{figure}[!h]
+  \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+
+  \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1,roundnode/.style={circle, fill=black, inner sep=0pt, minimum size=3.5pt}]
+  %uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
+  
+  %Shape: Ellipse [id:dp44966932604822996] 
+  \draw  [fill={rgb, 255:red, 220; green, 220; blue, 220 }  ,fill opacity=1 ] (170,65) .. controls (170,40.15) and (203.58,20) .. (245,20) .. controls (286.42,20) and (320,40.15) .. (320,65) .. controls (320,89.85) and (286.42,110) .. (245,110) .. controls (203.58,110) and (170,89.85) .. (170,65) -- cycle ;
+  \node (A) at (305,105) {\footnotesize \( A \)} ;
+  %Straight Lines [id:da8569138208042687] 
+  \draw    (60,30) -- (60,100) ;
+  \node[roundnode, label=west:{\footnotesize{\( \con{i0} \)}}] (I0) at (60,30) {} ;
+  \node[roundnode, label=west:{\footnotesize{\( \con{i1} \)}}] (I1) at (60,100) {} ;
+  \node (I) at (67, 70) {\footnotesize \( \func{I} \)} ;
+  %Curve Lines [id:da2061394224319698] 
+  \draw    (210,80) .. controls (234.17,37.67) and (267.17,83.17) .. (280,50) ;
+  \node[roundnode, label=south east:{\footnotesize{\( p\ \con{i1} \)}}] (I0) at (210,80) {} ;
+  \node[roundnode, label=south east:{\footnotesize{\( p\ \con{i0} \)}}] (I1) at (280,50) {} ;
+  %Curve Lines [id:da8829811064936145] 
+  \draw  [dotted, -latex']  (70,30) .. controls (144.17,20.17) and (218.83,10.83) .. (271.17,43.67) ;
+  %Curve Lines [id:da8852279413368417] 
+  \draw  [dotted, -latex']  (70,100) .. controls (116.17,99.17) and (136.17,70.67) .. (200,80) ;
+  
+  \end{tikzpicture}
+  \caption{Graphical interpretation of a function \( p : \func{I} \to A \)}
+\end{figure}
+
+Thus in particular, a function \( p \) from \func{I} to one of \Agda's 
+universes of types (\func{Set} \var{ℓ}) represents a line of types that varies
+continuously between the two types \( p\ \con{i0} \) and \( p\ \con{i1} \).
+% 
+Similarly a function \( p' : \func{I} \to \func{I} \to \func{Set}\ \var{ℓ}\ \) is 
+a square of types; and by iterating this process we get cubes and hypercubes 
+of types, hence the \emph{cubical} nature of cubical type theory.
+
+\begin{figure}[!h]
+  \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+
+  \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1,roundnode/.style={circle, fill=black, inner sep=0pt, minimum size=3.5pt}]
+  %uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
+  
+  %Straight Lines [id:da9992281795763605] 
+  \draw    (38.49,139.28) -- (173.68,139.28) ;
+  \node[roundnode, label=south west:{\footnotesize{\con{i0}}}] (I0) at (38.49,139.28) {} ;
+  \node[roundnode, label=south east:{\footnotesize{\con{i1}}}] (I0) at (173.68,139.28) {} ;
+  %Straight Lines [id:da39034223732541395] 
+  \draw  [dash pattern={on 0.84pt off 2.51pt}]  (38.49,100.54) -- (38.49,139.28) ;
+  %Straight Lines [id:da7047440344843311] 
+  \draw  [dash pattern={on 0.84pt off 2.51pt}]  (173.68,100.54) -- (173.68,139.28) ;
+  %Shape: Polygon Curved [id:ds1909563977441432] 
+  \draw  [draw opacity=0][fill={rgb, 255:red, 216; green, 212; blue, 212 }  ,fill opacity=1 ] (38.49,38.57) .. controls (80.7,21.91) and (132.97,54.06) .. (173.68,38.57) .. controls (155.5,42.83) and (154.6,97.83) .. (173.68,100.54) .. controls (157.68,107.2) and (133.03,104.05) .. (108.05,100.73) .. controls (82.13,97.28) and (55.85,93.64) .. (38.49,100.54) .. controls (19.86,96.28) and (20.31,42.83) .. (38.49,38.57) -- cycle ;
+  %Shape: Polygon Curved [id:ds8315502681665057] 
+  \draw  [fill={rgb, 255:red, 186; green, 183; blue, 183 }  ,fill opacity=1 ] (173.68,100.54) .. controls (194.56,104.29) and (193.65,36.89) .. (173.68,38.57) .. controls (153.7,40.24) and (152.8,96.8) .. (173.68,100.54) -- cycle ;
+  %Curve Lines [id:da7321879710524096] 
+  \draw [color={rgb, 255:red, 130; green, 130; blue, 130 }  ,draw opacity=1 ] [dash pattern={on 4.5pt off 4.5pt}]  (38.49,38.57) .. controls (54.11,42.96) and (55.91,96.8) .. (38.49,100.54) ;
+  %Curve Lines [id:da30123038239331235] 
+  \draw    (108.05,100.73) .. controls (92.86,100.67) and (92.41,37.14) .. (107.73,38.69) ;
+  %Curve Lines [id:da051040178779523826] 
+  \draw [color={rgb, 255:red, 130; green, 130; blue, 130 }  ,draw opacity=1 ] [dash pattern={on 4.5pt off 4.5pt}]  (107.73,38.69) .. controls (127.56,41.41) and (127.56,98.35) .. (108.05,100.73) ;
+  %Straight Lines [id:da44514618287884566] 
+  \draw  [dash pattern={on 0.84pt off 2.51pt}]  (108,100.73) -- (108,139.67) ;
+  \node (AI) at (108,70) {\footnotesize{\var{A}~\var{i}}} ;
+  \node (AI1) at (173.7,70) {\footnotesize{\var{A}~\con{i1}}} ;
+  \node[roundnode, label=south:{\footnotesize{\var{i} : \func{I}}}] (SI) at (108,139.67) {} ;
+  
+  \end{tikzpicture}
+  \caption{Graphical representation of a line of types 
+    \( A : \func{I} \to \func{Set}\ \var{ℓ} \), or equivalently a type depending 
+    on \( i : \func{I} \)}
+\end{figure}
+
+Given a line of types \( A : \func{I} \to \func{Set}\ \var{ℓ} \), we can form 
+the type of \emph{dependent lines} \( (i : \func{I}) \to A\ i \).
+And since it is often useful to specify the endpoints of a line, 
+\CubicalAgda provides primitive
+\sideremark{we omit the quantification of the universe level \var{ℓ} for readability}
+\emph{path types} that add constraints on the endpoints:
 %
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{PathP}
-%
-Paths are introduced by lambda abstractions
-\[
-  \symb{λ} \var{i} \to t : \func{PathP}\;\var{A}\;t[\substnop {i}
-  {\con{i0}}]\;t[\substnop {i} {\con{i1}}]
-\]
-provided that $t : A\;i$ for $i: \func{I}$. Given
-$\var{p} : \func{PathP}\;\var{A}\;\var{a}_0\;\var{a}_1$ we can apply
-it to $\var{r} : \func{I}$ and obtain
-$\var{p}\;\var{r} : \var{A}\;\var{r}$. Also, we always have that
-$\var{p}\;\con{i0}$ reduces to $a_0$ and $\var{p}\;\con{i1}$ reduces
-to $a_1$.
 
-The \func{PathP} types should be thought of as representing
-heterogeneous equalities since the two endpoints are in different
-types; this is similar to the dependent paths in
-HoTT~\sidecite[][Sect. 6.2]{HottBook13}. We define the type of non-dependent
+Paths are introduced by lambda abstractions:
+\begin{mathpar}
+  \inferrule{\Gamma,\; i : \func{I}\enskip \vdash \enskip t : A\ i}
+  {\Gamma \enskip \vdash \enskip \symb{λ} \var{i} \to t : \func{PathP}\;\var{A}\;t[\substnop {i}
+  {\con{i0}}]\;t[\substnop {i} {\con{i1}}]}
+\end{mathpar}
+Then given $\var{p} : \func{PathP}\;\var{A}\;\var{a}_0\;\var{a}_1$, we can apply
+it to $\var{r} : \func{I}$ and obtain
+$\var{p}\;\var{r} : \var{A}\;\var{r}$. 
+% 
+And we always have that
+$\var{p}\;\con{i0}$ is convertible to $a_0$ and $\var{p}\;\con{i1}$ is
+convertible to $a_1$, even when \( p \) is a neutral term.
+
+The type \func{PathP} plays the role of propositional equality in cubical type theory.
+More specifically it has the role of heterogeneous equality, since the two 
+endpoints are in different types; this is similar to the dependent paths in
+HoTT~\sidecite[][Sect. 6.2]{hottbook}. We define the type of homogeneous
 paths/equalities in terms of \func{PathP} as follows:
-%
+% 
+\sideremark{The homogeneous path types are written using a triple equality
+  symbol, following the convention of \CubicalAgda. This has nothing
+  to do with the definitional equality of \cref{ch:observational} or the 
+  reducible equality of \cref{ch:metatheory}.}
+% 
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{Path} %
-%
-The syntax $\{\var{A} = A\}$ tells \texttt{Agda} to bind the hidden
-argument \var{A} (first \var{A}) to a variable $A$ (second $A$) that
-can be used on the right hand side of the definition. Viewing
-equalities as paths allows us to reason about equality; for
-instance, the constant path represents a proof of reflexivity.
+
+The syntax $\{\var{A} = A\}$ in the definition tells \Agda to bind the hidden
+argument \var{A} (first occurence) to a variable $A$ (second occurence) that 
+can be used on the right hand side of the definition. 
+Viewing equalities as paths allows us to reason about equality; for
+instance the constant path represents a proof of equality by reflexivity.
 %
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{refl}
 
@@ -171,127 +288,192 @@ instance, the constant path represents a proof of reflexivity.
 % %
 % \ExecuteMetaData[chapters/literate-agda/Code.tex]{cong}
 
-Path types also let us prove new things that are not provable in
-standard \texttt{Agda}. For example, function extensionality, stating
-that pointwise equal functions are equal themselves, has a very simple
-proof:
+Using path types as equalities lets us prove theorems that are not provable in
+standard \Agda. For example, the principle of function extensionality (which states
+that two pointwise equal functions are equal) has a very simple proof:
 %
+\sideremark{When we input this definition to \CubicalAgda, 
+  the proof assistant checks that \( p\ x\ i \) is convertible to \( f\ x \)
+  when \( i = \con{i0} \) and convertible to \( g\ x \) when \( i = \con{i1} \).
+  And it is indeed the case, because \( p\ x \) has type \( f\ x\ \func{≡}\ g\ x \).}
+% 
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{funext}
 
 The proof of function extensionality for dependent and $n$-ary
-functions is equally direct. Since $\func{funExt}$ is a
-\emph{definable notion} in \texttt{Cubical Agda} it has computational
+functions is equally easy. Since $\func{funExt}$ is a
+theorem and not an axiom, it has computational
 content: it simply swaps the arguments to \var{p}.
 
-We can also use the basic operations on \func{I} to construct various
-useful operations, for example the reversal of a path is defined
-using \func{∼{}\_} and represents the fact that \func{≡} is symmetric.
+We can also use the de Morgan structure on \func{I} to construct various
+useful operations, for example the \emph{reversal} of a path is defined
+using \func{∼{}\_} and encodes the fact that \func{≡} is symmetric.
 %
+\sideremark{In this definition, the boundary conditions are met because
+  \( \text{\func{∼{}}} \con{i0} = \con{i1} \) and 
+  \( \text{\func{∼{}}} \con{i1} = \con{i0} \)}
+% 
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{sym}
 
 \subsection{Transport and Composition}
 
-One of the key operations with type theoretic equality is
-\emph{transport}: given an equality/path between types we get a
-function between these types. In \texttt{Cubical Agda} this is defined
-using another primitive called \func{transp}. However, for the
-examples in this paper the \func{transport} function suffices.
+\paragraph*{Transport}
+% 
+One of the basic uses of the propositional equality in type theory is 
+to perform \emph{type coercions}: 
+% 
+given an equality/path between two types \( A \) and \( B \), we should get
+a function from \( A \) to \( B \).
+% 
+In \CubicalAgda this is the job of the \func{transport} operator,
+which is defined in terms of the more general operator \func{transp}.
 %
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{transport}
-%
-% The more general \func{transp} operation lets us specify where the
-% transport is the identity function. In particular, when the second
-% argument to \func{transp} is \con{i1} it will reduce to \var{a}, which
-% let us prove that \func{transp}\;\var{A}\;\var{r}\;\var{a} is always
-% path equal to \var{a}.
-% \loic{This remark seems too technical. Hopefully we can get rid of
-%   transp in this paper...}
-% \anders{Yeah, I agree. Hopefully we can drop the actual definition of
-%   transport and pretend like it's the only operation.}
-% However, for the examples in this paper the \func{transport} function
-% will be sufficient.
-% \anders{Double check that this is true.}
+% 
+The \func{transp} operator is a primitive object in cubical type theory,
+and it satisfies complex computation rules.
+% 
+But \func{transport} will be sufficient for the purposes of this chapter.
 
-The substitution principle is an instance of \func{transport}.
+Using transport, we can substitute a term with another path-equal term.
 %
-\ExecuteMetaData[chapters/literate-agda/Code.tex]{subst}
-%
-This function invokes \func{transport} with a proof that the family
+\sideremark{This function invokes \func{transport} with a proof that the family
 $B$ respects the equality $p$:
 \[
   \lambda\;i \to B\;(p\;i) : B\;x\;\func{≡}\;B\;y
-\]
+\]}
+% 
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{subst}
 
-By combining the transport and minimum operations we can define an
-induction principle for paths that resemble the eliminator for
-Martin-Löf's inductively defined identity types~\sidecite{MartinLoef75}.
+If we combine the transport operator with some simple de Morgan algebra, we 
+can even define an induction principle for paths that resembles 
+the \( J \) eliminator for Martin-Löf's inductively defined identity 
+types~\sidecite{MartinLoef75}.
 %
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{J}
 
 However, an important difference between the cubical path types and
-Martin-Löf's identity types (and the path types in HoTT) is that
-cubical path types do not behave like inductive types.
-In particular, the above definition does not definitionally satisfy
-the computation rule when applied to \func{refl}. Nevertheless, we can
-still prove that it holds up to a path:
+Martin-Löf's identity types (and the path types in axiomatic HoTT) is that
+cubical path types are not inductive types.
+% 
+And in particular, the above definition does not satisfy the computation 
+rule when applied to \func{refl}. 
+% 
+Nevertheless, we can still prove that it holds up to a path:
+% 
+\sideremark{In this sense, the cubical equality is similar to the observational
+  equality of \cref{ch:observational}: both provide new extensionality principles 
+  in exchange for a weakening the computation rule of \( J \) to a propositional 
+  equality.}
 %
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{Jrefl}
 
-This is a subtle, but important difference between cubical type theory
-and HoTT. Readers familiar with HoTT might be worried that the failure
-of this equality holding definitionally complicates many proofs,
-however in our experience this is rarely the case because many proofs
-that require path induction in HoTT can be proved in more direct ways
-using cubical primitives. Furthermore, for closed terms (potentially
-depending on interval variables) the lack of this definitional
-equality in cubical type theory does not affect canonicity, in
-particular any closed term of type natural numbers is definitionally
-equal to a numeral as proved by~\sidecitet{Huber16}.
+Readers who are familiar with HoTT might be worrying that this weakened
+computation rule may complicate proofs; however in our experience this 
+is rarely the case, because most proofs done \textit{via} path induction 
+in HoTT can be done in more direct ways using cubical primitives.
+% 
+% Furthermore, for closed terms (potentially depending on interval variables) 
+% the lack of this definitional equality in cubical type theory does not affect 
+% canonicity, in particular any closed term of type natural numbers is 
+% definitionally equal to a numeral as proved by~\sidecitet{Huber16}
 
-\texttt{Cubical Agda} also has a primitive operation for composing
-paths and, more generally, for composing higher dimensional
-cubes. This operation is called \emph{homogeneous composition} and to
-describe it we need to be able to write partially specified
-$n$-dimensional cubes, i.e., cubes where some faces are missing. For
-this \texttt{Cubical Agda} has partial cubical types, written
-\func{Partial}~\var{r}~\var{A}. The idea is that
-\func{Partial}~\var{r}~\var{A} is the type of cubes in \var{A} that
-are only defined when (\var{r} = \con{i1}) holds. For example,
-\func{Partial}~(\var{i}~\func{∨}~\func{∼{}}~\var{i})~\var{A} is a type
-that is only defined when \var{i} is \con{i1} or \con{i0} (this means
-that it corresponds to the two endpoints of a line). Elements of these
-partial cubical types are introduced using pattern matching
-lambdas. For this purpose \texttt{Cubical Agda} supports a new form of
-patterns, here $(\var{i} = \con{i1})$ and $(\var{i} = \con{i0})$, that
-specify the cases of a partial element:
+\paragraph*{Composition}
+% 
+Cubical type theory also provides a primitive operation called \emph{homogeneous 
+composition} which allows us to compose paths and more generally, to compose 
+higher dimensional cubes. 
+
+In order to describe homogeneous composition, we need to have a notion of 
+partially specified $n$-dimensional cubes, \ie cubes where some faces are 
+missing. 
+% 
+For this reason, cubical type theory allows us to manipulate \emph{partial terms}:
+in \CubicalAgda, the type \func{Partial}~\var{r}~\var{A} contains elements of
+% 
+\sideremark{In the type \func{Partial}~\var{r}~\var{A}, the second argument \( r \)
+  is an element of \func{I} that is used to select faces from the context. 
+  For instance if the context contains two variables \( i, j \) of type \func{I}, 
+  then every term we define naturally has the shape of a square. Then the constraint
+  \( {i~\func{∨}~j = \con{i1}} \) selects a union of two faces of the square.}
+% 
+\var{A} which are only defined when (\var{r} = \con{i1}) holds. 
+% 
+For instance, if we are working in context that contains a variable \( i : \func{I} \) 
+and \( A \) is a well-formed type, we can 
+form the type \func{Partial}~(\var{i}~\func{∨}~\func{∼{}}~\var{i})~\var{A} 
+of elements of \( A \) which are defined when \( \var{i} = \con{i1} \)
+or when \( \var{i} = \con{i0} \).
+
+In \CubicalAgda, elements of partial cubical types are introduced with 
+pattern-matching on the constraint.
+% 
+For this purpose \CubicalAgda adds support for a new type of patterns, 
+of which $(\var{i} = \con{i1})$ and $(\var{i} = \con{i0})$ are examples in
+the following definition.
 %
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{partialBoolTwo}
+
+To help differentiate them from normal pattern matching on inductive types,
+we will write partial elements with pattern-matching lambdas.
+% 
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{partialBool'}
 
 The term \func{partialBool} should be thought of as a boolean
 depending on \var{i} with different values when \var{i} is \con{i1}
 and when \var{i} is \con{i0}.
 This is only defined on the two endpoints of \func{I} and there is no
-way to extend this partial type to a regular dependent boolean, since
-\con{true} is not equal to \con{false}.
+way to extend this partial type to a regular dependent boolean, or otherwise
+we would get a path between \con{true} and \con{false}.\\
 
-\texttt{Cubical Agda} also has cubical subtypes as in~\sidecitet{CCHM};
-given \var{A} : \func{Set}~\var{ℓ}, \var{r} : \func{I} and
-\var{u}~:~\func{Partial}~\var{r}~\var{A} we can form the type
-\var{A}~\func{[}~\var{r}~\func{↦}~\var{u}~\func{]}.  A term \var{v} of
-this type is a term of type \var{A} that is definitionally equal to
-\var{u} when (\var{r} = \con{i1}) is satisfied. Any term \var{u} :
-\var{A} can be seen as a term of type
+\begin{figure}[!h]
+\tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+
+\begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1,roundnode/.style={circle, fill=black, inner sep=0pt, minimum size=3.5pt}]
+  %uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
+
+%Straight Lines [id:da9992281795763605] 
+\draw    (38.49,139.28) -- (173.68,139.28) ;
+\node[roundnode, label=south west:{\footnotesize{\con{i0}}}] (I0) at (38.49,139.28) {} ;
+\node[roundnode, label=south east:{\footnotesize{\con{i1}}}] (I0) at (173.68,139.28) {} ;
+%Straight Lines [id:da39034223732541395] 
+\draw  [dash pattern={on 0.84pt off 2.51pt}]  (38.49,100.54) -- (38.49,139.28) ;
+%Straight Lines [id:da7047440344843311] 
+\draw  [dash pattern={on 0.84pt off 2.51pt}]  (173.68,100.54) -- (173.68,139.28) ;
+%Straight Lines [id:da4797898542184591] 
+\draw [color={rgb, 255:red, 180; green, 180; blue, 180 }  ,draw opacity=1 ]   (38.49,100.54) -- (173.68,100.54) ;
+%Straight Lines [id:da557351613724285] 
+\draw [color={rgb, 255:red, 180; green, 180; blue, 180 }  ,draw opacity=1 ]   (38.49,60.54) -- (173.68,60.54) ;
+\node[roundnode, label=east:{\footnotesize{\( \begin{array}{c} \AgdaFunction{partialBool}\ \con{i1} \\ = \con{true} \end{array} \)}}] (TT) at (173.68,60.54) {} ;
+\node[roundnode, label=west:{\footnotesize{\( \begin{array}{c} \AgdaFunction{partialBool}\ \con{i0} \\ = \con{false} \end{array} \)}}] (FF) at (38.49,100.54) {} ;
+\node (TR) at (105,52) {\textcolor[RGB]{160,160,160}{\footnotesize\textsf{true}}} ;
+\node (TR) at (105,108) {\textcolor[RGB]{160,160,160}{\footnotesize\textsf{false}}} ;
+
+\end{tikzpicture}
+\caption{Graphical representation of the partial element \func{partialBool}}
+\end{figure}
+
+Cubical type theory also provides \emph{cubical subtypes}~\sidecite{CCHM}.
+Given a type \( {\var{A} : \func{Set}~\var{ℓ}} \), a face constraint encoded
+by an element of the interval \( {\var{r} : \func{I}} \) and a partial term 
+\( {\var{u}~:~\func{Partial}~\var{r}~\var{A}} \), we can form the type
+\( {\var{A}~\func{[}~\var{r}~\func{↦}~\var{u}~\func{]}} \)
+of total elements of \( A \) that extend \( u \).  
+% 
+A term \var{v} of this type is a term of type \var{A} that is definitionally equal to
+\var{u} when the constraint (\var{r} = \con{i1}) holds. 
+
+Any term \var{u} : \var{A} can be seen as a term of type
 \var{A}~\func{[}~\var{r}~\func{↦}~\var{u}~\func{]} that agrees with
-itself when (\var{r} = \con{i1}):
+itself when (\var{r} = \con{i1}) holds.
 %
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{inc}
 
 We can also forget that a partial element agrees with \var{u} when
-(\var{r} = \con{i1}):
+\var{r} = \con{i1}.
 %
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{ouc}
 
-These two operations are inverse to each other when well-typed. Using
+And these two operations are inverse to each other when well-typed. Using
 this cubical infrastructure we can now give the type of the
 homogeneous composition operation.
 % that generalizes binary composition of paths so that we can compose
@@ -299,13 +481,61 @@ homogeneous composition operation.
 %
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{hcomp}
 
-When calling \func{hcomp} \{r = \var{r}\} \var{u} \var{u₀},
-\texttt{Cubical Agda} makes sure that \var{u₀} agrees with \var{u}
-\con{i0} on \var{r}; this is specified in the type of \var{u₀}. The
-idea is that \var{u₀} is the base and \var{u} specifies the sides of
-an open box where the side opposite of \var{u₀} is missing. The
-\func{hcomp} operation then gives us the missing side.
-For example binary composition of paths can be written as:
+The meaning of this type is a bit opaque in first approach.
+% 
+To get a clearer picture of \func{hcomp}, we can start by looking at the special
+case
+\func{hcomp}~\{\var{r}~=~\var{i}~\func{∨}~\func{∼{}}~\var{i}\}~\var{u}~\var{t},
+where assume that we are working in a context that contains the interval 
+variable \( i \) -- in other words, \( A \) is a type indexed over the interval 
+\func{I} as pictured in \cref{fig:hcomp-demo}.
+ 
+Then \var{t} is a total element of \( A \) and \var{u} extends \( t \)
+when \( i = \con{i0} \) or \( i = \con{i1} \), resulting in the shape of
+an open box.
+% 
+\CubicalAgda makes sure that \var{t} agrees with \var{u}~\con{i0} when the
+constraint is satisfied; this is specified by making \var{t} an extension type. 
+% 
+The \func{hcomp} operation then gives us the missing side of the box.
+
+\begin{figure}[!h]
+  \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+
+  \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1,roundnode/.style={circle, fill=black, inner sep=0pt, minimum size=3.5pt}]
+  %uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
+  \node[roundnode, label=south west:{\footnotesize{\con{i0}}}] (I0) at (40,140) {} ;
+  \node[roundnode, label=south east:{\footnotesize{\con{i1}}}] (I0) at (180,140) {} ;
+  %Straight Lines [id:da9992281795763605] 
+  \draw    (40,140) -- (180,140) ;
+  %Straight Lines [id:da39034223732541395] 
+  \draw  [dash pattern={on 0.84pt off 2.51pt}]  (40,100) -- (40,140) ;
+  %Straight Lines [id:da7047440344843311] 
+  \draw  [dash pattern={on 0.84pt off 2.51pt}]  (180,100) -- (180,140) ;
+  %Shape: Polygon Curved [id:ds6871817755174879] 
+  \draw  [draw opacity=0][fill={rgb, 255:red, 200; green, 200; blue, 200 }  ,fill opacity=1 ] (40,50) .. controls (72.17,30.5) and (135.17,73.5) .. (180,50) .. controls (179.92,99.92) and (179.92,50.17) .. (180,100) .. controls (133.67,131) and (77.17,84) .. (40,100) .. controls (39.92,50.17) and (39.92,99.92) .. (40,50) -- cycle ;
+  %Curve Lines [id:da27064595952926185] 
+  \draw    (40,90) .. controls (74,72.83) and (140,121.83) .. (180,90) ;
+  %Straight Lines [id:da9072242715265223] 
+  \draw  [color={rgb, 255:red, 220; green, 0; blue, 0 }  ,draw opacity=1 ]  (40,90) -- (40,60) ;
+  %Straight Lines [id:da34146717098575696] 
+  \draw  [color={rgb, 255:red, 220; green, 0; blue, 0 }  ,draw opacity=1 ]  (180,60) -- (180,90) ;
+  %Curve Lines [id:da40884349871839487] 
+  \draw  [dash pattern={on 3pt off 2pt}]  (40,60) .. controls (57.25,41.25) and (146.83,88.5) .. (180,60) ;
+  
+  \node (T) at (110,102) {\footnotesize\var{t}} ;
+  \node (U1) at (35,75) {\textcolor[RGB]{220,0,0}{\footnotesize\textit{u}}} ;
+  \node (U2) at (185,75) {\textcolor[RGB]{220,0,0}{\footnotesize\textit{u}}} ;
+  \node[rotate=-10] (H) at (110,58) {\footnotesize{\func{hcomp}~\var{u}~\var{t}}} ;
+
+  \end{tikzpicture}
+  \caption{Graphical representation of the homogeneous composition \func{hcomp}~\{\var{r}~=~\var{i}~\func{∨}~\func{∼{}}~\var{i}\}~\var{u}~\var{t}}
+  \label{fig:hcomp-demo}
+\end{figure}
+
+The general case does pretty much the same, but with an arbitrary number of
+dimension and an arbitrary face constraint.
+As an example for the use of \func{hcomp}, we can define binary composition of paths:
 %
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{compPath}
 
@@ -313,6 +543,7 @@ Pictorially we are given \var{p} : \var{x} \ \func{≡}\  \var{y} and
 \var{q} : \var{y} \ \func{≡}\  \var{z}, and the composite of the two paths
 is obtained by computing the dashed top of the following square.
 %
+\begin{figure}[!h]
 \begin{mathpar}
   \vcenter{\hbox{\begin{tikzpicture}[baseline=40,->, scale=0.8]
     \node [anchor=west] (x) at (0, 1) {\footnotesize \( j \)};
@@ -336,6 +567,8 @@ is obtained by computing the dashed top of the following square.
   \end{tikzpicture}
 
 \end{mathpar}
+\caption{Composing two paths using \func{hcomp}}
+\end{figure}
 
 % As we are constructing a path from \var{x} to \var{z} along \var{i}
 % we have \var{i} : \func{I} in context and put \func{inS} (\var{p}
@@ -350,12 +583,12 @@ is obtained by computing the dashed top of the following square.
 % % There are now three dimensions involved: $r$, $i$, $j$, and I do not
 % % know how to map this to the picture.}
 
-% When \var{i} is \con{i0} this is \func{outS}~\var{u₀} and when \var{i}
+% When \var{i} is \con{i0} this is \func{outS}~\var{t} and when \var{i}
 % is \con{i1} it is \func{hcomp} ($\lambda$ \var{j} $\to$ $\lambda$ \{
-% (\var{r} = \con{i1}) $\to$ \var{u} \var{j} \func{1=1} \} \var{u₀} as
+% (\var{r} = \con{i1}) $\to$ \var{u} \var{j} \func{1=1} \} \var{t} as
 % the absurd faces (\con{i0} = \con{i1}) gets filtered out. By the extensionality of
 % partial elements this hence gives a line along \var{i}
-% between \func{outS}~\var{u₀} and \func{hcomp} \var{u} \var{u₀} which
+% between \func{outS}~\var{t} and \func{hcomp} \var{u} \var{t} which
 % geometrically corresponds to the filling of an open box as it connects
 % the base with the lid computed using \func{hcomp}. %
 % %% \anders{Is this clearer now?} %
@@ -378,8 +611,8 @@ induction.
 \subsection{Higher Inductive Types}
 \label{sec:hits}
 
-The fact that \texttt{Cubical Agda} has native support for HITs means that we
-can define the circle HIT using an \texttt{Agda} \keyw{data} declaration.
+\CubicalAgda has native support for HITs, which means that we
+can define the circle using an \Agda~\keyw{data} declaration.
 \ExecuteMetaData[chapters/literate-agda/Circle.tex]{s1}
 
 % \begin{minipage}{0.4\linewidth}
@@ -399,9 +632,10 @@ can define the circle HIT using an \texttt{Agda} \keyw{data} declaration.
 % \end{minipage}
 
 This is a type with a point constructor \con{base} and a nontrivial
-equality/path constructor \con{loop} connecting \con{base} to itself
+equality / path constructor \con{loop} connecting \con{base} to itself
 as shown in the drawing below.
 
+\begin{figure}[!h]
 \begin{center}
 \begin{tikzpicture}
   \draw[->,thick,draw=black,solid,line width=0.3mm]
@@ -411,14 +645,23 @@ as shown in the drawing below.
   \node[] at (1,-0.58) (b) {\con{loop}};
 \end{tikzpicture}
 \end{center}
+\caption{Graphical representation of the HIT \func{S¹}}
+\end{figure}
 
-Functions out of HITs are written using normal \texttt{Agda} pattern
+Functions out of HITs are written using normal \Agda pattern
 matching equations. The following function wraps the circle twice
 around itself, by composing the \con{loop} constructor with itself:
 %
+\sideremark{When we input this definition by pattern matching, \CubicalAgda 
+  checks that the boundary constraints from the definition of \func{S¹} are
+  respected: since \con{loop}~\con{i0}~=~\con{base} and 
+  \con{loop}~\con{i1}~=~\con{base}, we want to have 
+  \func{double}~(\con{loop}~\con{i0})~=~\func{double}~\con{base} 
+  and \func{double}~(\con{loop}~\con{i1})~=~\func{double}~\con{base}.}
+% 
 \ExecuteMetaData[chapters/literate-agda/Circle.tex]{double}
 
-The second case defines a \emph{definitional} equality, while in HoTT
+Both cases define a \emph{definitional} equality, while in axiomatic HoTT
 this would have had to be defined using the postulated recursion
 principle for the circle. This means that in HoTT \func{double}
 applied to \con{loop} would not reduce automatically, but a
@@ -429,21 +672,15 @@ reasoning about \func{double}. Furthermore, this is not very natural
 if one wants to use HITs for programming.
 
 In order for the circle to be the free type generated by \con{base}
-and \con{loop} it also needs to have elements of the form \con{loop}
-$\cdot$ \con{loop} as in the above definition of \func{double}. In
-general, for HITs
-$\func{hcomp}\;(\lambda\,i\to\lambda~\{~(r = \io) \to u\})\;u_0$ only
-reduces to u[\substnop i {\io}] when $r$ is $\io$, and is to be
-considered a canonical element otherwise. The circle hence has
+and \con{loop}, it also needs to have elements of the form \con{loop}
+$\cdot$ \con{loop} as in the above definition of \func{double}. 
+% 
+In general, for HITs 
+$\func{hcomp}\;(\lambda\,i\to\lambda~\{~(r = \io) \to u\})\;u_0$ 
+only reduces to u[\substnop i {\io}] when $r$ is $\io$, and is
+considered to be a canonical element otherwise. The circle hence has
 constructors of the form $\hcompcon~u~u_0$ in addition to \con{base}
-and \con{loop}. When typechecking definitions like the one for
-\func{double}, \texttt{Cubical Agda} checks that the boundary of all
-cases are correct, in particular that the defining equation
-\[
-  \func{double}~(\con{loop}~\var{i}) = (\con{loop} \cdot \con{loop})~\var{i}
-\]
-agrees with \( \func{double}\ \con{base} \) when \var{i} is \iz{} or
-\io{}.
+and \con{loop}. 
 
 % \[
 %   \func{double}~(\con{loop}~\iz) = \func{double}~\con{base} = \con{base}
@@ -459,12 +696,11 @@ agrees with \( \func{double}\ \con{base} \) when \var{i} is \iz{} or
 
 \subsection{Glue Types and Univalence}
 
-The final extension of \texttt{Cubical Agda} relevant for this paper
+The final extension of \CubicalAgda relevant for this chapter
 are the \func{Glue} types of \sidecitet{CCHM} that let us give
 computational content to univalence. Given that a type in cubical type
 theory represents a higher dimensional cube, \func{Glue} types let us
-construct a cube where some sides have been replaced by equivalent
-types.
+replace the faces of a cube with some \emph{equivalent} types.
 % This is analogous to how \func{hcomp} lets us replace some
 % faces of a cube by composing it with other cubes, however for
 % \func{Glue} types we can compose with equivalences instead of paths.
@@ -475,32 +711,89 @@ types.
 %   is a good description of glue imo. And we do need it for Hopf.}
 
 There are many ways to define the notion of ``equivalence of types''
-in HoTT; \texttt{Cubical Agda} uses the definition that two types are
+in HoTT; \CubicalAgda uses the definition that two types are
 equivalent if there is a function between them with
 \emph{``contractible fibers''} following the terminology of
 \sidecitet{Voevodsky15} and the HoTT book~\sidecite{HottBook13}. Spelled out,
 a map $f : A \to B$ is an equivalence if the preimage of any point in
-\var{B} is a singleton type. We write \var{A} \func{≃} \var{B} if
+\var{B} is a singleton type. 
+% 
+\sideremark{Equivalences are formally defined as follows:\\
+\func{isEquiv}~f\ =\ (\var{y}~:~\var{B})~\to~\func{isContr}~(\func{fiber}~\var{f}~\var{y})\\
+\func{fiber}~\var{f}~\var{y}\ =\ \func{Σ}~(\var{x}~:~\var{A})~.~\var{f}~\var{x}~\func{≡}~\var{y} \\
+\func{isContr}~\var{A}\ =\ \func{Σ}~(\var{a}~:~\var{A})~.~((\var{x}~:~\var{A})~\to~\var{x}~\func{≡}~\var{a})}
+% 
+We write \var{A} \func{≃} \var{B} if
 there is a chosen equivalence $f : A \to B$ between \var{A} and
 \var{B}. A key result is that isomorphisms, in the sense of a
 section-retraction pair of functions, give rise to equivalences.
 In particular, the identity function is an equivalence:
 $\func{idEquiv}~\var{A}~:~\var{A}~\func{≃}~\var{A}$.
 
-The \func{Glue} types take a partial family of types \var{A} that are
-equivalent to the base type \var{B}. These types are then ``glued''
-onto \var{B} and the equivalence data gets packaged up into a new
-type.
+The \func{Glue} primitive takes a base type \var{B} and a partial family of 
+types \var{A} that are equivalent to \var{B}, and produces type by ``gluing'' 
+\var{A} onto \var{B}. The resulting type is definitionally equal to \var{A}
+when it is defined.
 %
 \ExecuteMetaData[chapters/literate-agda/Glue.tex]{Glue}
 %
 % When \var{r} is \con{i1} the type \func{Glue}\;\var{B}\;\var{Ae}
 % reduces to \var{Ae}\;\func{1=1}\;\proj{fst}.
 
-These types are introduced using the \func{glue} constructor and
-eliminated using the \func{unglue} operation. Examples of this will be
-discussed in the proof of \cref{thm:hopf}. Using \func{Glue} types we
-can turn an equivalence of types into a path:
+\begin{figure}[!h]
+  \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+
+  \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1,roundnode/.style={circle, fill=black, inner sep=0pt, minimum size=3.5pt}]
+  %uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
+  \node[roundnode, label=south west:{\footnotesize{\con{i0}}}] (I0) at (40,140) {} ;
+  \node[roundnode, label=south east:{\footnotesize{\con{i1}}}] (I0) at (130,140) {} ;
+  \node[roundnode, label=south west:{\footnotesize{\con{i0}}}] (I0) at (240,140) {} ;
+  \node[roundnode, label=south east:{\footnotesize{\con{i1}}}] (I0) at (330,140) {} ;
+  
+  %Straight Lines [id:da9992281795763605] 
+  \draw    (39.98,140) -- (130,140) ;
+  %Straight Lines [id:da39034223732541395] 
+  \draw  [dash pattern={on 0.84pt off 2.51pt}]  (39.98,100) -- (39.98,140) ;
+  %Straight Lines [id:da7047440344843311] 
+  \draw  [dash pattern={on 0.84pt off 2.51pt}]  (130,100) -- (130,140) ;
+  %Shape: Polygon Curved [id:ds6871817755174879] 
+  \draw  [draw opacity=0][fill={rgb, 255:red, 200; green, 200; blue, 200 }  ,fill opacity=1 ] (39.98,50) .. controls (66,40) and (97,61.5) .. (130,50) .. controls (129.95,99.92) and (129.95,50.17) .. (130,100) .. controls (97.5,114.5) and (70.5,90.5) .. (39.98,100) .. controls (39.92,50.17) and (39.92,99.92) .. (39.98,50) -- cycle ;
+  %Straight Lines [id:da9551336451182719] 
+  \draw [color={rgb, 255:red, 220; green, 0; blue, 0 }  ,draw opacity=1 ]   (150,50) -- (150,100) ;
+  %Straight Lines [id:da23306158989109416] 
+  \draw [color={rgb, 255:red, 220; green, 0; blue, 0 }  ,draw opacity=1 ]   (20,50) -- (20,100) ;
+  %Straight Lines [id:da2010301085745465] 
+  \draw    (239.98,140) -- (330,140) ;
+  %Straight Lines [id:da3537038075493171] 
+  \draw  [dash pattern={on 0.84pt off 2.51pt}]  (239.98,100) -- (239.98,140) ;
+  %Straight Lines [id:da9379434659446393] 
+  \draw  [dash pattern={on 0.84pt off 2.51pt}]  (330,100) -- (330,140) ;
+  %Shape: Polygon Curved [id:ds001846376488208623] 
+  \draw  [draw opacity=0][fill={rgb, 255:red, 200; green, 200; blue, 200 }  ,fill opacity=1 ] (239.98,50) .. controls (266,40) and (297,61.5) .. (330,50) .. controls (329.95,99.92) and (329.95,50.17) .. (330,100) .. controls (297.5,114.5) and (270.5,90.5) .. (239.98,100) .. controls (239.92,50.17) and (239.92,99.92) .. (239.98,50) -- cycle ;
+  %Straight Lines [id:da011720172503938642] 
+  \draw [color={rgb, 255:red, 220; green, 0; blue, 0 }  ,draw opacity=1 ]   (330,50) -- (330,100) ;
+  %Straight Lines [id:da4784036579630343] 
+  \draw [color={rgb, 255:red, 220; green, 0; blue, 0 }  ,draw opacity=1 ]   (239.98,50) -- (239.98,100) ;
+  %Straight Lines [id:da289164093987879] 
+  \draw    (130,50) -- (130,100) ;
+  %Straight Lines [id:da8905847731459658] 
+  \draw    (40,50) -- (39.98,100) ;
+  %Straight Lines [id:da9372757307556213] 
+  \draw[-latex]   (170,90) -- (220,90) ;
+  
+  \node (E1) at (140, 75) {\textcolor[RGB]{220,0,0}{\( \simeq \)}} ;
+  \node (E2) at (30, 75) {\textcolor[RGB]{220,0,0}{\( \simeq \)}} ;
+  \node (B) at (85, 75) {\footnotesize{\var{B}}} ;
+  \node (GB) at (285, 75) {\footnotesize{\func{Glue}~\var{B}~\var{A}}} ;
+  \end{tikzpicture}
+  \caption{Graphical representation of \func{Glue}~\var{B}~\{\var{r}~=~\var{i}~\func{∨}~\func{∼{}}~\var{i}\}~\var{A}}
+\end{figure}
+Elements of a \func{Glue} type are introduced using the \func{glue} constructor 
+and eliminated using the \func{unglue} operation. 
+% 
+Examples of this will be discussed in the proof of \cref{thm:hopf}. 
+
+With \func{Glue} types, we can turn an equivalence of types into a path:
 %
 \ExecuteMetaData[chapters/literate-agda/Glue.tex]{ua}
 
@@ -510,27 +803,13 @@ the identity equivalence. The term \func{ua} \var{e} is a path from
 \var{A} to \var{B} as the \func{Glue} type reduces when the face
 conditions are satisfied---when \var{i} is \con{i0} this reduces to
 \var{A} and when \var{i} is \con{i1} it reduces to \var{B}. %
-Pictorially we can describe \func{ua} \var{e} as the dashed top line
-in:
-%
-\begin{mathpar}
-  \begin{tikzpicture}[xscale=2.5,yscale=2]
-    \node (A01) at (0,1) {\var{A}};
-    \node (A11) at (1,1) {\var{B}};
-    \node (A00) at (0,0) {\var{B}};
-    \node (A10) at (1,0) {\var{B}};
-    \path[->,font=\scriptsize,>=angle 90]
-      (A01) edge node[left]{\var{e}} node[right]{\reflectbox{\rotatebox[origin=c]{90}{$\simeq$}}} (A00)
-      (A11) edge node[left]{\reflectbox{\rotatebox[origin=c]{90}{$\simeq$}}} node[right]{\func{idEquiv}~\var{B}} (A10)
-      (A00) edge node[below]{\var{B}} (A10);
-    \path[->,font=\scriptsize,>=angle 90,dashed]
-      (A01) edge node[above]{$ $} (A11);
-  \end{tikzpicture}
-\end{mathpar}
 
-This lets us prove the standard formulation of the univalence axiom,
-however, for all of the examples in this paper the \func{ua} function
-suffices.
+The univalence axiom is a little more complex, since it asks for the obvious 
+function \var{A}~\func{≡}~\var{B}~\to~\var{A}~\func{≃}~\var{B} to be an 
+equivalence.
+% 
+We can also derive it from \func{Glue}, but for all of the examples in this 
+chapter the \func{ua} function will be sufficient.
 
 % A consequence is that whenever we have an equivalence
 % $e : A\;\func{≃}\;B$ we have that
@@ -542,8 +821,8 @@ suffices.
 \section{The Circle and Torus}
 \label{sec:torus}
 
-We already gave the definition of the circle as a HIT in
-\cref{sec:hits}. To define the torus as a datatype in \texttt{Cubical Agda} we write the following:
+We already gave the definition of the circle as a HIT in \cref{sec:hits}. 
+Similarly, we can define the torus as a datatype in \CubicalAgda as follows:
 %
 \ExecuteMetaData[chapters/literate-agda/Torus.tex]{torus}
 
@@ -552,7 +831,7 @@ nontrivial path constructors connecting it to itself and a
 \con{square} relating the two paths. This square can be illustrated
 by:
 %
-\begin{center}
+\begin{figure}[!h]
 \begin{tikzpicture}[xscale=2,yscale=2]
   \draw [thin,->] (-1.55,0) -- (-1.55,0.4) ;
   \draw [thin,->] (-1.55,0) -- (-1.15,0) ;
@@ -570,14 +849,15 @@ by:
     (A10) edge node[right]{\con{line2}} (A11)
     (A00) edge node[below]{\con{line1}} (A10);
 \end{tikzpicture}
-\end{center}
+\caption{The two-dimensional face of the torus}
+\end{figure}
 
 The type of the \con{square} constructor captures this by identifying
 \con{line2} with itself \emph{over} \con{line1}.  In order to see that
 this represents a torus imagine \con{square} being made of a piece of
 paper that is folded so that the opposite sides are matched up.  The
 proof that the \func{Torus} type is equivalent to two circles in
-\texttt{Cubical Agda} was given by \sidecitet[][Section 2.4.1]{cubicalagda},
+\CubicalAgda was given by \sidecitet[][Section 2.4.1]{cubicalagda},
 but we recall it here for completeness. We first write a function from
 the torus to two circles using pattern matching.
 %
@@ -590,7 +870,7 @@ the torus to two circles using pattern matching.
 % \end{minipage}
 
 To prove that this is an equivalence we need to define its inverse
-\func{c2t} : \func{S¹} \func{×} \func{S¹} → \func{Torus}. This
+\func{c2t}~:~\func{S¹}~\func{×}~\func{S¹}~→~\func{Torus}. This
 function is also defined by pattern matching in the obvious
 way. Proving that the two maps cancel is then simply done by
 pattern matching with \func{refl} in all cases.
@@ -615,12 +895,13 @@ any isomorphism is an equivalence.
 %
 \ExecuteMetaData[chapters/literate-agda/Torus.tex]{teqs1s1}
 
-The simplicity of this cubical proof relies on the computation rules
-for all constructors of HITs holding definitionally in \texttt{Cubical
-  Agda}. In HoTT the computation rules for the higher constructors
-would have to be postulated which means that they do not hold
+This proof is trivial, thanks to the computation rules
+for all constructors of HITs holding definitionally in \CubicalAgda. 
+In axiomatic HoTT, the computation rules for the higher constructors
+would have to be postulated as axioms, which means that they do not hold
 definitionally. This is exactly what makes the proofs of
-\func{c2t-t2c} and \func{t2c-c2t} surprisingly nontrivial in HoTT.
+\func{c2t-t2c} and \func{t2c-c2t} surprisingly nontrivial in 
+HoTT~\sidecite{Sojakova16Torus}.
 
 \subsection{The Loop Spaces of the Circle and Torus}
 
@@ -634,16 +915,48 @@ the integers. This proof is a cubical adaptation of the proof of
 \sidecitet{pi1s1}. We can then combine this with the above equivalence
 between the torus and two circles to also compute the loop space of
 the torus. Note that we are computing loop spaces and not fundamental
-groups. However, as the fundamental group is defined as the
+groups. 
+% 
+\sideremark{The loop space should be called the 
+  ``fundamental \( \infty \)-group''.}
+% 
+However, as the fundamental group is defined as the
 set-truncation of the loop space and these loop spaces are both sets,
 we get that they coincide with the fundamental groups.
 
 The first step in computing the loop space of the circle is to define
 a function computing ``winding numbers'', i.e. the net number of times
 an element of \func{ΩS¹} goes around the circle clockwise.
-To do this we first prove that the successor function on the integers,
-\func{Int}, is an equivalence (its inverse is the predecessor
-function). By applying \func{ua} we then get a nontrivial
+To do this we first prove that the successor function on the signed integers
+\func{Int} is an equivalence (its inverse is the predecessor
+function). 
+% 
+\begin{marginfigure}
+  \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+
+  \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1,roundnode/.style={circle, fill=black, inner sep=0pt, minimum size=3.5pt}]
+  %uncomment if require: \path (0,300); %set diagram left start at 0, and has height of 300
+  \node[roundnode, label=west:{\footnotesize{\con{base}}}] (B) at (40,165) {} ;
+  \node[label=west:{\footnotesize{\anum{...}}}] (B) at (40,10) {} ;
+  \node[roundnode, label=west:{\footnotesize{\anum{+1}}}] (B) at (40,40) {} ;
+  \node[roundnode, label=west:{\footnotesize{\anum{0}}}] (B) at (40,70) {} ;
+  \node[roundnode, label=west:{\footnotesize{\anum{-1}}}] (B) at (40,100) {} ;
+  \node[label=west:{\footnotesize{\anum{...}}}] (B) at (40,130) {} ;
+  
+  %Shape: Ellipse [id:dp5332003998369562] 
+  \draw   (40,165) .. controls (40,156.72) and (55.67,150) .. (75,150) .. controls (94.33,150) and (110,156.72) .. (110,165) .. controls (110,173.28) and (94.33,180) .. (75,180) .. controls (55.67,180) and (40,173.28) .. (40,165) -- cycle ;
+  %Curve Lines [id:da36749341448547557] 
+  \draw    (110,30) .. controls (110.83,62.83) and (40.17,55.83) .. (40,40) .. controls (39.83,24.17) and (108.67,25.83) .. (110,60) .. controls (111.33,94.17) and (39.67,85.83) .. (40,70) .. controls (40.33,54.17) and (108.67,55.83) .. (110,90) .. controls (111.33,124.17) and (39.83,115.17) .. (40,100) .. controls (40.17,84.83) and (110.33,86.17) .. (110,120) ;
+  %Curve Lines [id:da7416045578170326] 
+  \draw  [dash pattern={on 3pt off 3pt}]  (110,30) .. controls (110.33,22.33) and (94.33,10.83) .. (80,10) ;
+  %Curve Lines [id:da8787470643619226] 
+  \draw  [dash pattern={on 3pt off 3pt}]  (110,120) .. controls (109.83,133.33) and (96.83,138.83) .. (90,140) ;
+
+  \end{tikzpicture}
+  \caption{Graphical represenation of the \func{helix} as a dependent type on \func{S¹}}
+\end{marginfigure}
+% 
+By applying \func{ua} we then get a nontrivial
 equality/path from \func{Int} to \func{Int} that we call
 \func{sucPathInt}. Using this we can define:
 %
@@ -657,7 +970,7 @@ numbers $+3$ and $-1$ as follows:
 
 The term \con{negsuc} \var{n} represents the number $- (n+1)$, so that
 \con{negsuc} \anum{0} is indeed $-1$. Note that none of these examples
-would have reduced to a numeral in HoTT as they would have been stuck
+would have reduced to a numeral in axiomatic HoTT as they would have been stuck
 on transporting along \func{ua}. The proofs of these would hence not
 be proved by \func{refl}, but rather by manually rewriting with the
 postulated computation rules for univalence.
@@ -695,10 +1008,12 @@ this offered by HoTT in the form of the \emph{encode-decode method}
 
 Note that \func{decode} \con{base} is \func{loopn} and that
 \func{encode} \con{base} is \func{winding} definitionally. The
-\con{loop} case of \func{decode} is a bit longer to define and we omit
-it due to space constraints. However, it is fairly direct to define
-using the cubical primitives and we refer the interested reader to the
-formalization. The main reason for generalizing the functions as above
+\con{loop} case of \func{decode} is a not too difficult to define cubically,
+but it does involve a few lines of path algebra. We prefer to omit
+it from our exposition to avoid getting sidetracked, and we refer
+the interested reader to the formalization.
+% 
+The main reason for generalizing the functions as above
 is that we can now use path induction to prove the following:
 %
 \ExecuteMetaData[chapters/literate-agda/Circle.tex]{decodeEncode}
@@ -713,6 +1028,10 @@ equality:
 
 By combining this result with the equality between the torus and two
 circles we obtain:
+% 
+\sideremark{The loop space of a cartesian product of two types is the cartesian 
+  product of the individual loop spaces, since the loop space is more or less a
+  function type.}
 %
 \ExecuteMetaData[chapters/literate-agda/Torus.tex]{omegatorusintint}
 
@@ -729,6 +1048,7 @@ Just like \func{winding} this function also computes as expected:
 \ExecuteMetaData[chapters/literate-agda/Torus.tex]{exwindingTorus}
 
 \section{Suspension, Spheres and Pushouts}
+\label{sec:susp-pushout}
 
 In this section we discuss various results about spheres, culminating
 in two proofs that the 3-dimensional sphere is equal to the join of
@@ -933,8 +1253,8 @@ one of \cref{lem:susps1} so we omit it.
 One might wonder if we can also give a direct definition of
 \func{S$^n$} in a similar fashion and prove that it is equal to the
 (\anum{n-1})\func{-sphere}. However, it is currently not possible to
-write the higher constructor corresponding to \con{surfₙ} in \texttt{Cubical
-Agda} as this kind of HIT is not supported by any of the proposed
+write the higher constructor corresponding to \con{surfₙ} in \CubicalAgda 
+as this kind of HIT is not supported by any of the proposed
 schemas for cubical HITs~\sidecite{CHM,CavalloHarper19}. Interestingly it
 is in fact possible to \emph{postulate} this HIT in HoTT or cubical
 type theory, and prove properties about it --- for instance
@@ -1140,7 +1460,7 @@ can define one of the main maps:
 \ExecuteMetaData[chapters/literate-agda/Pushout.tex]{forward}
 Note how we did not define a map \func{A□2-A○□} to handle the
 \con{push} case, but instead proceeded via nested pattern matching.
-The reason is that when \texttt{Agda} checks boundary constraints, it does not
+The reason is that when \Agda checks boundary constraints, it does not
 perform \( \eta \)-expansion on its own so we have to force it in the
 function definition.
 %% \anders{This remark is very technical and Agda specific. Maybe drop if
@@ -1334,7 +1654,7 @@ we obtain the desired equality between \( \func{A□○} \) and
 \end{proof}
 
 The formal proof of the $3 \times 3$ lemma is under $200$ lines of
-code~(LOC) in \texttt{Cubical Agda}. The
+code~(LOC) in \CubicalAgda. The
 corresponding result in \texttt{HoTT-Agda} is about $3000$ LOC.\footnote{This number has been calculated by counting the number of lines (excluding comments) in:
   \url{https://github.com/HoTT/HoTT-Agda/tree/master/theorems/homotopy/3x3}}
 These numbers should of course be taken with a grain of salt as those
@@ -1499,7 +1819,7 @@ direct cubical proof that \( \func{Join}\ \func{S¹}\ \func{S¹}
 \ \func{≡}\ \func{S³} \) by simply defining the maps directly and
 proving that they cancel.\footnote{For details see the \redtt{} proof
   at:\\ \url{https://github.com/RedPRL/redtt/blob/master/library/cool/s3-to-join.red}}
-We have ported his proof to \texttt{Cubical Agda} and the resulting
+We have ported his proof to \CubicalAgda and the resulting
 proof is very short ($\sim60$ LOC). However, the proofs that the maps
 cancel require a $5$-dimensional(!)  composition making it rather
 difficult to visualize.
@@ -1537,7 +1857,7 @@ e^{2i\pi \theta} \cdot e^{2i\pi \phi} = e^{2i\pi (\theta + \phi)}
 %% \anders{I think this is good, maybe point out that this is the
 %%   point-set topological (or ``real'') intuition behind what is going
 %%   on but that we are working synthetically.}
-This is defined in \texttt{Cubical Agda} as follows:
+This is defined in \CubicalAgda as follows:
 %
 \ExecuteMetaData[chapters/literate-agda/Circle.tex]{rot}
 
@@ -1766,7 +2086,7 @@ Our main theorem can be stated as:
   %\anders{Use \func{rot'} in the mapsto?}
 
   To do this we need to map out of a \func{Glue} type. This is made
-  possible through the \func{unglue} primitive in \texttt{Cubical Agda}. Given
+  possible through the \func{unglue} primitive in \CubicalAgda. Given
   $\var{y} : \func{ua}\ (\func{rotEquiv}\ \var{x})\ i$ the term
   $\func{unglue}\ (\var{i}\ \func{∨}\ \func{∼{}}\ \var{i})\ \var{y}$
   is an element of \func{S¹} that is $\var{x}\ \func{*}\ \var{y}$ when
@@ -1797,17 +2117,17 @@ Our main theorem can be stated as:
 This hence concludes our direct cubical proof that \func{Hopf} is
 indeed the Hopf fibration.
 
-\section{Conclusions and Future Work}
-\label{sec:conclusions}
+\section{Comparison with Axiomatic HoTT}
+\label{sec:comparison}
 
 We have in this paper shown how some of the main results in synthetic
 homotopy theory can be formalized in cubical type theory. We have used
-a variation of cubical type theory implemented by the \texttt{Cubical
-  Agda} system, however it would have been possible to formalize all
+a variation of cubical type theory implemented by the \CubicalAgda 
+system, however it would have been possible to formalize all
 of these examples with comparable complexity in other cubical
 systems. Indeed, many of these examples have also been formalized in
 the \redtt{} system \sidecite{redtt} and in the precursor of
-\texttt{Cubical Agda} called \cubicaltt{} \sidecite{Cubicaltt}.
+\CubicalAgda called \cubicaltt{} \sidecite{Cubicaltt}.
 
 One might wonder to what extent the lack of reversals and connections
 in \redtt{}, which is based on cartesian cubical type
@@ -1817,7 +2137,7 @@ interval is often made up for by the more powerful composition
 operations of cartesian cubical type theory. For instance, the direct
 proof that
 \( \func{Join}\ \func{S¹}\ \func{S¹} \ \func{≡}\ \func{S³} \) is of
-more or less exactly the same complexity as the \texttt{Cubical Agda}
+more or less exactly the same complexity as the \CubicalAgda
 proof. However, in order to draw any definite conclusions more
 experiments are necessary.
 
@@ -1831,8 +2151,8 @@ formalized results as they have been performed in different systems
 based on different type theories. However, it is interesting to note
 that all of these HoTT libraries contain cubical sublibraries for
 conveniently reasoning about squares and cubes inspired by the work of
-\sidecitet{LicataBrunerie15}. In a cubical system like \texttt{Cubical
-  Agda} we do not need to write such a library as the cubical
+\sidecitet{LicataBrunerie15}. In a cubical system like \CubicalAgda
+ we do not need to write such a library as the cubical
 primitives provide us with it for free.
 
 Despite the difficulty of comparing the complexity of formal proofs
@@ -1849,18 +2169,18 @@ cubical proof. We only include those examples where we can make
 reasonably accurate estimates of the proof size, but the numbers in
 the table should still be taken with a large grain of salt as they do
 not count self-contained proofs and many of the results rely on
-cubical sublibraries that are not necessary in \texttt{Cubical Agda}. The line
+cubical sublibraries that are not necessary in \CubicalAgda. The line
 count also involve relevant comments and we haven't counted the
 definitions of the involved HITs. The length and style of proofs also
 vary quite a bit between the various systems in general, for instance,
-both \texttt{Coq} and \texttt{Lean} proofs are written using tactics while \texttt{Agda} proofs
+both \Coq and \Lean proofs are written using tactics while \Agda proofs
 are typically not.
 
 \begin{table}[h!]
   \centering
   \caption{Results in the HoTT libraries}
   \begin{tabular}{c|cccc}
-    & \texttt{Agda} & \texttt{Coq} & \texttt{Lean} & \texttt{Cubical} \\
+    & \Agda & \Coq & \Lean & \CubicalAgda \\
     \hline \hline
     $\Omega(\Sp^1)=\mathbb{Z}$
       & 90 % https://github.com/HoTT/HoTT-Agda/blob/master/theorems/homotopy/LoopSpaceCircle.agda
@@ -1923,7 +2243,7 @@ proof as it is simply a matter of reorganizing data so that we can
 apply an already proved result. The other \texttt{HoTT-Agda} and \texttt{Lean-HoTT}
 proofs are more direct and construct the maps in an ingenious way
 following~\sidecitet[][Theorem 4.21]{Cavallo15}. Evan Cavallo has recently
-proved this result directly in \texttt{Cubical Agda} as well, leading to a
+proved this result directly in \CubicalAgda as well, leading to a
 proof in only 90 lines of code.
 
 Another interesting observation is that when working in a cubical
@@ -1944,12 +2264,12 @@ to interpret all of the results in this paper in topological spaces or
 even any (Grothendieck) $\infty$-topos. Currently these questions have
 not been fully resolved for the various cubical type theories that
 have been considered. In fact, it has been shown that the standard
-model of \texttt{Cubical Agda} is \emph{not} equivalent\footnote{By
+model of \CubicalAgda is \emph{not} equivalent\footnote{By
   ``equivalent'' we mean that the notion of fibration in the cubical
   set model gives rise to a model structure that is Quillen equivalent
   to the Quillen model structure on spaces.} to spaces
 \sidecite{sattlertalk}. However, if one drops the reversal operation
-(\func{∼{}\_}) from \texttt{Cubical Agda} any internal result about homotopy
+(\func{∼{}\_}) from \CubicalAgda any internal result about homotopy
 groups of spheres corresponds to a result about the homotopy groups of
 spheres in spaces.\footnote{For further details and discussions about
   this result see:

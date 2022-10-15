@@ -489,6 +489,39 @@
 \AgdaBound{d}\<%
 \end{code}
 
+
+%<*partialBoolTwo>
+\begin{code}%
+\>[0]\AgdaFunction{partialBool}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{∀}\AgdaSpace{}%
+\AgdaBound{i}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaPrimitive{Partial}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{i}\AgdaSpace{}%
+\AgdaOperator{\AgdaPrimitive{∨}}\AgdaSpace{}%
+\AgdaOperator{\AgdaPrimitive{\textasciitilde{}}}\AgdaSpace{}%
+\AgdaBound{i}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaDatatype{Bool}\<%
+\\
+\>[0]\AgdaFunction{partialBool}\AgdaSpace{}%
+\AgdaBound{i}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{i}%
+\AgdaSpace{}\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{i1}\AgdaSymbol{)}%
+\AgdaSpace{}\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{true}\<
+\\
+\>[0]\AgdaFunction{partialBool}\AgdaSpace{}%
+\AgdaBound{i}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{i}%
+\AgdaSpace{}\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{i0}\AgdaSymbol{)}%
+\AgdaSpace{}\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{false}\<%
+\end{code}
+%</partialBoolTwo>
+
 %<*partialBool'>
 \begin{code}%
 \>[0]\AgdaFunction{partialBool}\AgdaSpace{}%
@@ -628,7 +661,7 @@
 \AgdaPrimitive{Partial}\AgdaSpace{}%
 \AgdaBound{r}\AgdaSpace{}%
 \AgdaGeneralizable{A}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{u₀}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{t}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaGeneralizable{A}\AgdaSpace{}%
 \AgdaOperator{\AgdaFunction{[}}\AgdaSpace{}%
@@ -647,7 +680,7 @@
 \AgdaSymbol{=}\AgdaSpace{}%
 \AgdaBound{r}\AgdaSymbol{\}}\AgdaSpace{}%
 \AgdaBound{u}\AgdaSpace{}%
-\AgdaBound{u₀}\AgdaSpace{}%
+\AgdaBound{t}\AgdaSpace{}%
 \AgdaSymbol{=}\AgdaSpace{}%
 \AgdaPrimitive{primHComp}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaArgument{φ}\AgdaSpace{}%
@@ -667,7 +700,7 @@
 \AgdaPostulate{1=1}\AgdaSymbol{\}}\AgdaSpace{}%
 \AgdaSymbol{)}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaFunction{outS}\AgdaSpace{}%
-\AgdaBound{u₀}\AgdaSymbol{)}\<%
+\AgdaBound{t}\AgdaSymbol{)}\<%
 \end{code}
 
 %<*compPath>

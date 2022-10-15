@@ -52,6 +52,7 @@
 \usepackage{tikz-cd}
 \usepackage{floatrow}
 \usepackage{cancel}
+\usepackage{newunicodechar}
 
 \DeclareMathAlphabet{\mathbbm}{U}{bbm}{m}{n}
 
@@ -146,6 +147,7 @@
 
 \def\Coq{\textsc{Coq}\xspace}
 \def\Agda{\textsc{Agda}\xspace}
+\def\CubicalAgda{\textsc{Cubical} \textsc{Agda}\xspace}
 \def\Lean{\textsc{Lean}\xspace}
 \def\Idris{\textsc{Idris}\xspace}
 \def\cubicaltt{\textsc{cubicaltt}\xspace}
@@ -532,5 +534,5 @@
 \newcommand{\shepherd}[1]{{\color{red} #1}}
 
 
-
+\newunicodechar{≃}{\ensuremath{\simeq}}
 
