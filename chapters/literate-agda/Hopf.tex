@@ -718,8 +718,20 @@
 \AgdaBound{x}\AgdaSpace{}%
 \AgdaBound{y}\AgdaSpace{}%
 \AgdaBound{i}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{=}\<%
-\\
+\AgdaSymbol{=}\AgdaSpace{}\AgdaSymbol{(}%
+\AgdaInductiveConstructor{merid}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaFunction{rot'}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaBound{y}\AgdaSymbol{))}\AgdaSpace{}%
+\AgdaBound{i}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaComment{\{- ??? -\}}\AgdaSymbol{)}\<%
+\end{code}
+%</backward>
+
+%<*backwardtwo>
+\begin{code}%
 \>[0][@{}l@{\AgdaIndent{0}}]%
 \>[2]\AgdaKeyword{let}%
 \>[516I]\AgdaBound{p}\AgdaSpace{}%
@@ -740,19 +752,8 @@
 \AgdaBound{x}\AgdaSpace{}%
 \AgdaBound{y}\<%
 \\
-%
 \>[2]\AgdaKeyword{in}%
-\>[530I]\AgdaSymbol{(}\AgdaSpace{}%
-\AgdaInductiveConstructor{merid}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{rot'}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaBound{y}\AgdaSymbol{))}\AgdaSpace{}%
-\AgdaBound{i}\<%
-\\
-\>[.][@{}l@{}]\<[530I]%
-\>[5]\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaPrimitive{glue}\AgdaSpace{}%
+\>[530I]\AgdaPrimitive{glue}\AgdaSpace{}%
 \AgdaSymbol{(λ}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{i}\AgdaSpace{}%
@@ -768,9 +769,9 @@
 \AgdaBound{y}\AgdaSpace{}%
 \AgdaSymbol{\})}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{p}\AgdaSpace{}%
-\AgdaBound{i}\AgdaSymbol{))}\<%
+\AgdaBound{i}\AgdaSymbol{)}\<%
 \end{code}
-%</backward>
+%</backwardtwo>
 
 \begin{code}%
 \>[0]\<%

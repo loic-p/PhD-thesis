@@ -3,8 +3,20 @@
 \chapter{Synthetic Cubical Homotopy Theory}
 \labch{homotopy}
 
-After so much discussion of computation in type theory, we spend
-In this chapter, treats homotopical results
+In the previous chapters we spent a lot of time studying extensions of 
+intensional type theory, which we narrated as the quest for function 
+extensionality.
+% 
+But in addition to providing funext, univalent type theories open up an 
+entire new world of mathematics: since types gain the quality of synthetic 
+spaces, we can rephrase classical results from homotopy theory in the 
+language of type theory.
+% 
+And indeed, there is a growing literature on synthetic homotopy theory done in 
+axiomatic homotopy type theory~\cite{pi1s1,pinsn,Brunerie16,Cavallo15,seifertvankampen,BlakersMassey,vanDoorn18}.
+% 
+In this chapter, we lay a foundation for synthetic homotopy theory in cubical
+type theory, using the \CubicalAgda proof assistant.
 
 We start with a short introduction to homotopy theory and a discussion of the
 kind of results that we will encounter in this chapter in \cref{sec:synthetic}.
@@ -28,20 +40,46 @@ conflict with notations used in the previous chapters.
 % 
 We will make sure to be explicit about it and introduce every notation in due 
 course.
-\paragraph*{}
+
 \section{Synthetic Homotopy Theory}
 \label{sec:synthetic}
 
-In recent years HoTT has been developed axiomatically using various
-proof assistants. Indeed, all of the major proof assistants based on
-type theory have HoTT libraries: \texttt{HoTT-Agda} \sidecite{hottagda}, \texttt{Coq-HoTT}
-\sidecite{hottcoq}, \texttt{Lean-HoTT} \sidecite{hottlean}, \texttt{UniMath}
-\sidecite{UniMath}. Many impressive results can be found in these
-libraries, for example, the formalization of computations of many
+In its more classical form, homotopy theory is a branch of mathematics that 
+concerns itself with the study of topological spaces up to deformations.
+%
+% More broadly speaking, the governing philosophy in homotopy theory is to 
+% systematically replace the notion of equality with the notion of 
+% \defnote{homotopy}{A homotopy between two continuous maps \( f, g : X \to Y \) 
+%   is a continuous map \( h : X \times [0 , 1] \to Y \) such that 
+%   \( f(x) = h(x, 0) \) and \( g(x) = h(x, 1) \).}.
+% 
+For instance, homotopical constructions should make no difference between the shape 
+of a donut (a solid torus) and the shape of a coffee mug, as it is well-known that 
+we can continuously deform one into the other -- the hole in the handle
+of the mug corresponds to the hole in the donut.
+% 
+Homotopy theorists typically study ways to construct new spaces out of simpler 
+ones (such as \emph{suspensions} or \emph{smash products}), 
+invariants that can be used to distinguish spaces (such as the 
+\emph{fundamental group} or \emph{cohomology theories}), or algebraic 
+structures where equations have been weakened to homotopy equivalences
+(such as \emph{\( \infty \)-groups} or \emph{E\(\infty\)-rings}).
+
+In HoTT, types are interpreted as spaces and equalities
+are interpreted as paths. Furthermore the univalence axiom tells us that
+equalities between types correspond to homotopy equivalences, which means
+that types are handled up to deformation.
+% 
+All in all, this seems like the perfect framework for \emph{synthetic}
+homotopy theory, \ie establishing classical results from homotopy theory
+rephrased to talk about types instead of topological spaces.
+% 
+And indeed the community has developed impressive libraries of synthetic
+homotopy theory in axiomatic HoTT, including results such as
 homotopy groups of spheres~\sidecite{pi1s1,pinsn,Brunerie16}, the
 Seifert-van Kampen theorem~\sidecite{seifertvankampen}, Blakers-Massey
-theorem~\sidecite{BlakersMassey}
-and Serre's spectral sequence \sidecite{vanDoorn18}. 
+theorem~\sidecite{BlakersMassey} and Serre's spectral sequence 
+\sidecite{vanDoorn18}. 
 
 However, despite these successes some constructions have turned out to be surprisingly
 difficult. An example of this is the proof that the torus is
@@ -49,57 +87,22 @@ equivalent to the product of two circles: the first version required
 an impressive amount of complicated path algebra, worked out by
 \sidecitet{Sojakova16Torus}. The proof was later simplified by
 \sidecitet{LicataBrunerie15} using cubical ideas, but it was still highly
-nontrivial. The main reason for the difficulties in formalizing this
-proof is the complicated path algebra arising from the fact that many
-equalities do not hold definitionally. These problems can be traced
-back to univalence and HITs being axiomatically added in HoTT; in
-particular, the computation rules for the higher constructors of HITs
-are typically postulated and do not hold definitionally.
+nontrivial. The main source of the difficulties in formalizing this
+proof is the fact that many equalities do not hold definitionally,
+and thus add to the complexity of the involved path algebra.
+% 
+These problems can be traced back to univalence and HITs being postulated
+with axioms; in particular the computation rules for the higher constructors 
+of HITs do not hold definitionally.
 
-These issues have been resolved in a uniform way by the recent
-invention of \emph{cubical} type theories
-\sidecite{CCHM,AngiuliHouHarper18,ABCFHL}. This is a family of type
-theories with native support for all of the notions of HoTT, in
-particular univalence and HITs. The fundamental idea underlying
-cubical type theory is to take the homotopical intuitions from HoTT
-seriously and incorporate them in the judgmental framework of the type
-theory. As these homotopical notions are built into the theory, they
-have computational meaning, which simplifies many proofs. Indeed, many
-proofs that involve complicated path algebra in HoTT may simply be
-proved by reflexivity in cubical type theory. For instance, the proof
-that the torus is equivalent to the product of two circles is trivial
-to prove in cubical type theory using pattern matching and reflexivity
-as shown in~\cref{sec:torus}.
-
-There are multiple variations and implementations of cubical type
-theory---the original formulation of \sidecitet{CCHM} used an interval
-endowed with the structure of a \emph{De Morgan algebra} while the
-more recent \emph{cartesian} cubical type theories use an interval
-with less structure~\sidecite{AngiuliHouHarper18,ABCFHL}. All of the
-results in this paper have been formalized\footnote{The developments
-  can be found in the \textsc{agda/cubical} library located
-  at:\\ \url{https://github.com/agda/cubical}} using the recent
-cubical extension \sidecite{cubicalagda} of the \Agda{} proof assistant
-\sidecite{Agda} that is based on the De Morgan variation of cubical type
-theory. However, despite some technical differences between the
-underlying theories, all of the proofs could be carried with similar
-complexity in a system based on cartesian cubical type theory, like
-\redtt{}~\sidecite{redtt}.
-
-While the proofs in cubical type theory often resemble the original
-HoTT proofs some work is typically required to make them more
-``cubical'' in order to take full advantage of the cubical
-primitives. In particular, the use of path-induction that is
-ubiquitous in HoTT is kept to a minimum, and one typically instead
-uses the more elementary operations of cubical type theory such as
-transport and composition. This results in a new way of mechanizing
-synthetic homotopy theory, leading to (arguably) more direct and
-elegant proofs that closely resemble the homotopical arguments.
-
+But this is precisely why Coquand \etal developped cubical type 
+theories~\cite{CCHM,AngiuliHouHarper18,ABCFHL}, which provide univalence 
+and HITs with proper computational content. 
+% 
 The main goal of this chapter is to show the practical gains of using a
 system with native support for univalence and higher inductive types
 for formalizing synthetic homotopy theory. We exemplify this by
-formalizing the following results from HoTT:
+formalizing the following results in cubical type theory:
 %
 \begin{itemize}
 \item The equivalence of the torus and two circles together with the
@@ -118,19 +121,49 @@ formalizing the following results from HoTT:
   space is $\Sp^3$ (\cref{sec:hopf}).
 \end{itemize}
 
+While the proofs in cubical type theory often resemble the original
+HoTT proofs, some work is typically required to make them more
+``cubical'' in order to take full advantage of the cubical
+primitives. 
+% 
+In particular, the use of path-induction that is
+ubiquitous in HoTT is kept to a minimum, and one typically instead
+uses the more elementary operations of cubical type theory such as
+transport and composition.
+% 
+With this strategy, many proofs that involved complicated path algebra in HoTT become 
+much simpler. 
+% 
+For instance, the proof that the torus is equivalent to the product of two 
+circles is trivial to prove in cubical type theory using pattern matching and 
+reflexivity as shown in~\cref{sec:torus}.
+
+There are multiple variations and implementations of cubical type
+theory---the original formulation of \sidecitet{CCHM} used an interval
+endowed with the structure of a \emph{De Morgan algebra} while the
+more recent \emph{cartesian} cubical type theories use an interval
+with less structure~\sidecite{AngiuliHouHarper18,ABCFHL}. 
+% 
+All of the results in this paper have been formalized\sideremark{The developments
+  can be found in the \texttt{agda/cubical} library located
+  at:\\ \url{https://github.com/agda/cubical}} with the
+cubical extension \sidecite{cubicalagda} of the \Agda{} proof assistant, which 
+is based on the De Morgan variation of cubical type theory. 
+% 
+Despite some technical differences between the underlying theories, all of 
+the proofs could be carried with similar complexity in a system based on 
+cartesian cubical type theory, like \redtt{}~\sidecite{redtt}.
+
 \section{Cubical Type Theory and \CubicalAgda}
 \label{sec:cubical-agda}
 
-The cubical type theory that \CubicalAgda is based on is
-heavily inspired by the one of \sidecitet{CCHM}, more precisely on the
-variation outlined by \sidecitet{CHM} that is well-suited for HITs. The
-goal of this section is to give sufficient background for readers not
+The goal of this chapter is to give sufficient background for readers not
 familiar with cubical type theory and \CubicalAgda to be able
-to understand the examples in this paper. Readers who are familiar
-with \CubicalAgda can hence skip this section and we refer
-curious readers to the paper of \sidecitet{cubicalagda} for a
-comprehensive technical treatment of all of the features of
-\CubicalAgda.
+to understand our code. 
+% 
+Readers who are familiar with \CubicalAgda can thus skip this section, and 
+readers who wish to understand \CubicalAgda in greater depth should have
+a look at the introductory paper by Vezzosi \etal~\sidecite{cubicalagda}.
 
 \subsection{The Interval and Path Types}
 
@@ -291,13 +324,13 @@ instance the constant path represents a proof of equality by reflexivity.
 Using path types as equalities lets us prove theorems that are not provable in
 standard \Agda. For example, the principle of function extensionality (which states
 that two pointwise equal functions are equal) has a very simple proof:
-%
-\sideremark{When we input this definition to \CubicalAgda, 
+% 
+\ExecuteMetaData[chapters/literate-agda/Code.tex]{funext}
+% 
+\sideremark[*-4]{When we input this definition to \CubicalAgda, 
   the proof assistant checks that \( p\ x\ i \) is convertible to \( f\ x \)
   when \( i = \con{i0} \) and convertible to \( g\ x \) when \( i = \con{i1} \).
   And it is indeed the case, because \( p\ x \) has type \( f\ x\ \func{≡}\ g\ x \).}
-% 
-\ExecuteMetaData[chapters/literate-agda/Code.tex]{funext}
 
 The proof of function extensionality for dependent and $n$-ary
 functions is equally easy. Since $\func{funExt}$ is a
@@ -2029,27 +2062,32 @@ Our main theorem can be stated as:
       \node (A) at (1,0) {\( \func{S¹} \func{×}\ \func{S¹} \)};
       \node (C) at (2,0) {\func{S¹}};
       \path[thin,->,>=angle 90]
+      (A) edge node[above]{\footnotesize \( \pi_2 \)} (B)
+      (A) edge node[above]{\footnotesize \func{rot}} (C);
+    \end{tikzpicture}
+  \end{center}
+  which can be seen by a straightforward unfolding of definitions.
+  % 
+  \sideremark{This change of variables could be avoided if we tailored our 
+    definitions a bit better for this proof.
+    This sort of irritating details is the downside of working with bare 
+    cubical primitives instead of universal properties.}
+  % 
+  And with a change of variables, we can see \func{Σ}~\func{Hopf} as the homotopical 
+  pushout of this alternative span, where 
+  \func{rot'}~(\var{x}, \var{y}) = \func{rot}~(\func{inv}~\var{x})~\var{y}.
+  \begin{center}
+    \begin{tikzpicture}[xscale=3,yscale=2]
+      \node (B) at (0,0) {\func{S¹}};
+      \node (A) at (1,0) {\( \func{S¹} \func{×}\ \func{S¹} \)};
+      \node (C) at (2,0) {\func{S¹}};
+      \path[thin,->,>=angle 90]
       (A) edge node[above]{\footnotesize \func{rot'}} (B)
       (A) edge node[above]{\footnotesize \( \pi_2 \)} (C);
     \end{tikzpicture}
   \end{center}
-  where \( \func{rot'}\ (x , y) = \func{inv}\ x\ \func{*}\ y \).
-
-  \( \func{S¹}\ \func{×}\ \func{S¹} \)---the first coordinate being
-  the longitude in \func{S²}, the second parameterizing the fiber.
-  When transporting along the meridian \( \con{merid}\ \var{x} \), the
-  fiber above \con{north} will transform into the fiber above the
-  equator according to \( \func{rot}\ \var{x} \),
-  %% \anders{What is the inverse operations here? Is it the normal sym or
-  %%   the one defined by cases?}
-  and the one above \con{south} will be transported to the equator
-  according to the identity. Conversely, transporting fibers from the
-  equator to the \con{north} (resp. \con{south}) pole will transform
-  them according to \( \func{rot}\ (\func{inv}\ \var{x} \))
-  (resp. the identity).
-  This informal observation relates \( \func{Σ}\ \func{Hopf} \) to the
   
-  By \cref{joins1s1}, which states that
+  Now by \cref{joins1s1}, which states that
   \( \func{S³}\ \func{≡}\ \func{Join}\ \func{S¹}\ \func{S¹} \), it
   suffices to prove that
   \( \func{Σ}\ \func{Hopf}\ \func{≡}\ \func{Join}\ \func{S¹}\ \func{S¹} \). 
@@ -2066,18 +2104,13 @@ Our main theorem can be stated as:
     \end{tikzpicture}
   \end{center}
 
-  We will now describe a span isomorphism (that is, a natural
-  equivalence between these two spans) and use it as intuition to
-  build a formal isomorphism between the two types.
-  %% \anders{I'm a bit confused by this remark; why do we talk about
-  %%   natural equivalences as opposed to just isomorphisms?}
-  %% \loic{is this better?}
-  %% \anders{Yes!}
+  To show that these two homotopical pushouts are isomorphic, we will describe 
+  a span isomorphism (that is, a natural equivalence between these two spans),
+  and translate it to a \CubicalAgda term.
 
   To go from \( \func{Join}\ \func{S¹}\ \func{S¹} \) to
-  \( \func{Σ}\ \func{Hopf} \), we want to mimic the
+  \( \func{Σ}\ \func{Hopf} \), we want to use the
   following natural equivalence:
-  %%\anders{Now we suddenly talk about natural isos... }
 
   \begin{center}
     \begin{tikzpicture}[xscale=3,yscale=-2]
@@ -2100,22 +2133,24 @@ Our main theorem can be stated as:
   \end{center}
   %\anders{Why not use \func{rot'} in the downwards mapsto?}
 
-  We can use this intuition to construct the following map:
+  which can be written as a map between pushouts as follows:
   %
   \ExecuteMetaData[chapters/literate-agda/Hopf.tex]{backward}
 
-  Here, \( x \) is the point in the fiber above \con{north}, \( y \)
-  is the point in the fiber above \con{south}, and
-  \( \var{p}\ \var{i} \) is the point in the fiber above
-  \( \con{merid}\ (\func{rot'}\ (x , y))\ i \).  However, as
-  $\func{Hopf}\ (\con{merid}\ (\func{rot'}\ (x , y))\ i)$ is
-  $\func{ua}\ (\func{rotEquiv}\ (\con{merid}\ (\func{rot'}\ (x , y)))\
-  i)$ which in turn is a \func{Glue} type we need to use the
-  \func{glue} constructor to package it up into a well-typed term.
-  The term \func{lem-rot'} \var{x} \var{y} proves that
-  $\func{rot'}\ (x\ \con{,}\ y)\ \func{*}\ \var{x}\ \func{≡}\ \var y$,
-  that is, \( \func{inv}\ x\ \func{*}\ y\ \func{*}\ x\ \func{≡}\ y \).
-  This equality is clearly true and we prove it by induction on
+  Now our diagram says that the hole should be filled with \var{y},
+  but the types do not match: \var{y} has type \func{S¹} while the hole expects 
+  a term of type 
+  \func{Glue}~\func{S¹}~(\symb{λ}~\{~(\var{i} = \con{i0}) → (\func{S¹},~\func{rotEquiv}\ (\func{rot'}\ (x , y)))\ ;\ (\var{i} = \con{i1}) → (\func{S¹},~\func{idEquiv}~\func{S¹})~\})\ \var{i}.
+  To convert \var{y} into an inhabitant of this \func{Glue} type, we can use the 
+  \func{glue} primitive as follows:
+  % 
+  \ExecuteMetaData[chapters/literate-agda/Hopf.tex]{backwardtwo}
+
+  We supply it with a term \var{p}~\var{i} of type \func{S¹}, as well as a 
+  partial term which coincides with \var{p}~\var{i} after application of the
+  equivalences \func{rotEquiv} and \func{idEquiv}.
+  % 
+  The auxiliary lemma \func{lem-rot'} \var{x} \var{y} is defined by induction on
   \var{x} and \var{y}.
 
   Conversely, to go from \( \func{Σ}\ \func{Hopf} \) to
@@ -2155,35 +2190,21 @@ Our main theorem can be stated as:
 
   The lemma \func{lem-rot-inv} proves that
   $x\ \func{*}\ y\ \func{*}\ \func{inv}\ x\ \func{≡}\ y$ for all
-  $\var{x}, \var{y} : \func{S¹}$. This hence defines the second
-  map.
-  Proving that they cancel requires some rather involved path algebra,
+  $\var{x}, \var{y} : \func{S¹}$. 
+  Now that we have both directions of our equivalence, it remains to prove
+  that they cancel. This requires some rather involved path algebra,
   and we refer the interested reader to the formalization.
-  %% However, as far as the computational content of the Hopf fibration
-  %% is concerned, only the (very simple!) definitions of \func{h2j} and
-  %% \func{j2h} are relevant. \loic{Reviewer 3 disagrees. investigate.}
-  %% \anders{what to say? we can't go into too much
-  %%   detail, but we can at least mention that it uses connectedness of
-  %%   S1 (right?) and ...?}
-  %% \loic{I think this is more of a hack to avoid annoying path algebra,
-  %%   and that it is possible to do it without using any sort of
-  %%   abstract stuff...}
-  %% \loic{Maybe mention that these two maps is pretty much all of the
-  %%   relevant computational content.}
 \end{proof}
-
-This hence concludes our direct cubical proof that \func{Hopf} is
-indeed the Hopf fibration.
 
 \section{Comparison with Axiomatic HoTT}
 \label{sec:comparison}
 
-We have in this paper shown how some of the main results in synthetic
+We have in this chapter shown how some of the main results in synthetic
 homotopy theory can be formalized in cubical type theory. We have used
 a variation of cubical type theory implemented by the \CubicalAgda 
 system, however it would have been possible to formalize all
 of these examples with comparable complexity in other cubical
-systems. Indeed, many of these examples have also been formalized in
+systems. Indeed, some of these examples have also been formalized in
 the \redtt{} system \sidecite{redtt} and in the precursor of
 \CubicalAgda called \cubicaltt{} \sidecite{Cubicaltt}.
 
@@ -2199,12 +2220,14 @@ more or less exactly the same complexity as the \CubicalAgda
 proof. However, in order to draw any definite conclusions more
 experiments are necessary.
 
-The results in this paper have also been formalized in the various
+The results in this chapter have also been formalized in the axiomatic
 HoTT libraries available in the major proof assistants based on type
-theory: \texttt{HoTT-Agda} \sidecite{hottagda}, \texttt{Coq-HoTT} \sidecite{hottcoq}, \texttt{Lean-HoTT}
-\sidecite{hottlean}.\footnote{We omit the \texttt{UniMath} library as it does not
-  focus on synthetic homotopy theory.} It is very difficult to make an
-accurate quantitative comparison of the complexity between the
+theory: \texttt{HoTT-Agda} \cite{hottagda}, \texttt{Coq-HoTT} \cite{hottcoq}, 
+\texttt{Lean-HoTT} \cite{hottlean}.
+\sideremark{We omit the \texttt{UniMath} and \texttt{Agda-Unimath} libraries as 
+  they do not focus on synthetic homotopy theory.} 
+It is very difficult to make an accurate quantitative comparison of the 
+complexity between the
 formalized results as they have been performed in different systems
 based on different type theories. However, it is interesting to note
 that all of these HoTT libraries contain cubical sublibraries for
@@ -2216,11 +2239,9 @@ primitives provide us with it for free.
 Despite the difficulty of comparing the complexity of formal proofs
 between different systems we have made some estimates of the size of
 some of the proofs (in terms of lines of code) in
-\cref{table}.\footnote{The numbers in the table have been computed
-  from the \texttt{master} branches of the following libraries on
-  2019-12-16:\\ \url{https://github.com/HoTT/HoTT-Agda}\\
-  \url{https://github.com/HoTT/HoTT/}\\
-  \url{https://github.com/leanprover/lean2/tree/master/hott}}
+\cref{table}.\sideremark{The numbers in the table have been computed
+  from the \texttt{master} branches of the libraries on
+  2019-12-16. TODO: update?}
 Some of the libraries contain multiple proofs of the relevant results
 and in such cases we picked the one that most closely resemble the
 cubical proof. We only include those examples where we can make
@@ -2234,11 +2255,11 @@ vary quite a bit between the various systems in general, for instance,
 both \Coq and \Lean proofs are written using tactics while \Agda proofs
 are typically not.
 
-\begin{table}[h!]
+\begin{table*}[h!]
   \centering
   \caption{Results in the HoTT libraries}
   \begin{tabular}{c|cccc}
-    & \Agda & \Coq & \Lean & \CubicalAgda \\
+    & \texttt{HoTT-Agda} & \texttt{Coq-HoTT} & \texttt{Lean-HoTT} & \CubicalAgda \\
     \hline \hline
     $\Omega(\Sp^1)=\mathbb{Z}$
       & 90 % https://github.com/HoTT/HoTT-Agda/blob/master/theorems/homotopy/LoopSpaceCircle.agda
@@ -2283,7 +2304,7 @@ are typically not.
     %%   & ?
   \end{tabular}
   \label{table}
-\end{table}
+\end{table*}
 
 The table indicates that not too much is gained in the proof that the
 loop space of the circle is the integers by doing it cubically, while
@@ -2314,31 +2335,31 @@ this is not the case and it is in fact often more convenient to
 convert the equivalences into paths using univalence as we may then
 use the cubical primitives to manipulate them. This indicates that
 cubical type theory might be better suited for doing \emph{univalent}
-mathematics than HoTT.
+mathematics than axiomatic HoTT.
 
-A crucial property when doing synthetic mathematics is the existence
-of interesting models of the theory. Ideally we would like to be able
-to interpret all of the results in this paper in topological spaces or
-even any (Grothendieck) $\infty$-topos. Currently these questions have
-not been fully resolved for the various cubical type theories that
-have been considered. In fact, it has been shown that the standard
-model of \CubicalAgda is \emph{not} equivalent\footnote{By
-  ``equivalent'' we mean that the notion of fibration in the cubical
-  set model gives rise to a model structure that is Quillen equivalent
-  to the Quillen model structure on spaces.} to spaces
-\sidecite{sattlertalk}. However, if one drops the reversal operation
-(\func{∼{}\_}) from \CubicalAgda any internal result about homotopy
-groups of spheres corresponds to a result about the homotopy groups of
-spheres in spaces.\footnote{For further details and discussions about
-  this result see:
-  \url{https://groups.google.com/forum/\#!topic/homotopytypetheory/imPb56IqxOI}}
-Furthermore, there has been recent progress on an ``equivariant''
-cubical set model that is equivalent to spaces \sidecite{riehltalk}.  We
-are hence very optimistic that these issues will be resolved in the
-near future. Furthermore, as soon as a satisfactory cubical type
-theory with a model in spaces has been developed we expect it to be
-straightforward to adapt the formalizations in this paper to that
-theory. Indeed, the main features that we rely on---computational
-univalence and higher inductive types with definitional computation
-rules for all constructors---should also be satisfied by that cubical
-type theory.
+% A crucial property when doing synthetic mathematics is the existence
+% of interesting models of the theory. Ideally we would like to be able
+% to interpret all of the results in this paper in topological spaces or
+% even any (Grothendieck) $\infty$-topos. Currently these questions have
+% not been fully resolved for the various cubical type theories that
+% have been considered. In fact, it has been shown that the standard
+% model of \CubicalAgda is \emph{not} equivalent\sideremark{By
+%   ``equivalent'' we mean that the notion of fibration in the cubical
+%   set model gives rise to a model structure that is Quillen equivalent
+%   to the Quillen model structure on spaces.} to spaces
+% \sidecite{sattlertalk}. However, if one drops the reversal operation
+% (\func{∼{}\_}) from \CubicalAgda any internal result about homotopy
+% groups of spheres corresponds to a result about the homotopy groups of
+% spheres in spaces.\footnote{For further details and discussions about
+%   this result see:
+%   \url{https://groups.google.com/forum/\#!topic/homotopytypetheory/imPb56IqxOI}}
+% Furthermore, there has been recent progress on an ``equivariant''
+% cubical set model that is equivalent to spaces \sidecite{riehltalk}.  We
+% are hence very optimistic that these issues will be resolved in the
+% near future. Furthermore, as soon as a satisfactory cubical type
+% theory with a model in spaces has been developed we expect it to be
+% straightforward to adapt the formalizations in this paper to that
+% theory. Indeed, the main features that we rely on---computational
+% univalence and higher inductive types with definitional computation
+% rules for all constructors---should also be satisfied by that cubical
+% type theory.
