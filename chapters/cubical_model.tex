@@ -3,7 +3,23 @@
 \chapter{A Model in Cubical Presheaves}
 \labch{cubical_model}
 
+The aim of this chapter is to work toward an extension of the prefascist translation 
+that supports the univalence axiom.
+%  
+Our strategy is to enrich it with a notion of \emph{fibration structure}, following the model 
+of Cohen \etal in cubical sets~\cite{CCHM}.
+% 
+Such a translation would provide a new way to compute with the univalence axiom.
+
+In \cref{sec:cubical_sets}, we give a detailed overview of cubical presheaves 
+and fibration structures. 
+% 
+Then in \cref{sec:cubical_model} we outline a strategy for building a syntactic 
+translation of univalent type theory that interprets types as cubical sets with 
+a fibration structure.
+
 \section{Cubical Sets}
+\label{sec:cubical_sets}
 
 Cubical sets were initially studied by topologists, as a candidate for a 
 definition of ``space'' that is suitable to do \emph{homotopy theory}, that is 
@@ -71,7 +87,7 @@ get too wild and the definition of homotopy will be reasonable.
 \end{figure}
 
 Now, this idea of building objects by taking amalgamated sums of a family of
-basic ``building block'' objects should be reminiscent of the previous section
+basic ``building block'' objects should be reminiscent of the previous chapter
 about presheaves, and the astute reader might be wondering if we can use 
 presheaves on an appropriate category of cubes to obtain a synthetic model of
 well-behaved spaces.
@@ -88,7 +104,7 @@ point), we will have one object per dimension:
 \[
     \obj{\catCube} := \Nat.
 \]
-Thus, the objects of \( \catCube \) are integers, that we shall
+Thus, the objects of \( \catCube \) are integers, that we shall mentally
 picture as cubes of the corresponding dimension:
 % 
 \begin{figure}[!h]
@@ -249,13 +265,13 @@ primitive continuous maps into the real interval:
 % 
 And it happens that the hom-sets we obtain after closing this family of
 maps under cartesian products and composition are exactly the free de 
-Morgan algebras \sidecite{BuchholtzMorehouse17}.
+Morgan algebras~\sidecite{BuchholtzMorehouse17}.
 
 This restriction seems a bit dramatic: we casually replaced the full set of 
 continuous functions with a small set of piecewise linear functions! But the reader
 should keep in mind that our goal is to model spaces \emph{up to homotopy},
 and we can always deform continuous maps between reasonable spaces into 
-piecewise linear maps between cubical spaces \sidecite{hatcher}.
+piecewise linear maps between cubical spaces~\sidecite{hatcher}.
 
 \subsection{Unfolding definitions}
 
@@ -625,38 +641,38 @@ degenerate cubes are themselves degenerate cubes, etc.
 All in all, this presheaf construction amounts to giving a multi-sorted, 
 algebraic presentation of cubical sets.
 
-\subsection{Some examples of cubical sets}
+% \subsection{Some examples of cubical sets}
 
-\paragraph{The Interval} 
+% \paragraph{The Interval} 
 
-\begin{definition}
-    The interval \( \interval \) is the Yoneda embedding \( \yo(1) \)
-    of the interval from the cube category. 
-\end{definition}
-\sideremark{Recall that \( \yo(1)(n) = \hom[\catCube]{n}{1} \).} 
-The points of \( \interval \) are by definition the elements of 
-\( \hom[\catCube]{0}{1} \), that is \( \langle \izero \rangle \) and 
-\( \langle \ione \rangle \). 
+% \begin{definition}
+%     The interval \( \interval \) is the Yoneda embedding \( \yo(1) \)
+%     of the interval from the cube category. 
+% \end{definition}
+% \sideremark{Recall that \( \yo(1)(n) = \hom[\catCube]{n}{1} \).} 
+% The points of \( \interval \) are by definition the elements of 
+% \( \hom[\catCube]{0}{1} \), that is \( \langle \izero \rangle \) and 
+% \( \langle \ione \rangle \). 
  
-\begin{definition}
-    Let \( X \) be a cubical set, and \( x_1, x_2 \in X(0) \) be two points 
-    of \( X \). A path from \( x_1 \) to \( x_2 \) is a map from 
-    \( \interval \) to \( X \) that 
-\end{definition}
+% \begin{definition}
+%     Let \( X \) be a cubical set, and \( x_1, x_2 \in X(0) \) be two points 
+%     of \( X \). A path from \( x_1 \) to \( x_2 \) is a map from 
+%     \( \interval \) to \( X \) that 
+% \end{definition}
 
-The higher dimensional cubes of \( \interval \), however, are more 
-difficult to describe, because of the degeneracies and the connections.
+% The higher dimensional cubes of \( \interval \), however, are more 
+% difficult to describe, because of the degeneracies and the connections.
 
-\shepherd{We can establish a graphical calculus to ``see'' the de Morgan
-    cubical sets. But is it really necessary...}
+% \shepherd{We can establish a graphical calculus to ``see'' the de Morgan
+%     cubical sets. But is it really necessary...}
 
-\paragraph{The circle}
+% \paragraph{The circle}
 
-\shepherd{TODO}
+% \shepherd{TODO}
 
-\paragraph{Singular cubical sets}
+% \paragraph{Singular cubical sets}
 
-\shepherd{TODO}
+% \shepherd{TODO}
 
 \subsection{Fibrant Cubical Sets}
 
@@ -854,18 +870,27 @@ Open boxes represent those sets of cubes that can be composed together. Note
 that two paths with matching endpoints is a special case of an open box:
 we can simply take \( \horn_{\langle x \rangle}^1 \).
 
+Given a morphism \( \alpha : \hom[\catCube]{k}{n} \), we can extend the restriction
+operation \( X(\alpha) \) to the open boxes in \( X \) by only applying 
+\( \alpha \) to the first \( n \) coordinates of the open box.
+
 \begin{definition}
-    A CCHM fibration structure for a cubical set \( X \) extends every
-    open box morphism \( \theta : \horn_f^n \to X \) to a morphism
-    \( \widehat{\theta} : \yo(n+1) \to X \) such that
+    A CCHM fibration structure for a cubical set \( X \) is a function \( \Phi \) that takes
+    as inputs an open box \( \theta : \horn_f^n \to X \) 
+    and returns a ``lid'' \( \Phi(\theta) : \yo(n) \to X \) such that
     \begin{itemize}
-        \item \( \widehat{\theta} \) is equal to \( \theta \) on \( \horn_f^n \), and
-        \item \shepherd{for all...}
+        \item the lid matches the top of the open box: 
+        \( \Phi(\theta)  \circ \mathrm{face^n_{n,1}}\) and \( \theta \) coincide 
+        when they are defined.
+        \item  given any morphism \( \alpha : \hom[\catCube]{k}{n} \),
+            the result of the applying \( \Phi \) to the sub-open-box of \( \theta \) 
+             \( f \circ \alpha \) is equal to the result of applying \( \Phi \)
+            to the entire open box and restricting the result along \( \alpha \).
     \end{itemize}
 \end{definition}
 
 The map \( \theta : \horn_f^n \to X \) embeds an open box in \( X \), that is a
-set of composable cubes, and the lid of the closed box \( \widehat{\theta} \)
+set of composable cubes, and the lid of the closed box \( \Phi(\theta) \)
 represents the result of the composition.
 
 \begin{figure}[!h]
@@ -905,9 +930,9 @@ represents the result of the composition.
 A cubical set equipped with a CCHM fibration structure is said to be 
 \emph{CCHM-fibrant} (or just fibrant for short).
 
-\subsection{Examples of Fibrant Cubical Sets}
+% \subsection{Examples of Fibrant Cubical Sets}
 
-\shepherd{TODO}
+% \shepherd{TODO}
 
 \subsection{Taking a Step Back}
 
@@ -919,7 +944,7 @@ are elementary, constructive and amenable to computational methods;
 % 
 and on the other hand, fibrant cubical sets experimentally seem to behave just like 
 ``well-behaved'' topological spaces when considered up to deformation. As we
-will see in \shepherd{TODO}, it is actually possible to define plenty of homotopical
+will see in \cref{ch:homotopy}, it is actually possible to define plenty of homotopical
 constructions such as fundamental groups, homotopy pushouts, spheres, suspensions, 
 or even the Hopf fibration.
 
@@ -941,4 +966,6 @@ of \emph{simplicial} sets (which are built out of simplices instead of cubes) in
 similarly elementary manner, in greater detail.
 
 \section{Interpreting Type Theory}
+\label{sec:cubical_model}
 
+To do...

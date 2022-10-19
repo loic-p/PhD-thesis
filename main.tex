@@ -62,11 +62,10 @@
 %	BOOK INFORMATION
 %----------------------------------------------------------------------------------------
 
-\titlehead{Recovering Extensionality in Intensional Type Theory}
+\titlehead{Computing with Extensionality Principles}
 \subject{Thèse de Doctorat}
 
-\title[Recovering Extensionality in Intensional Type Theory]{Recovering Extensionality in Intensional Type Theory}
-\subtitle{From Setoids to Cubes}
+\title[Computing with Extensionality Principles]{Computing with Extensionality Principles in Dependent Type Theory}
 
 \author[Loïc Pujet]{Loïc Pujet}
 
@@ -132,12 +131,12 @@
 %	DEDICATION
 %----------------------------------------------------------------------------------------
 
-\dedication{
-	\textit{À Vanille, mon lapin nain qui bien malgré lui, m'enseigna une des lois les plus
-        fondamentales de l'univers: l'indifférence totale vis-à-vis de mon existence.}
-
-        (temporaire)
-}
+% \dedication{
+% 	% \textit{À Vanille, mon lapin nain qui bien malgré lui, m'enseigna une des lois les plus
+%     %     fondamentales de l'univers: l'indifférence totale vis-à-vis de mon existence.}
+% 	\textit{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus convallis diam nec dolor sagittis,
+% 	nec euismod ligula sollicitudin.}
+% }
 
 %----------------------------------------------------------------------------------------
 %	OUTPUT TITLE PAGE AND PREVIOUS
@@ -151,8 +150,8 @@
 %	PREFACE
 %----------------------------------------------------------------------------------------
 
-\input{chapters/preface.tex}
-\index{preface}
+% \input{chapters/preface.tex}
+% \index{preface}
 
 %----------------------------------------------------------------------------------------
 %	TABLE OF CONTENTS & LIST OF FIGURES/TABLES
@@ -171,13 +170,13 @@
 
 \tableofcontents % Output the table of contents
 
-\listoffigures % Output the list of figures
+% \listoffigures % Output the list of figures
 
 % Comment both of the following lines to have the LOF and the LOT on different pages
-\let\cleardoublepage\bigskip
-\let\clearpage\bigskip
+% \let\cleardoublepage\bigskip
+% \let\clearpage\bigskip
 
-\listoftables % Output the list of tables
+% \listoftables % Output the list of tables
 
 \endgroup
 
@@ -188,33 +187,33 @@
 \mainmatter % Denotes the start of the main document content, resets page numbering and uses arabic numbers
 \setchapterstyle{kao} % Choose the default chapter heading style
 
-% \input{chapters/intro_french.tex}
-% \input{chapters/intro_english.tex}
+\input{chapters/intro_french.tex}
+\input{chapters/intro_english.tex}
 
 \pagelayout{wide} % No margins
-\addpart{Observational Type Theory and Setoids}
+\addpart{The Observational Equality}
 \pagelayout{margin} % Restore margins
 
 % \input{chapters/intensional.tex}
 \input{chapters/observational.tex}
-% \input{chapters/metatheory.tex}
+\input{chapters/metatheory.tex}
 \input{chapters/inductives.tex}
 
 \pagelayout{wide} % No margins
-\addpart{Univalent Type Theory and Cubical Presheaves}
+\addpart{The Univalent Equality}
 \pagelayout{margin} % Restore margins
 
 % \input{chapters/hott.tex}
-% \input{chapters/prefascist.tex}
-% \input{chapters/cubical_model.tex}
+\input{chapters/prefascist.tex}
+\input{chapters/cubical_model.tex}
 
 \pagelayout{wide} % No margins
 \addpart{Cubical Synthetic Homotopy Theory}
 \pagelayout{margin} % Restore margins
 
-% \input{chapters/homotopy.tex} 
+\input{chapters/homotopy.tex} 
 
-% \appendix % From here onwards, chapters are numbered with letters, as is the appendix convention 
+\appendix % From here onwards, chapters are numbered with letters, as is the appendix convention 
 
 \pagelayout{wide} % No margins
 \addpart{Appendix}

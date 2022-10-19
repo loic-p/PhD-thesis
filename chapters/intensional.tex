@@ -3,72 +3,10 @@
 \chapter{Introduction in English}
 \labch{intro_observational}
 
-\section{Related work}
-
-Compared to~\sidecite{altenkirchAl:plpv2007}, the most important ingredient in \SetoidTT is the
-use of definitional proof-irrelevance.
-%
-This added flexibility in computations allows our recursors to enjoy proper computational
-behavior on open terms, and it also lets us seamlessly treat universe hierarchies.
-%
-Moreover, the normalization proof for OTT relies on a normalization conjecture for a different
-theory, unlike the normalization proof for \SetoidTT.
-
-In~\sidecite{Altenkirch2019}, the authors define a setoid model in \( \MLTT+\sProp \). Then, they
-interpret a version of \MLTT with proof-irrelevant identity types that support propext and
-funext in their model, thereby providing a computational interpretation of these principles.
-%
-However, handling universes in their model requires some additions to \( \MLTT+\sProp \), and
-the resulting theory is only conjectured to be normalizing.
-%
-In contrast to this, \SetoidTT is a full-fledged type theory and does not require any external
-model to compute.
-
-Compared to XTT~\sidecite{sterling_et_al:LIPIcs:2019:10538}, the strengths of \SetoidTT are a
-normalization strategy that exhibits canonicity, as well a full proof that conversion and typing
-are decidable. These properties allow us to present a concrete implementation of our system
-in a proof assistant.
-%
-In XTT however, Sterling\etal show that typing cannot be decidable, as there is no way to deduce
-\( \Obseq{A}{A'} \) and \( \Obseq{B}{B'} \) from a proof of \( \Obseq{A \times B}{A' \times B'} \).
-%
-In order to fix this shortcoming, they suggest adding a ``typecase'' operator, but
-argue against it since it forces the universe to be closed, thereby severely constraining the
-possible semantics.
-%
-In \SetoidTT, we obtain the injectivity of type contructors from the behavior of observational
-equality in the universe. These rules somewhat constrain the semantics---for instance, we cannot
-interpret \SetoidTT in set theory using a Grothendieck universe as the interpretation of \( \Type \)---but our universe remains open to the addition of arbitrary types.
-
 \section{to put somewhere}
-
-Allais and McBride on computation on refl
-
-Bob atkey on observational equality that does not reduce
 
 impossible to have canonicity for equality
 
 inductive equality is predicative
 
 explain the n+4
-
-\sideremark{The \Coq proof assistant extends to the base calculus
-of constructions
-Predicative Calculus of Cumulative Inductive Constructions \cite{pcuic}}
-
-Mixing type coercion operators and impredicative propositions is well known to 
-be a minefield:
-% % 
-% in his seminal work on System F, Girard already shows that adding an operator 
-% \( {J : \forall A\ B\ .\ A \to B} \) with the reduction rule
-% \( {J\ A\ A\ t \Rightarrow t} \) breaks normalization \sidecite{girard72}.
-in recent years, Coquand and Abel showed that the interaction of the two features 
-breaks normalization in the type theory of \Lean \sidecite{lmcs:6606}.
-% 
-Still, they leave an open question: is there a way to decide conversion without
-
-% And does the same argument applies to the observational equality of \SetoidCC, 
-% which computes in a different way?
- 
-% As we will see, the answers to those questions are respectively ``no'' and 
-% ``yes''.

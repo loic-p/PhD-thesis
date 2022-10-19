@@ -6,9 +6,9 @@
 
 % \sideremark{The \SetoidCC acronym stands for the ``Observational Calculus of 
 % Constructions''.}
-In this chapter we present our system \SetoidCC, which is a flavor of 
-Altenkirch, McBride and Swierstra's observational type theory 
-\cite{altenkirchAl:plpv2007}.
+In this chapter we present the observational calculus of constructions 
+(\SetoidCC), which is a flavor of Altenkirch, McBride and Swierstra's 
+observational type theory \cite{altenkirchAl:plpv2007}.
 % 
 \SetoidCC extends Martin-Löf Type Theory with support for impredicative 
 propositions and an observational equality that satisfies UIP, function 
@@ -227,10 +227,6 @@ out in \cref{sec:inductive-equality}.
 \section{The Formal System \SetoidCC}
 \label{sec:typing-rules}
 
-\subsection{Algebraic Theory or Typed Lambda-Calculus?}
-
-\shepherd{TODO}
-
 \subsection{Syntax}
 
 The syntax of the sorts, contexts, terms and types of the system is
@@ -263,7 +259,7 @@ The capture-avoiding substitution of a variable \( x \) in a term \( A \) by the
 term \( t \) is noted \( \subst{B}{t} \).
 
 % SetoidCC syntax
-\begin{figure}
+\begin{figure}[!h]
 	\begin{small}
 		\[
 		\begin{array}{lclcl}
@@ -651,8 +647,8 @@ identity.
 \end{mathpar}
 % 
 In \cref{ch:extensions}, we study a slight variant of \SetoidCC dubbed \SetoidCCplus
-where the rule \nameref{inferrule:cast-refl} holds up to definitional equality, but its 
-normalization and canonicity are only conjectural.
+where the rule \nameref{inferrule:cast-refl} holds up to definitional equality.
+% but its normalization and canonicity are only conjectural.
 
 \subsection{Dependent products}
 
@@ -1471,7 +1467,9 @@ Thus, the only difference between the two equalities is a tradeoff between
 definitional and propositional equations:
 \sideremark{In the system \SetoidCCplus of \cref{ch:extensions}, we have the best
 of both worlds: the observational equality satisfies both UIP and the computation
-of \( J \). But the normalization of this system is only conjectured.}
+of \( J \). 
+% But the normalization of this system is only conjectured.
+}
 % 
 \begin{itemize}
 \item The observational equality satisfies UIP by definition, but the \( J \) eliminator
@@ -1724,17 +1722,19 @@ But \SetoidCC is also constructive, \ie the principle of excluded middle
 does not hold. 
 % 
 This incites us to investigate more general classes of models, that do not 
-collapse the propositions to a two-valued set. Now, there happens to be a
-class of ``constructive-set-like'' categories that play an important role
-in mathematics, called \emph{Grothendieck toposes}. And indeed, we will
-prove in \cref{ch:metatheory} that
+collapse the propositions to a two-valued set. 
+% 
+Now, there happens to be an important class of categories that share most
+properties of the category of sets but not excluded middle, called 
+\emph{Grothendieck toposes}. 
+% 
+And indeed, Gratzer showed that \SetoidCC has models in all Grothendieck 
+toposes~\sidecite{https://doi.org/10.48550/arxiv.2202.05529}
 
-\begin{theorem}
-	\SetoidCC has models in all Grothendieck toposes.
-\end{theorem}
-
+This makes \SetoidCC a reasonably good language to reason internally to a 
+Grothendieck topos. 
 However, \SetoidCC does not validate all the reasoning principles that are
-available in the theory of elementary toposes. In particular, the most glaring omission is the
+available in the logic of toposes. In particular, the most glaring omission is the
 principle of unique choice, which states that given any relation 
 \( R : A \to B \to \sProp \) we can build a choice function if we know that \( R \)
 is the graph of a functional relation.
@@ -1770,3 +1770,41 @@ tools that are needed to prove the various theorems that we enunciated.
 
 % However, it becomes trivially provable if we replace the unique existence 
 % quantifier with a dependent sum.
+
+% \section{Related work}
+
+% Compared to~\sidecite{altenkirchAl:plpv2007}, the most important ingredient in \SetoidTT is the
+% use of definitional proof-irrelevance.
+% %
+% This added flexibility in computations allows our recursors to enjoy proper computational
+% behavior on open terms, and it also lets us seamlessly treat universe hierarchies.
+% %
+% Moreover, the normalization proof for OTT relies on a normalization conjecture for a different
+% theory, unlike the normalization proof for \SetoidTT.
+
+% In~\sidecite{Altenkirch2019}, the authors define a setoid model in \( \MLTT+\sProp \). Then, they
+% interpret a version of \MLTT with proof-irrelevant identity types that support propext and
+% funext in their model, thereby providing a computational interpretation of these principles.
+% %
+% However, handling universes in their model requires some additions to \( \MLTT+\sProp \), and
+% the resulting theory is only conjectured to be normalizing.
+% %
+% In contrast to this, \SetoidTT is a full-fledged type theory and does not require any external
+% model to compute.
+
+% Compared to XTT~\sidecite{sterling_et_al:LIPIcs:2019:10538}, the strengths of \SetoidTT are a
+% normalization strategy that exhibits canonicity, as well a full proof that conversion and typing
+% are decidable. These properties allow us to present a concrete implementation of our system
+% in a proof assistant.
+% %
+% In XTT however, Sterling\etal show that typing cannot be decidable, as there is no way to deduce
+% \( \Obseq{A}{A'} \) and \( \Obseq{B}{B'} \) from a proof of \( \Obseq{A \times B}{A' \times B'} \).
+% %
+% In order to fix this shortcoming, they suggest adding a ``typecase'' operator, but
+% argue against it since it forces the universe to be closed, thereby severely constraining the
+% possible semantics.
+% %
+% In \SetoidTT, we obtain the injectivity of type contructors from the behavior of observational
+% equality in the universe. These rules somewhat constrain the semantics---for instance, we cannot
+% interpret \SetoidTT in set theory using a Grothendieck universe as the interpretation of \( \Type \)
+% ---but our universe remains open to the addition of arbitrary types.

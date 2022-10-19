@@ -3,20 +3,20 @@
 \chapter{Synthetic Cubical Homotopy Theory}
 \labch{homotopy}
 
-In the previous chapters we spent a lot of time studying extensions of 
-intensional type theory, which we narrated as the quest for function 
-extensionality.
+In the previous chapters, we spent a lot of time studying extensions of 
+intensional type theory, which we moslty narrated as a quest for extensionality 
+principles.
 % 
-But in addition to providing funext, univalent type theories open up an 
-entire new world of mathematics: since types gain the quality of synthetic 
-spaces, we can rephrase classical results from homotopy theory in the 
-language of type theory.
+But in addition to providing extensionality principles, univalent type theories 
+also open up an entire new world of mathematics: 
+since types acquire the properties of synthetic spaces, we can rephrase classical 
+results from the mathematics of spaces in the language of type theory.
 % 
 And indeed, there is a growing literature on synthetic homotopy theory done in 
 axiomatic homotopy type theory~\cite{pi1s1,pinsn,Brunerie16,Cavallo15,seifertvankampen,BlakersMassey,vanDoorn18}.
 % 
 In this chapter, we lay a foundation for synthetic homotopy theory in cubical
-type theory, using the \CubicalAgda proof assistant.
+type theory using the \CubicalAgda proof assistant.
 
 We start with a short introduction to homotopy theory and a discussion of the
 kind of results that we will encounter in this chapter in \cref{sec:synthetic}.
@@ -34,6 +34,10 @@ HoTT in \cref{sec:comparison}.
 
 All the code that appears in this chapter is written in \Agda and has been
 integrated in the standard library of \CubicalAgda. 
+% 
+\sideremark{The developments
+  can be found in the \texttt{agda/cubical} library located
+  at:\\ \url{https://github.com/agda/cubical}}
 % 
 As a consequence we adopt the notations used in that library, which sometimes
 conflict with notations used in the previous chapters. 
@@ -144,9 +148,7 @@ endowed with the structure of a \emph{De Morgan algebra} while the
 more recent \emph{cartesian} cubical type theories use an interval
 with less structure~\sidecite{AngiuliHouHarper18,ABCFHL}. 
 % 
-All of the results in this paper have been formalized\sideremark{The developments
-  can be found in the \texttt{agda/cubical} library located
-  at:\\ \url{https://github.com/agda/cubical}} with the
+All of the results in this paper have been formalized with the
 cubical extension \sidecite{cubicalagda} of the \Agda{} proof assistant, which 
 is based on the De Morgan variation of cubical type theory. 
 % 
@@ -157,7 +159,7 @@ cartesian cubical type theory, like \redtt{}~\sidecite{redtt}.
 \section{Cubical Type Theory and \CubicalAgda}
 \label{sec:cubical-agda}
 
-The goal of this chapter is to give sufficient background for readers not
+The goal of this section is to give sufficient background for readers not
 familiar with cubical type theory and \CubicalAgda to be able
 to understand our code. 
 % 
@@ -297,9 +299,9 @@ HoTT~\sidecite[][Sect. 6.2]{hottbook}. We define the type of homogeneous
 paths/equalities in terms of \func{PathP} as follows:
 % 
 \sideremark{The homogeneous path types are written using a triple equality
-  symbol, following the convention of \CubicalAgda. This has nothing
-  to do with the definitional equality of \cref{ch:observational} or the 
-  reducible equality of \cref{ch:metatheory}.}
+  symbol, following the convention of \CubicalAgda. The reader should be
+  careful to not get confused with the inductive equality type of \cref{ch:prefascist}, 
+  or the definitional equality of \cref{ch:observational}.}
 % 
 \ExecuteMetaData[chapters/literate-agda/Code.tex]{Path} %
 

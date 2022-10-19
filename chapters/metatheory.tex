@@ -19,7 +19,7 @@ the normalization model. We explain how to deduce canonicity of \SetoidCC from
 a proof of consistency, we show that conversion is decidable, and we give the 
 outline of an algorithm for type-checking. 
 % 
-Except for the decidability of typing, all the proofs of this section have been
+Except for the decidability of typing, all the proofs of this chapter have been
 formally verified in \Agda. 
 
 In \cref{sec:analys-norm-proof}, we explain how to replay the construction of
@@ -100,12 +100,12 @@ They build their model in intensional type theory with induction-recursion,
 a meta-theory which is remarkably close to the theory being studied.
 % 
 Furthermore, they entirely formalized their proofs in \Agda, down to the proof
-of decidability of the conversion.
+of decidability of conversion.
 % 
 In this chapter, we will extend their model to show normalization and decidability
 of conversion for the full system \SetoidCC.
 % 
-We formalized a our proofs in \Agda for a significant subset of \SetoidCC that
+We formalized our proofs in \Agda for a significant subset of \SetoidCC that
 includes two predicative universes, the impredicative universe of propositions, 
 dependent products, natural numbers and the observational equality. 
 % 
@@ -170,7 +170,7 @@ equality.
 
 \paragraph*{Adding Proof-Irrelevant Types}
 % 
-In~\sidecite{gilbert:hal-01859964}, Gilbert \etal extend the model of 
+Gilbert \etal~\sidecite{gilbert:hal-01859964} extended the model of 
 Abel \etal to add a universe of definitionally proof-irrelevant types.
 Contrary to the universe \( \sProp \) of \SetoidCC, their universe is
 predicative, and only contains \( \Pi \)-types and the false proposition.
@@ -179,7 +179,7 @@ In their proof, Gilbert \etal extend the reduction rules to the inhabitants of
 proof-irrelevant types, and they go on to prove normalization for both relevant
 and irrelevant terms.
 %
-From their model, they also obtain a proof of consistency for \MLTT 
+From normalazition, they also deduce a proof of consistency for \MLTT 
 extended with predicative proof-irrelevant types: any proof of the false 
 proposition \( \Empty \) in an an empty context will reduce to a weak head 
 normal form, and the only weak head normal forms that can inhabit 
@@ -250,7 +250,7 @@ In the model of Abel \etal, dependent products are deemed reducible when
 their domain is reducible, and their codomain is reducible 
 for any reducible element of the domain. 
 % 
-But an impredicative dependent product may have an aribitrarily large domain,
+But an impredicative dependent product may have an arbitrarily large domain,
 so this definition will not work.
 % 
 We will break out of the circularity by defining a weaker notion of reducibility 
@@ -339,7 +339,7 @@ by the generic rule for neutral terms.
   \begin{small}
 \begin{flalign*}
   \begin{array}{lcl}
-\_ \Vdash_\ell \_ : \_ & : & (\Gamma : \Context) \to (t : \Term) \to (A : \Term) \to (\Univ : \Sort) \to \AgdaSet{} \\
+\_ \Vdash_\ell \_ : \_ & : & (\Gamma : \Context) \to (t : \Term) \to (\Univ : \Sort) \to \AgdaSet{} \\
 \_ \Vdash_\ell \_ : \_ & \bnfis & \Vne : \forall\ \Gamma\ t\ \Univ \to
                           (\Gamma \Vdash_{\mathsf{ne}} t : \Univ) \to
                           \Gamma \Vdash_\ell t : \Univ\\
@@ -424,6 +424,10 @@ with the predicates for neutral types.
   \inferrule{\redT{\Gamma}{A}{N}{\Type_i} \\ \neutral{N}}
   {\tytyR{\mathsf{ne}}{\Gamma}{A}{\Type_i}}
 \]
+% 
+\sideremark{Our reduction strategy is the weak-head reduction that we defined
+in \cref{sec:weak-head}.}
+% 
 Terms which reduce to neutral types are reducible types.
 In this rule, the premise \( \redT{\Gamma}{A}{N}{\Type_i} \) means that \( A \) 
 reduces to a term \( N \) in a finite number of steps (possibly zero), and that 
@@ -567,9 +571,9 @@ reducibly equal inhabitants of \( F \) results in two reducibly equal types.
 \sideremark[*1]{Thus, reducibility has the structure of a \emph{presheaf} over the
 category of weakenings. These generalized hypotheses are really an embodiment of
 the presheaf exponential.}
-The reader might be wondering why do we generalize the last three premises 
+The reader might be wondering why we generalize the last three premises 
 under any weakening. The simple explanation is that we want reducibility to be
-stable under weakening, and we won't be able to prove it by induction on the
+stable under weakening, and we will not be able to prove it by induction on the
 definition because of the negative occurences---so we generalize any premise
 that mentions reducibility on the left of an arrow.
 
@@ -662,7 +666,7 @@ In this case, we define:
     \end{itemize}
 \end{itemize}
 Thus, a term is a reducible inhabitant of \( A \) when it reduces to either a 
-neutral term or a dependent pair, a both of its projections are reducible.
+neutral term or a dependent pair, and both of its projections are reducible.
 
 \paragraph*{Box types}
 \[
@@ -867,7 +871,7 @@ the logical relation.
 \paragraph{Impredicative Dependent Function Types}
 
 For the impredicative function types, the situation is more complex,
-as we can not reproduce the definition of their predicative
+as we cannot reproduce the definition of their predicative
 counterpart:
 it involves a recursive call to the logical relation for the domain
 and codomain types, which might live in a higher universe than the
@@ -909,7 +913,7 @@ When $A$ is reducible to the impredicative universe, we define:
 \begin{itemize}
   \item \( \eqtyR{\Omega}{\Gamma}{A}{B}{\Type_0} \) if \( \redT{\Gamma}{B}{\sProp}{\Type_0} \).
   \item \( \tytmR{\Omega}{\Gamma}{t}{A}{\Type_0} \) if there is a normal form \( t' \) such that
-    \( \redT{\Gamma}{t}{t'}{\sProp} \), and \( \tytyR{X}{\Gamma}{t}{\sProp} \) for
+    \( \redT{\Gamma}{t}{t'}{\sProp} \), and \( \tytyR{X}{\Gamma}{t}{\sProp} \) for some
     \( X \in \{ \mathrm{ne}, \bot, {\Pi \mathsf{i}}\} \).
   \item \( \eqtmR{\Omega}{\Gamma}{t}{u}{A}{\Type_0} \) if there are normal forms \( t', u' \), as well
   as \( X \in \{ \mathrm{ne}, \bot, {\Pi \mathsf{i}}\} \) such that
@@ -1106,7 +1110,7 @@ The lemma is proved by a mutual induction on derivations for well-formed
 contexts, types, type equality, terms and term equality. 
 % 
 Our various extensions of the model require numerous changes to the proof of 
-Abel \etal, but most of these do not pose any major difficulty---albeit the 
+Abel \etal, but most of these do not pose any major difficulty---although the 
 proof is by no means trivial, as the arguments have to be spelled out in
 excruciating detail.
 
@@ -1292,6 +1296,9 @@ canonicity theorem:
   \( \metaop{S}^n\ \zero \).
 \end{theorem}
 
+This strategy of deriving canonicity from consistency and normalization was 
+already envisioned by Altenkirch \etal~\sidecite{AltenkirchMcBrideSwiestra07}.
+
 \subsection{Decidability of Conversion}
 
 In order to prove that convertibity is decidable for \SetoidCC, we need to 
@@ -1299,15 +1306,15 @@ devise a conversion checking algorithm, and then prove that it is both
 correct and complete.
 
 To do so, we follow \sidecitet{Abel:POPL2018} and define 
-\emph{algorithmic conversion} as a relation on well-typed 
+\emph{algorithmic conversion} as a relation 
+$\algoeqtmannotated{\Gamma}{t}{u}{A}{\Univ}$ between two well-typed 
 terms \( t \) and \( u \) of type \( A \) in context \( \Gamma \).
-$\algoeqtmannotated{\Gamma}{t}{u}{A}{\Univ}$.
 %
 This algorithmic conversion keeps track of the relevance information,
 and uses it to either give an immediate answer in case \( t \) and
-\( u \) are irrelevant, or compute their weak-head normal forms using
-the normalization theorem, then compare their head constructor, and possibly apply the algorithm
-recursively in case \( t \) and \( u \) are relevant.
+\( u \) are irrelevant, or to compute their weak-head normal forms using
+the normalization theorem, then compare their head constructor, and possibly 
+apply the algorithm recursively in case \( t \) and \( u \) are relevant.
 %
 Correctness of this algorithmic conversion is direct as the rules used are
 subsumed by the general conversion judgement \refAgda{Conversion.}{Soundness}.
@@ -1783,7 +1790,7 @@ set theory on the other hand.
 As we already mentioned, the normalization model that we built in
 \cref{sec:logic-relat-with} is not strong enough to obtain consistency
 and canonicity for \SetoidCC. Indeed, this model interprets the
-proof-irrelevant proposition \( \bot \) as the set of syntactical
+proof-irrelevant proposition \( \bot \) as the set of syntactic
 terms with type \( \bot \), which does not grant any kind of control
 over its proofs in the empty context.
 
@@ -1977,8 +1984,8 @@ The interpretation of the terms is defined in \cref{fig:interpretation}.
 In order to prove the soundness of our interpretation, we need to extend it to weakenings
 and substitutions between contexts.
 %
-Assume \( \Gamma \) and \( \Delta \) are a syntactical contexts, and \( A \) and \( t \)
-are syntactical terms.
+Assume \( \Gamma \) and \( \Delta \) are a syntactic contexts, and \( A \) and \( t \)
+are syntactic terms.
 %
 In case \( \mctx{\Gamma, \tm{x}{A}, \Delta} \) and \( \mctx{\Gamma, \Delta} \) are well-defined,
 let \( \pi_A \) be the projection:

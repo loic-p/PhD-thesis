@@ -3,16 +3,35 @@
 \chapter{Prefascist Types}
 \labch{prefascist}
 
-\shepherd{If some  Presheaves.
+As we conclude our explorations in the world of observational type theory 
+and proof-irrelevant equalities, we turn to the radically different world 
+of the univalent equality and of the cubical models of univalent type 
+theory~\cite{BezemCoquandHuber14, CCHM}. We start our new journey with
+a chapter about \emph{presheaves} in intensional type theory.
 
-In particular, presheaves will turn out to be especially useful to
-build models of type theory.}
+Presheaves are a versatile object in category theory that plays a significant
+role in the meta-theory of dependent type theory. 
+In particular, presheaves form the basis of the cubical models of univalent type
+theory which will be the focus of the next chapter.
+Thus in this preparatory chapter, we discuss the relation between presheaves and 
+intensional type theory.
 
-In this section, we will use a bit of categorical jargon, but the reader
-who is not too well versed in this dark art shall rest assured:
-we only assume some basic knowledge about functors and limits.
+We start this chapter with a short overview of the basic properties of presheaves in
+set theory in \cref{sec:categorical-reminders}. Then in 
+\cref{sec:intensional-problems}, we explain some well-known difficulties
+with defining presheaves of types in intensional type theory. In
+\cref{sec:prefascist} we introduce prefascist types, an alternative
+definition of presheaves in type theory proposed by 
+Pédrot~\sidecite{pedrot:prefascist} to build models of type theory in
+type theory.
 
-\section{Set-theoretical Presheaves}\label{sec:categorical-reminders}
+Given the nature of the topic, the reader should expect significantly more
+category theory in this chapter than in the rest of this thesis. 
+We assume some amount of familiariaty with objects such as functors, limits, 
+or adjunctions.
+
+\section{Set-theoretical Presheaves}
+\label{sec:categorical-reminders}
 
 In this section, we recall the definition of presheaves and go 
 over some of their uses.
@@ -21,22 +40,28 @@ The reader who is already well acquainted with presheaves might want to skip
 this section and go directly to \cref{sec:intensional-problems}, where we
 investigate presheaves from the angle of intensional type theory.
 % 
-But until then, we will be working informally in a constructive set theory.
+But until then, we will be working informally in a constructive set theory with
+\defnote{Grothendieck universes}{Grothendieck universes allow us to safely 
+manipulate objects such as the set of all \emph{small} sets, which is a 
+\emph{large} set. Grothendieck universes work very much like the predicative 
+universe hierarchy in type theory.}.
 
 Given any category \( \cat{C} \), the category 
 \( \catPsh{\cat{C}} \) of \emph{presheaves} on \( \cat{C} \) is the category 
 of functors from the opposite category \( \op{\cat{C}} \) to the category of 
 small sets.
-\sideremark{In this definition, the \( \mathrm{Hom}_\catCat \) notation should 
-    be understood in the 2-categorical sense: this object is a category, not a 
-    set.}
+% 
 \begin{definition}
 \(
     \catPsh{\cat{C}} := \hom[\catCat]{\op{\cat{C}}}{\catSet}
 \)
 \end{definition}
-In other words, a presheaf is a functor, and a morphism of presheaves is a 
-natural transformation.
+% 
+In this definition, the \( \mathrm{Hom}_\catCat \) notation should 
+be understood in the 2-categorical sense: this object is a category, not a set.
+% 
+In other words, a presheaf is a functor from \( \op{\cat{C}} \) to \( \catSet \), 
+and a morphism of presheaves is a natural transformation.
 
 In the usual fashion of category theory, this definition is slick
 and abstract, which results in a remarkably versatile object. 
@@ -44,9 +69,9 @@ and abstract, which results in a remarkably versatile object.
 But in counterpart, the definition alone is not too helpful in building
 intuition about presheaves---what are they good for?
 
-Presheaves\sidenote{sheaves, actually} were initially designed to capture the 
-idea of a set continuously parametrized by a topological space, whose lattice 
-of open sets was used as the index category. 
+Presheaves\sidenote{sheaves, actually} were initially designed to capture the
+idea of a set continuously parametrized by a topological space \( X \), by taking the 
+lattice of open subsets of \( X \) as the index category \( \cat{C} \). 
 % 
 The definition was later generalized to an arbitrary category, but this 
 topological legacy has left traces in the terminology, with words such as 
@@ -54,8 +79,8 @@ topological legacy has left traces in the terminology, with words such as
 on \( \cat{C} \), then the elements of \( F(p) \) are called sections of 
 \( F \) over \( p \), and the image of a morphism \( F(\alpha) \) is called 
 the restriction along \( \alpha \).}.
-
-But in this thesis, we will mostly be interested in presheaves different 
+% 
+However in this thesis we will mostly be interested in presheaves different 
 reasons, one of them being that presheaves allow us to freely add colimits to 
 a category.
 
@@ -121,6 +146,9 @@ and as a consequence we should be careful to have different pictures for
 
 \subsection{Presheaves as Generalized Categories of Sets}
 
+In addition to being cocomplete, categories of presheaves also have small
+limits and exponential objects~\sidecite{MaclaneMoerdijk}.
+
 \begin{theorem}
     The category \( \catPsh{\cat{C}} \) admits all small limits, which can
     be computed point-wise. Moreover, the Yoneda embedding preserves
@@ -131,30 +159,44 @@ and as a consequence we should be careful to have different pictures for
     The category \( \catPsh{\cat{C}} \) is cartesian closed.
 \end{theorem}
 
-\shepherd{Forcing n stuff}
+This is only natural: presheaves are more or less indexed small sets, and as 
+such they retain a large part of the structure of \( \catSet \). In fact, they
+retain much more structure than just limits and colimits: we can basically 
+% 
+\sideremark{The category of presheaves on \( \cat{C} \) is the prototypical example of a \emph{topos}, 
+ a category that shares most of the abstract categorical properties of \( \catSet \).}
+% 
+replicate any construction from constructive set theory inside a category of 
+presheaves---we can form powersets, the image of a morphism, dependent 
+products, etc. However, the principle of excluded middle and the axiom of 
+choice are not valid in most categories of presheaves.
 
-\shepherd{We can give models to type theory, too!}
+In particular, presheaves have enough structure to interpret 
+dependent products, dependent sums and inductive types. As a consequence, we
+can build models of Martin-Löf type theory in categories of 
+presheaves~\sidecite{Hofmann97}.
 
-\section{Type-theoretical Presheaves}\label{sec:intensional-problems}
+\section{Type-theoretical Presheaves}
+\label{sec:intensional-problems}
 
 Hopefully by now, the reader is convinced that presheaves are a simple yet 
 versatile idea in category theory and thus a natural candidate for a 
 translation into type theory.
 % 
-But while concrete first-order objects such as integers, graphs or trees 
-generally translate very well, abstractions that deal with predicates, sets
-and functions usually come with their lot of complications---and presheaves
-are no exception.
+But while concrete first-order objects such as integers or finite trees 
+are usually pretty straightforward to implement in type theory, higher-order objects 
+that deal with predicates or functions usually come with their lot of 
+complications---and presheaves are no exception.
 
 In this section, we explain the difficulties with defining presheaves of types
 in intensional Martin-Löf Type Theory. 
 % 
 We use the syntax of the \Agda proof assistant for our type theoretical 
-definitions.
+definitions, without assuming Streicher's axiom K.
 
 \subsection{First Definition}
 
-Let us assume we are working with a small category \( \cat{C} \), and that we
+Let us assume that we are working with a small category \( \cat{C} \), and that we
 managed to encode it nicely inside type theory:
 \sideremark[*2]{Arguments between curly braces are optional arguments, which will
     usually be inferred from the context.}
@@ -162,33 +204,44 @@ managed to encode it nicely inside type theory:
 \ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{category}
 
 Furthermore, we assume that the unit laws and the associativity of
-composition hold \emph{by definition}:
-% 
-\sideremark{Using the definitional equality in \Agda code like this is not
-possible in practice, of course. This abuse of notation should rather be 
-understood as assuming an actual implementation of \func{Hom}, \func{id} and
-\func{\_∘\_} that satisfy the definitional equations.}
+composition in \( \cat{C} \) hold \emph{by definition}:
 
 \ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{equations}
 
-meaning that the equality here is not the propositional equality \func{\_≡\_},
-but the definitional equality \( \_=\_\) : these terms are convertible. 
+\sideremark{In this chapter, we use the \Agda conventions. This means that
+    we use a triple equal symbol \func{≡} for the propositional equality.
+    It has nothing to do with the definitional equality of \cref{ch:observational}
+    or the reducible equality of \cref{ch:metatheory}. The definitional equality
+    of \Agda is written with the usual equality symbol \( {=} \).}
 % 
-It could be the case, for instance, if we managed to express \( \cat{C} \) as a 
-full subcategory of \func{Set}---in which cases the morphisms are just 
-functions, whose composition is associative by defintion.
+By which we mean that the equality that appears in these three postulates is 
+not the propositional equality (\( {\func{≡}} \)) but rather the definitional 
+equality (\( {=} \)): the two sides are convertible.
 
-This constraint might look very strong, but in \cref{sec:cat-strictification}
-we will see that all small categories can in fact be presented in this way
-in a type theory with strict propositions.
+Of course, using the definitional equality in \Agda code like this is not
+allowed.
+% 
+This should rather be understood as a notational shorthand for the assumption
+that we have an actual implementation of \( \cat{C} \) with instances of 
+\func{Hom}, \func{id} and \func{\_∘\_} that satisfy these three definitional 
+equations.
+% 
+It could be the case for instance if we managed to express \( \cat{C} \) as a 
+full subcategory of \func{Set}, in which case the morphisms are just 
+functions, whose composition is associative by defintion.
+% 
+This might seem like an arbitrary and restrictive constraint on the category 
+\( \cat{C} \), but in \cref{sec:cat-strictification} we will see that all small 
+categories can in fact be presented in this way in a type theory with strict 
+propositions.
 
 Now, how should we go about defining the type of presheaves on \( \cat{C} \)?
-If we mimic the set-theoretic definition of a presheaf, we might obtain 
+If we mimic the set-theoretic definition of a presheaf, we might write 
 something that starts like this:
 
 \ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{presheaf1}
 
-This gives the action on objects and morphisms, but we also need to verify some 
+This defines the action of the presheaf on objects and morphisms, but we also need to verify some 
 equations, as functors are supposed to preserve identities and composition.
 % 
 We can try to state them using the propositional equality \func{\_≡\_}:
@@ -204,11 +257,11 @@ and from there, all reasonable equalities such as
 can be proved through successive rewritings using \field{F\_id} and 
 \field{F\_comp}.
 % 
-Sure enough, this definition does correspond to presheaves when we interpret
+And sure enough, this definition does correspond to presheaves when we interpret
 type theory in the usual set-theoretical model \sidecite{Hofmann97}. 
 % 
 But as bare \MLTT lacks the extensional features of set theory, this
-definition has some kinks that we might want to iron out.
+definition hides some kinks that we might want to iron out.
 
 \subsection{A Story about Higher Coherences}
 
@@ -219,35 +272,36 @@ side:
 \begin{center}
     \sideremark{The horizontal equalities are instances of \field{F\_comp},
         and the two vertical equalities hold by definition.}
+\tikzset{triple/.style={-,AgdaDatatype,preaction={draw,AgdaDatatype,double,double distance=2pt}}}
 \begin{tikzcd}
     \field{F₁}\ ((f\ \func{\circ}\ g)\ \func{\circ}\ h)
-    \ar[equal]{r} \ar[equal]{d}
+    \ar[triple]{r} \ar[equal]{d}
     & \field{F₁}\ h\ \func{\circ}\ \field{F₁}\ (f\ \func{\circ}\ g) 
-    \ar[equal]{r}
+    \ar[triple]{r}
     & \field{F₁}\ h\ \func{\circ}\ (\field{F₁}\ g\ \func{\circ}\ \field{F₁}\ f)
     \ar[equal]{d} \\
     \field{F₁}\ (f\ \func{\circ}\ (g\ \func{\circ}\ h))
-    \ar[equal]{r}
+    \ar[triple]{r}
     & \field{F₁}\ (g\ \func{\circ}\ h) \ \func{\circ}\ \field{F₁}\ f
-    \ar[equal]{r}
+    \ar[triple]{r}
     & (\field{F₁}\ h\ \func{\circ}\ \field{F₁}\ g)\ \func{\circ}\ \field{F₁}\ f
 \end{tikzcd}
 \end{center}
 
-and these result in two different equality witnesses.
+and these two chains of equalities result in two different witnesses of equation \ref{eq-psh}.
 % 
-We might hope to prove that these two witnesses are in fact equal ; but it does 
-not seem possible without assuming additional axioms (remember that we are 
+We might hope to prove that these two witnesses are in fact equal ; but it is 
+not possible without assuming additional axioms (remember that we are 
 working in intensional \MLTT here, where identity proofs are by no means 
 unique!).
 % 
 This state of affairs is rather unsatisfying, and it certainly looks like that 
 kind of nuisance that will show up uninvited in our proofs later on.
 
-To understand the source of this irritating phenomenon, it is helpful to turn 
-ourselves to Homotopy Type Theory.
+To understand the source of this irritating phenomenon, it is helpful to look at 
+it under the lens of Homotopy Type Theory.
 % 
-As we explained in chapter \cref{ch:homotopy}, in \HoTT we think of types
+As we explained in chapter \cref{ch:intro_english}, in \HoTT we think of types
 as being \emph{spaces} instead of sets, and the two different notions of equality 
 (definitional and propositional) have very different interpretations:
 \begin{itemize}
@@ -257,52 +311,49 @@ as being \emph{spaces} instead of sets, and the two different notions of equalit
         paths connecting \( a \) to \( b \). 
 \end{itemize}
 % 
-Since \MLTT is a subset of \HoTT, our tentative definitions can be 
-interpreted as talking about spaces as well and should ideally make sense
+Since \MLTT is a subset of \HoTT, our tentative definition can be 
+interpreted as talking about spaces and should ideally make sense
 from this perspective. 
 % 
-So, does our definition properly encode \defnote{presheaves of 
-spaces}{Presheaves of spaces are an incarnation of higher presheaves, the
-analogue of regular presheaves in higher category theory.}?
-% 
-Unfortunately, it does not. 
-
 Our definition would in fact work for presheaves of spaces if \field{F\_id} 
-and \field{F\_comp} were definitional equalities. 
+and \field{F\_comp} were definitional equalities,
 % 
-But when we relax these equalities to mere paths (propositional equalities), we 
-introduce superfluous information---as we have seen, there are now several 
-ways to use \field{F\_id} and \field{F\_comp} to prove what should really be a 
-equality ``on the nose'' in the corresponding spaces.
+but when we relax these equalities to mere paths (propositional equalities) we 
+are effectively adding superfluous information to the type---as we have seen, 
+there are now several ways to use \field{F\_id} and \field{F\_comp} to prove 
+what should really be a equality ``on the nose'' in the corresponding spaces.
 % 
-And since paths are relevant information in \HoTT, the object we get is 
-actually different from what we aim for.
-% 
+Thus instead of presheaves of spaces, we are defining something like presheaves
+of spaces with superfluous free loops attached to them.
+
 Of course, we do not have access to the definitional equality internally 
 in type theory, so we have to find another way to eliminate these extra paths.
-
+% 
 We can try to add new fields to the record \func{presheaf} that enforce 
-propositional equations between the redundant equality witnesses, such as
+propositional equations between the redundant equality witnesses, as follows:
 
 \begin{code}
-\>[0] \field{F\_coh} : \AgdaSymbol{∀}\ f\ g\ h\ \AgdaSymbol{→}
-\>[94I]\ (\field{F\_comp}\ h\ (f\ \func{∘}\ g))
-\ \func{∙}\ ((\field{F₁}\ h)\ \func{∘}\ (\field{F\_comp}\ g\ f))\<%
+\>[0] \field{F\_coh} : \AgdaSymbol{∀}\ \AgdaBound{f}\ \AgdaBound{g}\ \AgdaBound{h}\ \AgdaSymbol{→}
+\>[94I]\ (\field{F\_comp}\ \AgdaBound{h}\ (\AgdaBound{f}\ \func{∘}\ \AgdaBound{g}))
+\ \func{∙}\ ((\field{F₁}\ \AgdaBound{h})\ \func{∘}\ (\field{F\_comp}\ \AgdaBound{g}\ \AgdaBound{f}))\<%
 \\
 \>[.][@{}l@{}]\<[94I]%
-\>[12]\func{≡}\ (\field{F\_comp}\ (g\ \func{∘}\ h)\ f)
-\ \func{∙}\ ((\field{F\_comp}\ h\ g)\ \func{∘}\ (\field{F₁}\ f)) \<%
+\>[12]\func{≡}\ (\field{F\_comp}\ (\AgdaBound{g}\ \func{∘}\ \AgdaBound{h})\ \AgdaBound{f})
+\ \func{∙}\ ((\field{F\_comp}\ \AgdaBound{h}\ \AgdaBound{g})\ \func{∘}\ (\field{F₁}\ \AgdaBound{f})) \<%
 \end{code}
 \sideremark[*-5]{\func{\_∙\_} denotes the transitivity of equality / composition of 
 paths.}
 
-While it is true that we can find a finite number of equations that account for 
-all superfluous paths introduced by \field{F\_id} and \field{F\_comp}, this 
-approach will not get us very far. 
+Indeed, it is possible to find a finite number of equations that account for 
+all superfluous paths introduced by \field{F\_id} and \field{F\_comp}.  
+But this approach will not get us very far: 
 % 
-\field{F\_coh} itself introduces superfluous paths between paths, and only
-leads us towards an infinite tower of coherences of ever increasing 
-dimensions, with no appearant way to make it fit into a finite definition.
+\field{F\_coh} introduces superfluous paths between paths, which results in
+a type of presheaves with superfluous 2-dimensional loops.
+% 
+Going further in this direction only leads us towards an infinite tower 
+of equalities of ever increasing dimensions, with no apparant way to make it 
+fit into a finite definition.
 
 Here, we recognize a well-known pattern, as difficulties with infinite 
 towers of coherences show up for numerous definitions in Homotopy Type Theory.
@@ -316,8 +367,10 @@ strictly increasing maps \( \Delta_+ \).
 % 
 As we will explain shortly, if our type theory supports strict propositions,
 \( \Delta_+ \) can be presented as a category that satisfies the composition
-and the unit laws by definition, thereby making semi-simplicial sets a special
-case of our problem.
+and the unit laws by definition, which means that the definition of 
+semi-simplicial sets is a special case of the problem we are trying to solve.
+% 
+This is bad news!
 
 \subsection{Possible Workarounds}
 
@@ -326,7 +379,7 @@ defining presheaves of types on a general category is delicate because of the
 intricate higher-dimensional structure that may be encoded in identity types.
 % 
 Even though the problem of simplicial types remains open, there are still 
-ways to avoid coherence problems with presheaves in type theory:
+ways to avoid coherence problems with presheaves in type theory.
 
 \paragraph{Presheaves of hsets} If types in \HoTT correspond to spaces, there 
 is a certain subclass of types that can be identified as sets.
@@ -336,45 +389,48 @@ paths between any two points of \( X \) are equal
 
 \ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{hset}
 
-Interestingly, \field{is\_hset} removes all the non-trivial loops from 
-\field{X} without introducing any higher-dimensional coherence problems 
-(theorem 7.1.7 in \sidecite{HottBook13}). 
+Interestingly, the \field{is\_hset} constraint removes all the non-trivial 
+loops from \field{X} without introducing any higher-dimensional coherence 
+problems (\sidecite{hottbook}, theorem 7.1.7). 
 % 
-Such is the mystery that shrouds coherence towers: sometimes we can find 
-a finite definition that handles them properly, sometimes this definition 
-remain elusive.
+Such is the mystery of coherence towers: sometimes we can find a finite 
+definition that makes all higher coherence issues vanish in one go, and 
+sometimes this definition remains elusive.
 
-Anyway, one can define presheaves of hsets and develop large swaths of category
-theory without fearing coherence issues \sidecite{hottcoq}, but these proofs
-will not generalize to the corresponding theorems in higher category theory.
+Anyway it is straightforward to define presheaves of hsets, and they can be used 
+to develop large swaths of category theory without fearing coherence 
+issues~\sidecite{hottcoq}. 
+However these proofs are less general than what we could hope for if we had a 
+working definition for presheaves of spaces, because they only apply to
+the subclass of presheaves where all types are hsets.
 
 \paragraph{Uniqueness of Identity Proofs (UIP)}
 % 
 Going further in that direction, we can modify the type theory itself to 
 enforce the uniqueness of identity proofs, so that every type is a hset.
 % 
-In the observational type theories \SetoidTT and \SetoidCC that we introduced 
-in the first part of this thesis, the identity types are strict propositions,
+For instance, in the observational type theory \SetoidCC from 
+\cref{ch:obervational} identity types are strict propositions,
 which means all identity proofs are equal by definition.
 
-This framework comes very close to constructive set theory, so we can
-reasonably expect that doing mathematics with presheaves will not pose 
-significant problems.
+\SetoidCC gets very close to a type theoretical account of constructive set 
+theory, so we can reasonably expect that doing mathematics with presheaves 
+will not pose significant problems.
 
 \paragraph{Two-level type theories}
 % 
 Instead of curtailing the identity types, two-level type theories 
-(\sidecite{voevodsky:2013:hts}, \sidecite{annenkov-capriotti-kraus:2017})
 feature two distinct propositional equalities: a homotopical equality that 
 encodes paths, as well as a strict equality that encodes the actual equality
-of points and satisfies UIP.
+of points and satisfies UIP~\sidecite{voevodsky:2013:hts, annenkov-capriotti-kraus:2017}.
 
-Then, we can state the definition of a presheaf using the strict equality
+In such a framework, we can write a definition for presheaves using the strict equality
 and avoid coherence problems, while still supporting types with arbitrarily
 complex homotopical structures---at the price of additional complexity
 and manipulations of \emph{fibrancy conditions}.
 
 \section{Prefascist Types}
+\label{sec:prefascist}
 
 All the definitions of presheaves that we just listed follow the same general
 pattern: they keep the shape of the set-theory-inspired definition, and
@@ -384,8 +440,8 @@ introducing relevant path information.
 
 However, this is not the only possible approach: 
 % 
-in \sidecite{pedrot:prefascist}, Pédrot designs a syntactical model of \CIC in
-an extension of \CIC, such that every type is interpreted as a presheaf which
+in a 2020 paper~\sidecite{pedrot:prefascist}, Pédrot designs a syntactical model of \MLTT in
+\( \MLTT+\varsProp \) such that every type is interpreted as a presheaf which
 is functorial up to \emph{definitional equality}. 
 % 
 In order to do so, Pédrot introduces \defnote{prefascist types}{Prefascist 
@@ -396,12 +452,17 @@ take on the definition of a presheaf.
 In this section, we explain the definition of prefascist types and show some of 
 their properties.
 % 
-As in \cref{sec:intensional-problems}, we assume that we are working with a 
+As with \cref{sec:intensional-problems}, we assume that we are working with a 
 \emph{strict} category, that is a category \( \cat{C} \) that satisfies the 
 associativity and unit laws by definition. 
-
+% 
+\sideremark{In \cref{ch:intro_english} we used \( \varsProp \) for the sort
+ of strict propositions, and we reserved \( \varProp \) for the sort of 
+ non-strict propositions of \Coq. But since we adopt \Agda's conventions
+ in this chapter, we will use \func{Prop} for strict propositions.}
+% 
 Moreover, we will extend \MLTT with a sort of strict propositions \func{Prop},
-as implemented by \Coq, \Agda and \Lean \sidecite{gilbert:hal-01859964}.
+as implemented by \Coq, \Agda and \Lean \cite{gilbert:hal-01859964}.
 % 
 It works just like the universe \func{Set}, except that any type \( A \) 
 in \func{Prop} is proof-irrelevant, meaning that all terms with type 
@@ -410,7 +471,7 @@ in \func{Prop} is proof-irrelevant, meaning that all terms with type
 We also add a strict truncation operator \func{∥\_∥ₛ} that embeds 
 proof-relevant types in \func{Prop}.
 
-As an illustration for the use of \func{Prop}, we can now have the category 
+As an illustration for the use of \func{Prop}, we can use it to define the category
 \( \Delta_+ \) of finite ordinals and increasing maps as a strict category.
 If we define the monotonicity predicate as a strict proposition, then 
 morphisms of \( \Delta_+ \) are a pair of a function and a computationally
@@ -423,55 +484,71 @@ categories in this way.
 \subsection{What are Prefascist Types?}
 
 In order to arrive to a definition of prefascist types, we start by 
-investigating strict presheaves---even though we do not have a working 
-definition for their type, we can still assume we have an object \( F \)
-that satisfies the functoriality equations up to definitional equality:
+investigating strict presheaves of types, \ie presheaves of types that satisfy 
+the functoriality equations by definition. 
+% 
+Even though we do not have an internal definition for their type, we can still 
+assume we have an object \( F \) that satisfies the functoriality equations up 
+to definitional equality:
 
-\sideremark{Here, we abuse \Agda notation again. This should really be read
-as assuming actual implementations of \func{F₀} and \func{F₁} that satisfy
-the two definitional equations.}
+\sideremark{Once again, it is impossible to use the definitional equality in
+\Agda syntax. 
+This should really be read as assuming actual implementations of \func{F₀} and 
+\func{F₁} that satisfy the two equations \func{F\_id} and \func{F\_comp} by 
+definition.}
 \ExecuteMetaData[chapters/literate-agda/PrePrefascist.tex]{strictpsh}
 
 Although we cannot define it internally in \MLTT, we will write 
-\( \catsPsh{\cat{C}} \) for the category of type-theoretical strict presheaves
+\( \catsPsh{\cat{C}} \) for the category of strict type-theoretic presheaves
 and strict natural transformations.
+An element of \( \catsPsh{\cat{C}} \) is given by two terms 
+\func{F₀} and \func{F₁} of \MLTT that satisfy the equations \func{F\_id} and 
+\func{F\_comp} by definition, and a morphism is defined in a similar way.
+Note that our type-theoretic presheaves are \emph{internal presheaves}: we
+do not consider arbitrary set-theoretic functors from \( \cat{C} \) to the
+category of types, but only functors that can be expressed in \MLTT.
 
-Remark that given \( x \) in \( \func{F₀}\ p \), we can use \( \func{F₁} \) to 
-get an inhabitant of \( \func{F₀}\ q \) whenever we have a morphism 
-from \( q \) to \( p \).
+
+Now we remark that given \( x \) in \( \func{F₀}\ a \), we can use \( \func{F₁} \) to 
+get an inhabitant of \( \func{F₀}\ b \) whenever we have a morphism 
+from \( b \) to \( a \).
 % 
 In other words, having the presheaf structure laying around means that elements
-of \( \func{F₀}\ p \) are really promoted to inhabitants of
-\[
-\widehat{\func{F₀}}\ p := \AgdaSymbol{∀}\ q\ (α : \func{Hom}\ q\ p)\ \AgdaSymbol{→}\ \func{F₀}\ q
-\]
-where the promoted version of \( x : \func{F₀}\ p \) is given by
-\[
-\widehat{x} := \AgdaSymbol{λ}\ q\ α\ \AgdaSymbol{→}\ \func{F₁}\ α\ x.
-\]
-Tracking all restrictions like this allows us to define functoriality for 
-\( \widehat{\func{F₀}} \) as a simple composition, without any reference to 
-\func{F₁}
+of \( \func{F₀}\ a \) are really promoted to elements of the ``completed'' type family
+\( \widehat{\func{F₀}} \), which is defined as follows:
 \[
 \begin{array}{lcl}
-    \alpha\ \func{∙}\ \_ & : & \widehat{\func{F₀}}\ p\ \AgdaSymbol{→}\ \widehat{\func{F₀}}\ q \\
-    \alpha\ \func{∙}\ \widehat{x} & := & \AgdaSymbol{λ}\ r\ β\ \AgdaSymbol{→}\ \widehat{x}\ r\ (α\ \func{∘}\ β).    
+\widehat{\func{F₀}} & : & (a : \func{Obj}) \to \func{Set} \\
+\widehat{\func{F₀}}\ a & := & \AgdaSymbol{∀}\ b\ (f : \func{Hom}\ b\ a)\ \AgdaSymbol{→}\ \func{F₀}\ b
+\end{array}
+\]
+And the promoted version of \( x : \func{F₀}\ a \) is given by
+\[
+\widehat{x} := \AgdaSymbol{λ}\ b\ f\ \AgdaSymbol{→}\ \func{F₁}\ f\ x.
+\]
+Tracking all restrictions like this allows us to exhibit a natural presheaf 
+structure for \( \widehat{\func{F₀}} \) by defining functoriality with a 
+simple composition. If \( f \) is a morphism from \( b \) to \( a \), we define
+\[
+\begin{array}{lcl}
+    f\ \func{∙}\ \_ & : & \widehat{\func{F₀}}\ a\ \AgdaSymbol{→}\ \widehat{\func{F₀}}\ b \\
+    f\ \func{∙}\ \widehat{x} & := & \AgdaSymbol{λ}\ c\ g\ \AgdaSymbol{→}\ \widehat{x}\ c\ (f\ \func{∘}\ g).    
 \end{array}
 \]
 Now, remember how we insisted that \( \cat{C} \) satisfies associativity and 
-the unit law up to definitional equality---this is because thanks to these
-equations, \( \widehat{\func{F₀}} \) is strictly functorial:
+the unit law up to definitional equality. This constraint on \( \cat{C} \) 
+automatically makes \( \widehat{\func{F₀}} \) a strict presheaf:
 \begin{align*}
-    β\ \func{∙}\ (α\ \func{∙}\ \widehat{x}) & = (α\ \func{∘}\ β)\ \func{∙}\ \widehat{x} \\
-    (\func{id}\ p)\ \func{∙}\ \widehat{x} & = \widehat{x}.
+    g\ \func{∙}\ (f\ \func{∙}\ \widehat{x}) & = (f\ \func{∘}\ g)\ \func{∙}\ \widehat{x} \\
+    (\func{id}\ a)\ \func{∙}\ \widehat{x} & = \widehat{x}.
 \end{align*}
-Thus, \( \widehat{\func{F₀}} \) is an object of \( \catsPsh{\cat{C}} \),
-and since \func{F₁} satisfies the functoriality equations by definition, 
+Thus, \( \widehat{\func{F₀}} \) can be seen as an object of \( \catsPsh{\cat{C}} \),
+and since \func{F₁} satisfies the functoriality equations up to a defininitional equality, 
 our embedding \( x \mapsto \widehat{x} \) commutes with restriction:
-\( \alpha\ \func{∙}\ \widehat{x} \) is convertible to the promotion
-of \( \func{F₁}\ \alpha\ x \). 
+\( f\ \func{∙}\ \widehat{x} \) is convertible to the embedding
+of \( \func{F₁}\ f\ x \). 
 % 
-This means that we have a natural tranformation 
+This means that we have a \emph{strict} natural tranformation 
 \( F \to \widehat{\func{F₀}} \), which effectively replaces the 
 functoriality given by \( \func{F₁} \) with composition in \( \cat{C} \).
 
@@ -482,8 +559,8 @@ The strict presheaves that can be expressed as \( \widehat{X} \) for some
 presheaves as coalgebras, and presheaves of the form \( \widehat{X} \) 
 will be cofree coalgebras.} presheaves) 
 % 
-are remarkably tractable, since their functoriality operation is automatically
-provided by composition and will satisfy the required equations on the nose.
+are remarkably easy to handle, since their functoriality operation is automatically
+provided by composition and will satisfy the equations up to a definitional equality.
 % 
 And as we just explained, every strict presheaf can be embedded into a
 cofree presheaf.
@@ -493,23 +570,38 @@ of a cofree presheaf:
 
 \ExecuteMetaData[chapters/literate-agda/Prefascist.tex]{prefascist}
 
-This definition represents the subpresheaf of \( \widehat{\field{F₀}} \) 
-that is obtained by only keeping the elements of 
-\( \widehat{\field{F₀}}\ p \) that satisfy the proof-irrelevant predicate
-\( \field{Fε} \) for all their restrictions:
+The record that defines a prefascist type contains a type family 
+\( \field{F₀} \) on the objects of \( \cat{C} \), and a proof-irrelevant 
+predicate on the family \( \widehat{\field{F₀}} \).
+% 
+This definition represents the subpresheaf of \( \widehat{\field{F₀}} \)
+that is obtained by only keeping the elements of \( \widehat{\field{F₀}}\ a \) 
+that satisfy the proof-irrelevant predicate \( \field{Fε} \) for all their 
+restrictions.
+
+Given a prefascist type \( F \), we can define the type of elements of \( F \)
+over an object \( a \) as follows:
 
 \ExecuteMetaData[chapters/literate-agda/Prefascist.tex]{elem}
 
-Prefascist types are still strict presheaves, as we can define 
-functoriality using composition which is of course stricly associative:
+This record contains an element \field{x₀} of \( \widehat{\field{F₀}}\ a \) and
+a proof \field{xε} that all its restrictions satisfy the predicate \field{Fε}.
+% 
+We can define a functoriality operation on the elements of a prefascist type, by 
+using composition on \field{x₀} and \field{xε}. If \( f \) is a morphism from \( b \)
+to \( a \), we define
+% 
 \[
 \begin{array}{lcl}
-    \alpha\ \func{∙}\ \_ & : & \func{elem}\ F\ p\ \AgdaSymbol{→}\ \func{elem}\ F\ q \\
-    \alpha\ \func{∙}\ \func{⟨}\ \field{x₀}\ \func{,}\ \field{xε}\ \func{⟩} & 
-        := & \func{⟨}\ \alpha\ \func{∙}\ \field{x₀}\ \func{,}\ \alpha\ \func{∙}\ \field{xε} \ \func{⟩}  
+    f\ \func{∙}\ \_ & : & \func{elem}\ F\ a\ \AgdaSymbol{→}\ \func{elem}\ F\ b \\
+    f\ \func{∙}\ \func{⟨}\ \field{x₀}\ \func{,}\ \field{xε}\ \func{⟩} & 
+        := & \func{⟨}\ f\ \func{∙}\ \field{x₀}\ \func{,}\ f\ \func{∙}\ \field{xε} \ \func{⟩}  
 \end{array}
 \]
-Finally, morphisms of prefascist types are defined as
+
+And since composition in \( \cat{C} \) is strictly associative, the prefascist 
+types are strict presheaves.
+Finally, morphisms of prefascist types are defined as follows:
 
 \ExecuteMetaData[chapters/literate-agda/Prefascist.tex]{morphism}
 
@@ -523,24 +615,24 @@ Thus, our prefascist types form a remarkable subcategory of \( \catsPsh{\cat{C}}
 can be defined in a minor extension of \MLTT.
 % 
 Naturally, this begs the question of which presheaves can be encoded as
-prefascist sets. In the next section, we will see that prefastist types
+prefascist sets. In the next section, we will see that prefascist types
 are equivalent to the full category of presheaves in a set-truncated theory, 
 but unfortunately falls short of it when homotopical information 
 becomes relevant.
 
 \subsection{Categorical Perspective}
 
-In this section, we explain what are prefascist types on \( \cat{C} \) from 
+In this section, we revisit prefascist types on \( \cat{C} \) from 
 the perspective of category theory. We assume that the reader is familiar 
 with the theory of monads and adjunctions.
 
-While the problem of internally defining presheaves of types on an general 
-category is rather delicate, there are particular cases in which it reduces 
-to something much simpler.
+While the problem of defining the category of presheaves of types on 
+\( \cat{C} \) in type theory is rather delicate, there are 
+particular cases in which this problem becomes much simpler.
 % 
 In particular, if the category is \defnote{discrete}{A category is discrete if 
 it has only identity morphisms.}, then presheaves of types on \( \cat{C} \) are 
-just types indexed by \( \obj{\cat{C}} \), and morphisms are indexed functions.
+just types indexed by \( \obj{\cat{C}} \) and morphisms are indexed functions.
 This category is simple enough to define in intensional type theory, and all of 
 the equations are (vacuously) verified up to definitional equality.
 
@@ -549,90 +641,271 @@ Now, remark that every category \( \cat{C} \) contains a discrete subcategory
 morphisms. The embedding \( \cat{C}_0 \hookrightarrow \cat{C} \) gives rise
 to a ``pullback'' functor
 \[
-f^* : \catsPsh{\cat{C}} \to \catsPsh{\cat{C}_0}
+\iota^* : \catsPsh{\cat{C}} \to \catsPsh{\cat{C}_0}
 \]
 which simply forgets the functoriality of a strict presheaf. 
-\sideremark{\( f^* \) also has a left adjoint, thus both \( f^* \) and \( f_* \) preserve limits.}
-This functor has a right adjoint \( f_* \), given by
+\sideremark{\( \iota^* \) also has a left adjoint, thus both \( \iota^* \) and \( \iota_* \) preserve limits.}
+This functor has a right adjoint \( \iota_* \), given by
 \[
 \begin{array}{lcl}
-f_* & : & \catsPsh{\cat{C}_0} \to \catsPsh{\cat{C}} \\
-f_* X (p) & := & \AgdaSymbol{∀}\ q\ (α : \func{Hom}\ q\ p)\ \AgdaSymbol{→}\ X\ q
+\iota_* & : & \catsPsh{\cat{C}_0} \to \catsPsh{\cat{C}} \\
+\iota_* X (a) & := & \AgdaSymbol{∀}\ (b : \func{Obj})\ (f : \func{Hom}\ b\ a)\ \AgdaSymbol{→}\ X\ b
 \end{array}
 \]
 which is the same as our construction \( \widehat{X} \) from the previous 
-section. The comonad \( f^* f_* \) associated with this adjunction presents
-presheaves as a coalgebraic theory:
+section. 
+
+\paragraph*{The presheaf comonad}
+By composing both sides of the adjunction, we get a comonad 
+\( \iota^* \iota_* \) on \( \catsPsh{\cat{C}_0} \), which we can 
+define internally in \MLTT. 
+% 
+The comultiplication of \( \iota^* \iota_* \) corresponds to composition of
+morphisms in \( \cat{C} \):
+\[
+\begin{array}{lcl}
+\nu_X & : & \AgdaSymbol{∀}\ (a : \func{Obj}) \to \iota^* \iota_* X(a) \to \iota^* \iota_* \iota^* \iota_* X(a) \\
+\nu_X(a) & := & \lambda\ (x : \iota^* \iota_* X(a))\ (b : \func{Obj})\ (f : \func{Hom}\ b\ a)\\
+& & \phantom{\lambda\ (x : \iota^* \iota_* X(a))}\ (c : \func{Obj})\ (g : \func{Hom}\ c\ b)\ .\ x\ c\ (f\ \func{∘}\ g)
+\end{array}
+\]
+And its counit is derived from the identity morphism of \( \cat{C} \):
+\[
+\begin{array}{lcl}
+\varepsilon_X & : & \AgdaSymbol{∀}\ (a : \func{Obj}) \to \iota^* \iota_* X(a) \to X(a) \\
+\varepsilon_X(a) & := & \lambda\ (x : \iota^* \iota_* X(a))\ .\ x\ a\ (\func{id}\ a).
+\end{array}
+\]
+Since \( \cat{C} \) is a strict category, it follows that \( \iota^* \iota_* \) 
+satisfies the monad equations by definition: the associativity of the 
+comultiplication corresponds to associativity of the composition in \( \cat{C} \) 
+and the unit laws for the comultiplication correspond to the unit laws for 
+\( \cat{C} \).
+
+The comonad \( \iota^* \iota_* \) is particularly interesting to us, because it 
+has the category of presheaves as its category of coalgebras.
 % 
 \begin{theorem}
-  \( \catsPsh{\cat{C}} \) is equivalent to the category of (strict) coalgebras 
-  of the the comonad \( f^* f_* \). In other words, \( f^* \dashv f_* \) is a 
+  The category of strict type-theoretic presheaves \( \catsPsh{\cat{C}} \) is equivalent 
+  to the category of strict type-theoretic
+  coalgebras of the the comonad \( \iota^* \iota_* \). In other words, \( \iota^* \dashv \iota_* \) is a 
   comonadic adjunction.
 \end{theorem}
 \begin{proof}
-  A strict coalgebra for \( f^* f_* \) is by definition an collection of types 
+  A strict coalgebra for \( \iota^* \iota_* \) is by definition an collection of types 
   \( F \) indexed by the objects of \( \cat{C} \), along with a 
   collection of functions
   \[ 
-     F(p) \to \AgdaSymbol{∀}\ q\ (α : \func{Hom}\ q\ p)\ \to\ F(q)
+     F(a) \to \AgdaSymbol{∀}\ b\ (f : \func{Hom}\ b\ a)\ \to\ F(b)
   \]
-  that satisfy the two comonad equations by definition, which are respectively the 
+  that satisfy the two coalgebra equations by definition, which are respectively the 
   compatibility with composition and identities.
 \end{proof}
+This decomposition of the theory of presheaves into the adjunction 
+\( \iota^* \dashv \iota_* \) is already implicitly present in the work of Jaber 
+\etal~\sidecite{Jaber16} where they analyze presheaves under the lens
+of call-by-push-value.
 
-As we know, defining the category of coalgebras (\ie all presheaves) in \MLTT 
-is problematic because of the coalgebra equations.
+\paragraph*{Cofree presheaves}
 % 
-However, there is an important subcategory that we can define in type theory: the
+As we already saw, defining the category of coalgebras of \( \iota^* \iota_* \) 
+(\ie the category of presheaves of \( \cat{C} \)) in \MLTT is problematic because of the coalgebra equations.
+% 
+However there is an important subcategory that we can define in type theory: the
 co-Kliesli category of the adjunction, which is equivalent to the category of 
 cofree coalgebras.
 %
-The elements of the co-Kliesli category are types indexed on \( \obj{\cat{C}} \), 
+The objects of the co-Kliesli category are presheaves on \( \obj{\cat{C}_0} \), 
 and the hom-types are given by
 \[
-    \hom[\mathrm{coK}]{F}{G} := \AgdaSymbol{∀}\ p\ \to f^* f_* F(p) \to G(p).
+    \hom[\mathrm{coK}]{F}{G} := \AgdaSymbol{∀}\ a\ \to \iota^* \iota_* F(a) \to G(a).
 \]
-The composition of two morphisms in the co-Kliesli category is 
+The composition of two morphisms \( \theta \) and \( \xi \) in the co-Kliesli 
+category is obtained by computing \( \theta \circ (\iota^* \iota_* \xi) \) in 
+\( \catsPsh{\cat{C}_0} \) and composing it with the comultiplication. This 
+composition is strictly associative, because all the laws of the comonad 
+\( \iota^* \iota_* \) hold by definition.
 
-And then, prefascist types are defined as subobjects of cofree presehaves. 
-Since the presheaf that encodes the subobject classifier is a cofree presheaf 
+The subcategory of cofree presheaves is convenient to define and manipulate in 
+type theory, but it supports only a small portion of the structure
+of the category \( \catPsh{\cat{C}} \). 
+% 
+In general, the coproduct of two cofree presheaves is not a cofree presheaf.
 
-\begin{definition}
-  A prefascist type is defined to be a 
-\end{definition}
+\paragraph*{Prefascist types}
+% 
+In the previous section we noticed that any presheaf \( X : \catPsh{\cat{C}} \) 
+has a natural transformation that maps it into a cofree presheaf, 
+given by the unit of the adjunction \( \iota^* \dashv \iota_* \).
+\[
+\eta_X : X \to \iota_* \iota^* X
+\]
+%
+This
+\sideremark{In the the record \func{prefascist} of the previous section, we did
+not ask for \field{Fε} to be preserved by the restriction of \( \widehat{\field{F₀}} \).
+We made up for this in the definition of \func{elem} by asking that \field{Fε}
+applies to all the restrictions of the elements.}
+% 
+led us to define a prefascist type as a sub-presheaf of a cofree presheaf,
+\ie a pair of a family of types \( F_0 : \catPsh{\cat{C}_0} \) and a propositional
+predicate on \( \iota^* \iota_* F_0 \) that is preserved by restriction.
 
+And thus we come back to our question: can every strict presheaf \( X \) be 
+presented as a prefascist type?
+The following lemma states that it is indeed the case if we are working with
+an observational type theory such as the theory \SetoidCC of \cref{ch:observational}.
+% 
 \begin{theorem}
-  If we assume UIP, then the category of prefascist types is equivalent to
-  the category of presheaves on \( \cat{C} \).
+  Assume that our type theory supports function extensionality and has a 
+  proof-irrelevant equality.
 
+  Then the category of strict presheaves \( \catsPsh{\cat{C}} \) is equivalent
+  to the category of prefascist types, whose objects are terms of type \func{prefascist}
+  and whose morphisms are terms of type \func{pf\_hom} quotiented by propositional 
+  equality.
 \end{theorem}
 \begin{proof}
-
+  We construct an equivalence of categories by hand.
+  Given a strict presheaf \( X \), the unit \( \eta_X \) is a monomorphism from 
+  \( X \) to a cofree presheaf. Thus we can define a prefascist type as follows: 
+  \[
+    \begin{array}{lcl}
+        \field{F₀} & := & \iota^* X \\
+        \field{Fε} & := & \lambda\ (a : \func{Obj})\ (x : \iota^* \iota_* \iota^* X(a))\ .\ x\ \func{≡}\ \eta_X\ (x\ (\func{id}\ a)).
+    \end{array}
+  \]
+  Conversely, given a prefascist type \( Y : \func{prefascist} \), we already 
+  know that it naturally has the structure of a strict presheaf, by defining
+  \[
+    Y(a) := \func{elem}\ Y\ a.
+  \]
+  Now it only remains to check that this defines an equivalence of categories, 
+  which is straightforward since we have function extensionality and UIP.
 \end{proof}
 
-However, not every 
-\begin{theorem}
-  Every presheaf of sets is 
-\end{theorem}
+Thus, if we work in observational type theory, prefascist types are an 
+interesting alternative to the naive definition of presheaves: we get an 
+equivalent category, and we gained definitional functoriality laws in the 
+process.
 
-\subsection{Properties of Prefascist Types}
-
-\subsection{Stricly Associative Categories}\label{sec:cat-strictification}
-
-Note that the definition of a category exhibits the same problem if we try to
-use types to encode hom-sets. 
+Unfortunately, this equivalence will not hold if we work without UIP and 
+\sideremark{It is still true that \( \eta_X\ a\ x\ \func{≡} \eta_X\ a\ y \) 
+    implies \( x\ \func{≡}\ y \), but this is not sufficient to define a
+    monorphism in the absence of UIP.}
+interpret types as spaces. In that case, the unit \( \eta_X \) of the 
+adjunction \( \iota^* \dashv \iota_* \) is \emph{not} a monomorphism in general, 
+and it is not true that every presheaf is a sub-presheaf of a cofree presheaf. 
 % 
-Relaxing the associativity of composition and the unital laws by only having
-them hold up to a path introduces non-trivial coherence problems that require 
-infinite towers of equalities to solve, which we avoided by asking for our
-category \( \cat{C} \) to satisfy them by definition.
+In the \( \infty \)-groupoid model, the category of prefascist types sits strictly 
+inbetween the category of presheaves of hsets and the category of presheaves of types.
+% 
+We have no clear characterization of which presheaves can be expressed as 
+prefascist types.
 
-In fact, there is no way to define the type of \defnote{type-enriched 
-categories}{Type-enriched categories are categories that have types as their
-hom-sets.} in \HoTT that we currently know of. 
+\subsection{Strictifying Categories}\label{sec:cat-strictification}
+
+Up until now, we worked under the assumption that we have a definition of
+a category \( \cat{C} \) that satisfies the associativity of composition
+and the unit laws up to definitional equality.
+% 
+This seems a bit artificial: most categories we can encounter in the wild 
+do not have such a strong property, and what good are our prefascist types if
+we can only define them on a very limited subset of categories?
+% 
+However in this section we show that any small category can be presented as
+a strict category, given that we have access to a sort \func{Prop} of strict
+propositions.
+
+Assume we are given a non-strict category \( \cat{C} \) consisting of a type
+of objects \func{Obj}, a \emph{hset} of morphisms for any two objects \( a \) 
+and \( b \), and a composition and identities with equations that hold only
+up to a propositional equality.
+
+\ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{nonstrictcategory}
+
+We can use the Yoneda lemma to replace the hom-set \( \func{Hom}\ a\ b \) with 
+the isomorphic hset \( \hom[\catPsh{\cat{C}}]{\yo(a)}{\yo(b)} \). This way,
+morphisms become natural transformations of presheaves, which can be written as
+dependent functions with a naturality condition in \func{Prop}. This trick allows
+us to define a strict category \( \cat{C}' \) from \( \cat{C} \) as follows:
+\[
+\begin{array}{lcl}
+\func{Obj'} & : & \func{Set} \\
+\func{Obj'} & := & \func{Obj} \\
+\\
+\func{Hom'} & : & \func{Obj'} \to \func{Obj'} \to \func{Set} \\
+\func{Hom'}\ a\ b & := & \func{Σ}\ (\theta : \func{∀}\ (c : \func{Obj}) \to \func{Hom}\ c\ a \to \func{Hom}\ c\ b)\ .\\
+& & \phantom{\func{Σ}}\ \func{∀}\ (c\ d\ : \func{Obj})\ (f : \func{Hom}\ d\ c)\ (g : \func{Hom}\ c\ a)\\
+& & \phantom{\func{Σ}\ \func{∀}}\ \to \func{∥}\  (\theta\ c\ g)\ \func{∘}\ f\ \func{\equiv}\ \theta\ d\ (g\ \func{∘}\ f)\ \func{∥ₛ}\\
+\\
+\func{id'} & : & (a : \func{Obj'}) \to \func{Hom'}\ a\ a \\
+\func{id'}\ a & := & \func{⟨} \lambda\ (c : \func{Obj})\ (f : \func{Hom}\ c\ a)\ .\ f\enskip \func{;}\enskip \lambda\ \_\ \_\ \_\ \_\ .\ \func{refl}\ \func{⟩}\\
+\\
+\func{\_∘'\_} & : & \{a\ b\ c : \func{Obj'}\} \to \func{Hom'}\ b\ c \to \func{Hom'}\ a\ b \to \func{Hom'}\ a\ c\\
+\func{⟨} \theta_f\ \func{;}\ h_f\func{⟩}\ \func{∘'}\ \func{⟨} \theta_g\ \func{;}\ h_g\func{⟩} & := & \func{⟨} \lambda\ (d : \func{Obj})\ (h : \func{Hom}\ d\ a)\ .\ \theta_f\ d\ (\theta_g\ d\ h)\enskip \func{;}\enskip [...] \func{⟩}
+\end{array}
+\]
+
+With this definition, composition of two morphisms becomes a composition
+of functions with a manipulation of proof-irrelevant conditions, which is 
+associative by definition. 
+Likewise, the unit laws correspond to composition with an identity function,
+which is unital by definition.
+Therefore our replacement for \( \cat{C} \) is a strict category.
+
+But is \( \cat{C}' \) actually equivalent to \( \cat{C} \)?
+It is the case if we interpret types as classical sets, or as 
+\( \infty \)-groupoids.
+% 
+But proving the equivalence in the internal language of type theory is not
+possible in general, unless we have enough structure to recover a proof of 
+\( a\ \func{\equiv}\ b \) from a proof of \( \func{∥}\ a\ \func{\equiv}\ b\ \func{∥ₛ} \)
+---for instance, if we are working in observational type theory.
 
 \subsection{The Prefascist Translation}
 
-\section{Higher Prefascist Types}
+In the context of a theory with UIP, most of the structure from categories of
+presheaves can be replicated for prefascist types in type theory. For instance,
+the category prefascist types have products, pullbacks, exponential object,
+coproducts, \etc
+% 
+In his prefascist paper~\sidecite{pedrot:prefascist}, Pédrot uses prefascist 
+types to define a presheaf model of \MLTT as a \emph{syntactic 
+translation}~\sidecite{boulier:hal-01445835}.
 
-\section{The Bar Construction}
+A prototypical syntactic translation is given by two mappings \( [\_] \) and
+\( \llbracket \_ \rrbracket \) from the syntax of \MLTT to the syntax of 
+\MLTT such that
+% 
+\begin{enumerate}
+\item if the judgment \( \Gamma \vdash t : A \) is derivable in \MLTT, then 
+the judgment
+\( {\llbracket \Gamma \rrbracket_{\mathsf{Con}} \vdash [t] : \llbracket A \rrbracket} \)
+is derivable in \( \MLTT \), 
+\item if \( \Gamma \vdash A \equiv B \) then
+\( {\llbracket \Gamma \rrbracket_{\mathsf{Con}} \vdash \llbracket A \rrbracket \equiv \llbracket B \rrbracket} \),
+\item if \( \Gamma \vdash t \equiv u : A \) then
+\( {\llbracket \Gamma \rrbracket_{\mathsf{Con}} \vdash [t] \equiv [u] : \llbracket A \rrbracket} \), and
+\item the translation of the empty type \( \llbracket \bot \rrbracket \) has no 
+inhabitants in the empty context.
+\end{enumerate}
+% 
+\sideremark[*-8]{\( \llbracket \_ \rrbracket_{\mathsf{Con}} \) applies
+\( \llbracket \_ \rrbracket \) to all the types in a context.}
+
+The prefascist model of Pédrot is slightly more involved: in particular, the target theory
+is not \MLTT but \( \sMLTT \), a theory that extends \MLTT with a sort of 
+strict propositions and supports a proof-irrelevant equality with large
+elimination \emph{à la} \Lean.
+% 
+With this additional structure in the target theory, the prefascist model
+interprets every type as a prefascist set, and every term of type \( A \) as a 
+natural transformation from the interpretation of the context to the 
+interpretation of \( A \).
+
+In other words, prefascist types make it possible to phrase the traditional
+presheaf models in the language of intensional type theory, in a way that 
+preserves computation.
+
+% \section{Higher Prefascist Types}
