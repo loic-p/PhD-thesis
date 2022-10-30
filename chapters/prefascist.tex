@@ -160,7 +160,7 @@ limits and exponential objects~\sidecite{MaclaneMoerdijk}.
 \end{theorem}
 
 This is only natural: presheaves are more or less indexed small sets, and as 
-such they retain a large part of the structure of \( \catSet \). In fact, they
+such they retain a large part of the structure of the category \( \catSet \). In fact, they
 retain much more structure than just limits and colimits: we can basically 
 % 
 \sideremark{The category of presheaves on \( \cat{C} \) is the prototypical example of a \emph{topos}, 
@@ -301,7 +301,7 @@ kind of nuisance that will show up uninvited in our proofs later on.
 To understand the source of this irritating phenomenon, it is helpful to look at 
 it under the lens of Homotopy Type Theory.
 % 
-As we explained in chapter \cref{ch:intro_english}, in \HoTT we think of types
+As we explained in \cref{ch:intro_english}, in \HoTT we think of types
 as being \emph{spaces} instead of sets, and the two different notions of equality 
 (definitional and propositional) have very different interpretations:
 \begin{itemize}
@@ -378,7 +378,7 @@ Thanks to the perspective of Homotopy Type Theory, we now understand that
 defining presheaves of types on a general category is delicate because of the 
 intricate higher-dimensional structure that may be encoded in identity types.
 % 
-Even though the problem of simplicial types remains open, there are still 
+Even though the problem of simplicial types remains open, there are well-known 
 ways to avoid coherence problems with presheaves in type theory.
 
 \paragraph{Presheaves of hsets} If types in \HoTT correspond to spaces, there 
@@ -410,7 +410,7 @@ Going further in that direction, we can modify the type theory itself to
 enforce the uniqueness of identity proofs, so that every type is a hset.
 % 
 For instance, in the observational type theory \SetoidCC from 
-\cref{ch:obervational} identity types are strict propositions,
+\cref{ch:observational} identity types are strict propositions,
 which means all identity proofs are equal by definition.
 
 \SetoidCC gets very close to a type theoretical account of constructive set 
@@ -483,7 +483,7 @@ categories in this way.
 
 \subsection{What are Prefascist Types?}
 
-In order to arrive to a definition of prefascist types, we start by 
+In order to arrive at a definition of prefascist types, we start by 
 investigating strict presheaves of types, \ie presheaves of types that satisfy 
 the functoriality equations by definition. 
 % 
@@ -504,12 +504,14 @@ and strict natural transformations.
 An element of \( \catsPsh{\cat{C}} \) is given by two terms 
 \func{F₀} and \func{F₁} of \MLTT that satisfy the equations \func{F\_id} and 
 \func{F\_comp} by definition, and a morphism is defined in a similar way.
-Note that our type-theoretic presheaves are \emph{internal presheaves}: we
-do not consider arbitrary set-theoretic functors from \( \cat{C} \) to the
+Note that our category \( \catsPsh{\cat{C}} \) of type-theoretic presheaves 
+only contains \emph{internal presheaves}: we do not consider arbitrary 
+set-theoretic functors from \( \cat{C} \) to the
 category of types, but only functors that can be expressed in \MLTT.
 
-
-Now we remark that given \( x \) in \( \func{F₀}\ a \), we can use \( \func{F₁} \) to 
+Now let us assume that we are working with specific instances of \( \func{F₀} \)
+and \( \func{F₁} \).
+We remark that given \( x \) in \( \func{F₀}\ a \), we can use \( \func{F₁} \) to 
 get an inhabitant of \( \func{F₀}\ b \) whenever we have a morphism 
 from \( b \) to \( a \).
 % 
@@ -550,7 +552,8 @@ of \( \func{F₁}\ f\ x \).
 % 
 This means that we have a \emph{strict} natural tranformation 
 \( F \to \widehat{\func{F₀}} \), which effectively replaces the 
-functoriality given by \( \func{F₁} \) with composition in \( \cat{C} \).
+functoriality given by \( \func{F₁} \) with a functoriality operation
+derived from composition in \( \cat{C} \).
 
 The strict presheaves that can be expressed as \( \widehat{X} \) for some 
 \( X : \func{Obj} \to \func{Set} \) 
@@ -572,10 +575,10 @@ of a cofree presheaf:
 
 The record that defines a prefascist type contains a type family 
 \( \field{F₀} \) on the objects of \( \cat{C} \), and a proof-irrelevant 
-predicate on the family \( \widehat{\field{F₀}} \).
+predicate on the ``completed'' family \( \widehat{\field{F₀}} \).
 % 
-This definition represents the subpresheaf of \( \widehat{\field{F₀}} \)
-that is obtained by only keeping the elements of \( \widehat{\field{F₀}}\ a \) 
+This definition is intended to represent the subpresheaf of \( \widehat{\field{F₀}} \)
+that is obtained by only considering the elements of \( \widehat{\field{F₀}}\ a \) 
 that satisfy the proof-irrelevant predicate \( \field{Fε} \) for all their 
 restrictions.
 
@@ -609,7 +612,7 @@ This definition might look daunting at first, but it simply imitates
 the definition of an element of \( G \) with an element of \( F \) in the 
 context: ``morphisms are generalized elements''. We invite the reader
 to check that morphisms are in fact strict natural transformations (meaning 
-that the naturality holds by definition, as usual).
+that the naturality holds by definition).
 
 Thus, our prefascist types form a remarkable subcategory of \( \catsPsh{\cat{C}} \) that
 can be defined in a minor extension of \MLTT.
@@ -867,7 +870,7 @@ possible in general, unless we have enough structure to recover a proof of
 
 In the context of a theory with UIP, most of the structure from categories of
 presheaves can be replicated for prefascist types in type theory. For instance,
-the category prefascist types have products, pullbacks, exponential object,
+the category of prefascist types has products, pullbacks, exponential object,
 coproducts, \etc
 % 
 In his prefascist paper~\sidecite{pedrot:prefascist}, Pédrot uses prefascist 

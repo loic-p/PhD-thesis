@@ -4,7 +4,7 @@
 \labch{cubical_model}
 
 The aim of this chapter is to work toward an extension of the prefascist translation 
-that supports the univalence axiom.
+of Pédrot that supports the univalence axiom.
 %  
 Our strategy is to enrich it with a notion of \emph{fibration structure}, following the model 
 of Cohen \etal in cubical sets~\cite{CCHM}.
@@ -18,7 +18,7 @@ Then in \cref{sec:cubical_model} we outline a strategy for building a syntactic
 translation of univalent type theory that interprets types as cubical sets with 
 a fibration structure.
 
-\section{Cubical Sets}
+\section{Cubical Sets and Fibration Structures}
 \label{sec:cubical_sets}
 
 Cubical sets were initially studied by topologists, as a candidate for a 
@@ -88,7 +88,7 @@ get too wild and the definition of homotopy will be reasonable.
 
 Now, this idea of building objects by taking amalgamated sums of a family of
 basic ``building block'' objects should be reminiscent of the previous chapter
-about presheaves, and the astute reader might be wondering if we can use 
+about presheaves, and the reader might be wondering if we can use 
 presheaves on an appropriate category of cubes to obtain a synthetic model of
 well-behaved spaces.
 % 
@@ -166,8 +166,8 @@ intuitively encode the different ways to send a cube of dimension \( m \) to
 a cube of dimension \( n \).
 %  
 There are many reasonable choices for this definition 
-(see \sidecitet{BuchholtzMorehouse17} for a survey), and each will result in
-a slightly different category of cubical sets. 
+(see \sidecitet{BuchholtzMorehouse17} for a survey), and each choice will 
+result in a slightly different category of cubical sets. 
 \sideremark{The hope is that these different categories of cubical sets will
 capture the same notion of space, when considered up to homotopy. But such
 theorems are usually quite difficult to prove.}
@@ -495,6 +495,9 @@ This might appear strange at first glance, but one quickly realizes that it is
 necessary: without degenerate cubes, it would be impossible to map the interval
 to a point, since morphisms of cubical sets are natural transformations, which
 must send 1-dimensional cubes to 1-dimensional cubes.
+% 
+With the degenerate cubes, it becomes possible: the 1-dimensional edge of the
+interval is mapped to the degenerate edge contained in the 0-dimensional point.
 
 \begin{figure}[!h]
 \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
@@ -542,7 +545,7 @@ on the real interval:
 \mathrm{meet}_k^n & := \langle x_1 , ...\ , x_k \land x_{k+1} , ...\ , x_n \rangle : \hom[\catCube]{n}{n-1}
 \end{align*}
 These maps are called \emph{connections}, and we can picture them as contracting 
-a square onto its main diagonal, as if it were a folding fan. In cubical sets,
+a square onto its main diagonal, as if it were a folding fan (\cref{fig:connections}). In cubical sets,
 connections equip cubes with two new families of degenerate cubes, allowing for
 more maps between cubes. For now, connections may not seem as motivated as the
 other operations, but they will play an important part in the next section, 
@@ -879,9 +882,9 @@ operation \( X(\alpha) \) to the open boxes in \( X \) by only applying
     as inputs an open box \( \theta : \horn_f^n \to X \) 
     and returns a ``lid'' \( \Phi(\theta) : \yo(n) \to X \) such that
     \begin{itemize}
-        \item the lid matches the top of the open box: 
+        \item the lid matches the top of the open box, \ie
         \( \Phi(\theta)  \circ \mathrm{face^n_{n,1}}\) and \( \theta \) coincide 
-        when they are defined.
+        when they are both defined.
         \item  given any morphism \( \alpha : \hom[\catCube]{k}{n} \),
             the result of the applying \( \Phi \) to the sub-open-box of \( \theta \) 
              \( f \circ \alpha \) is equal to the result of applying \( \Phi \)
