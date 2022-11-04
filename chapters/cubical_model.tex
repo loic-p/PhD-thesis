@@ -3,16 +3,65 @@
 \chapter{A Model in Cubical Presheaves}
 \labch{cubical_model}
 
-The aim of this chapter is to work toward an extension of the prefascist translation 
-of Pédrot that supports the univalence axiom.
-%  
-Our strategy is to enrich it with a notion of \emph{fibration structure}, following the model 
-of Cohen \etal in cubical sets~\cite{CCHM}.
-% 
-Such a translation would provide a new way to compute with the univalence axiom.
+% The aim of this chapter is to work toward an extension of the prefascist 
+% translation of Pédrot that supports the univalence axiom.
+% %  
+% Our strategy is to use \emph{cubical sets} equipped with a notion of 
+% \emph{fibration structure}, following the model of Cohen \etal~\cite{CCHM}.
+% % 
+% Such a translation would provide a novel way to compute with the univalence axiom.
 
-In \cref{sec:cubical_sets}, we give a detailed overview of cubical presheaves 
-and fibration structures. 
+As we explained in \cref{sec:univalence}, the central piece of Homotopy Type 
+Theory is the univalence axiom, which identifies the type of equalities between 
+two types \( A \) and \( B \) with the type of isomorphisms between \( A \) and \( B \):
+% 
+\[
+(A =_{\varType} B) \enskip \simeq \enskip  (A \simeq B)
+\]
+
+But postulating univalence as an axiom has the unfortunate consequence of 
+breaking some of the nice computational properties of intensional type theory.
+% 
+This is all the more disappointing insofar as the univalence principle is 
+constructive, as evidenced by Bezem \etal who built a model of 
+univalence in a cosntructive set theory by interpreting types as \emph{fibrant 
+cubical sets}~\sidecite{BezemCoquandHuber14}.
+% 
+This conundrum has been solved by the introduction of cubical type 
+theories~\sidecite{CCHM,ABCFHL}, which provide an axiom-free univalent system by reifying 
+some of the structure of the fibrant cubical sets as syntactical constructions.
+
+In this chapter, our aim is to give an alternative solution for computing with
+the univalence axiom, by translating \( \MLTT{+}\mathsf{Univalence} \) into the 
+system \SetoidCCplus that we presented in \cref{sec:cast-refl}.
+
+Our strategy is based on the prefascist translation of Pédrot, which gives a 
+type-theoretical account of the interpretation of type theory in the category 
+of presheaves over any base category \( \cat{C} \) (see \cref{sec:PMP_translation}).
+% 
+Since cubical sets are presheaves on the \emph{category of cubes}, we can use
+the prefascist translation to obtain a model of \MLTT in the category of 
+cubical sets. 
+% 
+However this is not quite sufficient to validate the univalence axiom.
+% 
+Indeed, the cubical model of Bezem \etal does not exactly follow the generic
+recipe to interpret \MLTT in categories of presheaves: in particular, the
+equality is interpreted as the set of \emph{cubical paths}, a construction that 
+exploits the specific properties of the category of cubes.
+% 
+And in order to interpret the elimination principle for the equality, Bezem 
+\etal equip their cubical sets with \emph{fibration structures}.
+
+Consequently, we need to define the category of cubes as a strict category on
+the one hand, and to extend the prefascist translation of Pédrot with fibrancy 
+structures on the other hand.   
+% 
+With these ingredients, we should have enough structure to interpret the 
+univalence axiom in our translation.
+
+In \cref{sec:cubical_sets}, we explain what are cubical sets and fibration 
+structures, and how they relate to spaces and topology. 
 % 
 Then in \cref{sec:cubical_model} we outline a strategy for building a syntactic 
 translation of univalent type theory that interprets types as cubical sets with 
@@ -41,7 +90,7 @@ spaces are so general that they have no reason to interact nicely with \( [0, 1]
 as witnessed by the inadequacy of path-connectedness for general topological 
 spaces.
 
-Thus, it should come as no surprise that topologists like to restrict their 
+Thus, it should come as no surprise that homotopy theorists like to restrict their 
 attention to a subclass of topological spaces that are more compatible with
 the unit interval. 
 \sideremark{Topological spaces that can be built by iteratively attaching 
@@ -52,7 +101,7 @@ built from (hyper)cubes---cartesian powers of the interval---by gluing them toge
 (\cref{fig:cubical-set}). This way, we can be sure that they do not 
 get too wild and the definition of homotopy will be reasonable.
 
-\begin{figure}
+\begin{figure}[!h]
     \tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
     
     \begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
@@ -95,6 +144,7 @@ well-behaved spaces.
 This is precisely what cubical sets are.
 
 \subsection{The category of cubes}
+\label{sec:cat_cubes}
 
 We now define the category of \defnote{cubes}{By cubes, we mean generalized cubes
 of all integer dimensions: the point, the segment, the square, the 3D cube, the 
@@ -172,9 +222,9 @@ result in a slightly different category of cubical sets.
 capture the same notion of space, when considered up to homotopy. But such
 theorems are usually quite difficult to prove.}
 % 
-In this thesis, we follow Cohen et al. \cite{CCHM} and use the category of 
+In this chapter, we follow Cohen et al. \cite{CCHM} and use the category of 
 \emph{de Morgan} cubes:
-\begin{definition}
+\begin{definition}\label{def:cat_cubes}
     The category of de Morgan cubes \( \catCube \) is defined by
     \begin{align*}
         & \obj{\catCube} := \Nat \\
@@ -968,7 +1018,210 @@ theory is invited to consult \sidecitet{friedmanSsets}, which treats the case
 of \emph{simplicial} sets (which are built out of simplices instead of cubes) in a 
 similarly elementary manner, in greater detail.
 
-\section{Interpreting Type Theory}
-\label{sec:cubical_model}
+\section{Towards a Cubical Translation}
+\label{sec:cubical_trans}
 
-To do...
+We use \Agda syntax for \SetoidCCplus
+
+\subsection{Defining the Category of Cubes in Type Theory}
+
+The first step is to define the category of de Morgan cubes as a \emph{strict}
+category, \ie a category with a definitionally associative composition
+operation that satisfies the unit laws for the definitional equality.
+% 
+We could define this category in \SetoidCCplus by using the quotient
+types to define de Morgan algebras, and then using the Yoneda embedding to
+strictify the resulting category as explained in \cref{sec:cat-strictification}.
+
+\begin{marginfigure}
+\begin{tikzcd}
+& i_1 \ar[dash]{dr} \ar[dash]{dl} & \\
+i_l \ar[dash]{dr} & & i_r \ar[dash]{dl} \\
+& i_0 &
+\end{tikzcd}
+\caption{The diamond algebra \( \mathbb{D} \)}
+\end{marginfigure}
+% 
+However, we can devise a much simpler embedding of the category of de Morgan
+cubes in the category of types and functions:
+% 
+define the \emph{diamond algebra} as the de Morgan algebra with carrier set 
+\( \{ i_0, i_l, i_r, i_1 \} \) where the meet, join and reversal are defined by 
+the four equations
+\begin{mathpar}
+i_l \vee i_r = i_1
+\and i_l \wedge i_r = i_0 
+\and \sim i_l = i_l 
+\and \sim i_r = i_r. 
+\end{mathpar}
+% 
+Then two morphisms \( f, g \in \hom[\catCube]{m}{n} \) in the category of de 
+Morgan cubes are equal if and only if their interpretation as functions of type 
+\( \mathbb{D}^m \to \mathbb{D}^n \) are pointwise equal~\sidecite{demorgan}.
+% 
+This implies that we can define the hom-sets of the category of cubes as 
+subsets of function types, so that composition of morphisms coincides 
+with function composition and the identity morphism coincides with the 
+identity function.
+
+Consequently, we define an inductive type of codes for morphisms, using the
+generating family that we described in the previous section: 
+
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{demorgan}
+
+Then, we define the interpretation of a code as a function on the diamond
+algebra:
+
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{demorganinterp}
+
+And finally, we define the type of morphisms \( \hom[\catCube]{n}{m} \) as the 
+type of pairs of a diamond algebra function and a proof that it corresponds to
+the interpretation of a code.
+
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{category}
+
+Note that the field \field{code} is proof-irrelevant.
+% 
+If our records satisfy the \( \eta \)-rule, this implies that morphisms behave
+exactly like functions and thus that they are definitionally associative.
+
+% something about supplementary equations?
+
+\subsection{The Universe of Cubical Sets}
+
+Now that we have our strict category of de Morgan cubes, we can set the stage 
+for a prefascist translation with fibration structures. Recall the definition 
+of prefascist types from \cref{ch:prefascist}:
+
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{prefascist}
+
+If we want to use these to build a model of univalent type theory, we first 
+need to define a handful of building blocks.
+% 
+We start with a hierarchy of prefascist types indexed by a level \( \ell \) 
+that plays the role of a universe hierarchy for the category of prefascist types.
+ 
+From the work of Hofmann and Streicher on presheaf 
+universes~\sidecite{HofmannStreicher}, we know that the type of sections of a 
+universe over an object \( n \) should be the type of prefascists on the 
+% 
+\defnote{slice category}{The slice category over an object \( n \) is noted
+\( \catCube_{/n} \). The objects of the slice category are the morphisms of 
+\( \catCube \) with codomain \( n \), and a morphism of the slice category 
+from \( f : a \to n \) to \( g : b \to n \) is a \( h : a \to b \) such that 
+\( g \circ h = f \).} 
+% 
+\( \catCube_{/n} \):
+
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{yt}
+
+This type family will fill the role of the field \field{F₀} for our universal 
+prefascist.
+% 
+Note that it has a natural restriction operation: given \( \alpha : \func{Hom}~m~n \), 
+we can define restriction as composition with \( \alpha \) in both fields.
+% 
+\sideremark{Recall that we defined the notation \( α~\func{∙}~x \) as a shorthand for
+\( λ~\AgdaBound{m'}~\AgdaBound{α'}~\func{→}~x~\AgdaBound{m'}~(α~\func{∘}~\AgdaBound{α'}) \). }
+% 
+\begin{code}
+\>[0]\func{restr}~\AgdaSymbol{:}~(\AgdaBound{α}~\AgdaSymbol{:}~\func{Hom}~\AgdaBound{m}~\AgdaBound{n})~%
+\AgdaSymbol{→}~(\func{cubicalType₀}~\AgdaBound{ℓ}~\AgdaBound{n})~%
+\AgdaSymbol{→}~(\func{cubicalType₀}~\AgdaBound{ℓ}~\AgdaBound{m})\<%
+\\
+\>[0]\func{restr}~\AgdaBound{α}~(\con{CT}~\AgdaBound{ct0}~\AgdaBound{ctε})~%
+\AgdaSymbol{=}~\con{CT}~(\AgdaBound{α}~\func{∙}~\AgdaBound{ct0})~(\AgdaBound{α}~\func{∙}~\AgdaBound{ctε})\<%
+\end{code}
+
+Now we can use this restriction operator to devise a predicate \func{cubicalTypeε} 
+on families of sections of \func{cubicalType₀}, that will be the field \field{Fε} of the 
+universal prefascist type.
+
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{cubicaleps}
+
+And thus we can define the universal prefascist type \( \func{cubicalType}~\ell \).
+% 
+\begin{code}
+\>[0]\func{cubicalType}~\AgdaSymbol{:}~\AgdaSymbol{∀}~\AgdaBound{ℓ}~\AgdaSymbol{→}~\func{prefascist}\<%
+\\
+\>[0]\func{cubicalType}~\AgdaBound{\ell}~%
+\AgdaSymbol{=}~\AgdaSymbol{\{}~\field{F₀}~\AgdaSymbol{=}~\func{cubicalType₀}~\AgdaBound{ℓ}~\AgdaSymbol{;}~%
+\field{Fε}~\AgdaSymbol{=}~\func{cubicalTypeε}~\AgdaSymbol{\}}\<%
+\end{code}
+
+This universe hierarchy allows us to model \emph{dependent types} in the 
+category of prefascist types: given a prefascist \( A \), a dependent prefascist
+on \( A \) is a prefascist morphism from \( A \) to \func{cubicalType}.
+% 
+Furthermore, if we have a prefascist morphism \( B \to A \) and a dependent prefascist type
+on \( A \), we can get a dependent prefascist type on \( B \) with a simple 
+morphism composition.
+% 
+This ``substitution'' operation is strictly associative, which is very important when it
+comes to building models of dependent type theory~\sidecite{Hofmann97}.
+
+\subsection{Fibration Structures}
+
+However, the model of Cohen \etal does not only interpret types as arbitrary
+cubical presheaves, it also equips them with fibration structures.
+% 
+Thus we need to build a universe of \emph{CCHM-fibrant} prefascist types, that
+we call \func{fibrantType}.
+% 
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{yft}
+
+Just like in the type \func{cubicalType₀}, the fields \field{FT₀} and
+\field{FTε} define a prefascist type on the category \( \catCube_{/n} \), or
+equivalently a prefascist indexed over \( \yo~n \) by the Yoneda lemma.
+
+The fields \field{comp₀}, \field{compε} and \field{comp\textasciitilde{}} compute 
+a lid for an arbitrary open box in the dependent prefascist, which corresponds 
+to the (non-homogeneous) composition in CCHM cubical type theory. 
+Their arguments are
+% 
+\begin{itemize}
+\item a morphism \( \alpha \) that embeds a cube of dimension \( m+1 \)
+in \( \yo~n \) and an element of the face lattice \( \varphi \) which 
+together define an open box \( \theta : \horn^m_\varphi \to \yo~n \) ;
+\item an element of the dependent prefascist retricted to the sides the open 
+box \( \theta \), given by \AgdaBound{p0} and \AgdaBound{pε} ;
+\item an element of the dependent prefascist restricted to the bottom of the
+open box \( \theta \), given by \AgdaBound{s0} and \AgdaBound{sε} ; and
+\item a proof that the elements on the sides and on the bottom coincide.
+\end{itemize}
+% 
+From these, \field{comp₀} computes an element of \field{FT₀} over the lid of
+the open box. The field \field{compε} ensures that restricting a lid is
+the same as computing a lid for the restricted box, and \field{comp\textasciitilde{}}
+ensures that the lid coincides with the sides of the box when both are defined.
+
+Just like the type \func{cubicalType₀}, our type \func{fibrantType₀} admits a 
+natural restriction operation derived from composition.
+% 
+From this restriction operation, we define the predicate \func{fibrantTypeε} as 
+follows
+% 
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{fibranteps}
+
+And finally, we can define the prefascist \func{fibrantType}.
+% 
+\begin{code}
+\>[0]\func{fibrantType}~\AgdaSymbol{:}~\func{prefascist}\<%
+\\
+\>[0]\func{fibrantType}~%
+\AgdaSymbol{=}~\AgdaSymbol{\{}~\field{F₀}~\AgdaSymbol{=}~\func{fibrantType₀}~\AgdaSymbol{;}~%
+\field{Fε}~\AgdaSymbol{=}~\func{fibrantTypeε}~\AgdaSymbol{\}}\<%
+\end{code}
+
+\subsection{Function Types and Dependent Products}
+
+Now that we have a universe of fibrant types, our goal is to show that it
+supports the basic constructions of dependent type theory.
+% 
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{arrzero}
+
+\subsection{The Natural Numbers}
+
+\subsection{Interpreting Equality}
+
+\subsection{Gluing}
