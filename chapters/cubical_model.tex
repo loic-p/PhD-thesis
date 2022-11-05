@@ -55,7 +55,7 @@ And in order to interpret the elimination principle for the equality, Bezem
 
 Consequently, we need to define the category of cubes as a strict category on
 the one hand, and to extend the prefascist translation of Pédrot with fibrancy 
-structures on the other hand.   
+structures on the other hand.
 % 
 With these ingredients, we should have enough structure to interpret the 
 univalence axiom in our translation.
@@ -1165,8 +1165,26 @@ comes to building models of dependent type theory~\sidecite{Hofmann97}.
 However, the model of Cohen \etal does not only interpret types as arbitrary
 cubical presheaves, it also equips them with fibration structures.
 % 
-Thus we need to build a universe of \emph{CCHM-fibrant} prefascist types, that
-we call \func{fibrantType}.
+We want to extend this notion of fibration structure to dependent prefascist
+types, which means that we need to build a universe of \emph{CCHM-fibrant} 
+prefascist types. 
+
+Its type of sections is defined as follows:
+% 
+\sideremark[*5]{Given a morphism \( α : \hom[\catCube]{n}{1} \) in the category of 
+    cubes, or equivalently an element of the lattice of faces of the cube of 
+    dimension \( n \), the proposition \( \func{is⊤}~\alpha \) is true when
+    \( \alpha \) is the maximal element of the face lattice. This proposition 
+    supports a restriction operation, that we write \func{restr}.}
+% 
+\sideremark[*18]{The morphisms \func{side0}, \func{side1}, \func{degen} 
+    correspond respectively to \( \mathrm{face}_{0,0}^n \), \( \mathrm{face}_{0,1}^n \)
+    and \( \mathrm{degen}_{0}^n \) from the previous section.}
+% 
+\sideremark[*23]{Given a morphism \( α : \hom[\catCube]{m}{n} \) in the category
+    of cubes, the morphism \( \func{lift}~α : \hom[\catCube]{m+1}{n+1} \) is the
+    identity on the first coordinate and is equal to \( α \) on the remaining 
+    coordinates.}
 % 
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{yft}
 
@@ -1181,13 +1199,14 @@ Their arguments are
 % 
 \begin{itemize}
 \item a morphism \( \alpha \) that embeds a cube of dimension \( m+1 \)
-in \( \yo~n \) and an element of the face lattice \( \varphi \) which 
+in \( \yo~n \) and an element of the face lattice \( \varphi \), which 
 together define an open box \( \theta : \horn^m_\varphi \to \yo~n \) ;
 \item an element of the dependent prefascist retricted to the sides the open 
 box \( \theta \), given by \AgdaBound{p0} and \AgdaBound{pε} ;
 \item an element of the dependent prefascist restricted to the bottom of the
 open box \( \theta \), given by \AgdaBound{s0} and \AgdaBound{sε} ; and
-\item a proof that the elements on the sides and on the bottom coincide.
+\item a proof that the elements on the sides and on the bottom coincide,
+given by \AgdaBound{s\textasciitilde}.
 \end{itemize}
 % 
 From these, \field{comp₀} computes an element of \field{FT₀} over the lid of
@@ -1213,6 +1232,8 @@ And finally, we can define the prefascist \func{fibrantType}.
 \field{Fε}~\AgdaSymbol{=}~\func{fibrantTypeε}~\AgdaSymbol{\}}\<%
 \end{code}
 
+\subsection{Working Internally in the Universe}
+
 \subsection{Function Types and Dependent Products}
 
 Now that we have a universe of fibrant types, our goal is to show that it
@@ -1222,6 +1243,14 @@ supports the basic constructions of dependent type theory.
 
 \subsection{The Natural Numbers}
 
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{natzero}
+
 \subsection{Interpreting Equality}
 
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{cubeqzero}
+
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{eqzero}
+
 \subsection{Gluing}
+
+\section{Perspectives}
