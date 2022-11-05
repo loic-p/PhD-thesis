@@ -1018,10 +1018,29 @@ theory is invited to consult \sidecitet{friedmanSsets}, which treats the case
 of \emph{simplicial} sets (which are built out of simplices instead of cubes) in a 
 similarly elementary manner, in greater detail.
 
-\section{Towards a Cubical Translation}
+\section{Toward a Cubical Translation}
 \label{sec:cubical_trans}
 
-We use \Agda syntax for \SetoidCCplus
+We now turn ourselves to the task of translating 
+\( \MLTT{+}\mathsf{Univalence} \) into \SetoidCCplus.
+% 
+Our strategy is to use the prefascist translation of Pédrot~\sidecite{pedrot:prefascist}  
+to get an interpretation of \( \MLTT \) in the category of cubical sets, and 
+then to extend it with CCHM fibration structures.
+
+As we will realize shortly, the definition of a fibration structure 
+will involve complex constructions in the language of \SetoidCCplus.
+% 
+To make sure that we are not overlooking some important type dependency or some 
+missing computation rule, it seems reasonable to define our translation with the help of a 
+proof assistant.
+% 
+We opt for \Agda, since we can use its proof-irrelevant propositions and rewrite 
+rules~\sidecite{taming_of_the_rew} to support the theory of \SetoidCCplus.
+% 
+Thus all the \Agda code in this section uses the theory of \SetoidCC, and
+in particular the observational equality \func{\_\textasciitilde{}\_}.
+
 
 \subsection{Defining the Category of Cubes in Type Theory}
 
@@ -1160,6 +1179,9 @@ morphism composition.
 This ``substitution'' operation is strictly associative, which is very important when it
 comes to building models of dependent type theory~\sidecite{Hofmann97}.
 
+Now, let's unfold this definition a little bit: if \( A \) is a prefascist type, 
+then a dependent prefascist on \( A \) is the data of 
+
 \subsection{Fibration Structures}
 
 However, the model of Cohen \etal does not only interpret types as arbitrary
@@ -1234,9 +1256,18 @@ And finally, we can define the prefascist \func{fibrantType}.
 
 \subsection{Working Internally in the Universe}
 
+Our goal is to interpret 
+\begin{itemize}
+\item a well-formed context \( \Gamma \) as a (not necessarily fibrant) prefascist type,
+\item a type \( A \) in context \( \Gamma \) as a prefascist morphism from
+the interpretation of \( \Gamma \) to \func{fibrantType}, and
+\item a term \( t \) of type \( A \) in context \( \Gamma \) as a section of
+the corresponding dependent prefascist.
+\end{itemize} 
+
 \subsection{Function Types and Dependent Products}
 
-Now that we have a universe of fibrant types, our goal is to show that it
+, our goal is to show that it
 supports the basic constructions of dependent type theory.
 % 
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{arrzero}
