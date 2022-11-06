@@ -1314,8 +1314,56 @@ principle is interpreted by a definitional equality.
 
 \subsection{The Cubical Equality}
 
+The interpretation of the propositional equality type is more 
+interesting. We cannot add a fibration structure to the equality type used by Pédrot, 
+since this type is not fibrant in general. 
+% 
+Instead we want to interpret an equality between \( x \) and \( y \) as a
+\emph{path} from \( x \) to \( y \). 
+
+In the cubical world, if \( x \) and
+\( y \) are two \( n \)-dimensional sections of a prefascist type \( A \),
+then a path should be a \( (n+1) \)-dimensional cube which has \( x \)
+and \( y \) as opposing faces:
+
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{cubeqzero}
+
+This definition admits a natural restriction along morphisms of the cube 
+category, that we (once again) write \func{restr}:
+
+\begin{code}
+\>[0]\func{restr}\ \AgdaSymbol{:}\ (\AgdaBound{α}\ \AgdaSymbol{:}\ \func{Hom}~\AgdaBound{m}~\AgdaBound{n})%
+\ \AgdaSymbol{→}\ \func{cubicalPath}\ \AgdaBound{A0}\ \AgdaBound{Aε}\ \AgdaBound{x0}\ \AgdaBound{y0}\<%
+\\
+\>[0]\phantom{\func{restr}\ \AgdaSymbol{:}}
+\AgdaSymbol{→}\ \func{cubicalPath}\ (\AgdaBound{α}~\func{∙}~\AgdaBound{A0})%
+\ (\AgdaBound{α}~\func{∙}~\AgdaBound{Aε})%
+\ (\AgdaBound{α}~\func{∙}~\AgdaBound{x0})%
+\ (\AgdaBound{α}~\func{∙}~\AgdaBound{y0})\<%
+\end{code}
+
+We use these to define the interpretation of the propositional equality.
 
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{eqzero}
 
+\subsection{Glue Types}
+
+So far, we have the elementary bricks of \MLTT down: a universe of fibrant types,
+dependent products, natural numbers, and a propositional equality.
+% 
+However, our initial goal was to interpret the univalence axiom. How should we go 
+about that?
+
+In the model of Cohen \etal, this relies on \emph{Glue types}, a construction 
+that can be used to replace faces of a cubical presheaf with equivalent types.
+% 
+It seems clear that Glue types can be adapted to the world of fibrant prefascist 
+types given the similarity with presheaves, but we have not formalized it yet.
+
 \section{Perspectives}
+
+Completing the translation
+
+Compare it with a translation into cubical type theory
+
+Talk about funext somewhere
