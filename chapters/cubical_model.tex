@@ -1179,8 +1179,8 @@ morphism composition.
 This ``substitution'' operation is strictly associative, which is very important when it
 comes to building models of dependent type theory~\sidecite{Hofmann97}.
 
-Now, let's unfold this definition a little bit: if \( A \) is a prefascist type, 
-then a dependent prefascist on \( A \) is the data of 
+% Now, let's unfold this definition a little bit: if \( A \) is a prefascist type, 
+% then a dependent prefascist on \( A \) is the data of 
 
 \subsection{Fibration Structures}
 
@@ -1254,7 +1254,7 @@ And finally, we can define the prefascist \func{fibrantType}.
 \field{Fε}~\AgdaSymbol{=}~\func{fibrantTypeε}~\AgdaSymbol{\}}\<%
 \end{code}
 
-\subsection{Working Internally in the Universe}
+\subsection{Working Internally in the Universe of Fibrant Types}
 
 Our goal is to interpret 
 \begin{itemize}
@@ -1267,21 +1267,55 @@ the corresponding dependent prefascist.
 
 \subsection{Function Types and Dependent Products}
 
-, our goal is to show that it
-supports the basic constructions of dependent type theory.
+In order to interpret the function types, we replicate Pédrot's construction
+and supplement it with a fibration structure adapted from the fibration 
+structure of Cohen \etal
 % 
+\sideremark[*14]{\func{rev} is the morphism in the cube category that flips
+the first coordinate. \func{empty} is the minimal element of the face lattice.
+\func{∅} provides us with a partial element defined on \func{empty}.}
+
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{arrzero}
+% 
+\sideremark[*-5]{For the sake of brevity, we omit the fields \field{compε} and 
+    \field{comp\textasciitilde{}}, which are computationally irrelevant
+    anyway.}
+
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{arreps}
+
+To define the \( λ \)-abstraction and the function application, we can use the
+exact same definitions as in the translation of Pédrot.
+% 
+These definitions respect the \( \beta \) and \( \eta \) rules: assuming the
+involved terms are well-typed, the interpretation of \( (λx\ .\ t)\ u \) is 
+convertible to the interpretation of \( t[u/x] \), and the interpretation
+of \( λx\ .\ t\ x \) is convertible to the interpretation of \( t \).
+
+The construction for dependent products is very similar, if slightly more
+complex. We have not verified it in a proof assistant yet.
 
 \subsection{The Natural Numbers}
 
+The natural numbers are interpreted as a constant prefascist, whose type of
+sections is equal to \( \Nat \) in all dimensions. A family of sections is 
+deemed compatible if they are all equal to the same natural number.
+
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{natzero}
 
-\subsection{Interpreting Equality}
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{nateps}
+
+The composition operation is quite straightforward: an open box of natural 
+numbers is necessarily constant, and thus the bottom element can serve as
+a lid.
+
+As shown by Pédrot, we can interpret 0, the successor function, and the
+induction principle. Furthermore, the computation rule of the induction
+principle is interpreted by a definitional equality.
+
+\subsection{The Cubical Equality}
 
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{cubeqzero}
 
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{eqzero}
-
-\subsection{Gluing}
 
 \section{Perspectives}
