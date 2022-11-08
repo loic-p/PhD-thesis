@@ -1018,9 +1018,12 @@ similarly elementary manner, in greater detail.
 \label{sec:cubical_trans}
 
 We now turn ourselves to the task of translating 
-\( \MLTT{+}\mathsf{Univalence} \) into a simpler type theory.
+\defnote{\( \MLTT{+}\mathsf{Univalence} \)}{The system \( \MLTT{+}\mathsf{Univalence} \) is defined to be 
+Martin-Löf type theory extended with the univalence axiom, without the
+computation rule for the \( J \) eliminator on reflexivity.} 
+into a simpler type theory.
 % 
-Our strategy is to use the prefascist translation of Pédrot~\sidecite{pedrot:prefascist}  
+Our strategy is to use the prefascist translation of Pédrot~\cite{pedrot:prefascist}  
 to get an interpretation of \( \MLTT \) in the category of cubical sets, and 
 then to extend it with CCHM fibration structures.
 
@@ -1266,6 +1269,7 @@ And finally, we can define the prefascist \func{fibrantType}.
 \end{code}
 
 \subsection{Building a Model as a Translation}
+\label{sec:trans-overview}
 
 We can extract a model of dependent type theory from the universe \func{fibrantType}
 by interpreting contexts as telescopes of dependent prefascists, types as dependent
@@ -1533,29 +1537,104 @@ universe. As such, they are the obvious next step in this line of research.
 \section{Consequences and Perspectives}
 \label{sec:cubical-perspectives}
 
-This concludes our sketch of a translation from \( \MLTT{+}\mathsf{Univalence} \) 
-into \SetoidCCplus
+Our prefascist translation is not quite complete as it stands, but it hopefully 
+makes a strong argument for the possibility to translate 
+\( \MLTT{+}\mathsf{Univalence} \) into \SetoidCCplus.
+% 
+In this section, we investigate the theoretical consequences of such a 
+translation, if it were completed.
+
+\subsection{The system \HoTTminus}
+
+Assume that we have an extension of the functions \( {[\_]}^n_0 \) and
+\( {[\_]}^n_ε \) from \cref{sec:trans-overview} to the full syntax of 
+\( \MLTT{+}\mathsf{Univalence} \), such that
+\begin{itemize}
+\item Given any typing judgment \( \Gamma \vdash t : A \) that is derivable in 
+\( \MLTT{+}\) \(\mathsf{Univalence} \), the translated judgments are derivable in 
+\SetoidCCplus:
+\[
+\begin{split}
+\llbracket \Gamma \rrbracket^n & \vdash {[t]}^n_0 : \func{El₀}~{[A]}^n_0 : \Type \\
+\llbracket \Gamma \rrbracket^n & \vdash {[t]}^n_ε : \func{Elε}~{[A]}^n_0~{[A]}^n_ε~{[t]}^n_0 : \sProp
+\end{split}
+\]
+\item Given any convertibility judgment \( \Gamma \vdash t \equiv u : A \) that is 
+derivable in \( \MLTT{+}\) \(\mathsf{Univalence} \), the translated judgment is 
+derivable in \SetoidCC:
+\[
+\llbracket \Gamma \rrbracket^n \vdash {[t]}^n_0 \equiv {[u]}^n_0 : \func{El₀}~{[A]}^n_0 : \Type
+\]
+\end{itemize}
+
+\vspace{1em}
+Then we can use this translation to define the system \HoTTminus. 
+The syntax of \HoTTminus is the syntax of \( \MLTT{+}\mathsf{Univalence} \),
+and its typing judgments are defined \emph{via} translation into \SetoidCCplus:
+\begin{itemize}
+\item A context \( \Gamma \) of \HoTTminus terms is well-formed when the 
+translated context \( \llbracket \Gamma \rrbracket^0 \) is well-formed in
+\SetoidCCplus,
+\item the typing judgment \( \Gamma \vdash t : A \) is valid in \HoTTminus when
+the two translated judgments 
+\( \llbracket \Gamma \rrbracket^n \vdash {[t]}^n_0 : \func{El₀}~{[A]}^n_0 : \Type \)
+and 
+\( \llbracket \Gamma \rrbracket^n \vdash {[t]}^n_ε : \func{Elε}~{[A]}^n_0~{[A]}^0_ε~{[t]}^n_0 : \sProp \)
+are derivable in \SetoidCCplus,
+\item the convertibility judgment \( \Gamma \vdash t \equiv u : A \) is valid 
+in \HoTTminus when the translated judgments
+\( \llbracket \Gamma \rrbracket^n \vdash {[t]}^n_0 \equiv {[u]}^n_0 : \func{El₀}~{[A]}^n_0 : \Type \)
+is derivable in \SetoidCCplus.
+\end{itemize}
+
+The system \HoTTminus is clearly an extension of \( \MLTT{+}\mathsf{Univalence} \),
+in the sense that every judgment that is valid in the latter is also valid in the 
+\HoTTminus.
+% 
+Additionally, if our conjecture of normalization for \SetoidCCplus from 
+\cref{sec:cast-refl} is true, then \HoTTminus has interesting computational 
+properties.
 
 \begin{theorem}[\footnotesize{assuming the conversion and the typing of \SetoidCCplus
     are decidable}]
     The conversion and the typing of \HoTTminus are decidable.
 \end{theorem}
 
-\begin{theorem}[\footnotesize{assuming the conversion and the typing of \SetoidCCplus
-    are decidable}]
+\begin{theorem}[\footnotesize{assuming the reduction of \SetoidCCplus
+    is normalizing}] \phantom{.}\\
     If \( t \) is a term of type \( \Nat \) in the empty context, then there 
     exists an integer \( n \) such that \( t \) is propositionally equal to 
     \( S^n~0 \). \\
     Furthermore, there exists a program that can compute \( n \) from the term \( t \).
 \end{theorem}
 
-\begin{proof}
-blabla
-\end{proof}
+This property is often called \emph{homotopy canonicity}. It follows from an
+immediate inspection of the translation of the type of integers.
+
+Finally, we can extract some proof-theoretical results:
 
 \begin{theorem}
-    Every integer function that can be defined in the empty context in \HoTTminus 
-    can also be defined in \SetoidCCplus.
+    Every integer function that can be defined in the empty context in 
+    \( \MLTT{+}\mathsf{Univalence} \) can also be defined in \SetoidCCplus.
 \end{theorem}
 
-Talk about funext and cast-on-refl somewhere
+From which we conjecture that the univalence axiom does not increase the
+computational power of \MLTT:
+
+\begin{conjecture}
+    Every integer function that can be defined in the empty context in 
+    \( \MLTT{+}\mathsf{Univalence} \) can also be defined in \MLTT.
+\end{conjecture}
+
+\subsection{Going further}
+
+These observations are interesting, but not exactly revolutionary: translating
+\( \MLTT{+}\mathsf{Univalence} \) into cubical type theory provides us
+with similar properties, in a way that is much more computationally efficient.
+
+Our translation is arguably more modular, though: we can easily extend it to
+two-level type theories~\sidecite{voevodsky:2013:hts, annenkov-capriotti-kraus:2017} 
+by using universes of non-fibrant prefascist types,
+and more generally, we can add any primitive that has a constructive interpretation 
+in the cubical model---and we get a proof of decidability and homotopy canonicity 
+for free, without needing to devise computation rules.
