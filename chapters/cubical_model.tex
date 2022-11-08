@@ -1492,6 +1492,15 @@ category, that we (once again) write \func{restr}:
 \end{code}
 
 We use these to define the interpretation of the propositional equality.
+\sideremark[*8]{The map \func{degen'}~:~\func{Hom}~(n+2)~(n+1) applies a 
+degeneracy on the second coordinate, contrary to the map \func{degen} which
+acts on the first coordinate.\\ 
+The map \func{proj0}~:~\func{Hom}~(n+1)~1 is the projection of the first
+coordinate.
+The operator \func{merge} takes a partial element on face \AgdaBound{φ} 
+and a partial element on face \AgdaBound{ψ} which are compatible on
+\AgdaBound{φ}~\func{∧}~\AgdaBound{ψ} and produces a partial element on
+face \AgdaBound{φ}~\func{∨}~\AgdaBound{ψ} (in our case, it is generalized to three arguments).}
 
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{eqzero}
 
