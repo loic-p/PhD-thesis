@@ -3,69 +3,65 @@
 \chapter{A Model in Cubical Presheaves}
 \labch{cubical_model}
 
-% The aim of this chapter is to work toward an extension of the prefascist 
-% translation of Pédrot that supports the univalence axiom.
-% %  
-% Our strategy is to use \emph{cubical sets} equipped with a notion of 
-% \emph{fibration structure}, following the model of Cohen \etal~\cite{CCHM}.
-% % 
-% Such a translation would provide a novel way to compute with the univalence axiom.
-
 As we explained in \cref{sec:univalence}, the central piece of Homotopy Type 
 Theory is the univalence axiom, which identifies the type of equalities between 
-two types \( A \) and \( B \) with the type of isomorphisms between \( A \) and \( B \):
+two types \( A \) and \( B \) with the type of isomorphisms between \( A \) and 
+\( B \).
 % 
-\[
-(A =_{\varType} B) \enskip \simeq \enskip  (A \simeq B)
-\]
+% \[
+% (A =_{\varType} B) \enskip \simeq \enskip  (A \simeq B)
+% \]
 
 But postulating univalence as an axiom has the unfortunate consequence of 
 breaking some of the nice computational properties of intensional type theory.
 % 
-This is all the more disappointing insofar as the univalence principle is 
-constructive, as evidenced by Bezem \etal who built a model of 
-univalence in a cosntructive set theory by interpreting types as \emph{fibrant 
-cubical sets}~\sidecite{BezemCoquandHuber14}.
-% 
-This conundrum has been solved by the introduction of cubical type 
-theories~\sidecite{CCHM,ABCFHL}, which provide an axiom-free univalent system by reifying 
-some of the structure of the fibrant cubical sets as syntactical constructions.
+This is all the more disappointing insofar as the univalence principle has 
+constructive models, as evidenced by Bezem \etal who built a model of 
+univalence by interpreting types as 
+\emph{fibrant cubical sets}~\sidecite{BezemCoquandHuber14}.
 
+This conundrum was solved by the introduction of cubical type 
+theories~\sidecite{CCHM,ABCFHL}, which provide an axiom-free univalent system by 
+reifying some of the structure of the fibrant cubical sets as syntactical 
+constructions.
+% 
 In this chapter, our aim is to give an alternative solution for computing with
-the univalence axiom, by translating \( \MLTT{+}\mathsf{Univalence} \) into the 
-system \SetoidCCplus that we presented in \cref{sec:cast-refl}.
+fibrant cubical sets, by presenting the cubical model of Cohen \etal \cite{CCHM} 
+as a syntactic translation from \( \MLTT{+}\mathsf{Univalence} \) to a simpler 
+type theory.
 
-Our strategy is based on the prefascist translation of Pédrot, which gives a 
-type-theoretical account of the interpretation of type theory in the category 
-of presheaves over any base category \( \cat{C} \) (see \cref{sec:PMP_translation}).
+Our strategy is based on the prefascist translation of Pédrot, which is a 
+syntactic account of the interpretation of type theory in categories
+of presheaves.
 % 
-Since cubical sets are presheaves on the \emph{category of cubes}, we can use
-the prefascist translation to obtain a model of \MLTT in the category of 
-cubical sets. 
+Since the cubical sets of Cohen \etal are presheaves on the 
+\emph{category of de Morgan cubes}, we can use the prefascist translation to obtain a 
+model of \MLTT in the category of cubical sets. 
 % 
 However this is not quite sufficient to validate the univalence axiom.
 % 
-Indeed, the cubical model of Bezem \etal does not exactly follow the generic
+Indeed, the cubical model of Cohen \etal does not exactly follow the generic
 recipe to interpret \MLTT in categories of presheaves: in particular, the
 equality is interpreted as the set of \emph{cubical paths}, a construction that 
 exploits the specific properties of the category of cubes.
 % 
-And in order to interpret the elimination principle for the equality, Bezem 
+And in order to interpret the elimination principle for the equality, Cohen 
 \etal equip their cubical sets with \emph{fibration structures}.
 
-Consequently, we need to define the category of cubes as a strict category on
-the one hand, and to extend the prefascist translation of Pédrot with fibrancy 
-structures on the other hand.
+\sideremark{The of results presented in this chapter have yet to reach the
+same degree of maturity as the rest of this thesis. 
+We will be careful to distinguish the parts that have been thoroughly checked
+from the parts that are less solid.}
 % 
-With these ingredients, we should have enough structure to interpret the 
-univalence axiom in our translation.
-
 In \cref{sec:cubical_sets}, we explain what are cubical sets and fibration 
 structures, and how they relate to spaces and topology. 
 % 
-Then in \cref{sec:cubical_model} we outline a strategy for building a syntactic 
-translation of univalent type theory that interprets types as cubical sets with 
-a fibration structure.
+Then in \cref{sec:cubical_trans} we sketch an extension of the prefascist 
+translation of Pédrot with fibration structures, which should give us enough 
+structure to interpret the univalence axiom.
+% 
+Finally, in \cref{sec:cubical-perspectives} we discuss the theoretical 
+consequences of this translation.
 
 \section{Cubical Sets and Fibration Structures}
 \label{sec:cubical_sets}
@@ -1022,11 +1018,24 @@ similarly elementary manner, in greater detail.
 \label{sec:cubical_trans}
 
 We now turn ourselves to the task of translating 
-\( \MLTT{+}\mathsf{Univalence} \) into \SetoidCCplus.
+\( \MLTT{+}\mathsf{Univalence} \) into a simpler type theory.
 % 
 Our strategy is to use the prefascist translation of Pédrot~\sidecite{pedrot:prefascist}  
 to get an interpretation of \( \MLTT \) in the category of cubical sets, and 
 then to extend it with CCHM fibration structures.
+
+The translation of Pédrot uses 
+\defnote{\( \sMLTT \)}{\( \sMLTT \) extends \MLTT with strict propositions, and 
+an inductive equality valued in strict propositions \emph{à la} \Lean.} as its target 
+type theory, as it relies on proof-irrelevant propositions and a proof-irrelevant
+equality type with large elimination.
+% 
+For our part, we also want to have function extensionality in order to deal with 
+fibration structures.
+% 
+This would make \SetoidCC a natural choice for our target type theory, 
+but we also need the \( J \) eliminator to compute on reflexivity---which means
+we actually need to use the extended system \SetoidCCplus (see \cref{sec:cast-refl}).
 
 As we will realize shortly, the definition of a fibration structure 
 will involve complex constructions in the language of \SetoidCCplus.
@@ -1038,15 +1047,17 @@ proof assistant.
 We opt for \Agda, since we can use its proof-irrelevant propositions and rewrite 
 rules~\sidecite{taming_of_the_rew} to support the theory of \SetoidCCplus.
 % 
-Thus all the \Agda code in this section uses the theory of \SetoidCC, and
-in particular the observational equality \func{\_\textasciitilde{}\_}.
+Thus all the \Agda code in this section uses the theory of \SetoidCCplus, which
+means that we have access to the observational equality 
+\AgdaBound{a}~\func{\textasciitilde{}}~\AgdaBound{b} and the \func{cast} operator.
 
 
 \subsection{Defining the Category of Cubes in Type Theory}
 
 The first step is to define the category of de Morgan cubes as a \emph{strict}
-category, \ie a category with a definitionally associative composition
-operation that satisfies the unit laws for the definitional equality.
+category, \ie as a category with a composition
+operation that satisfies the associativity law and the unit laws up to a 
+definitional equality.
 % 
 We could define this category in \SetoidCCplus by using the quotient
 types to define de Morgan algebras, and then using the Yoneda embedding to
@@ -1064,7 +1075,7 @@ i_l \ar[dash]{dr} & & i_r \ar[dash]{dl} \\
 However, we can devise a much simpler embedding of the category of de Morgan
 cubes in the category of types and functions:
 % 
-define the \emph{diamond algebra} as the de Morgan algebra with carrier set 
+define the \emph{diamond algebra} \( \mathbb{D} \) as the de Morgan algebra with carrier set 
 \( \{ i_0, i_l, i_r, i_1 \} \) where the meet, join and reversal are defined by 
 the four equations
 \begin{mathpar}
@@ -1109,7 +1120,7 @@ exactly like functions and thus that they are definitionally associative.
 \subsection{The Universe of Cubical Sets}
 
 Now that we have our strict category of de Morgan cubes, we can set the stage 
-for a prefascist translation with fibration structures. Recall the definition 
+for the prefascist translation. Recall the definition 
 of prefascist types from \cref{ch:prefascist}:
 
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{prefascist}
@@ -1187,9 +1198,9 @@ comes to building models of dependent type theory~\sidecite{Hofmann97}.
 However, the model of Cohen \etal does not only interpret types as arbitrary
 cubical presheaves, it also equips them with fibration structures.
 % 
-We want to extend this notion of fibration structure to dependent prefascist
-types, which means that we need to build a universe of \emph{CCHM-fibrant} 
-prefascist types. 
+We want to equip our dependent prefascist types with analogous 
+fibration structures, which means that we need to build a universe of 
+\emph{CCHM-fibrant} prefascist types. 
 
 Its type of sections is defined as follows:
 % 
@@ -1243,7 +1254,7 @@ From this restriction operation, we define the predicate \func{fibrantTypeε} as
 follows
 % 
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{fibranteps}
-
+% 
 And finally, we can define the prefascist \func{fibrantType}.
 % 
 \begin{code}
@@ -1254,16 +1265,141 @@ And finally, we can define the prefascist \func{fibrantType}.
 \field{Fε}~\AgdaSymbol{=}~\func{fibrantTypeε}~\AgdaSymbol{\}}\<%
 \end{code}
 
-\subsection{Working Internally in the Universe of Fibrant Types}
+\subsection{Building a Model as a Translation}
 
-Our goal is to interpret 
+We can extract a model of dependent type theory from the universe \func{fibrantType}
+by interpreting contexts as telescopes of dependent prefascists, types as dependent
+prefascists, and terms as sections.
+
+We phrase this model as a syntactic translation, \ie as a family of functions
+from the syntax of \MLTT to the syntax of \SetoidCCplus:
+% 
 \begin{itemize}
-\item a well-formed context \( \Gamma \) as a (not necessarily fibrant) prefascist type,
-\item a type \( A \) in context \( \Gamma \) as a prefascist morphism from
-the interpretation of \( \Gamma \) to \func{fibrantType}, and
-\item a term \( t \) of type \( A \) in context \( \Gamma \) as a section of
-the corresponding dependent prefascist.
-\end{itemize} 
+\item To every context of \MLTT terms \( \Gamma \), we associate a family of contexts of \SetoidCCplus
+    indexed by an object \( n : \func{Obj} \), that we write \( \llbracket Γ \rrbracket^n \).
+\item To every term \( t \) of \MLTT, we associate two families of terms
+    % \( \llbracket t \rrbracket^n_0 \), \( \llbracket t \rrbracket^n_ε \), 
+    \( {[t]}^n_0 \) and \( {[t]}^n_ε \) indexed by an object \( n : \func{Obj} \).
+\end{itemize}
+
+\begin{figure}
+\begin{small}
+\[
+\begin{array}{lcl}
+{[x]}^n_0 & := & x_0 \\
+{[x]}^n_ε & := & x_ε 
+\vspace{0.5em}\\
+{[λ(x:A)~.~t]}^n_0 & := & λ~m~α~x_0~x_ε~.~{[t]}^m_0~x_0~x_ε~m~(\func{id}~m)\\ 
+{[λ(x:A)~.~t]}^n_ε & := & λ~m~α~x_0~x_ε~.~{[t]}^m_ε~x_0~x_ε~m~(\func{id}~m)
+\vspace{0.5em}\\
+{[t~u]}^n_0 & := & λ~m~α~.~{[t]}^n_0~m~α~(α\cdot{[u]}^n_0)~(α\cdot{[u]}^n_ε)\\
+{[t~u]}^n_ε & := & λ~m~α~.~{[t]}^n_ε~m~α~(α\cdot{[u]}^n_0)~(α\cdot{[u]}^n_ε)
+\vspace{0.5em}\\
+{[A \to B]}^n_0 & := & \func{Arr₀}~{[A]}^n_0~{[A]}^n_ε~{[B]}^n_0~{[B]}^n_ε\\
+{[A \to B]}^n_ε & := & \func{Arrε}~{[A]}^n_0~{[A]}^n_ε~{[B]}^n_0~{[B]}^n_ε
+\vspace{0.5em}\\
+{[\Pi (x : A)~.~B]}^n_0 & := & \func{Prod₀}~{[A]}^n_0~{[A]}^n_ε~{[B]}^n_0~{[B]}^n_ε\\
+{[\Pi (x : A)~.~B]}^n_ε & := & \func{Prodε}~{[A]}^n_0~{[A]}^n_ε~{[B]}^n_0~{[B]}^n_ε
+\vspace{0.5em}\\
+{[\mathsf{Type}]}^n_0 & := & \func{fType₀}\\
+{[\mathsf{Type}]}^n_ε & := & \func{fTypeε}\\
+% \\
+% {\llbracket A\rrbracket}^n_0 & := & \func{El₀}~{[A]}^n_0 \\
+% {\llbracket A\rrbracket}^n_ε & := & \func{Elε}~{[A]}^n_0~{[A]}^n_ε \\
+\\
+\llbracket \emptyctx \rrbracket^n & := & n : \func{Obj} \\
+\llbracket \Gamma,~x:A \rrbracket^n & := & \llbracket \Gamma \rrbracket^n~,~x_0:\func{El₀}~{[A]}^n_0~,~x_ε:\func{Elε}~{[A]}^n_0~{[A]}^n_ε~x_0
+\end{array}
+\]
+\end{small}
+\caption{Core of the fibrant prefascist translation}
+\label{fig:prefascist-trans}
+\end{figure}
+
+The intuition behind these functions is that if \( A \) is a type of \MLTT in 
+context \( \Gamma \), then the two following judgments should be derivable in
+\SetoidCCplus: 
+\[
+\begin{array}{lclcl}
+\llbracket Γ \rrbracket^n & \vdash & {[ A ]}^n_0 & : & 
+\AgdaSymbol{∀}~\AgdaBound{m}~%
+\AgdaSymbol{(}\AgdaBound{α}~\AgdaSymbol{:}~\AgdaRecord{Hom}~\AgdaBound{m}~\AgdaBound{n}\AgdaSymbol{)}~%
+\AgdaSymbol{→}~\AgdaRecord{fibrantType₀}~\AgdaBound{m}\AgdaSymbol{)}\\
+\llbracket Γ \rrbracket^n & \vdash & {[ A ]}^n_ε & : &
+\AgdaSymbol{∀}~\AgdaBound{m}~%
+\AgdaSymbol{(}\AgdaBound{α}~\AgdaSymbol{:}~\AgdaRecord{Hom}~\AgdaBound{m}~\AgdaBound{n}\AgdaSymbol{)}~%
+\AgdaSymbol{→}~\AgdaRecord{fibrantTypeε}~(\AgdaBound{α}~\func{∙}~{[ A ]}^n_0)\AgdaSymbol{)}\\
+\end{array}
+\]
+
+Taken together, these judgments encode an element of \func{fibrantType}, or in other words a prefascist type
+that depends on \( \llbracket Γ \rrbracket^n \).
+
+If the judgment \( \Gamma \vdash t : A \) is derivable in \MLTT,
+\( {[t]}^n_0 \) and \( {[t]}^n_ε \) should correspond to a section of
+the prefascist type associated with \( A \).
+% 
+To define this type of sections, we introduce the following two functions:
+%  
+\sideremark[*7]{Here, we need to use a \func{cast} to convert between sections
+of \AgdaBound{A0}~\AgdaBound{m'}~(\AgdaBound{α}~\func{∘}~\AgdaBound{α'}) and
+sections of \AgdaBound{A0}~\AgdaBound{m}~\AgdaBound{α}.
+Similar type-castings will come up frequently, so we will abreviate them as
+\func{pfcast} from now on.}
+% 
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{elzero}
+
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{elone}
+
+And then, if the judgment \( \Gamma \vdash t : A \) is derivable in \MLTT,
+we have
+\[
+\begin{array}{lclcl}
+\llbracket Γ \rrbracket^n & \vdash & {[ t ]}^n_0 & : & \func{El₀}~{[ A ]}^n_0\\
+\llbracket Γ \rrbracket^n & \vdash & {[ t ]}^n_ε & : & \func{Elε}~{[ A ]}^n_0~{[ A ]}^n_ε.
+\end{array}
+\]
+
+The translation for a core type theory with function types, dependent products 
+and one universe is given in \cref{fig:prefascist-trans}. 
+% 
+Ideally the universe should be translated as a fibrant prefascist type, but the 
+definition of the fibration structure for the universe relies on 
+\emph{Glue types} which are left for future work.
+% 
+For now, we interpret the universe a non-fibrant prefascist type instead:
+% 
+\sideremark{Since \func{fType₀} is not a fibrant prefascist type, the 
+application \func{El₀}~\func{fType₀} is technically ill-typed.
+To avoid wasting too much of our attention on this kind of annoyances, we will
+silently extend \func{El₀} and \func{Elε} to non-fibrant prefascist
+types.}
+
+\begin{code}
+\>[0] \func{fType₀}~:~\AgdaSymbol{∀}~\AgdaSymbol{\{} \AgdaBound{n} \AgdaSymbol{\}}~%
+\AgdaBound{m}~\AgdaSymbol{→}~(\AgdaBound{α} : \func{Hom}~\AgdaBound{m}~\AgdaBound{n})~%
+\AgdaSymbol{→}~\func{cubicalType₀}~\func{\_}~\AgdaBound{m} \<%
+\\
+\>[0] \func{fType₀}~\AgdaSymbol{\{} \AgdaBound{n} \AgdaSymbol{\}}~%
+\AgdaBound{m}~\AgdaBound{α}~\AgdaSymbol{=}~\con{CT}~%
+(\AgdaSymbol{λ}~\AgdaBound{m'}~\AgdaBound{α'}~\AgdaSymbol{→}~\func{fibrantType₀}~\AgdaBound{m'})\<%
+\\
+\>[0]\phantom{\func{fType₀}~\AgdaSymbol{\{} \AgdaBound{n} \AgdaSymbol{\}}~%
+\AgdaBound{m}~\AgdaBound{α}~\AgdaSymbol{=}~\con{CT}}
+(\AgdaSymbol{λ}~\AgdaBound{m'}~\AgdaBound{α'}~\AgdaBound{x}~\AgdaSymbol{→}~\func{fibrantTypeε}~\AgdaBound{x}) \<%
+\end{code}
+
+\begin{code}
+\>[0] \func{fTypeε}~:~\AgdaSymbol{∀}~\AgdaSymbol{\{} \AgdaBound{n} \AgdaSymbol{\}}~%
+\AgdaBound{m}~\AgdaSymbol{→}~(\AgdaBound{α} : \func{Hom}~\AgdaBound{m}~\AgdaBound{n})~%
+\AgdaSymbol{→}~\func{cubicalTypeε}~(\AgdaBound{α}~\func{∙}~\func{fType₀}) \<%
+\\
+\>[0] \func{fTypeε}~\AgdaSymbol{\{} \AgdaBound{n} \AgdaSymbol{\}}~%
+\AgdaBound{m}~\AgdaBound{α}~\AgdaBound{m'}~\AgdaBound{α'}~\AgdaSymbol{=}~\func{refl}
+\end{code}
+
+Without a fibration structure for the universe, we cannot eliminate the 
+propositional equality in large types.
 
 \subsection{Function Types and Dependent Products}
 
@@ -1283,8 +1419,9 @@ the first coordinate. \func{empty} is the minimal element of the face lattice.
 
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{arreps}
 
-To define the \( λ \)-abstraction and the function application, we can use the
-exact same definitions as in the translation of Pédrot.
+To define the \( λ \)-abstraction and the function application we can use the
+exact same definitions as in the translation of Pédrot, since the fibration structure
+is not involved.
 % 
 These definitions respect the \( \beta \) and \( \eta \) rules: assuming the
 involved terms are well-typed, the interpretation of \( (λx\ .\ t)\ u \) is 
@@ -1296,7 +1433,8 @@ complex. We have not verified it in a proof assistant yet.
 
 \subsection{The Natural Numbers}
 
-The natural numbers are interpreted as a constant prefascist, whose type of
+We can extend our core translation to support natural numbers.
+We interpret the type of natural numbers as a constant prefascist, whose type of
 sections is equal to \( \Nat \) in all dimensions. A family of sections is 
 deemed compatible if they are all equal to the same natural number.
 
@@ -1340,11 +1478,40 @@ category, that we (once again) write \func{restr}:
 \ (\AgdaBound{α}~\func{∙}~\AgdaBound{Aε})%
 \ (\AgdaBound{α}~\func{∙}~\AgdaBound{x0})%
 \ (\AgdaBound{α}~\func{∙}~\AgdaBound{y0})\<%
+\\
+\>[0]\func{restr}~\AgdaBound{α}~(\con{CE}~\AgdaBound{ce0}~\AgdaBound{ceε}~\AgdaBound{lb}~\AgdaBound{rb})~\AgdaSymbol{=}~%
+\con{CE}~(\func{lift}~\AgdaBound{α}~\func{∙}~\AgdaBound{ce0})~(\func{lift}~\AgdaBound{α}~\func{∙}~\AgdaBound{ceε})\<%
+\\
+\>[0]\hspace{11em}
+(\func{ap}~(\AgdaSymbol{λ}~\AgdaBound{x}~\AgdaSymbol{→}~\AgdaBound{α}~\func{∙}~\AgdaBound{x})~\AgdaBound{lb})~%
+(\func{ap}~(\AgdaSymbol{λ}~\AgdaBound{x}~\AgdaSymbol{→}~\AgdaBound{α}~\func{∙}~\AgdaBound{x})~\AgdaBound{rb})\<%
 \end{code}
 
 We use these to define the interpretation of the propositional equality.
 
 \ExecuteMetaData[chapters/literate-agda/Translation.tex]{eqzero}
+
+We could have hoped to derive the fibration structure of the equality type 
+from that of \AgdaBound{A0} with a few algebraic manipulations, but it turns
+out to be surprisingly nontrivial because of the boundary conditions.
+
+The proof of reflexivity is derived from a degeneracy morphism: 
+
+\ExecuteMetaData[chapters/literate-agda/Translation.tex]{reflzero}
+
+and \func{eqreflε} is given by reflexivity.
+
+In order to interpret of the \( J \) eliminator, we break it into 
+transport and contractibility of the singletons, following Cohen \etal
+% 
+The former can be derived from the fibration structure of the types, and the
+latter can be proved with the structure of the category of cubes and some
+heavy boundary condition yoga.
+% 
+We omit the proofs, as they get quite verbose.
+
+Additionally, we were able to formally verify a proof of function 
+extensionality, which can be derived without proving the univalence axiom.
 
 \subsection{Glue Types}
 
@@ -1360,10 +1527,35 @@ that can be used to replace faces of a cubical presheaf with equivalent types.
 It seems clear that Glue types can be adapted to the world of fibrant prefascist 
 types given the similarity with presheaves, but we have not formalized it yet.
 
-\section{Perspectives}
+Furthermore, Glue types allow us to define the fibration structure for the 
+universe. As such, they are the obvious next step in this line of research.
 
-Completing the translation
+\section{Consequences and Perspectives}
+\label{sec:cubical-perspectives}
 
-Compare it with a translation into cubical type theory
+This concludes our sketch of a translation from \( \MLTT{+}\mathsf{Univalence} \) 
+into \SetoidCCplus
 
-Talk about funext somewhere
+\begin{theorem}[\footnotesize{assuming the conversion and the typing of \SetoidCCplus
+    are decidable}]
+    The conversion and the typing of \HoTTminus are decidable.
+\end{theorem}
+
+\begin{theorem}[\footnotesize{assuming the conversion and the typing of \SetoidCCplus
+    are decidable}]
+    If \( t \) is a term of type \( \Nat \) in the empty context, then there 
+    exists an integer \( n \) such that \( t \) is propositionally equal to 
+    \( S^n~0 \). \\
+    Furthermore, there exists a program that can compute \( n \) from the term \( t \).
+\end{theorem}
+
+\begin{proof}
+blabla
+\end{proof}
+
+\begin{theorem}
+    Every integer function that can be defined in the empty context in \HoTTminus 
+    can also be defined in \SetoidCCplus.
+\end{theorem}
+
+Talk about funext and cast-on-refl somewhere
