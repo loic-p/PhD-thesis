@@ -1,4 +1,4 @@
-\setchapterimage[6cm]{seaside}
+% \setchapterimage[6cm]{seaside}
 \setchapterpreamble[u]{\margintoc}
 \chapter{The Observational Calculus of Constructions}
 \labch{layout}
@@ -40,7 +40,7 @@ universes; but also new types such as subset types and quotient types that
 we will introduce in due course.
 % 
 Generally speaking, proof-relevant objects correspond to mathematical 
-constructions or programs depending on which side of the Curry-Howard 
+constructions or programs, depending on which side of the Curry-Howard 
 correspondance you are most familiar with.
 
 The second layer corresponds to the impredicative universe of propositions 
@@ -148,7 +148,7 @@ from an inhabitant of \( P\ a \) and a proof of \( \Obseq{a}{b} \), we should
 be able to derive an inhabitant of \( P\ b \).
 % 
 \[
-\inferrule{\tytm{\Gamma}{A}{\Type} \\ \tytm{\Gamma}{a, b}{A} \\ \tytm{\Gamma}{e}{\Obseq[A]{a}{b}} \\ \tytm{\Gamma}{P}{A \to \Type/\sProp} \\ \tytm{\Gamma}{t}{P\ a}}{\tytm{\Gamma}{?}{P\ b}}
+\inferrule{\tytm{\Gamma}{A}{\Type} \\ \tytm{\Gamma}{a, b}{A} \\ \tytm{\Gamma}{e}{\Obseq[A]{a}{b}} \\ \tytm{\Gamma}{P}{A \to \Type} \\ \tytm{\Gamma}{t}{P\ a}}{\tytm{\Gamma}{?}{P\ b}}
 \]
 % 
 To this end, \SetoidCC provides the two primitive eliminators \( \transportName \)
@@ -248,11 +248,11 @@ On top of this, the system supports some inductive types, which include the
 standard examples of natural numbers \( \Nat \) and inductive equality 
 \( \metaop{Id} \) but also the less standard quotient types and box types.
 
-We will introduce a number of syntactic sugars for constructions of \SetoidCC,
+We will introduce some syntactic sugar for constructions of \SetoidCC,
 such as \( \top \) for the true proposition or \( \metaop{ap} \) for the proof
 that functions preserve the observational equality (cf \cref{sec:cast-intro}).
 % 
-We will introduce them throughout the chapter, but for convenience they are 
+Such notations will be introduced throughout the chapter, but for convenience they are 
 collected in appendix \ref{sec:ap:sugar}.
 % 
 The capture-avoiding substitution of a variable \( x \) in a term \( A \) by the 
@@ -419,8 +419,9 @@ refer the interested reader to appendix \ref{sec:ap:cong}.
 Given a type \( A \) and a proof-irrelevant family \( B : A \to \sProp \)
 on it, the system allows the formation of a proof-irrelevant \( \Pi \)-Type, 
 with the usual introduction and elimination rules.
-\sideremark{There is no need for \( \beta \)-reduction or an \( \eta \) rule, 
-since this type lives in the proof-irrelevant world.}
+\sideremark{There is no need for \( \beta \)-reduction or an \( \eta \) rule. 
+Since this type lives in the proof-irrelevant world, both conversion rules
+are a consequence of proof irrelevance.}
 % 
 \begin{mathpar}
 	\inferrule[$\Pi$-Irr-Form]
@@ -512,10 +513,11 @@ proposition $\Empty$, from which we can define the true proposition
 $\Unit$.
 
 Besides its formation rule (Rule~\nameref{inferrule:empty-form}), the false proposition
-comes with an elimination principle (Rule~\nameref{inferrule:empty-elim}) that 
-applies to both proof-irrelevant and proof-relevant types.
-\sideremark{This large elimination rule means that we could not replace 
+comes with an elimination \sideremark{This large elimination rule means that we could not replace 
 \( \Empty \) with some impredicative encoding.}
+principle (Rule~\nameref{inferrule:empty-elim}) that 
+applies to both proof-irrelevant and proof-relevant types.
+
 % 
 \begin{mathpar}
 	\inferrule[$\Empty$-Form]
@@ -1003,8 +1005,7 @@ eliminator of the universe, which computes with a specific rule for each type.
 % 
 First, casting from $\Nat$ to $\Nat$ is defined by recursion.
 \sideremark{We could instead define type-casting of natural numbers to be the identity, but we prefer
-this definition because it is an instance of the pattern we will define for 
-arbitrary inductive types in \cref{ch:extensions}.}
+this definition because it can be generalized to more complex inductive types, such as lists.}
 % 
 \begin{mathpar}
 	\inferrule[Cast-Zero]

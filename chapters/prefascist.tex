@@ -1,4 +1,5 @@
-\setchapterimage[6cm]{seaside}
+% \setchapterimage[6cm]{fasciation}
+% \setchapterpreamble[u]{\begingroup \marginnote[-48mm]{{\begin{flushright} \textcolor{white}{A fasciated~daisy~flower\\Picture from ``le blog de Blanche''} \end{flushright}}} \endgroup \margintoc}
 \setchapterpreamble[u]{\margintoc}
 \chapter{Prefascist Types}
 \labch{prefascist}
@@ -27,10 +28,10 @@ type theory.
 
 Given the nature of the topic, the reader should expect significantly more
 category theory in this chapter than in the rest of this thesis. 
-We assume some amount of familiariaty with objects such as functors, limits, 
+We assume some amount of familiarity with objects such as functors, limits, 
 or adjunctions.
 
-\section{Set-theoretical Presheaves}
+\section{Set-theoretic Presheaves}
 \label{sec:categorical-reminders}
 
 In this section, we recall the definition of presheaves and go 
@@ -80,7 +81,7 @@ on \( \cat{C} \), then the elements of \( F(p) \) are called sections of
 \( F \) over \( p \), and the image of a morphism \( F(\alpha) \) is called 
 the restriction along \( \alpha \).}.
 % 
-However in this thesis we will mostly be interested in presheaves different 
+However in this thesis we will mostly be interested in presheaves for different 
 reasons, one of them being that presheaves allow us to freely add colimits to 
 a category.
 
@@ -139,7 +140,7 @@ This is why combinatorial models of spaces such as \emph{simplicial sets} and
 We will come back to this in the next chapter.
 
 However, mental images are a double edged sword and can be just as misleading
-as they are enlightening. In particular, the reader should note that the yoneda 
+as they are enlightening. In particular, the reader should note that the Yoneda 
 embedding does not preserve colimits that may already exist in \( \cat{C} \),
 and as a consequence we should be careful to have different pictures for
 \( \yo(x+y) \) and \( \yo(x) + \yo(y) \).
@@ -176,7 +177,7 @@ dependent products, dependent sums and inductive types. As a consequence, we
 can build models of Martin-Löf type theory in categories of 
 presheaves~\sidecite{Hofmann97}.
 
-\section{Type-theoretical Presheaves}
+\section{Type-theoretic Presheaves}
 \label{sec:intensional-problems}
 
 Hopefully by now, the reader is convinced that presheaves are a simple yet 
@@ -191,7 +192,7 @@ complications---and presheaves are no exception.
 In this section, we explain the difficulties with defining presheaves of types
 in intensional Martin-Löf Type Theory. 
 % 
-We use the syntax of the \Agda proof assistant for our type theoretical 
+We use the syntax of the \Agda proof assistant for our type-theoretic
 definitions, without assuming Streicher's axiom K.
 
 \subsection{First Definition}
@@ -258,7 +259,7 @@ can be proved through successive rewritings using \field{F\_id} and
 \field{F\_comp}.
 % 
 And sure enough, this definition does correspond to presheaves when we interpret
-type theory in the usual set-theoretical model \sidecite{Hofmann97}. 
+type theory in the usual set-theoretic model \sidecite{Hofmann97}. 
 % 
 But as bare \MLTT lacks the extensional features of set theory, this
 definition hides some kinks that we might want to iron out.
@@ -413,7 +414,7 @@ For instance, in the observational type theory \SetoidCC from
 \cref{ch:observational} identity types are strict propositions,
 which means all identity proofs are equal by definition.
 
-\SetoidCC gets very close to a type theoretical account of constructive set 
+\SetoidCC gets very close to a type-theoretic account of constructive set 
 theory, so we can reasonably expect that doing mathematics with presheaves 
 will not pose significant problems.
 
@@ -545,7 +546,7 @@ automatically makes \( \widehat{\func{F₀}} \) a strict presheaf:
     (\func{id}\ a)\ \func{∙}\ \widehat{x} & = \widehat{x}.
 \end{align*}
 Thus, \( \widehat{\func{F₀}} \) can be seen as an object of \( \catsPsh{\cat{C}} \),
-and since \func{F₁} satisfies the functoriality equations up to a defininitional equality, 
+and since \func{F₁} satisfies the functoriality equations up to a definitional equality, 
 our embedding \( x \mapsto \widehat{x} \) commutes with restriction:
 \( f\ \func{∙}\ \widehat{x} \) is convertible to the embedding
 of \( \func{F₁}\ f\ x \). 
@@ -680,7 +681,7 @@ And its counit is derived from the identity morphism of \( \cat{C} \):
 \end{array}
 \]
 Since \( \cat{C} \) is a strict category, it follows that \( \iota^* \iota_* \) 
-satisfies the monad equations by definition: the associativity of the 
+satisfies the comonad equations by definition: the associativity of the 
 comultiplication corresponds to associativity of the composition in \( \cat{C} \) 
 and the unit laws for the comultiplication correspond to the unit laws for 
 \( \cat{C} \).
@@ -695,7 +696,7 @@ has the category of presheaves as its category of coalgebras.
   comonadic adjunction.
 \end{theorem}
 \begin{proof}
-  A strict coalgebra for \( \iota^* \iota_* \) is by definition an collection of types 
+  A strict coalgebra for \( \iota^* \iota_* \) is by definition a collection of types 
   \( F \) indexed by the objects of \( \cat{C} \), along with a 
   collection of functions
   \[ 
@@ -715,15 +716,15 @@ As we already saw, defining the category of coalgebras of \( \iota^* \iota_* \)
 (\ie the category of presheaves of \( \cat{C} \)) in \MLTT is problematic because of the coalgebra equations.
 % 
 However there is an important subcategory that we can define in type theory: the
-co-Kliesli category of the adjunction, which is equivalent to the category of 
+co-Kleisli category of the adjunction, which is equivalent to the category of 
 cofree coalgebras.
 %
-The objects of the co-Kliesli category are presheaves on \( \obj{\cat{C}_0} \), 
+The objects of the co-Kleisli category are presheaves on \( \obj{\cat{C}_0} \), 
 and the hom-types are given by
 \[
     \hom[\mathrm{coK}]{F}{G} := \AgdaSymbol{∀}\ a\ \to \iota^* \iota_* F(a) \to G(a).
 \]
-The composition of two morphisms \( \theta \) and \( \xi \) in the co-Kliesli 
+The composition of two morphisms \( \theta \) and \( \xi \) in the co-Kleisli 
 category is obtained by computing \( \theta \circ (\iota^* \iota_* \xi) \) in 
 \( \catsPsh{\cat{C}_0} \) and composing it with the comultiplication. This 
 composition is strictly associative, because all the laws of the comonad 

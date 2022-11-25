@@ -1,4 +1,5 @@
-\setchapterimage[6cm]{seaside}
+% \setchapterimage[6cm]{cubism}
+% \setchapterpreamble[u]{\begingroup \marginnote[-48mm]{{\begin{flushright} \textcolor{white}{Robert Delaunay,\\ \textit{La fenêtre sur la ville n°3}} \end{flushright}}} \endgroup \margintoc}
 \setchapterpreamble[u]{\margintoc}
 \chapter{A Model in Cubical Presheaves}
 \labch{cubical_model}
@@ -48,7 +49,7 @@ exploits the specific properties of the category of cubes.
 And in order to interpret the elimination principle for the equality, Cohen 
 \etal equip their cubical sets with \emph{fibration structures}.
 
-\sideremark{The of results presented in this chapter have yet to reach the
+\sideremark{The results presented in this chapter have yet to reach the
 same degree of maturity as the rest of this thesis. 
 We will be careful to distinguish the parts that have been thoroughly checked
 from the parts that are less solid.}
@@ -830,13 +831,13 @@ The idea is simple: once put in disjunctive normal form, a term of
 of variables and negated variables.
 % 
 But if we replace \( x_i \) with \( x_i = 1 \) and \( {\sim} x_k \) with
-\( x_i = 0 \), we can read that as a union of intersections of hyperfaces,
+\( x_k = 0 \), we can read that as a union of intersections of hyperfaces,
 as in \cref{fig:face-lattice}.
 
 Next, we associate an \emph{open box} to every element of the face lattice:
 
 \begin{definition}
-    Given \( f \in \faces(n) \), we build the cubical set \( \horn_f^n \) as
+    Given \( f \in \faces(n) \), we build the open box \( \horn_f^n \) as
     a subobject of the \( (n+1) \)-dimensional cube \( \yo(n+1) \):
     \begin{align*}
         \horn_f^n(k) = & \{ x \in \hom[\catCube]{k}{n+1} \ |\ f \circ \mathrm{degen}_{n+1}^{n+1} \circ x = \ione \} \\
@@ -907,20 +908,23 @@ rgb(100bp)=(0.44,0.44,0.44)}
 \draw  [->] (184.06,21.4) -- (184.33,51.17) ;
 \node (y) at (190.33,51.17) {\footnotesize $y$} ;
 \end{tikzpicture}
-\caption{The open box corresponding to \( ({\sim} x) \lor ({\sim} y) \lor (x \land y) \)}
+\caption{The open box corresponding to \( ({\sim} x) \lor ({\sim} y) \lor (x \land y) \)
+    is a subobject of the three-dimensional cube}
     \label{fig:open-box}
 \end{marginfigure}
 % 
-Alternatively, the open box \( \horn_f^n \) can be obtained by first taking the
-cartesian product \( f \times \interval \), and then adding a 
-\( n \)-dimensional lid.
+% Alternatively, the open box \( \horn_f^n \) can be obtained by first taking the
+% cartesian product \( f \times \interval \), and then adding a 
+% \( n \)-dimensional lid.
 
-Open boxes represent those sets of cubes that can be composed together. Note
-that two paths with matching endpoints is a special case of an open box:
-we can simply take \( \horn_{\langle x \rangle}^1 \).
+Open boxes represent the shapes that can be composed together. Note
+that the shape of two paths with matching endpoints is a special case of an 
+open box: we can simply take \( \horn_{\langle x \rangle}^1 \).
 
-Given a morphism \( \alpha : \hom[\catCube]{k}{n} \), we can extend the restriction
-operation \( X(\alpha) \) to the open boxes in \( X \) by only applying 
+Given an open box \( \horn_f^n \) and a cubical set \( X \), we define an
+open box embedded in \( X \) to be a homomorphism of cubical sets \( \theta : \horn_f^n \to X \). 
+Then, given a morphism \( \alpha : \hom[\catCube]{k}{n} \), we can extend the restriction
+operation \( X(\alpha) \) to the open boxes embedded in \( X \) by applying 
 \( \alpha \) to the first \( n \) coordinates of the open box.
 
 \begin{definition}
@@ -932,7 +936,7 @@ operation \( X(\alpha) \) to the open boxes in \( X \) by only applying
         \( \Phi(\theta)  \circ \mathrm{face^n_{n,1}}\) and \( \theta \) coincide 
         when they are both defined.
         \item  given any morphism \( \alpha : \hom[\catCube]{k}{n} \),
-            the result of the applying \( \Phi \) to the sub-open-box of \( \theta \) 
+            the result of applying \( \Phi \) to the sub-open-box of \( \theta \) 
              \( f \circ \alpha \) is equal to the result of applying \( \Phi \)
             to the entire open box and restricting the result along \( \alpha \).
     \end{itemize}
@@ -1136,7 +1140,7 @@ that plays the role of a universe hierarchy for the category of prefascist types
  
 From the work of Hofmann and Streicher on presheaf 
 universes~\sidecite{HofmannStreicher}, we know that the type of sections of a 
-universe over an object \( n \) should be the type of prefascists on the 
+universe over an object \( n \) should be the type of prefascist types on the 
 % 
 \defnote{slice category}{The slice category over an object \( n \) is noted
 \( \catCube_{/n} \). The objects of the slice category are the morphisms of 
@@ -1272,8 +1276,8 @@ And finally, we can define the prefascist \func{fibrantType}.
 \label{sec:trans-overview}
 
 We can extract a model of dependent type theory from the universe \func{fibrantType}
-by interpreting contexts as telescopes of dependent prefascists, types as dependent
-prefascists, and terms as sections.
+by interpreting contexts as telescopes of dependent prefascist types, types as 
+dependent prefascist types, and terms as sections.
 
 We phrase this model as a syntactic translation, \ie as a family of functions
 from the syntax of \MLTT to the syntax of \SetoidCCplus:
@@ -1328,11 +1332,11 @@ context \( \Gamma \), then the two following judgments should be derivable in
 \llbracket Γ \rrbracket^n & \vdash & {[ A ]}^n_0 & : & 
 \AgdaSymbol{∀}~\AgdaBound{m}~%
 \AgdaSymbol{(}\AgdaBound{α}~\AgdaSymbol{:}~\AgdaRecord{Hom}~\AgdaBound{m}~\AgdaBound{n}\AgdaSymbol{)}~%
-\AgdaSymbol{→}~\AgdaRecord{fibrantType₀}~\AgdaBound{m}\AgdaSymbol{)}\\
+\AgdaSymbol{→}~\AgdaRecord{fibrantType₀}~\AgdaBound{m}\\
 \llbracket Γ \rrbracket^n & \vdash & {[ A ]}^n_ε & : &
 \AgdaSymbol{∀}~\AgdaBound{m}~%
 \AgdaSymbol{(}\AgdaBound{α}~\AgdaSymbol{:}~\AgdaRecord{Hom}~\AgdaBound{m}~\AgdaBound{n}\AgdaSymbol{)}~%
-\AgdaSymbol{→}~\AgdaRecord{fibrantTypeε}~(\AgdaBound{α}~\func{∙}~{[ A ]}^n_0)\AgdaSymbol{)}\\
+\AgdaSymbol{→}~\AgdaRecord{fibrantTypeε}~(\AgdaBound{α}~\func{∙}~{[ A ]}^n_0)
 \end{array}
 \]
 
@@ -1514,7 +1518,7 @@ The proof of reflexivity is derived from a degeneracy morphism:
 
 and \func{eqreflε} is given by reflexivity.
 
-In order to interpret of the \( J \) eliminator, we break it into 
+In order to interpret the \( J \) eliminator, we break it into 
 transport and contractibility of the singletons, following Cohen \etal
 % 
 The former can be derived from the fibration structure of the types, and the
@@ -1591,13 +1595,13 @@ and
 \( \llbracket \Gamma \rrbracket^n \vdash {[t]}^n_ε : \func{Elε}~{[A]}^n_0~{[A]}^0_ε~{[t]}^n_0 : \sProp \)
 are derivable in \SetoidCCplus,
 \item the convertibility judgment \( \Gamma \vdash t \equiv u : A \) is valid 
-in \HoTTminus when the translated judgments
+in \HoTTminus when the translated judgment
 \( \llbracket \Gamma \rrbracket^n \vdash {[t]}^n_0 \equiv {[u]}^n_0 : \func{El₀}~{[A]}^n_0 : \Type \)
 is derivable in \SetoidCCplus.
 \end{itemize}
 
 The system \HoTTminus is clearly an extension of \( \MLTT{+}\mathsf{Univalence} \),
-in the sense that every judgment that is valid in the latter is also valid in the 
+in the sense that every judgment that is valid in the latter is also valid in 
 \HoTTminus.
 % 
 Additionally, if our conjecture of normalization for \SetoidCCplus from 
@@ -1620,7 +1624,7 @@ properties.
 This property is often called \emph{homotopy canonicity}. It follows from an
 immediate inspection of the translation of the type of integers.
 
-Finally, we can extract some proof-theoretical results:
+Finally, we can extract some proof-theoretic results:
 
 \begin{theorem}
     Every integer function that can be defined in the empty context in 

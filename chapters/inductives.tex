@@ -1,4 +1,4 @@
-\setchapterimage[6cm]{seaside}
+% \setchapterimage[6cm]{seaside}
 \setchapterpreamble[u]{\margintoc}
 \chapter{Optional Features and Extensions of \SetoidCC}
 \labch{extensions}
@@ -766,7 +766,7 @@ logical power of impredicativity to leak to the predicative layer.
 % 
 More concretely, we can use impredicativity and large elimination to define 
 all the integer functions that are provably computable in higher-order Peano
-Arithemetic as terms of type \( \Nat \to \Nat \) in the predicative layer 
+Arithmetic as terms of type \( \Nat \to \Nat \) in the predicative layer 
 (and then some more!).
 
 Compare this situation to \SetoidCC, where most propositions are defined
@@ -781,8 +781,8 @@ equality (\textit{via} \( \castName \)).
   \( \castName \) to a large elimination principle.}
 % 
 This impoverished communication between the two layers confines the power of 
-impredicativity is confined to the proof-irrelevant layer: 
-while it may be possible to define very complex functions as \textit{via}
+impredicativity to the proof-irrelevant layer: 
+while it may be possible to define very complex functions \textit{via}
 an impredicative encoding of their graph, there is no way to apply them to
 proof-relevant integers.
 % 
@@ -848,7 +848,7 @@ the system with an impredicative universe of proof-\emph{relevant} propositions
 \( \Prop \) for the universe of proof-relevant propositions in \SetoidCC.}
 % 
 Now this new universe cannot replace \( \sProp \), because 
-proof-irrelevant axioms play an important role in the definition of the
+proof-irrelevant axioms play an important role in the definition of
 the observational equality. 
 % 
 Therefore, in this section we study an extension of \SetoidCC that supports both \( \sProp \) 
@@ -1053,7 +1053,7 @@ terminates on all canonical inputs, we pose
 \]
 
 and \sideremark{Here, the values 0 and 1 should be understood as the corresponding 
-  church integers in \( \Natprop \).}
+  integers in \( \Natprop \).}
 % 
 we obtain that \( Y_f\ 1 \) reduces to 0 if there exists a \( n \) such that
 \( g^n\ 1 \equiv 0 \), but diverges (for any reduction strategy) otherwise.
@@ -1116,6 +1116,6 @@ should compute between elements of \( \Prop \).
 % 
 Is the system \SetoidCC + \( \Prop \) doomed, then?
 
-Long story short, we do not know. Maybe there is a way to define a system that
+Long story short, I do not know. Maybe there is a way to define a system that
 is better compartmentalized, so that both \( \sProp \) and \( \Prop \) can 
 interact with the predicative layer without interacting together. 

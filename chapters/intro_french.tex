@@ -1,4 +1,3 @@
-\setchapterimage[6cm]{seaside}
 \setchapterpreamble[u]{\margintoc}
 \chapter{Introduction en Français}
 \labch{intro_french}
@@ -10,16 +9,16 @@
 
 \section{L'égalité dans la Théorie des Types Intensionnelle}
 
-Si vous avez déjà utilisé un assistant de preuve basé sur la théorie des types 
-intensionnelle comme \Coq, \Agda ou \Lean---et il y a de fortes chances que 
-ce soit votre cas si vous êtes en train de lire cette thèse---alors vous savez 
+Si vous avez déjà utilisé un assistant à la preuve basé sur la théorie des types 
+intensionnelle comme \Coq, \Agda ou \( {\Lean} \) -- et il y a de fortes chances que 
+ce soit votre cas si vous êtes en train de lire cette thèse -- alors vous savez 
 sans doute que l'égalité peut être un véritable casse-tête.
 
 D'une part, nous avons l'égalité définitionnelle (également appelée conversion), 
-qui enregistre les équations que l'assistant de preuve manipule silencieusement 
+qui regroupe les équations que l'assistant à la preuve manipule silencieusement 
 pour nous. 
 % 
-\sideremark{Dans un assistant de preuve basé sur la théorie des ensembles ZF 
+\sideremark{Dans un assistant à la preuve basé sur la théorie des ensembles ZF 
   comme Metamath, le théorème \( {2+2=4} \) demande une preuve. 
   Et bien qu'elle soit élémentaire, cette preuve implique une quantité surprenante 
   de lemmes auxiliaires !}
@@ -29,36 +28,36 @@ ce qui signifie que nous pouvons les utiliser indifféremment dans nos preuves
 sans avoir à nous soucier de prouver leur égalité à la main. 
 % 
 Lorsqu'on utilise des types dépendants, cette quantité minimale 
-d'automatisation est absolument vitale ; pour éviter de se retrouver à insérer 
+d'automatisation est absolument vitale pour éviter de se retrouver à insérer 
 des coercitions explicites à chaque fois que nous voulons, par exemple, 
 utiliser un terme de type \( \mathsf{Vector}\ (2+2) \) en tant que terme de 
 type \( \mathsf{Vector}\ 4 \).
 
 Mais malheureusement, il existe des objets qui ne sont pas des entiers 
-naturels\sidenote{[référence nécessaire]}, et les preuves mathématiques traitent 
-souvent d'égalités entre des objets infinitaires tels que les fonctions et les 
+naturels, et les preuves mathématiques traitent 
+fréquemment d'égalités entre des objets infinitaires tels que les fonctions et les 
 ensembles. 
 % 
-Et naturellement, il n'existe pas d'algorithme capable de décider si deux 
+Et bien évidemment, il n'existe pas d'algorithme capable de décider si deux 
 fonctions de type \( \Nat \to \Nat \) associent les mêmes images aux mêmes 
-antécédants.
+antécédents.
 % 
 Ainsi en pratique, l'égalité définitionnelle se limite aux égalités 
 \( \beta / \eta / \iota \), avec possiblement quelques extensions comme les 
-règles de réécriture d'Agda~\sidecite{taming_of_the_rew}.
+règles de réécriture d'\Agda~\sidecite{taming_of_the_rew}.
 
 Puisque le système ne sera pas en mesure d'automatiser complètement toutes 
 les égalités, nous avons besoin d'un moyen de raisonner à leur sujet. 
 % 
-C'est pourquoi la théorie des types intensionnelle fournit une deuxième notion 
-d'égalité, appelée l'égalité \emph{propositionnelle}.
+C'est pourquoi la théorie des types intensionnelle fournit une seconde notion 
+d'égalité, appelée égalité \emph{propositionnelle}.
 % 
 Contrairement à l'égalité définitionnelle, celle-ci est disponible 
 dans le langage de la théorie des types, et nous pouvons l'utiliser 
 pour énoncer et prouver des théorèmes. 
 % 
-Dans les trois principaux assistants de preuve basés sur la théorie des types, 
-l'égalité propositionnelle est implémentée avec un type inductif, d'après les 
+Dans les trois principaux assistants à la preuve basés sur la théorie des types, 
+l'égalité propositionnelle est un type inductif, d'après les 
 travaux de Martin-Löf~\sidecite{MartinLoef75}.
 % 
 \sideremark{L'égalité propositionnelle \( \Indeq{A}{t}{u} \) est un type, tandis
@@ -89,25 +88,27 @@ travaux de Martin-Löf~\sidecite{MartinLoef75}.
 
 Ces quelques règles suffisent à définir une relation d'équivalence qui contient 
 l'égalité définitionnelle, peut être utilisée pour réécrire des termes et peut 
-être utilisée pour convertir des termes entre deux types égaux.
+être utilisée pour obtenir un terme de type \( B \) à partir d'un terme de type
+\( A \) et d'une preuve de \( A =_{\varType} B \).
 
-Une différence importante avec la pratique courante des mathématiques est que nous restons 
-très attachés à la correspondance de Curry-Howard entre les preuves et les programmes : 
-l'égalité est un type, et les preuves d'égalité sont des programmes\sidenote{amen.}. 
+Une différence importante avec la pratique courante des mathématiques est qu'en théorie
+des types, nous restons très attachés à la correspondance de Curry-Howard 
+entre les preuves et les programmes~: 
+l'égalité est un type, et les preuves d'égalité sont des programmes. 
 % 
 En tant que telles, les preuves d'égalité sont des valeurs de première classe 
-tout comme les entiers naturels ou les fonctions, et elles sont donc sujettes 
-au raisonnement mathématique, et elles peuvent également être évaluées.
+au même titre que les entiers naturels ou les fonctions, et elles sont donc sujettes 
+au raisonnement mathématique et peuvent être évaluées.
 
 \subsection{Types et Propositions}
 
 Bien que la possibilité d'évaluer les preuves soit un principe fondamental de 
-la philosophie Curry-Howard, une preuve d'égalité typique n'a pas un 
+la philosophie Curry-Howard, une preuve d'égalité n'a généralement pas un 
 comportement calculatoire très intéressant. 
 % 
 Le terme \( \indJ{A}{t}{P}{u}{t'}{e} \) se contente d'attendre que \( e \) se 
 réduise en une preuve par réflexivité, auquel cas \( t \) et \( t' \) sont 
-convertibles et le terme entier peut simplement être évalué en \( u \).
+convertibles, et le terme entier peut simplement être évalué en \( u \).
 
 Par conséquent, les programmes 
 \defnote{extraits}{L'extraction produit un programme dans un langage externe
@@ -116,30 +117,30 @@ Par conséquent, les programmes
 passer beaucoup de temps à propager les preuves d'égalité, pour finir par les 
 effacer lorsqu'elles ne sont plus nécessaires. 
 % 
-Cette situation sous-optimale a conduit l'assistant de preuve de Coq à 
+Cette situation sous-optimale a conduit l'assistant à la preuve \Coq à 
 introduire une sorte spéciale \( \varProp \) pour les types dont les preuves sont 
 effacées lors de l'extraction~\sidecite{letouzey04}. 
 % 
 En plaçant l'égalité propositionnelle dans \( \varProp \) avec les autres 
-contraintes logiques qui ne jouent aucun rôle calculatoire, Coq retrouve des 
+contraintes logiques qui ne jouent aucun rôle calculatoire, \Coq retrouve des 
 performances raisonnables pour les programmes extraits.
 
-Techniquement, c'est un peu une violation de la discipline de Curry-Howard, 
+Techniquement, cette pratique va à l'encontre de la discipline de Curry-Howard, 
 puisque \( \varProp \) réintroduit une séparation entre les propositions et les données.
 %  
-Mais ne vous méprenez pas : les preuves de propositions jouent encore
-leur rôle normal dans les calculs de théorie des types, et en particulier, 
+Mais ne nous méprenons pas~: les preuves de propositions jouent toujours
+leur rôle habituel dans les calculs de théorie des types, et en particulier, 
 elles peuvent bloquer l'évaluation des termes ouverts. 
 % 
 C'est seulement lorsque nous extrayons un programme \emph{externe} que les 
 propositions sont effacées.
 
-L'assistant de preuve \Lean va un peu plus loin et introduit la sorte 
-\( \varsProp \) pour les \emph{propositions strictes}~\sidecite{lean}. 
+L'assistant à la preuve \Lean va encore un peu plus loin dans cette direction en 
+introduisant la sorte \( \varsProp \) pour les \emph{propositions strictes}~\sidecite{lean}. 
 % 
-Contrairement aux propositions de \Coq, les propositions strictes sont
-\emph{proof-irrelevant}, ce qui signifie que deux habitants quelconques 
-d'une proposition stricte \( A \) sont définitionnellement égaux.
+Contrairement aux preuves des propositions en \Coq, deux habitants quelconques 
+d'une proposition stricte \( A \) sont toujours définitionnellement égaux 
+(les propositions strictes sont dites \emph{proof-irrelevant} en anglais).
 % 
 \[
 \inferrule{\tytm{\Gamma}{A}{\varsProp} \\ \tytm{\Gamma}{t, u}{A}}{\eqtm{\Gamma}{t}{u}{A}}
@@ -149,14 +150,14 @@ Mettre l'égalité propositionnelle dans \( \varsProp \) n'est pas aussi inoffen
 qu'il n'y parait.
 % 
 En particulier, cela implique que toute preuve d'égalité propositionnelle entre 
-deux termes convertibles est maintenant indiscernable d'une preuve par réflexivité 
-(puisque les deux preuves ont le même type). 
+deux termes convertibles est maintenant indiscernable d'une preuve par réflexivité,
+puisque les deux preuves ont le même type. 
 % 
-En d'autres termes, \Lean satisfait une version stricte du principe de 
-\emph{uniqueness of identity proofs} (UIP).
+En d'autres termes, \Lean satisfait une version stricte du principe d'unicité des
+preuves d'égalité (abrégé en UIP pour \emph{uniqueness of identity proofs}).
 
 Avec ce principe, les preuves d'égalité non-réflexives ne sont plus capables de 
-bloquer un calcul : le terme \( \indJ{A}{t}{P}{u}{t}{e} \) est convertible en 
+bloquer un calcul~: le terme \( \indJ{A}{t}{P}{u}{t}{e} \) est convertible en 
 \( \indJ{A}{t}{P}{u}{t}{\indrefl{t}} \), qui devrait se réduire !
 % 
 Par conséquent, l'éliminateur \( J \) de \Lean se réduit dès qu'il est appliqué 
@@ -169,24 +170,24 @@ Par conséquent, l'éliminateur \( J \) de \Lean se réduit dès qu'il est appli
 
 Mais bien que cette règle soit logiquement cohérente, Abel et Coquand ont montré 
 qu'elle conduit à un échec de la normalisation pour les termes 
-ouverts~\cite{lmcs:6606}. 
+ouverts~\sidecite{lmcs:6606}. 
 % 
-\sideremark{Il est établi que l'égalité définitionnelle de \Lean est indécidable
-  pour des raisons orthogonales~\cite{gilbert:hal-01859964}. Toutefois, 
-  remarquons que ça n'a pas empêché la communauté de \Lean de développer 
-  une impressionante quantité de mathématiques.}
+\sideremark{L'égalité définitionnelle de \Lean est de toute manière indécidable
+  pour des raisons orthogonales~\cite{gilbert:hal-01859964}. 
+  Remarquons que ça n'a pas empêché la communauté de \Lean de développer 
+  une quantité impressionante de mathématiques.}
 % 
 Et comme les algorithmes que nous utilisons pour vérifier la convertibilité 
 reposent sur la normalisation, on en déduit que l'ajout de la 
 règle~\nameref{infrule:J-conv} casse notre procédure de décision pour l'égalité 
 définitionnelle. 
 % 
-Comme l'ont remarqué Abel et Coquand, il n'est pas clair que cela provienne d'une 
+Toutefois, comme l'ont remarqué Abel et Coquand, il n'est pas clair que cela provienne d'une 
 incompatibilité fondamentale entre les propositions strictes imprédicatives et 
 l'égalité propositionnelle, et qu'il n'existe pas une stratégie plus 
 intelligente qui pourrait résoudre ce problème.
 
-\subsection{Imprédicativité}
+\subsection{L'Imprédicativité}
 
 En théorie des types dépendants, une sorte est dite \emph{imprédicative} 
 quand elle est close par produits dépendants indexés par n'importe quel type. 
@@ -196,87 +197,87 @@ type \( A \) et toute fonction \( \tm{B}{A \to \varProp} \) le produit dépendan
 \( \Depfun{A}{B\ x} \) est dans \( \varProp \).
 
 L'imprédicativité introduit de l'autoréférence dans notre système 
-de types : nous pouvons l'utiliser pour former une proposition \( P \) qui 
-quantifie sur le type \( \varProp \) de toutes les propositions, type qui 
+de types~: nous pouvons l'utiliser pour former une proposition \( P \) qui 
+quantifie sur le type \( \varProp \) de toutes les propositions, qui 
 contient \( P \). 
 % 
 Un exemple classique est l'encodage imprédicatif de la proposition fausse, 
-dont les habitants peuvent être éliminés dans n'importe quelle autre proposition :
+dont les habitants peuvent être éliminés dans n'importe quelle autre proposition~:
 \[
-\Depfun[X]{\varProp}{X} \quad : \quad \varProp
+\bot \enskip := \enskip \Depfun[X]{\varProp}{X} \enskip : \enskip \varProp
 \]
 
-Comparez cette situation avec la hiérarchie \emph{prédicative} 
+Comparons cette situation avec la hiérarchie \emph{prédicative} 
 $(\varType_i)_{i \in \Nat}$ 
 % 
-\sideremark{Dans l'assistant de preuve \Coq, les univers prédicatifs ne sont 
+\sideremark{Dans l'assistant à la preuve \Coq, les univers prédicatifs ne sont 
   techniquement pas indexés par des entiers, mais le système maintient un graphe
-  de contrainte de niveau d'univers qui remplit la même fonction.}
+  de contraintes de niveau d'univers qui remplit la même fonction.}
 % 
 des types non-propositionnels.
 % 
-Dans le monde non-propositionnel, les produits dépendants sont forcés de vivre 
-dans un niveau d'univers qui est à la fois plus grand que celui de leur domaine et
-plus grand que celui de leur codomaine :
+Dans le monde non-propositionnel, les produits dépendants sont forcés d'habiter 
+un univers dont le niveau est à la fois plus grand que celui de leur domaine et
+plus grand que celui de leur codomaine~:
 % 
 étant donné un type \( A : \varType_i \) et une fonction \( {\tm{B}{A \to \varType_j}} \), 
 le produit dépendant \( \Depfun{A}{B\ x} \) atterrit dans l'univers
 \( \varType_{\mathsf{max}(i,j)} \).
  
-La prédicativité supprime les possibilités d'autoréférence : si nous essayons 
+Une hiérarche prédicative supprime les possibilités d'autoréférence~: si nous essayons 
 de reproduire l'encodage de la proposition fausse dans \( \varType_0 \), le 
-type résultant se retrouve dans l'univers \( \varType_1 \).
+type résultant habite l'univers \( \varType_1 \).
 \[
-\Depfun[X]{\varType_0}{X} \quad : \quad \varType_1
+\bot' \enskip := \enskip \Depfun[X]{\varType_0}{X} \enskip : \enskip \varType_1
 \]
 
-Autoriser l'autoréférence revient à jouer avec le feu : les antinomies 
-logiques héritées du paradoxe de Russell restent tapies dans l'ombre, et 
+Autoriser l'autoréférence revient à jouer avec le feu~: les antinomies 
+logiques dérivées du paradoxe de Russell restent tapies dans l'ombre, et 
 pourraient nous attraper si nous sommes un peu trop gourmands avec nos 
 règles logiques.
 % 
-Par exemple, le paradoxe de Berardi montre qu'avoir le tiers exclu et les 
-l'élimination large pour les booléens à valeur dans \( \varProp \) est incohérent. 
+Par exemple, le paradoxe de Berardi montre qu'avoir à la fois le tiers exclu et 
+l'élimination large pour les booléens définis dans \( \varProp \) est incohérent. 
 % 
 L'imprédicativité joue également un rôle central dans le terme 
 non-normalisant qu'Abel et Coquand ont obtenu à partir de la 
 règle~\nameref{infrule:J-conv}~\sidecite{lmcs:6606}.
 
-En contrepartie pour cette fragilité, l'imprédicativité augmente considérablement 
+En contrepartie de cette fragilité, l'imprédicativité augmente considérablement 
 le pouvoir expressif de notre système logique, et nous permet de formuler 
-d'importantes constructions mathématiques telles que le théorème du point fixe 
+des constructions mathématiques importantes comme le théorème du point fixe 
 de Tarski ou des treillis complets non-triviaux~\sidecite{paco}. 
 % 
-De plus, certains théorèmes comme la normalisation du Système F ne peuvent tout
-simplement pas être prouvés dans une théorie prédictive.
+De plus, certains théorèmes comme la normalisation de Système F ne peuvent tout
+simplement pas être prouvés dans une théorie prédicative.
 
-Les différents assistants de preuve ont adopté des attitudes variées envers 
-l'imprédicativité. D'un côté, 
+Les différents assistants à la preuve ont adopté des attitudes diverses en ce qui 
+concerne l'imprédicativité. D'une part, 
 % 
-\sideremark{Fut un temps, \Coq utilisait également une sorte imprédicative
+\sideremark{Dans sa version initiale, \Coq utilisait une sorte imprédicative
   pour les types \emph{proof-relevant}, mais l'équipe de développement a 
-  préféré désactiver cette fonctionnalité pour avoir une théorie plus proche
-  des mathématiques classiques.}
+  préféré abandonner cette fonctionnalité pour rester compatible avec les
+  mathématiques classiques.}
 % 
 \Coq et \Lean ont tous deux adopté l'imprédicativité pour leur sorte des 
 propositions, qui cohabite avec la hiérarchie d'univers prédicatifs utilisée 
 pour les types \emph{proof-relevant}~\sidecite{Coq:manual,lean}.
 % 
-De l'autre côté, l'assistant de preuve \Agda a choisi de ne pas implémenter
+D'autre part, l'assistant à la preuve \Agda a choisi de ne pas implémenter
 l'imprédicativité et utilise deux hiérarchies prédicatives à la place, une 
 pour les propositions strictes et une pour les types~\sidecite{agda261}.
 
 \section{L'Extensionalité dans la Théorie des Types Intensionnelle}
 
-L'égalité propositionnelle simple que nous avons définie avec un type inductif 
+Malheureusement, l'égalité propositionnelle simple que nous avons définie avec un type inductif 
 ne répond pas vraiment aux exigences du raisonnement mathématique. 
 % 
 En mathématiques, deux fonctions sont considérées comme égales lorsqu'elles 
-coïncident sur tous les antécédants---il s'agit du principe 
-d'\emph{extensionnalité des fonctions}---mais
+coïncident sur tous les antécédents -- il s'agit du principe 
+d'\emph{extensionnalité des fonctions} -- mais
 % 
-\sideremark{En particulier, il est impossible de montrer que les fonctions
-\( {\lambda\ n\ .\ n+1} \) and \( {\lambda\ n\ .\ 1+n} \) sont égales.}
+\sideremark{En particulier, il nous est impossible de montrer que les fonctions
+\( {\lambda\ n\ .\ n+1} \) et \( {\lambda\ n\ .\ 1+n} \) sont égales.}
 % 
 ce principe n'est pas démontrable pour l'égalité propositionnelle dans 
 la théorie des types intensionnelle.
@@ -287,7 +288,7 @@ la théorie des types intensionnelle.
 En fait, nous pouvons même prouver que toutes les preuves d'égalité 
 propositionnelle dans un contexte clos se réduisent à l'égalité définitionnelle. 
 % 
-C'est une conséquence directe de la normalisation des termes bien typés : 
+C'est une conséquence directe de la normalisation des termes bien typés~: 
 la seule forme normale close pour une preuve d'égalité est \( \indrefl{t} \), 
 terme qui n'est typable que si les deux membres de l'égalité sont convertibles. 
 % 
@@ -295,9 +296,9 @@ Et comme nous l'avons expliqué précédemment, l'égalité définitionnelle est
 incapable de gérer l'égalité naturelle des fonctions. 
 
 Développer des mathématiques complexes sans le principe d'extensionnalité 
-des fonctions n'est pas une tâche facile. Par conséquent, notre communauté a 
-considéré plusieurs options pour retrouver une égalité plus conventionnelle au 
-fil des ans.
+des fonctions n'est pas une tâche facile. En conséquence, la communauté de la 
+théorie des types a considéré plusieurs options pour retrouver une égalité plus 
+conventionnelle.
 
 \paragraph*{Postuler des axiomes d'extensionnalité}
 % 
@@ -310,11 +311,11 @@ est simplement de le postuler comme axiome.
   de l'extraction.}
 % 
 Par exemple, l'axiome \textsf{functional\_extensionality\_dep} est disponible 
-dans la bibliothèque standard de Coq. 
+dans la bibliothèque standard de \Coq. 
 % 
 L'utilisation d'axiomes a toutefois des inconvénients, car ils ne se comportent 
 pas très bien vis-à-vis des propriétés calculatoires de la théorie des types 
-intensionnelle : appliquer l'éliminateur \( \mathsf{J} \) à une égalité obtenue 
+intensionnelle~: appliquer l'éliminateur \( \mathsf{J} \) à une égalité obtenue 
 via un axiome ne produira qu'un terme bloqué.
 
 \paragraph*{Utiliser des sétoïdes}
@@ -325,11 +326,11 @@ en conflit avec la correspondance preuves-programmes est d'utiliser des
 des couples \( (|A|, e_A) \) d'un type \( |A| \) et d'une relation d'équivalence 
 \( e_A \) sur \( |A| \) (l'\emph{égalité sétoïdale} de \( A \)).
 % 
-Nous pouvons alors considérer uniquement les fonctions qui préservent l'égalité 
-sétoïdale, et nous pouvons demander l'extensionnalité dans l'égalité sétoïdale 
+Nous considérons alors uniquement les fonctions qui préservent l'égalité 
+sétoïdale, et nous pouvons imposer l'extensionnalité dans l'égalité sétoïdale 
 des types de fonctions.
 
-Travailler avec des sétoïdes n'est pas très agréable, car nous devons accompagner 
+Travailler avec des sétoïdes n'est toutefois pas très agréable, car nous devons accompagner 
 chaque définition par des preuves bureaucratiques de préservation de l'égalité
 sétoïdale, alors même que toutes les constructions possibles en théorie des types 
 respectent naturellement l'extensionnalité des fonctions~\sidecite{Altenkirch99}. 
@@ -337,7 +338,7 @@ respectent naturellement l'extensionnalité des fonctions~\sidecite{Altenkirch99
 En un mot, nous devons faire le travail d'un compilateur à la main. 
 % 
 \Coq implémente des tactiques pour traiter les sétoïdes plus efficacement, mais 
-elles supportent difficilement le passage à l'échelle de développements conséquents---
+elles supportent difficilement le passage à l'échelle de développements conséquents -- 
 au point que la communauté utilise le terme \emph{setoid hell} en référence à ces 
 problèmes.
 
@@ -346,25 +347,26 @@ problèmes.
 Étant donné que les axiomes d'extensionnalité sont problématiques parce qu'ils 
 bloquent le calcul, les théoriciens des types ont envisagé plusieurs manières 
 d'étendre la théorie des types intensionnelle avec de nouvelles règles de calcul 
-pour gérer les axiomes souhaités. 
+qui prennent en compte les axiomes souhaités. 
 % 
-Les travaux les plus fructueux peuvent être divisés en deux groupes : d'une part ceux qui 
+Les travaux dans cette direction les plus fructueux peuvent être divisés en deux groupes~: d'une part ceux qui 
 remplacent l'égalité propositionnelle inductive par une 
 \emph{égalité observationnelle}, et d'autre part ceux qui la remplacent par une 
 \emph{égalité univalente}.
 
 \subsection{L'Égalité Observationnelle}
 
-Les origines de l'égalité observationnelle remontent aux travaux de Hofmann et 
-Altenkirch sur le modèle sétoïdal de la théorie des types~\cite{hofmann95,altenkirch99}.
+Les origines de l'égalité observationnelle remontent au modèle sétoïdal de la 
+théorie des types, construit par Altenkirch suite aux explorations de 
+Hofmann~\cite{hofmann95,altenkirch99}.
 % 
-En interprétant les types comme des sétoïdes, ils ont pu modéliser
+En interprétant les types comme des sétoïdes, Altenkirch a pu modéliser
 \defnote{ITT+funext}{ITT+funext est une abréviation pour la théorie des types intensionnelle 
 avec l'axiome d'extensionalité des fonctions.}
 dans une théorie des types intensionnelle étendue avec des propositions strictes. 
 Étant donné que ces propositions strictes n'entrent pas en conflit avec l'interprétation 
 des preuves en tant que programmes, le modèle sétoïdal fournit un moyen d'évaluer les 
-preuves qui utilisent l'axiome d'extensionnalité des fonctions, en évaluant leur 
+preuves qui utilisent l'axiome d'extensionnalité des fonctions en évaluant leur 
 interprétation.
 
 L'ingrédient central du modèle sétoïdal est l'interprétation de l'univers. 
@@ -372,8 +374,8 @@ L'ingrédient central du modèle sétoïdal est l'interprétation de l'univers.
 Construire un sétoïde qui contient tous les petits sétoïdes semble difficile 
 en première approche, car la collection de tous les petits sétoïdes n'a pas 
 d'égalité sétoïdale naturelle ; mais cela peut être résolu en utilisant un univers 
-\defnote{inductif-récursif}{L'induction-recursion est un principe logique puissant qui 
-  permet de définir un type inductif \( A \) simultanément avec des fonctions
+\defnote{inductif-récursif}{Une construction par induction-récursion permet de 
+  définir un type inductif \( A \) simultanément avec des fonctions
   définies par récursion sur \( A \).} 
 de codes sur lequel on définit récursivement l'égalité sétoïdale 
 ainsi qu'un opérateur de \emph{type-casting}.
@@ -381,7 +383,7 @@ ainsi qu'un opérateur de \emph{type-casting}.
 Suite à cette première étape, Altenkirch McBride et 
 Swierstra~\sidecite{altenkirchAl:plpv2007} ont développé la théorie des types 
 observationnelle (OTT), une extension de la théorie des types intensionnelle 
-qui ramène les idées du modèle sétoïdal dans le monde de la syntaxe : 
+qui ramène les idées du modèle sétoïdal dans le monde de la syntaxe~: 
 % 
 OTT incorpore un nouvel opérateur primitif appelé 
 \emph{égalité observationnelle} qui dote chaque type d'une structure de sétoïde 
@@ -389,11 +391,11 @@ définie par récursion sur l'univers.
 % 
 Grâce à cela, OTT implémente les principes d'UIP et d'extensionnalité des 
 fonctions, et de plus Altenkirch \etal prouvent que la normalisation des termes 
-OTT découle d'un résultat de normalisation conjecturé pour la théorie des types 
+d'OTT découle d'un résultat de normalisation conjecturé pour la théorie des types 
 avec induction-récursion.
 
 L'égalité observationnelle a connu un certain renouveau ces dernières années, 
-avec notamment les travaux de Sterling et al. qui la revisitent sous l'angle 
+avec notamment les travaux de Sterling \etal qui la revisitent sous l'angle 
 de la théorie des types cubique~\sidecite{sterling-angiuli-gratzer:2022} ou bien
 les travaux sur \emph{setoid type theory} d'Altenkirch \etal~\sidecite{Altenkirch2019}. 
 % 
@@ -401,7 +403,7 @@ Toutefois, la théorie des types observationnelle n'a pas encore atteint un nive
 de maturité comparable à celui des théories des types univalentes. 
 % 
 En particulier, il n'existe toujours pas de support pour l'égalité 
-observationnelle dans les principaux assistants de preuve, bien que des
+observationnelle dans les principaux assistants à la preuve, bien que des
 travaux aient été menés dans cette direction~\sidecite{mcbride-autopsy}.
 
 \subsection{L'Égalité Univalente}
@@ -412,7 +414,7 @@ l'\emph{axiome d'univalence} de Voevodsky~\sidecite{kapulkin2012simplicial,hottb
 (A =_{\varType} B) \enskip \simeq \enskip  (A \simeq B)
 \]
 
-L'axiome d'univalence donne un sens nouveau à l'égalité entre les types : 
+L'axiome d'univalence donne un sens nouveau à l'égalité entre les types~: 
 % 
 \sideremark{Donner une bonne définition d'un isomorphisme entre deux types est
   plus subtil qu'il n'y paraît. Pour éviter trop de digressions dans notre 
@@ -434,11 +436,11 @@ L'axiome d'univalence s'éloigne de l'usage habituel de l'égalité en mathémat
 en ce sens que l'égalité ne peut plus être une proposition puisqu'elle contient 
 désormais des informations essentielles pour le calcul.  
 % 
-Par exemple, il existe deux automorphismes distincts du type des booléens---l'un 
-correspondant à l'identité et l'autre à la négation---et transporter un terme avec 
-l'identité ne donne pas les mêmes résultats que le transport avec la négation.
+Par exemple, il existe deux automorphismes distincts du type des booléens -- l'un 
+correspondant à l'identité et l'autre à la négation -- et transporter un terme selon 
+l'identité ne donne pas les mêmes résultats que le transport selon la négation.
 % 
-\sideremark{Transporter une terme \( t : A \) avec un isomorphisme \( f : A \simeq B \) 
+\sideremark{Transporter une terme \( t : A \) selon un isomorphisme \( f : A \simeq B \) 
   revient à appliquer l'isomorphisme à \( t \), à une égalité propositionnelle près.}
 \[
 \begin{split}
@@ -509,7 +511,7 @@ C'est le point de départ de la \emph{théorie des types homotopique} (HoTT), un
 analogie profonde entre la théorie de l'homotopie et la théorie des types 
 intensionnelle avec l'axiome d'univalence~\cite{hottbook}.
 
-Lorsque nous faisons de la théorie des types homoptopique, nous considérons les 
+Lorsque nous faisons de la théorie des types homotopique, nous considérons les 
 types comme des espaces. Les habitants d'un type jouent le rôle de points, 
 les égalités entre deux termes correspondent aux chemins entre les points, les 
 égalités entre deux égalités sont des déformations continues entre les chemins 
@@ -520,7 +522,7 @@ préservent les égalités), et les isomorphismes correspondent aux équivalence
 d'homotopie. 
 
 La théorie des types homotopique étend également la notion de type inductif 
-aux \emph{types inductifs supérieurs} (abrégés en HITs pour \emph{higher inductive types}), 
+aux types inductifs supérieurs (abrégés en HIT pour \emph{higher inductive types}), 
 qui comportent des constructeurs de chemins/égalités en plus des constructeurs d'éléments. 
 % 
 Les HIT fournissent des outils pour construire des espaces basiques comme le cercle, 
@@ -539,10 +541,7 @@ la sphère et le tore, mais également de quoi former des types quotients.
 \mathsf{Inductive}\enskip\mathsf{circle} : \varType_0\enskip := \\
 \sep \quad \mathsf{base} \enskip : \enskip \mathsf{circle}\\
 \sep \quad \mathsf{loop} \enskip : \enskip \Indeq{\mathsf{circle}}{\mathsf{base}}{\mathsf{base}} \\
-\end{array}
-\]
-\[
-\begin{array}{l}
+\\
 \mathsf{Inductive}\enskip\mathsf{quotient}\ (A : \varType_i)\ (R : A \to A \to \varType_i) : \varType_i\enskip := \\
 \sep \quad \mathsf{emb} \enskip : \enskip A \to \mathsf{quotient}\ A\ R \\
 \sep \quad \mathsf{quo} \enskip : \enskip \Depfun[a\ b]{A}{R\ a\ b \to \Indeq{...}{\mathsf{emb}\ a}{\mathsf{emb}\ b}} \\
@@ -551,13 +550,13 @@ la sphère et le tore, mais également de quoi former des types quotients.
 
 En utilisant des types inductifs supérieurs et l'axiome d'univalence, il devient
 possible de prouver un nombre surprenant de résultats classiques de la théorie 
-de l'homotopie, reformulés pour parler de types et d'égalité : 
+de l'homotopie, reformulés pour parler de types et d'égalité~: 
 % 
 dans sa thèse, Brunerie a réussi à montrer que le quatrième groupe d'homotopie 
 de la sphère tridimensionnelle a deux éléments~\sidecite{Brunerie16}. 
 % 
 Depuis lors, la communauté HoTT a développé des bibliothèques de 
-mathématiques univalentes conséquentes, à l'aide des assistants de preuve
+mathématiques univalentes conséquentes, à l'aide des assistants à la preuve
 \Coq~\sidecite{Bauer:2017:HLF:3018610.3018615} et \Agda~\sidecite{agda-unimath}.
 
 Toutefois, la théorie des types homotopique n'est pas une théorie qui 
@@ -612,7 +611,7 @@ Dans les années qui ont suivi son introduction, la théorie des types cubiques 
 évolué en un domaine de recherche dynamique. 
 % 
 De nombreuses variante du système original ont été étudiées sous un angle 
-théorique~\cite{AngiuliHouHarper18,ABCFHL} et implémentées dans des assistants de 
+théorique~\cite{AngiuliHouHarper18,ABCFHL} et implémentées dans des assistants à la 
 preuve~\cite{Cubicaltt, redtt}. 
 % 
 Parmi celles-ci, le mode \texttt{cubical} d'\Agda est sans aucun doute l'implémentation 
@@ -630,13 +629,11 @@ Pour ce faire, nous introduisons un calcul formel basé sur la théorie des type
 observationnelle d'Altenkirch \textit{et al}, que nous appelons le calcul 
 des constructions observationnel (abrégé en \SetoidCC). 
 % 
-\SetoidCC possède des types dépendants avec des types inductifs et un univers 
-imprédicatif de propositions strictes. 
-% 
-En plus de cela, on ajoute une implémentation de l'égalité observationnelle 
-et un opérateur primitif de \emph{type-casting} à partir desquels nous pouvons 
-dériver les principes d'unicité des preuves d'identité, d'extensionnalité des 
-fonctions et d'extensionnalité des propositions.
+En plus des briques élémentaires de la théorie des types dépendants, \SetoidCC
+supporte une implémentation de l'égalité observationnelle et un opérateur primitif 
+de \emph{type-casting} à partir desquels nous pouvons dériver les principes d'unicité 
+des preuves d'identité, d'extensionnalité des fonctions et d'extensionnalité 
+des propositions.
 % 
 \SetoidCC permet également la formation de quotients d'un type par une relation 
 d'équivalence stricte.
@@ -653,35 +650,35 @@ La preuve de normalisation peut être consultée en ligne \refAgdaRoot{Everythin
 et des liens vers le code seront fournis à intervalles réguliers dans les chapitres 
 correspondants.
 
-À notre connaissance, notre modèle introduit plusieurs innovations par rapport 
+À notre connaissance, notre modèle apporte plusieurs innovations par rapport 
 à la littérature existante sur les preuves de normalisation. 
 % 
 La plus basique, mais aussi la plus importante, est que nous ne normalisons pas 
-les preuves de propositions strictes, contrairement à l'approche défendue par 
+les preuves de propositions strictes, contrairement à l'approche adoptée par 
 Gilbert et al \etal~\sidecite{gilbert:hal-01859964}. 
 % 
-Cela nous permet non seulement de supporter les axiomes \emph{proof-irrelevant}, 
-mais aussi de gérer l'imprédicativité sans avoir recours aux candidats de 
-réductibilité usuels. 
+Cela nous permet non seulement de supporter les axiomes dans l'univers des 
+propositions strictes, mais aussi de gérer l'imprédicativité sans avoir recours 
+aux candidats de réductibilité usuels. 
 % 
 Comme nous n'avons pas besoin des candidats de réductibilité, nous pouvons 
 utiliser une relation logique \emph{proof-irrelevant} pour notre preuve, ce 
 qui nous permet d'ajouter des opérateurs non paramétriques tels que l'égalité 
 observationnelle et le \emph{type-casting}. 
 % 
-En échange de cette flexibilité, notre refus de normaliser les preuves de
-proposition a pour conséquence que la normalisation n'implique pas directement 
+En échange de cette flexibilité, notre refus de normaliser les preuves des
+propositions a pour conséquence que la normalisation n'implique pas directement 
 la canonicité, et qu'une preuve de cohérence séparée est nécessaire pour 
-obtenir la canonicité---comme suggéré par McBride \etal dans leur article sur 
+obtenir la canonicité -- comme suggéré par McBride \etal dans leur article sur 
 la théorie des types observationnelle~\sidecite{AltenkirchMcBrideSwiestra07}. 
 % 
 Nous comblerons cette lacune en construisant un modèle de \SetoidCC en théorie 
 des ensembles. 
 
 Ce travail résout plusieurs problèmes qui étaient encore ouverts à notre 
-connaissance : tout d'abord, nous obtenons une preuve complète de la 
+connaissance~: tout d'abord, nous obtenons une preuve complète de la 
 normalisation et de la décidabilité pour la théorie des types observationnelle, 
-déjà conjecturée par Altenkirch \etal. 
+déjà conjecturée par Altenkirch \etal
 % 
 De plus, l'égalité de \SetoidCC vit dans une sorte imprédicative de propositions 
 strictes, tout comme l'égalité de \Lean. 
@@ -691,7 +688,7 @@ extension de \SetoidCC, tout en préservant la normalisation et la décidabilit�
 du typage. 
 % 
 Ceci répond à la question d'Abel et Coquand sur la compatibilité de 
-l'imprédicativité et de l'étalité en tant que proposition stricte~\sidecite{lmcs:6606}.
+l'imprédicativité et de l'égalité en tant que proposition stricte~\sidecite{lmcs:6606}.
 
 \paragraph{Vers une Traduction Cubique}
 % 
@@ -711,9 +708,9 @@ objets algébriques, y compris les ensembles cubiques que Coquand \etal ont
 utilisé pour modéliser l'univalence. 
 % 
 Cependant il manque un ingrédient important à la traduction préfasciste
-comparé au modèle de Coquand \etal : les \emph{structures de fibration}.
+comparé au modèle de Coquand \etal~: les \emph{structures de fibration}.
 
-Nous ajoutons deux nouvelles pierres à cet édifice : dans un premier temps, 
+Nous ajoutons deux nouvelles pierres à cet édifice~: dans un premier temps, 
 nous présentons une dissection de la construction préfasciste de Pédrot, 
 en expliquant comment elle contourne les difficultés bien connues des 
 préfaisceaux en théorie des types intensionnelle.
@@ -732,7 +729,7 @@ de l'homotopie en théorie des types cubiques, et nous comparons les preuves
 obtenues avec des formalisations analogues qui postulent l'univalence et les
 HITs en tant qu'axiomes. 
 % 
-Notre panel de résultats inclut :
+Notre panel de résultats inclut~:
 %
 \begin{itemize}
 \item L'équivalence entre le tore et le produit cartésien de deux cercles,
@@ -740,7 +737,7 @@ Notre panel de résultats inclut :
 \item L'équivalence entre une définition directe des sphères de basses 
   dimensions et une définition alternative à base de suspensions itérées.
 \item La définition du pushout homotopique avec une preuve directe du lemme
-  ``\( 3 \times 3 \)''
+  ``\( 3 \times 3 \)''.
 \item La définition du joint de deux type et une preuve d'associativité. 
   Avec ces éléments, nous obtenons deux preuves différentes que la sphère $\Sp^3$
   est équivalente au joint de deux cercles.
@@ -748,8 +745,8 @@ Notre panel de résultats inclut :
   est équivalent à la sphère $\Sp^3$.
 \end{itemize}
 
-Ce travail a été formalisé dans l'assistant de preuves \Agda, et a été incorporé dans
-la bibliothèque standard de cubical Agda~\sidecite{agda-cubical-library}.
+Ce travail a été formalisé dans l'assistant à la preuve \Agda, et a été incorporé dans
+la bibliothèque standard de \CubicalAgda~\sidecite{agda-cubical-library}.
 
 \subsection{Publications}
 
@@ -761,22 +758,22 @@ Cette thèse s'appuie sur trois articles revus et publiés dans des conférences
 \item La construction d'une relation logique pour une version prédicative
   de la théorie des types observationnelle a été réalisée en collaboration
   avec Nicolas Tabareau, et a fait l'objet d'une publication à POPL'22~\sidecite{pujet:hal-03367052}.
-  Cet article a été nommé ``distinguished paper''.
+  % Cet article a été nommé ``distinguished paper''.
 \item Le travail sur l'imprédicativité et son interaction avec l'égalité 
-  observationnelle a égélement été réalisé en collaboration avec Nicolas
-  Tabareau, et a été conditionnellement accepté à POPL'23. 
+  observationnelle a également été réalisé en collaboration avec Nicolas
+  Tabareau, et a été accepté à POPL'23~\sidecite{pujet-tabareau-2}. 
 \end{itemize}
 En plus de cela, la traduction cubique étudiée en partie 2 a été l'objet d'un
-\emph{extended abstract} presenté à ICMS'20.
+résumé étendu presenté à ICMS'20.
 
 \section{Théories et Méta-Théories}
 
-Dans les chapitres suivants, nous manipulerons un certain nombre de systèmes formels---principalement 
-des théories de types dépendantes, mais également quelques théories 
+Dans les chapitres suivants, nous manipulerons un certain nombre de systèmes formels -- principalement 
+des théories des types dépendants, mais également quelques théories 
 du premier ordre. 
 % 
-Comme la correspondance entre les théories des types et les noms semble varier
-significativement d'un auteur à l'autre, nous fixons notre propre convention :
+Étant donné que les conventions de nommages des théories des types semblent varier
+significativement d'un auteur à l'autre, nous fixons notre propre convention~:
 
 \begin{tabular}{p{3em} p{0.82\textwidth} }
 \MLTT & 
@@ -803,24 +800,24 @@ significativement d'un auteur à l'autre, nous fixons notre propre convention :
   Une présentation détaillée est donnée dans le chapitre \ref{ch:observational}.
   % 
   Le système étendu \SetoidCCplus ajoute une règle supplémentaire pour le calcul
-  du \emph{type-casting} sur les preuves d'égalité réflexives, comme décrit dans le 
+  du \emph{type-casting} sur les preuves d'égalité réflexives, décrite dans le 
   chapitre \ref{ch:extensions}. 
 \end{tabular}
 
 Comme la majeure partie de cette thèse traite des propriétés méta-théoriques 
-des théories des types, nous les traiterons généralement comme des objets 
+des théories des types, nous les traiterons souvent comme des objets 
 mathématiques, c'est-à-dire comme une collection de lexèmes
 et de règles de typage. 
 % 
 Mais les théories des types sont également des théories mathématiques à part 
 entière, que nous pouvons utiliser pour prouver des théorèmes.
 
-Et en effet, nous développerons beaucoup de mathématiques à l'intérieur de 
-théories des types, en adoptant généralement un style informel pour éviter 
-de submerger le lecteur avec des termes de preuve peu lisibles. 
+Et en effet, nous développerons une certaine quantité de mathématiques à l'intérieur de 
+théories des types, en adoptant généralement un style informel pour des questions
+de lisibilité.
 % 
-Lorsque nous utilisons la théorie des types comme méta-théorie, nous utilisons 
-la syntaxe et le schéma de couleurs de l'assistant de preuve \Agda, pour la 
+Lorsque nous utilisons la théorie des types comme méta-théorie, nous adopterons 
+la syntaxe et le schéma de couleurs de l'assistant à la preuve \Agda, pour la 
 simple raison que toutes nos formalisations sont effectuées en \Agda. 
 % 
 Si aucun code en \Agda n'apparaît, il est raisonnable de supposer que nous travaillons 

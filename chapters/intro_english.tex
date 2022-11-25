@@ -1,4 +1,3 @@
-\setchapterimage[6cm]{seaside}
 \setchapterpreamble[u]{\margintoc}
 \chapter{Introduction in English}
 \labch{intro_english}
@@ -44,7 +43,7 @@ lest we have to insert explicit coercions every time we want to say, use a term
 of type \( \mathsf{Vector}\ (2+2) \) as a term of type \( \mathsf{Vector}\ 4 \).
 
 But unfortunately not everything is a natural 
-number\sidenote{[citation needed]}, and mathematical proofs
+number, and mathematical proofs
 frequently deal with equalities between infinitary objects such as functions and 
 sets.
 % 
@@ -100,7 +99,7 @@ between equal types.
 
 An important difference with the common practice of mathematics is the 
 attachment to the Curry-Howard correspondence between proofs and programs:
-equality is a \emph{type}, and equality proofs are \emph{programs}\sidenote{amen.}.
+equality is a \emph{type}, and equality proofs are \emph{programs}.
 % 
 As such, equality proofs are first class values like the natural numbers
 or the functions, and we can reason about them or evaluate them just as well.
@@ -210,7 +209,7 @@ we can use it to form a proposition \( P \) which quantifies over the type
 A classic example is the impredicative encoding of the false proposition, 
 whose inhabitants can be eliminated into any other proposition:
 \[
-\Depfun[X]{\varProp}{X} \quad : \quad \varProp
+\bot \enskip := \enskip \Depfun[X]{\varProp}{X} \enskip : \enskip \varProp
 \]
 
 Compare this situation with the \emph{predicative} hierarchy 
@@ -233,7 +232,7 @@ Predicativity removes the possibility for self-reference: if we try to
 replicate the encoding of the false proposition in \( \varType_0 \), the
 resulting type lands in the next universe.
 \[
-\Depfun[X]{\varType_0}{X} \quad : \quad \varType_1
+\Depfun[X]{\varType_0}{X} \enskip : \enskip \varType_1
 \]
 
 Playing with self-reference is always a dangerous game: 
@@ -367,10 +366,10 @@ and the ones that replace it with a \emph{univalent equality}.
 
 \subsection{Observational Equality}
 
-The observational equality has its roots in the work of Hofmann and 
-Altenkirch on the setoid model of type theory~\cite{hofmann95,altenkirch99}.
+The observational equality has its roots in the setoid model of type theory, 
+developed by Altenkirch after some explorations by Hofmann~\cite{hofmann95,altenkirch99}.
 % 
-By interpreting types as setoids, they were able to model
+By interpreting types as setoids, Altenkirch was able to model
 \defnote{ITT+funext}{ITT+funext stands for intensional type theory extended 
   with function extensionality.}
 in an intensional type theory extended with strict propositions.
@@ -540,7 +539,10 @@ the torus, but also a notion of quotient types.
 \mathsf{Inductive}\enskip\mathsf{circle} : \varType_0\enskip := \\
 \sep \quad \mathsf{base} \enskip : \enskip \mathsf{circle}\\
 \sep \quad \mathsf{loop} \enskip : \enskip \Indeq{\mathsf{circle}}{\mathsf{base}}{\mathsf{base}} \\
-\\
+\end{array}
+\]
+\[
+\begin{array}{l}
 \mathsf{Inductive}\enskip\mathsf{quotient}\ (A : \varType_i)\ (R : A \to A \to \varType_i) : \varType_i\enskip := \\
 \sep \quad \mathsf{emb} \enskip : \enskip A \to \mathsf{quotient}\ A\ R \\
 \sep \quad \mathsf{quo} \enskip : \enskip \Depfun[a\ b]{A}{R\ a\ b \to \Indeq{...}{\mathsf{emb}\ a}{\mathsf{emb}\ b}} \\
@@ -711,7 +713,7 @@ objects, and among them the cubical sets that Coquand \etal used to model
 univalence.
 % 
 However, the prefascist translation is missing an important ingredient of
-that model, called the \emph{fibrantion structure}.
+that model, called the \emph{fibration structure}.
 
 We add two new pages to this story: first, we present a dissection of 
 the prefascist construction of Pédrot, explaining how it gets around the well-known 
@@ -760,11 +762,10 @@ This thesis builds upon three peer-reviewed papers:
   CPP'20~\sidecite{cubical-homotopy}.
 \item The construction of a logical relation for a predicative version of 
   observational type theory is joint work with Nicolas Tabareau and was 
-  presented at POPL'22~\sidecite{pujet:hal-03367052},
-  where it received the ``distinguished paper'' award.
+  presented at POPL'22~\sidecite{pujet:hal-03367052}.
 \item The treatment of impredicativity in observational type theory is also
-  joint work with Nicolas Tabareau. It has been conditionally accepted at
-  POPL'23. 
+  joint work with Nicolas Tabareau. It has been accepted at
+  POPL'23~\sidecite{pujet-tabareau-2}. 
 \end{itemize}
 Additionally, the cubical translation of part 2 was the object of an extended 
 abstract presented at ICMS'20.
