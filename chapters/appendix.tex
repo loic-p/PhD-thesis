@@ -3,81 +3,83 @@
 
 \pagelayout{wide}
 
-\chapter{Inference Rules}
+\chapter{Inference Rules of \SetoidCC}
 \label{ch:ap:rules}
 
-\section{Syntactic Sugars}
+\section{Syntactic Sugar}
 \label{sec:ap:sugar}
 
-\[
+\begin{flalign*}
 \begin{array}{l}
 \metaop{ap} \quad : \quad \Depfun[f]{A \to B}{\Fun{\Obseq[A]{x}{y}}{\Obseq[B]{f\ x}{f\ y}}} \\
 \metaop{ap}\ f\ e \quad := \quad \transport{A}{x}{\lambda z\ .\ \Obseq[B]{f\ x}{f\ z}}{\metaop{refl}}{y}{e}
-\end{array}
-\]
+\end{array}&&
+\end{flalign*}
 
-\[
+\begin{flalign*}
 \begin{array}{l}
 {\_}^{-1} \quad : \quad \Obseq[A]{x}{y} \to \Obseq[A]{y}{x} \\
 e^{-1} \quad := \quad \transport{A}{x}{\lambda z\ .\ \Obseq[A]{z}{x}}{\metaop{refl}}{y}{e}
-\end{array}
-\]
+\end{array}&&
+\end{flalign*}
 
-\[
+\begin{flalign*}
 \begin{array}{l}
 {\_} \cdot \_ \quad : \quad \Obseq[A]{x}{y} \to \Obseq[A]{y}{z} \to \Obseq[A]{x}{z} \\
 e \cdot e' \quad := \quad \transport{A}{y}{\lambda t\ .\ \Obseq[A]{x}{t}}{e}{z}{e'}
-\end{array}
-\]
+\end{array}&&
+\end{flalign*}
 
 % \begin{align*} \sProp^+ & := \Type_0 \\ \Type_i^+ & := \Type_{i+1}
 % \end{align*}
 
-\[
+\begin{flalign*}
     \begin{array}{l}
     \Exists{\_}{\_} \quad : \quad \Depfun[A]{\sProp}{(A \to \sProp) \to \sProp} \\
 	\Exists{A}{B} \quad := \quad \Depfun[X]{\sProp}{\Fun{(\Fun{\Depfun{A}{B}}{X})}{X}}
-    \end{array}
-\]
+    \end{array}&&
+\end{flalign*}
 
-\[
+\begin{flalign*}
     \begin{array}{l}
-    \pair{\_}{\_} \quad : \quad \Depfun[a]{A}{B\ a \to \Exists{A}{B}}  \\
+    \pair{\_}{\_} \quad : \quad \Depfun[a]{A}{B \to \Exists[a]{A}{B}}  \\
 	\pair{a}{b} \quad := \quad \lambda\ X\ H\ .\ H\ a\ b
-    \end{array}
-\]
+    \end{array}&&
+\end{flalign*}
 
-\[
+Given a term \( t \) of type \( \Exists{A}{B} \):
+\begin{flalign*}
 \begin{array}{rll}
 	\fst{t} \quad & := \quad t\ A\ (\lambda\ a\ b\ .\ a) & : \quad A \\
 	\snd{t} \quad & := \quad t\ (B\ \fst{t})\ (\lambda\ a\ b\ .\ b) & : \quad B\ \fst{t}
-\end{array}
-\]
+\end{array}&&
+\end{flalign*}
 
-\[
+\begin{flalign*}
     \begin{array}{l}
     \varExists{\_}{\_} \quad : \quad \Depfun[A]{\Type_i}{(A \to \sProp) \to \sProp} \\
 	\varExists{A}{B} \quad := \quad \Depfun[X]{\sProp}{\Fun{(\Fun{\Depfun{A}{B}}{X})}{X}}
-    \end{array}
-\]
+    \end{array}&&
+\end{flalign*}
 
-\[ 
+\begin{flalign*} 
 	\begin{array}{rll}
 	\Unit \quad & := \quad \Fun{\Empty}{\Empty} & : \quad \sProp \\
 	\unit \quad & := \quad \lam{\Empty}{x} & : \quad \Unit
-	\end{array}
-\]
+	\end{array}&&
+\end{flalign*}
 
-\[
+\begin{flalign*}
     \begin{array}{l}
     \Squash{\_} \quad : \quad \Type_i \to \sProp \\
 	\Squash{A} \quad := \quad \Depfun[X]{\sProp}{\Fun{(\Fun{A}{X})}{X}}
-    \end{array}
-\]
+    \end{array}&&
+\end{flalign*}
 
-\[
-	\squash{t} \quad := \quad \lambda\ X\ H\ .\ H\ t \quad : \quad \Squash{A}
-\]
+Given a term \( t \) of type \( A \):
+\begin{flalign*}
+	\squash{t} \quad := \quad \lambda\ X\ H\ .\ H\ t \quad : \quad \Squash{A}&&
+\end{flalign*}
 
 \section{Contexts and Conversion}
 
