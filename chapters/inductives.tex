@@ -635,9 +635,8 @@ All in all, these reduction rules are a bit of a eyesore, but the underlying
 idea is just to use the same trick as in our definition of the inductive 
 equality.
 % 
-We expect that adding recursion to our inductive scheme does not pose 
-fundamental problems, but the rules become unreasonably complex and we would
-not dare to inflict them upon our reader.
+I expect that adding recursion to our inductive scheme does not pose 
+fundamental problems, but the rules become much more complex.
 
 \subsection{Indices and Universe Levels}
 \label{sec:univ-levels}
@@ -1022,10 +1021,10 @@ Instead, a tedious but straightforward computation using the definitional equali
 % 
 \begin{align*}
   \Gamma \vdash Y_f \enskip &\equiv \enskip \Delta_f\ \Delta_f' \quad : \quad \Natprop \to \Natprop\\
-      &\equiv \enskip f\ (\alpha\ (\Delta_f\ (\beta\ \Delta_f')))\\
-      &\equiv \enskip f\ (\alpha\ (f\ (\alpha^2\ (\Delta_f\ (\beta^3\ \Delta_f')))))\\
-      &\equiv \enskip f\ (\alpha\ (f\ (\alpha^2\ (f\ (\alpha^4\ (\Delta_f\ (\beta^7\ \Delta_f')))))))\\
-      &\equiv \enskip ...
+      &\Rightarrow^* \enskip f\ (\alpha\ (\Delta_f\ (\beta\ \Delta_f')))\\
+      &\Rightarrow^* \enskip f\ (\alpha\ (f\ (\alpha^2\ (\Delta_f\ (\beta^3\ \Delta_f')))))\\
+      &\Rightarrow^* \enskip f\ (\alpha\ (f\ (\alpha^2\ (f\ (\alpha^4\ (\Delta_f\ (\beta^7\ \Delta_f')))))))\\
+      &\Rightarrow^* \enskip ...
 \end{align*}
 where we define the auxiliary functions \( \alpha \) and \( \beta \) as:
 \[
@@ -1049,7 +1048,7 @@ terminates on all canonical inputs, we pose
 \begin{array}{lcl}
   f & : & (\Fun{\Natprop}{\Natprop}) \to (\Fun{\Natprop}{\Natprop}) \\
   f & := & \lam[p]{\Fun{\Natprop}{\Natprop}}{\lam[n]{\Natprop}{{\natrec{\Natprop}{0}{p\ (g\ n)}{n}}}}
-\end{array}{lcl}
+\end{array}
 \]
 
 and \sideremark{Here, the values 0 and 1 should be understood as the corresponding 
@@ -1065,49 +1064,31 @@ we obtain that \( Y_f\ 1 \) reduces to 0 if there exists a \( n \) such that
 
 \paragraph{Conversion is Undecidable}
 
-\SetoidCC is expressive enough to encode Turing machines, so
-knowing whether there exists a \( n \) such that \( g^n\ 1 \equiv 0 \) is
-undecidable in general.
+\SetoidCC is expressive enough to encode Turing machines so that
+knowing whether there exists a \( n \) such that \( g^n\ 1 = 0 \) is
+undecidable.
 %
 To complete the proof of undecidability of conversion, we still need
-to show that a term that diverges for any reduction strategy is not
+to show that a term of type \( \Natprop \) that diverges for all reduction strategies is not
 convertible to $0$. In other words, we need to show that conversion is
 not degenerate.
 
-To establish this, we consider a variation on the standard results of untyped
-lambda-calculus \sidecite{barendregt} showing that diverging terms
-cannot be equal to a normal form, by using confluence of the system
-and the fact that equality of two terms $t$ and $u$ corresponds to the
-existence of a zig-zag of reduction $t \Rightarrow^* t_1 \Leftarrow^*
-t_2\Rightarrow^*\dots \Leftarrow^* u$.
+To establish this, we use a lemma of Geuvers, adapted to the 
+Calculus of Inductive Constructions by \sidecitet[][lemma 2.19]{wernerthesis}.
+The lemma corresponds to a weak form of confluence: any well-typed term
+\( t \) that is \( \beta \eta \iota \)-equal to a weak head normal form
+\( t' \) actually reduces to an \( \eta \)-expanded form of \( t' \) for 
+untyped \( \beta \iota' \) reduction, a slightly modified version of 
+untyped \( \beta \iota \) reduction. 
+% 
+If we take \( t' = 0 \) then we obtain that a well-typed term \( t \) that
+is \( \beta \eta \iota \)-equal to 0 has a normal form, and thus cannot be
+divergent. 
 
-In \CIC, confluence of reduction has been formally proven by
-\sidecitet{coqcoqcorrect}, by using the standard Tait-Martin Löf
-method~\sidecite{takahashi1989parallel} making use of parallel
-reduction.
-%
-Extending the proof of confluence for \SetoidCC is straightforward for
-the reduction involving the cast operator and the equality type, as
-they do not add any critical pair.
-
-The only difficulty is to additionally account for $\eta$-conversion
-and proof-irrelevance in the conversion to get a similar notion of
-zig-zag.
-%
-Actually, $\eta$-conversion can be turned into an
-$\eta$-reduction rule and for proof-irrelevance, we can use the fact
-that because no reduction depends on the shape of a proof-irrelevant
-terms, proof-irrelevance commutes with reduction.
-So in \SetoidCC + $\Prop$, any proof of conversion between $t$ and $u$
-can be seen as a zig-zag up to proof-irrelevance
-%
-$t \Rightarrow^* t_1 \equiv_{pi} t_1' \Leftarrow^*
-t_2\Rightarrow ^* t_2' \equiv_{pi} \dots \Leftarrow^* u$ where $\equiv_{pi}$ is syntactic
-equality up-to applications of proof-irrelevance.
-%
-From this, using confluence, we conclude to any term that it convertible to $0$ can be
-reduced to $0$, so a term that diverges for any reduction strategy
-cannot be convertible to $0$.
+In order to apply this lemma to \SetoidCC, we need to extend the proof to 
+strict propositions and type-casting operators. The extension is not too
+difficult: strict propositions do not contribute to the reduction behavior, 
+and type-casting is very similar to an eliminator of an inductive type.
 
 \paragraph{Is this situation salvageable?}
 % 
@@ -1118,4 +1099,4 @@ Is the system \SetoidCC + \( \Prop \) doomed, then?
 
 Long story short, I do not know. Maybe there is a way to define a system that
 is better compartmentalized, so that both \( \sProp \) and \( \Prop \) can 
-interact with the predicative layer without interacting together. 
+interact with the predicative layer without interacting together...
