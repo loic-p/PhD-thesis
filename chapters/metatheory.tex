@@ -1970,9 +1970,9 @@ The interpretation of the terms is defined in \cref{fig:interpretation}.
   \( \rho \in \mctx{\Gamma} \).
 \item In order to validate proposition extensionality, proof-irrelevant 
   propositions are directly interpreted as \emph{truth values}, or
-  in other words, subsets of the singleton set.
+  in other words, subobjects of the singleton set.
   Computationally irrelevant proofs such as \( \metaop{refl} \) of 
-  \( \metaop{\Box{-}elim} \) are all interpreted interpreted as \( \rho \mapsto * \),
+  \( \metaop{\Box{-}elim} \) are all interpreted as \( \rho \mapsto * \),
   which guarantees that the corresponding proposition is true for all
   \( \rho \in \mctx{\Gamma} \).
   % 
@@ -2107,19 +2107,20 @@ the consistency of \SetoidCC is immediate:
   There are no proofs of \( \bot \) in the empty context.
 \end{theorem}
 
-Furthermore, by inspecting the normal forms provided by the normalization
-theorem, we realize that \( \castName \) is the only way to build a neutral
-term in the absence of variables. But having a stuck \( \castName \) requires
-having an equality proof between two incompatible types, which contradicts
-consistency.
+Furthermore, the model allows us to show that there are no neutral terms in
+the empty context: if we inspect the normal forms provided by the normalization
+theorem, we realize that a \( \castName \) between two incompatible types is the 
+only way to build a neutral term in the empty context. 
+But giving a type to such a \( \castName \) requires having an equality proof 
+between two incompatible types, which contradicts consistency.
 
 \begin{theorem}
   There are no neutral terms in the empty context.
 \end{theorem}
 
-From there, we deduce the canonicity theorem: all integers reduce to
-standard integers in the empty context. Thus, our modified model still allows
-us to establish all of the important meta-theoretical properties.
+From there, we deduce the canonicity theorem for the integers: all integers reduce to
+standard integers in the empty context. Thus, our modified model allows
+us to establish all of the meta-theoretical properties that we claimed in \cref{ch:observational}.
 
 On the other hand, it seems difficult to measure to what extent our
 set-theoretic model presents
