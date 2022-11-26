@@ -965,10 +965,10 @@ Here are the rules that handle the proof-relevant types that we described so far
 			% \\ \tytm{\Gamma}{A'}{\Univ_i}
 			\\ \tytm{\extctx{\Gamma}{A}}{B}{\Type_i}
 			\\ \tytm{\extctx{\Gamma}{A'}}{B'}{\Type_i}
-			\\ a := \cast{A'}{A}{\sym{e}}{a'}}
+			\\ a := \cast{A'}{A}{e}{a'}}
 		{\redmultiline{\Gamma}
 			{\Obseq[\Type]{\Depfun{A}{B}}{\Depfun{A'}{B'}}}
-			{\Exists[e]{\Obseq[{\Univ}]{A}{A'}}{\Depfun[a']{A'}{\Obseq[{\Type}]{\subst{B}{a}}{\subst{B'}{a'}}}}}{\sProp}}
+			{\Exists[e]{\Obseq[{\Univ}]{A'}{A}}{\Depfun[a']{A'}{\Obseq[{\Type}]{\subst{B}{a}}{\subst{B'}{a'}}}}}{\sProp}}
 	\ilabel{inferrule:eq-pi}
 \end{mathpar}
 \sideremark{Remark that the resulting types for \( \Pi \) and \( \Sigma \) are 
@@ -1039,7 +1039,7 @@ value of the original function.
 	\inferrule[Cast-$\Pi$]
 		{\tytm{\Gamma}{e}{\Obseq[{\Type}]{\Depfun{A}{B}}{\Depfun{A'}{B'}}}
 			\\ \tytmannotated{\Gamma}{f}{\Depfun{A}{B}}{\Type}
-			\\ a := \cast{A'}{A}{\sym{\fst{e}}}{a'}}
+			\\ a := \cast{A'}{A}{\fst{e}}{a'}}
 		{\redmultiline{\Gamma}
 			{\cast{\Depfun{A}{B}}{\Depfun{A'}{B'}}{e}{f}}
 			{\lam[a']{A'}{\cast{\subst{B}{a}}{\subst{B'}{a'}}{\snd{e}\ a'}{f\ a}}}
