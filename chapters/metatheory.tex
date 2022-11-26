@@ -1482,7 +1482,7 @@ Proof-relevant terms in \SetoidCC are \emph{programs}, at least in the sense of
 being terms in a lambda-calculus with additional operators.
 % 
 As such, they may be extracted and evaluated just like regular programs---
-and in fact, evaluating open terms is pretty much what our type-checking 
+and in fact, evaluating open terms is pretty much what our conversion checking 
 algorithm from \cref{sec:decidable-typing} does.
 % 
 Therefore, it makes sense to investigate the computational complexity of 
@@ -1502,8 +1502,9 @@ worst-case complexity, but they are still very efficient in practice!
 % 
 However, investigating the expressive power of proof terms is still a
 worthwile endeavor, as it provides us with information on the kinds of mathematical
-statements that can be proved in the proof-relevant fragment of \SetoidCC: for 
-instance, is it possible to show normalization of System F?
+statements that can be constructively proved in the relevant fragment of 
+\SetoidCC: for instance, is it possible to define a normalization function for 
+System F terms?
 
 To derive a lower bound for the computational expressivity, we simply remark 
 that Martin-Löf type theory is a subset of \SetoidCC, provided we use a 
@@ -1522,64 +1523,56 @@ hope to go lower than \MLTT, given that it is a subset \SetoidCC. But we
 can get pretty close:
 
 \begin{theorem}\label{setoidCC-in-MLTT}
-  \MLTT with \( n + 4 \) universes and \( \mathrm{W} \)-types can prove normalization of 
-  \SetoidCC with \( n \) universes and \( \mathrm{W} \)-types.
+  \MLTT with \( n + 4 \) universes and a general scheme for inductive types 
+  can prove normalization of \SetoidCC with \( n \) universes.
 \end{theorem}
 \begin{proof}
   The proof of this theorem is given in \cref{sec:fitt-norm-proof}.
 \end{proof}
 
-In the rest of this section, we need to be very precise about the exact
-amount of inductives and universes in our theories.
-We will write \( \MLTTW_n \) for Martin-Löf type 
-theory with \( n \) universes and \( \mathrm{W} \)-types, and we will write
-\( \SetoidCCW_n \) for the observational calculus of constructions extended 
-with proof-relevant \( \mathrm{W} \)-types and \( n \) universes.
+In the rest of this section, we will write \( \MLTTW_n \) for Martin-Löf type 
+theory with \( n \) universes and a general scheme of inductive types, and we 
+will write \( \SetoidCC_n \) for the observational calculus of constructions 
+with \( n \) universes.
 
 When we let \( n \) go to infinity, or in other words when we consider theories 
 with an unbounded hierarchy of universes, we get that
-normalization for \MLTTW is equivalent to normalization for \SetoidCCW.
+\MLTTW is sufficient to prove normalization for \SetoidCC.
 
 \begin{corollary}
-  Normalization for \SetoidCCW is equivalent to normalization for \MLTTW
-  over a weak fragment of arithmetic.
+  \MLTT with a general scheme of inductive types can prove normalization of \SetoidCC.
 \end{corollary}
 
 Note that we cannot hope for a similar result in terms of consistency or
-canonicity: while consistency and canonicity for \MLTTW follow from
-normalization, proving that \SetoidCCW is consistent requires an impredicative
+canonicity: while consistency and canonicity for \MLTT follow from
+normalization, proving that \SetoidCC is consistent requires an impredicative
 theory, which is necessarily much stronger than \MLTTW.
 
-\Cref{setoidCC-in-MLTT} also provides us with a neat description of the
-computational power of \SetoidCCW:
+\Cref{setoidCC-in-MLTT} provides us with an upper bound on the
+computational power of \SetoidCC:
 
 \begin{corollary}\label{integer-functions}
-  \SetoidCCW and \MLTTW can express the exact same integer functions
-  as closed terms of type \( \Fun{\Nat}{\Nat} \).
+  Any integer function that can be defined as a closed term of type 
+  \( \Fun{\Nat}{\Nat} \) in \SetoidCC can also be defined in \MLTT with 
+  a general scheme for inductive types.
 \end{corollary}
 
 \begin{proof}
-  In one direction, we can simply embed functions from \MLTTW into \SetoidCCW.
-
-  In the converse direction, we note that any closed term \( f \) of
-  type \( \Fun{\Nat}{\Nat} \) in \SetoidCCW only mentions a finite number of
+  We start by noting that any closed term \( f \) of
+  type \( \Fun{\Nat}{\Nat} \) in \SetoidCC only mentions a finite number of
   universes \( N \).
   %
   Thus, \cref{setoidCC-in-MLTT} provides us with a normalization function for 
-  \( \SetoidCCW_N \) in \( \MLTTW_{N+4} \), that computes the normal form of any 
+  \( \SetoidCC_N \) in \( \MLTTW_{N+4} \), that computes the normal form of any 
   well-typed term. 
   % 
-  From there, we can define a function \( f' : \Fun{\Nat}{\Nat} \) in \MLTTW
+  From there, we can define a function \( f' : \Fun{\Nat}{\Nat} \) in \MLTT
   that represents the same integer function as \( f \).
-  Given an integer \( n : \Nat \), \( f' \) first computes a \SetoidCCW typing 
+  Given an integer \( n : \Nat \), \( f' \) first computes a \SetoidCC typing 
   derivation for \( f\ n \) in the empty context, then applies the 
   normalization function to obtain a weak-head normal form that is necessarily
   canonical, and converts this normal form back to an integer.
 \end{proof}
-%
-In the case of \SetoidCC without \( \mathrm{W} \)-types, we only know that its
-computational power is between that of \MLTT and \MLTTW, but we conjecture that
-it is equivalent to \MLTT.
 
 \Cref{integer-functions} might come off as a surprise, since \SetoidCC is 
 equipped with an impredicative universe, and impredicativity generally adds
@@ -1587,7 +1580,7 @@ a great deal of proof-theoretic strength!
 %
 And \SetoidCC does possess this logical power, in fact. Indeed, it can
 represent many more functions as \( \sProp \)-valued functional relations
-than \MLTT. But this corollary shows that there is no way to extract them
+than \MLTTW. But this corollary shows that there is no way to extract them
 in the proof-relevant fragment, even though we have access to elimination
 principles for false propositions and the observational equality.
 %
@@ -1596,36 +1589,32 @@ Thus, the logical power of impredicativity is locked inside of \( \sProp \).
 This is in stark contrast with the Calculus of Inductive Constructions,
 in which it is possible to define closed terms of type \( \Fun{\Nat}{\Nat} \) that leverage
 the power of impredicativity, using a principle called large elimination
-of singleton inductive types\sideremark{The standard technique is to use
-the accessibility predicate as defined in \url{https://coq.inria.fr/library/Coq.Init.Wf.html}.}.
+of singleton inductive types.\sideremark{The standard technique is to use
+the accessibility predicate as defined in \url{https://coq.inria.fr/library/Coq.Init.Wf.html}.}
 %
 We discuss this principle with more detail in \cref{ch:extensions}.
 
-\subsection{Fitting the Normalization Proof in MLTT}
+\subsection{Fitting the Normalization Proof in \MLTTW}
 \label{sec:fitt-norm-proof}
 
 In this section, we give a proof of \cref{setoidCC-in-MLTT}, by
 encoding the logical relation sketched in \cref{sec:logic-relat-with}
 without induction-recursion.
 %
-This argument has been formalized in \Agda.\sideremark{The formalization is in the
-  folder \texttt{logrel-wo-ind-rec}. It is done for \MLTT and not
-full \SetoidCC, but it does not make a difference as the crux of the proof is in
-the definition of the relation without induction-recursion.}
+This argument has been formalized in \Agda.\sideremark{The formalization is available
+at \url{https://github.com/loic-p/logrel-mltt/tree/without-IR}. 
+It is done for \MLTT and not full \SetoidCC, but it does not make a difference 
+as the crux of the proof lies in the definition of the normalization model without 
+induction-recursion.}
 %
 For the remainder of this section, we work in \( \MLTTW_{n+4} \) with a deep
 embedding of \( \SetoidCCW_n \).
 % 
-Having \( \mathrm{W} \)-types and inductive equalities in our meta-theory,
-it becomes possible to encode a wide range of indexed, nested inductive
-types as described by \sidecitet{inductives_with_W}. Therefore, we freely
-make use of them, and assume they are translated back to \( \mathrm{W} \)-types.
-%
 To avoid confusion between the meta-theory and the object theory, we
 will use \Agda-style notations for the meta-theory.
 
 From a bird's eye perspective, the normalization proof builds a model
-of \SetoidCCW in which well-formed types are interpreted as proof-relevant
+of \SetoidCC in which well-formed types are interpreted as proof-relevant
 predicates on untyped terms, and induction-recursion is used to construct a
 universe in the model: we define the inductive predicate of reducible types
 simultaneously with recursive functions that associates reducibility
@@ -1675,14 +1664,14 @@ Note that the logical relation is built in stages:
 Each step of this process requires an additional meta-theoretical universe
 level.
 %
-This is only natural, since we are proving normalization for a theory that
-subsumes \( \MLTTW_n \), a property from which we can deduce the consistency
-of \( \MLTTW_n \).
+This is not too surprising, since we are proving normalization for a theory 
+that subsumes \( \MLTT_n \), a property from which we can deduce the consistency
+of \( \MLTT_n \).
 %
-Therefore, Gödel's incompleteness theorem applies and guarantees that
-we need more universes in the meta-theory than in the fragment we
-consider.
-
+Therefore, if this proof scheme can be extended to deal
+with general inductive types in the object theory, then Gödel's incompleteness 
+theorem applies and guarantees that we need more universes in the meta-theory 
+than in the object theory.
 
 \begin{figure*}
   \begin{small}
@@ -1773,7 +1762,8 @@ prove the fundamental lemma.
 %
 We do not develop this here as the construction is a similar encoding of
 small induction-recursion with functional relations.
-The interested reader can consult the formalization for a more detailed proof.
+The interested reader can consult the formalization at
+\url{https://github.com/loic-p/logrel-mltt/tree/without-IR}.
 
 \section{Semantics of \SetoidCC}
 \label{sec:cons-seto-model}
