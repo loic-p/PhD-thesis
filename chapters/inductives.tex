@@ -6,10 +6,10 @@
 In this chapter, we investigate several variants and extensions of the
 observational calculus of constructions.
 
-In \cref{sec:cast-refl}, we add a computation rule to the \( \castName \)
-operator so that it reduces when applied to a reflexive identity proof. 
-We propose a normalization algorithm for the resulting system, and we 
-conjecture that it always terminates on well-typed terms.
+In \cref{sec:cast-refl}, we add a rule to the \( \castName \)
+operator so that it is reduces when applied to a reflexive identity proof. 
+We discuss normalization of the resulting system, and we give a proof of
+decidability of conversion.
 % 
 Then in \cref{sec:heterogeneous}, we go over two alternative presentations of the 
 observational equality: a heterogeneous equality and an equality with no
@@ -129,9 +129,9 @@ also supports the computation rule on reflexivity by definition.
 Naturally, extending the convertibility relation of \SetoidCC means that we
 need a new algorithm to decide conversion for \SetoidCCplus terms.
 % 
-We will describe two such algorithms below, but unfortunately we are not
-able to supplement either with a proof of correction. 
-We leave these as conjectures for further work.
+We will describe two such algorithms below, but we were only 
+able to supplement the second algorithm with a proof of correction. 
+We leave the first one as a conjecture for further work.
 
 \subsection{Implementing \nameref{inferrule:cast-refl-plus} with reduction rules}
 
@@ -294,7 +294,7 @@ checking instead, as described in the work of Allais \etal~\sidecite{allais13}.
 Concretely, we propose the following informal algorithm for conversion 
 checking in \SetoidCCplus:
 % 
-\begin{figure}[!h]
+\begin{figure}[H]
 \[
 \begin{array}{l}
 \textbf{Input:} \enskip \text{A context \( \Gamma \), three terms \( A \), \( t \), \( u \), and an integer \( i \).} \\
@@ -321,11 +321,15 @@ checking in \SetoidCCplus:
 \caption{Conversion checking algorithm for \SetoidCCplus}
 \end{figure}
 
-\begin{conjecture}
+\begin{theorem}
   The algorithm sketched above decides conversion for \SetoidCCplus.
-\end{conjecture}
+\end{theorem}
 
-We leave the investigation of this question for future works.
+We have formalized a proof of decidability for \SetoidCCplus with a similar
+algorithm in the \Agda proof assistant. The proof is available on GitHub at
+\url{https://github.com/CoqHott/logrel-mltt}, on the branch
+\url{impredicativity-cast-compute-refl}. The source code can also be browsed
+at {\small{\href{https://htmlpreview.github.io/?https://raw.githubusercontent.com/CoqHott/logrel-mltt/impredicativity-cast-compute-refl/html/Everything.html}{\emph{[CCobs-plus.agda]}}}}.
 
 \section{Variations on the Observational Equality}
 \label{sec:heterogeneous}

@@ -1604,17 +1604,16 @@ The system \HoTTminus is clearly an extension of \( \MLTT{+}\mathsf{Univalence} 
 in the sense that every judgment that is valid in the latter is also valid in 
 \HoTTminus.
 % 
-Additionally, if our conjecture of normalization for \SetoidCCplus from 
-\cref{sec:cast-refl} is true, then \HoTTminus has interesting computational 
+Additionally, thanks to our normalization proof for \SetoidCCplus from 
+\cref{sec:cast-refl}, we can show that \HoTTminus has interesting computational 
 properties.
 
-\begin{theorem}[\footnotesize{assuming the conversion and the typing of \SetoidCCplus
-    are decidable}]
+\begin{theorem}
     The conversion and the typing of \HoTTminus are decidable.
 \end{theorem}
 
-\begin{theorem}[\footnotesize{assuming the reduction of \SetoidCCplus
-    is normalizing}] \phantom{.}\\
+\begin{theorem}
+     \phantom{.}\\
     If \( t \) is a term of type \( \Nat \) in the empty context, then there 
     exists an integer \( n \) such that \( t \) is propositionally equal to 
     \( S^n~0 \). \\
@@ -1631,13 +1630,15 @@ Finally, we can extract some proof-theoretic results:
     \( \MLTT{+}\mathsf{Univalence} \) can also be defined in \SetoidCCplus.
 \end{theorem}
 
-From which we conjecture that the univalence axiom does not increase the
-computational power of \MLTT:
+And given that our normalization proof for \SetoidCCplus is done in \MLTT
+with small induction-recursion, we can use the method described in 
+\cref{sec:fitt-norm-proof} to show that \SetoidCCplus cannot define more
+functions than \MLTT. Hence the following result:
 
-\begin{conjecture}
+\begin{theorem}
     Every integer function that can be defined in the empty context in 
     \( \MLTT{+}\mathsf{Univalence} \) can also be defined in \MLTT.
-\end{conjecture}
+\end{theorem}
 
 \subsection{Going further}
 
