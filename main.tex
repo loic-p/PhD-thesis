@@ -58,6 +58,12 @@
 % Somehow this one needs to come after \begin{document} because of some obscure interaction with
 % LuaLaTeX which redefines \Equiv
 
+\includepdf{cover-front.pdf}
+\clearpage
+\thispagestyle{empty}
+\null%
+\clearpage
+
 %----------------------------------------------------------------------------------------
 %	BOOK INFORMATION
 %----------------------------------------------------------------------------------------
@@ -132,10 +138,8 @@
 %----------------------------------------------------------------------------------------
 
 % \dedication{
-% 	% \textit{À Vanille, mon lapin nain qui bien malgré lui, m'enseigna une des lois les plus
-%     %     fondamentales de l'univers: l'indifférence totale vis-à-vis de mon existence.}
-% 	\textit{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus convallis diam nec dolor sagittis,
-% 	nec euismod ligula sollicitudin.}
+% 	\textit{À Vanille, mon lapin nain qui bien malgré lui, m'enseigna une des lois les plus
+%         fondamentales de l'univers: l'indifférence totale vis-à-vis de mon existence.}
 % }
 
 %----------------------------------------------------------------------------------------
@@ -241,8 +245,8 @@
 
 % The glossary needs to be compiled on the command line with 'makeglossaries main' from the template directory
 
-\setglossarystyle{listgroup} % Set the style of the glossary (see https://en.wikibooks.org/wiki/LaTeX/Glossary for a reference)
-\printglossary[title=Special Terms, toctitle=List of Terms] % Output the glossary, 'title' is the chapter heading for the glossary, toctitle is the table of contents heading
+% \setglossarystyle{listgroup} % Set the style of the glossary (see https://en.wikibooks.org/wiki/LaTeX/Glossary for a reference)
+% \printglossary[title=Special Terms, toctitle=List of Terms] % Output the glossary, 'title' is the chapter heading for the glossary, toctitle is the table of contents heading
 
 %----------------------------------------------------------------------------------------
 %	INDEX
@@ -250,7 +254,7 @@
 
 % The index needs to be compiled on the command line with 'makeindex main' from the template directory
 
-\printindex % Output the index
+% \printindex % Output the index
 
 %----------------------------------------------------------------------------------------
 %	BACK COVER
@@ -258,11 +262,11 @@
 
 % If you have a PDF/image file that you want to use as a back cover, uncomment the following lines
 
-%\clearpage
-%\thispagestyle{empty}
-%\null%
-%\clearpage
-%\includepdf{cover-back.pdf}
+\clearpage
+\thispagestyle{empty}
+\null%
+\clearpage
+\includepdf{cover-back.pdf}
 
 %----------------------------------------------------------------------------------------
 
