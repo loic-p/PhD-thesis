@@ -311,7 +311,7 @@ The typing rules of \SetoidCC are based on four different judgments:
 	\( \wfctx{\Gamma} \) & {the context \( \Gamma \) is well-formed} \\
 	\( \tytmannotated{\Gamma}{t}{A}{\Univ} \) & {the term \( t \) has type \( A \) in context \( \Gamma \)} \\
 	\( \eqtmannotated{\Gamma}{t}{u}{A}{\Univ} \) & {\( t \) and \( u \) are convertible at type \( A \) in context \( \Gamma \)} \\
-	\( \redannotated{\Gamma}{t}{u}{A}{\Type_i} \) & \qquad {the term \( t \) reduces to \( u \) at type \( A \) in context \( \Gamma \)}
+	\( \redannotated{\Gamma}{t}{u}{A}{\Type_i} \) & \quad {the term \( t \) reduces to \( u \) at type \( A \) in context \( \Gamma \)}
   \end{tabular}
   \sideremark[*-4]{In all the judgments, \( \Univ \) is either \( \Type_i \) or \( \sProp \).
   Note that the reduction only makes sense for proof-relevant terms, so it will never
@@ -783,6 +783,11 @@ The observational equality between two inhabitants of a dependent sum reduces
 to the equality of the first and second projections---modulo a type casting, 
 which is necessary for the second equality to type-check.
 % 
+\sideremark[*2]{Note that in this rule, \( b' \) is only an abreviation, and not
+a premise — in particular, \( b' \) contains the variable \( e \), which is not in
+scope yet. Although this might be a controversial choice, we will use this sort of 
+abreviations fairly often for cast variables.}
+% 
 \begin{mathpar}
   \inferrule[Eq-Pair]{\tytmannotated{\Gamma}{t,u}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}
   			\\ b' := \cast{\subst{B}{\relfst{t}}}{\subst{B}{\relfst{u}}}{\ap{B}{e}}{\relsnd{t}}} 
@@ -790,9 +795,7 @@ which is necessary for the second equality to type-check.
 				{(\Obseq[B]{b'}{\relsnd{u}})}}{\sProp}}
 		  \ilabel{inferrule:eq-pair}
 \end{mathpar}
-% 
-\sideremark[*-4]{Note that in this rule, \( b' \) is only an abreviation, and not
-a premise.}
+
 
 \subsection{Natural numbers}
 
@@ -902,7 +905,7 @@ the propositions, which are not convertible to one another despite being proof-i
 The observational equality between two inhabitants of \( \sProp \) reduces to
 their logical equivalence, which bakes the principle of propositional 
 extensionality into \SetoidCC.
-% 
+
 \sideremark{Recall that the implication is a non-dependent proof-irrelevant
 \( \Pi \)-type. Likewise, we define the conjunction as the non-dependent
 case of the dependent conjunction.}
@@ -1035,6 +1038,7 @@ Casting between two dependent products is slightly more involved: it
 produces a new function by casting back and forth the argument and return
 value of the original function.
 % 
+\begin{figure*}[!h]
 \begin{mathpar}
 	\inferrule[Cast-$\Pi$]
 		{\tytm{\Gamma}{e}{\Obseq[{\Type}]{\Depfun{A}{B}}{\Depfun{A'}{B'}}}
@@ -1046,10 +1050,12 @@ value of the original function.
 			{\Depfun{A'}{B'} : \Type_i}}
 	\ilabel{inferrule:cast-pi}
 \end{mathpar}
-% 
+\end{figure*}
+
 Finally, casting between two dependent sums produces a new dependent pair
 by applying \( \castName \) to the projections of the original one.
 % 
+\begin{figure*}[!h]
 \begin{mathpar}
 	\inferrule[Cast-$\Sigma$]
 		{\tytm{\Gamma}{e}{\Obseq[{\Type}]{\Depsum{A}{B}}{\Depsum{A'}{B'}}}
@@ -1061,6 +1067,7 @@ by applying \( \castName \) to the projections of the original one.
 			{\Depsum{A'}{B'} : \Type_i}}
 	\ilabel{inferrule:cast-sigma}
 \end{mathpar}
+\end{figure*}
 
 We only define reduction rules when the two types have the same head, and in other
 cases the cast will simply be a stuck term.
@@ -1129,18 +1136,15 @@ two canonical projections reduces to \( R \).
 			{\red{\Gamma}{\Obseq[\Quo{A}{R}]{\quo{t}}{\quo{u}}}{R\ t\ u}{\sProp}}
 \end{mathpar}
 % 
-The definition of $\castName$ between two quotient types reduces when
-the casted term is a canonical projection.
-%
-\begin{mathpar}
-  \inferrule[Quotient-Proj-Cast]{\tytmannotated{\Gamma}{e}{\Obseq[\Type_i]{\Quo{A}{R}}{\Quo{A'}{R'}}}{\sProp}
-	\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}}
-  {\redannotated{\Gamma}{\cast{\Quo{A}{R}}{\Quo{A'}{R'}}{e}{\quo{t}}}{\quo{\cast{A}{A'}{\fst{e}}{t}}}{\Quo{A}{R'}}{\Type_i}}
-\end{mathpar}
-
 Observational equality between two quotient types reduces to equality
 of the (proof-relevant part of the) telescopes that define each
 quotient:
+% 
+\sideremark{This rule is perhaps too fine compared to what we might hope for: 
+plenty of isomorphic quotients are not identified. But remember that the 
+observational equality between types is by no means univalent, and only identifies
+types that have been constructed in the same way.
+}
 % 
 \begin{mathpar}
   \inferrule[Quotient-Eq]{\tytm{\Gamma}{A}{\Type_i}
@@ -1157,10 +1161,20 @@ quotient:
 	  {\Obseq[\sProp]{R\ x\ y}{R\ x'\ y'}}}}{\sProp}}
 \end{mathpar}
 % 
+Then, given a proof of equality between quotients, the $\castName$ operator 
+reduces on canonical projections.
+%
+\begin{mathpar}
+  \inferrule[Quotient-Proj-Cast]{\tytmannotated{\Gamma}{e}{\Obseq[\Type_i]{\Quo{A}{R}}{\Quo{A'}{R'}}}{\sProp}
+	\\ \tytmannotated{\Gamma}{t}{A}{\Type_i}}
+  {\redannotated{\Gamma}{\cast{\Quo{A}{R}}{\Quo{A'}{R'}}{e}{\quo{t}}}{\quo{\cast{A}{A'}{\fst{e}}{t}}}{\Quo{A}{R'}}{\Type_i}}
+\end{mathpar}
+ 
 The eliminator for quotient types encodes the universal property of quotients: to construct a
 function out of a quotient \( \Quo{A}{R} \), it suffices to give a function \( t_\pi \) out of \( A \)
 such that if \( R \ x \ y \), then their images under \( t_\pi \) are equal.
 % 
+\begin{figure*}[!h]
 \begin{mathpar}
   \inferrule[Quotient-Elim]{\tytm{\Gamma}{B}{\Fun{\Quo{A}{R}}{\Univ}}
 			\\ \tytm{\Gamma}{t_\pi}{\Depfun{A}{B\ \quo{x}}}
@@ -1168,9 +1182,11 @@ such that if \( R \ x \ y \), then their images under \( t_\pi \) are equal.
 			\\ \tytm{\Gamma}{u}{\Quo{A}{R}}}
 			{\tytmannotated{\Gamma}{\quorec{B}{t_\pi}{t_\sim}{u}}{B\ u}{\Univ}}
 \end{mathpar}
-% 
+\end{figure*}
+
 The eliminator for quotient types has the obvious computation rule
 % 
+\begin{figure*}[!h]
 \begin{mathpar}
   \inferrule[Quotient-Proj-Elim]{\tytm{\Gamma}{B}{\Fun{\Quo{A}{R}}{\Type_i}}
 			\\ \tytm{\Gamma}{t_\pi}{\Depfun{A}{B\ \quo{x}}}
@@ -1178,7 +1194,8 @@ The eliminator for quotient types has the obvious computation rule
 			\\ \tytm{\Gamma}{u}{A}}
 			{\redannotated{\Gamma}{\quorec{B}{t_\pi}{t_\sim}{\quo{u}}}{t_\pi\ u}{B\ (\quo{u})}{\Type_i}}
 \end{mathpar}
-%
+\end{figure*}
+
 On top of this, quotients also come with the appropriate substitution and 
 congruence rules.
 % ifAppendix{ as defined in \cref{fig:SetoidTT-substitution,fig:SetoidTT-congruence}}
@@ -1231,7 +1248,7 @@ retain the computational behavior of inhabitants of \( A \).
 Another typical use of $\Boxt{}$ is to define a singleton
   type on which it is possible to reason about equality. Indeed, although
   $\Unit$ has only one inhabitant up-to conversion, it is not possible
-  to state this internally as equality on propositions is not defined.
+  to state this internally as equality between proofs of propositions is not defined.
   %
   However, one can state contractibility of the type $\Boxt{\Unit}$ and prove
   it, as it lives in $\Type$.
@@ -1297,6 +1314,13 @@ satisfies the same typing rule:
 			{\tytm{\Gamma}{\cast{B\ t\ \refl{t}{A}}{B\ t'\ e}{\eqJ{A}{t}{B}{t'}{e}}{b}}{B\ t'\ e}}
 \end{mathpar}
 where the auxiliary operator \( \metaop{eq}_{\metaop{J}} \) is defined by
+% 
+\sideremark{Remark that definitional proof irrelevance plays a role in the
+	construction of \( \metaop{eq}_{\metaop{J}} \): the fourth argument of
+	the \( \metaop{transp} \) operator is
+	only well-typed when \( \metaop{refl} \) is convertible to any other
+	proof of equality between \( t \) and itself.}
+% 
 \[
 \begin{array}{rcl}
 	\eqJ{A}{t}{B}{t'\!}{e} & \!:\! & \Obseq{B\ t\ \refl{t}{}}{B\ t'\ e} \\
@@ -1361,10 +1385,11 @@ Following his ideas, we extend \SetoidCC with \( \metaop{Id} \)-types:
 \end{mathpar}
 % 
 These rules mimic the behavior of Martin-Löf identity types, quotiented so they 
-contain only one inhabitant up to observational equality. 
+contain only one inhabitant up to observational equality. Let's see how we
+could extend the operations of \SetoidCC to this new type former.
 
-Observational equality between two identity types is defined as equality of the
-telescopes of arguments, as for the quotient type:
+Firstly, we define the observational equality between two identity types as 
+the equality of the telescopes of arguments, like we did for the quotient type:
 %
 \begin{mathpar}
   \inferrule[Id-Eq]{\tytm{\Gamma}{A}{\Type_i}
@@ -1379,7 +1404,7 @@ telescopes of arguments, as for the quotient type:
 			  {\sProp}}
 \end{mathpar}
 %
-We may hope to define computation
+Next, we may hope to define computation
 rules for cast by simply reducing the equality proof to a weak head normal form, and then
 commuting cast with the head constructor like we did for the type of natural numbers. 
 However, we quickly run into a problem:
@@ -1396,7 +1421,7 @@ We cannot reduce this term to $\metaop{Idrefl}$, because \( t' \) and \( u' \)
 are not convertible in general---\( e \) only provides us with a propositional 
 equality \( \Obseq[A']{t'}{u'} \). 
 % 
-In order to fix this, we add a term $\idpath{e} $ that turns any inhabitant of 
+So in order to fix this, we add a new operator $\idpath{e} $ that turns any inhabitant of 
 \( \Obseq[A]{t}{u} \) into an inhabitant of \( \Id{A}{t}{u} \).
 % 
 \begin{mathpar}
@@ -1407,7 +1432,7 @@ In order to fix this, we add a term $\idpath{e} $ that turns any inhabitant of
 			{\tytm{\Gamma}{\idpath{e}}{\Id{A}{t}{u}}}
 \end{mathpar}
 %
-Then, the computation rule for cast on $\id{t}$ can be defined as:
+Now we can define the computation rule for cast on $\id{t}$, using our new operator:
 %
 \begin{mathpar}
   \inferrule[Cast-Idrefl]{\tytm{\Gamma}{A, A'}{\Type_i}
@@ -1420,8 +1445,10 @@ Then, the computation rule for cast on $\id{t}$ can be defined as:
 			  {\Id{A'}{t'}{u'}}}
 \end{mathpar}
 % 
-We also need to account for this additional constructor in reduction rules:
+And naturally, we need to account for this additional constructor in the reduction 
+rules for the observational equality and type-casting:
 % 
+\begin{figure*}[!h]
 \begin{mathpar}
   \inferrule[J-Idpath]{\tytm{\Gamma}{A}{\Type_i}
 			\\ \tytm{\Gamma}{t}{A}
@@ -1445,9 +1472,13 @@ We also need to account for this additional constructor in reduction rules:
 			  {\idpath{\transitivity{\transitivity{\sym{\fst{\snd{e'}}}}{\ap{(\cast{A}{A'}{\fst{e'}}{-})}{e}}}{\snd{\snd{e'}}}}}
 			  {\Id{A'}{t'}{u'}}}
 \end{mathpar}
+\end{figure*}
+
+With this handful of additional rules, our \( \metaop{Id} \) types satisfy all 
+the computational rules of the Martin-Löf identity types. 
 % 
-Along with the adequate congruence rules and substitution rules, these form the
-rules for Id types.
+Using these, we can complete our embedding of \MLTT into the proof-relevant 
+layer of \SetoidCC.
 
 \paragraph{Relation with the Observational Equality}
 % 
@@ -1466,9 +1497,9 @@ type theory.
 
 Thus, the only difference between the two equalities is a tradeoff between
 definitional and propositional equations:
-\sideremark{In the system \SetoidCCplus of \cref{ch:extensions}, we have the best
-of both worlds: the observational equality satisfies both UIP and the computation
-of \( J \). 
+\sideremark{In \cref{ch:extensions}, we explain how to modify \SetoidCC
+to get the best of both worlds: an observational equality that satisfies 
+both UIP and the computation of \( J \). 
 % But the normalization of this system is only conjectured.
 }
 % 
@@ -1503,7 +1534,7 @@ Constructors are all those tokens that are introduced by introduction rules,
 including \( \zero \) and \( \metaop{S} \) but also type formers (except for the
 observational equality) and lambda-abstractions.
 
-On the other hand eliminators are introduced by elimination rules, and they
+On the other hand, eliminators are introduced by elimination rules, and they
 include tokens like \( \color{RoyalBlue}{\Nat}\metaop{-elim} \) but also 
 applications, \( \castName \) or the observational equality type.
 % 
@@ -1541,7 +1572,7 @@ In \SetoidCC, inhabitants of a proof-irrelevant type are never
 considered as whnf, as there is no notion of reduction of
 proof-irrelevant terms.
 
-\begin{figure}[!h]
+\begin{figure}
   \begin{small}
 	\[
 	\begin{array}{l@{\qquad}lcl}
