@@ -339,25 +339,24 @@ at {\small{\href{https://htmlpreview.github.io/?https://raw.githubusercontent.co
 In \SetoidCC, we can form the observational 
 equality of two terms only when they have the same type. 
 % 
-In other words the observational equality is homogeneous---just like the 
-definitional equality, the inductive equality, or most equalities routinely 
-considered by type theorists.
+In other words the observational equality is \emph{homogeneous}, just like the 
+definitional equality or the inductive equality.
 % 
-But when they introduced observational type theory, Altenkirch, McBride and 
-Swierstra decided to use a heterogenous 
+But in their seminal work on observational type theory, Altenkirch, McBride and 
+Swierstra decided to use a \emph{heterogenous} 
 equality~\sidecite{altenkirchAl:plpv2007}, arguing that it results in simpler
 rules.
-% 
-In this section, we show that it is not too difficult to modify the 
-presentation of \SetoidCC so that it uses a proof-irrelevant heterogeneous 
-equality instead of the homogeneous observational equality.
+%  
+In this section, we explain how to modify the presentation of \SetoidCC so that 
+it uses a proof-irrelevant heterogeneous equality instead of the homogeneous 
+observational equality, and we discuss the consequences.
 
 % It is not too difficult to modify the presentation of \SetoidCC so that it uses a
 % proof-irrelevant heterogeneous equality \textit{à la} Altenkirch \etal instead 
 % of the homogeneous observational equality.
 % 
-First, we change the formation rule of the equality so that it applies between
-two terms with different types:
+First, we can change the formation rule of the equality so that it applies 
+between two terms with different types:
 % 
 \begin{mathpar}
   \inferrule[Heterogenous-Eq-Form]
@@ -367,22 +366,26 @@ two terms with different types:
   \and
 \end{mathpar}
 
-Note that unlike the ``path-over'' equality of cubical type theory, we do not 
-ask for a proof of equality between \( A \) and \( B \) to form the type
-\( \Heteq{t}{A}{u}{B} \).
+Note that we are now using two indices in the type \( \Heteq{t}{A}{u}{B} \), 
+one on the left for the type of \( t \) and one on the right for the type of
+\( u \).
+Remark also that we do not ask for a proof of equality between the type \( A \)
+and \( B \) in order to form the type \( \Heteq{t}{A}{u}{B} \). Unlike the 
+``path-over'' equality of cubical type theory, our heterogeneous equality can
+be used to compare two terms with completely unrelated types.
 
 We also replace rules \nameref{inferrule:refl},
 \nameref{inferrule:transport-prop} and \nameref{inferrule:cast} with the 
-following:
+following rules, which should be self-explanatory:
 \begin{mathpar}
   \inferrule[Heterogeneous-Transport-\( \sProp \)]
 		{%\tytm{\Gamma}{A}{\Type_i}
     \tytmannotated{\Gamma}{t}{A}{\Type_i}
-    \\ \tytm{\extctx[x]{\extctx[X]{\Gamma}{\Type_i}}{X}}{B}{\sProp} 
-    \\ \tytmannotated{\Gamma}{u}{\subst[x]{\subst[X]{B}{A}}{t}}{\sProp}
-    \\ \tytmannotated{\Gamma}{t'}{A'}{\Type_i}
-    \\ \tytmannotated{\Gamma}{e}{\Heteq{t}{A}{t'}{A'}}{\sProp}}
-  {\tytmannotated{\Gamma}{\hettransport{A}{t}{B}{u}{A'}{t'}{e}}{\subst[x]{\subst[X]{B}{A'}}{t'}}{\sProp}}
+    \\ \tytm{\extctx[x]{\Gamma}{A}}{B}{\sProp} 
+    \\ \tytmannotated{\Gamma}{u}{\subst[x]{B}{t}}{\sProp}
+    \\ \tytmannotated{\Gamma}{t'}{A}{\Type_i}
+    \\ \tytmannotated{\Gamma}{e}{\Heteq{t}{A}{t'}{A}}{\sProp}}
+  {\tytmannotated{\Gamma}{\hettransport{A}{t}{B}{u}{A}{t'}{e}}{\subst[x]{B}{t'}}{\sProp}}
 \end{mathpar}
 \begin{mathpar}
 	\inferrule[Heterogeneous-Cast]
@@ -396,9 +399,8 @@ following:
     {\tytmannotated{\Gamma}{\refl{t}{t}}{\Heteq{t}{A}{t}{A}}{\sProp}}
 \end{mathpar}
 
-From a computational perspective, the heterogeneous equality does not play
-the role of a type former, but rather that of an eliminator of the 
-universe---just like the homogeneous observational equality.
+Just like with the homogeneous equality, the heterogeneous equality plays
+the role of an eliminator of the universe.
 % 
 In other words, the term \( \Heteq{t}{A}{u}{B} \) computes by comparing the 
 head constructors of the types \( A \) and \( B \).
@@ -413,28 +415,46 @@ and if \( A \) and \( B \) have incompatible head constructors, then
   of the theory.}.
 
 Naturally, we also adjust the rules that describe equality on the base types. 
-For instance, the heterogeneous equality between two dependent pairs now reads 
+For instance, the heterogeneous equality between two dependent functions now reads 
 as follows:
 % 
 \begin{mathpar}
-  \inferrule[Heterogeneous-Eq-Pair]{\tytmannotated{\Gamma}{t,u}{\Depsumannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}} 
-			{\redmultiline{\Gamma}{\Heteq{t}{\Sigma A B}{u}{\Sigma A B}}{(\Heteq{\relfst{t}}{A}{\relfst{u}}{A})
-				\land {(\Heteq{\relsnd{t}}{B[\relfst{t}]}{\relsnd{u}}{B[\relfst{u}]})}}{\sProp}}
+  \inferrule[Heterogeneous-Eq-Fun]{
+    \tytmannotated{\Gamma}{f}{\Depfunannotated{A}{B}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}
+    \\ \tytmannotated{\Gamma}{g}{\Depfunannotated{A'}{B'}{}{\Type_i}{\Type_j}}{\Type_{\mathrm{max}(i,j)}}}
+			{\redmultiline{\Gamma}{\Heteq{f}{\Pi A B}{g}{\Pi A' B'}}
+        {\Pi (t : A)\ (u : A')\ .\ \Fun{(\Heteq{t}{A}{u}{A'})}{(\Heteq{f\ t}{B[t]}{g\ u}{B'[u]})}}{\sProp}}
 \end{mathpar}
 
-Remark that contrary to rule \nameref{inferrule:eq-pair}, we do not need to use
-type casting to state equality between the second projections. 
+Remark that contrary to the homogeneous rule \nameref{inferrule:eq-fun}, we do 
+not need to use the type casting operator in the reduction rule. 
 % 
 This is exactly what makes the heterogeneous equality nicer than the homogeneous 
 equality: it can be defined independently from \( \castName \).
 
-Other than making the system more modular, replacing the observational equality with the 
-heterogeneous variant does not change the behavior of \SetoidCC too much. 
-% 
-It seems safe to assume that all the meta-theory that we developed in
-\cref{ch:metatheory} would work just as well with a heterogeneous equality.
-Thus the choice between homogeneous and heterogeneous is a matter of taste
-more than anything.
+In counterpart, the heterogeneous equality brings a couple of interesting quirks
+to the table. 
+In the rule above, remark that if the domains \( A \) and \( A' \) are incompatible, 
+then the equality type \( \Heteq{f}{\Pi A B}{g}{\Pi A' B'} \) is equivalent to:
+\[
+  \Pi (t : A)\ (u : A')\ .\ \Fun{\Empty}{(\Heteq{f\ t}{B[t]}{g\ u}{B'[u]})}
+\]
+Since this type is always inhabited, any two functions with incompatible 
+domains are equal. This property becomes even more unsettling when we notice
+that it implies that the heterogeneous equality is not transitive: the
+boolean identity function is equal to the identity on \( \mathbb{N} \), which
+is equal to the boolean negation---but the boolean identity is not equal to
+the negation.
+
+The only way out is to consider that the heterogeneous equality mathematically 
+makes sense only when it is combined with a proof of equality of the two types 
+(in which case it becomes equivalent to the homogeneous equality with transport).
+
+As far as the meta-theoretical properties are concerned, picking a 
+heterogeneous equality does not change much. The proof of normalization goes
+through with a few minor tweaks here and there, and similarly for the 
+proof of consistency. Thus, the choice between homogeneous and heterogeneous
+is mostly a matter of taste.
 
 \subsection{Equality Without Computation}
 
@@ -449,7 +469,7 @@ As a computationally irrelevant property, its sole purpose is to add a
 logical constraint to \( \castName \) so that it becomes impossible to cast 
 between two incompatible types in an empty context.
 
-Therefore, any alternative definition fine as long as it does not add 
+Therefore, any alternative definition is fine as long as it does not add 
 equalities between incompatible types in an empty context, and as long as it allows us to
 give a type to all the reduction rules for \( \castName \). 
 % 
