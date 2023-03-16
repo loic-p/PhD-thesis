@@ -20,25 +20,25 @@ pour nous.
 % 
 \sideremark{Dans un assistant à la preuve basé sur la théorie des ensembles ZF 
   comme Metamath, le théorème \( {2+2=4} \) demande une preuve. 
-  Et bien qu'elle soit élémentaire, cette preuve implique une quantité surprenante 
-  de lemmes auxiliaires !}
+  Et bien qu'elle soit élémentaire, une telle preuve demande une quantité 
+  surprenante de lemmes auxiliaires~!}
 % 
 Par exemple, les termes \( 2 + 2 \) et \( 4 \) sont égaux définitionnellement, 
 ce qui signifie que nous pouvons les utiliser indifféremment dans nos preuves 
 sans avoir à nous soucier de prouver leur égalité à la main. 
 % 
-Lorsqu'on utilise des types dépendants, cette quantité minimale 
+Lorsque nous utilisons des types dépendants, cette quantité minimale 
 d'automatisation est absolument vitale pour éviter de se retrouver à insérer 
 des coercitions explicites à chaque fois que nous voulons, par exemple, 
 utiliser un terme de type \( \mathsf{Vector}\ (2+2) \) en tant que terme de 
 type \( \mathsf{Vector}\ 4 \).
 
-Mais malheureusement, il existe des objets qui ne sont pas des entiers 
-naturels, et les preuves mathématiques traitent 
-fréquemment d'égalités entre des objets infinitaires tels que les fonctions et les 
-ensembles. 
+Mais malheureusement, l'assistant à la preuve n'est pas capable de nous mâcher
+le travail dans tous les cas. Les preuves mathématiques traitent fréquemment 
+d'égalités entre des objets infinitaires tels que les fonctions et les 
+ensembles
 % 
-Et bien évidemment, il n'existe pas d'algorithme capable de décider si deux 
+et, bien évidemment, il n'existe pas d'algorithme capable de décider si deux 
 fonctions de type \( \Nat \to \Nat \) associent les mêmes images aux mêmes 
 antécédents.
 % 
@@ -52,7 +52,7 @@ les égalités, nous avons besoin d'un moyen de raisonner à leur sujet.
 C'est pourquoi la théorie des types intensionnelle fournit une seconde notion 
 d'égalité, appelée égalité \emph{propositionnelle}.
 % 
-Contrairement à l'égalité définitionnelle, celle-ci est disponible 
+Contrairement à l'égalité définitionnelle, celle-ci est directement manipulable 
 dans le langage de la théorie des types, et nous pouvons l'utiliser 
 pour énoncer et prouver des théorèmes. 
 % 
@@ -91,8 +91,8 @@ l'égalité définitionnelle, peut être utilisée pour réécrire des termes et
 être utilisée pour obtenir un terme de type \( B \) à partir d'un terme de type
 \( A \) et d'une preuve de \( A =_{\varType} B \).
 
-Une différence importante avec la pratique courante des mathématiques est qu'en théorie
-des types, nous restons très attachés à la correspondance de Curry-Howard 
+Une différence importante avec l'égalité usuelle des mathématiques informelles 
+est qu'en théorie des types, nous restons très attachés à la correspondance de Curry-Howard 
 entre les preuves et les programmes~: 
 l'égalité est un type, et les preuves d'égalité sont des programmes. 
 % 
@@ -183,7 +183,7 @@ règle~\nameref{infrule:J-conv} casse notre procédure de décision pour l'égal
 définitionnelle. 
 % 
 Toutefois, comme l'ont remarqué Abel et Coquand, il n'est pas clair que cela provienne d'une 
-incompatibilité fondamentale entre les propositions strictes imprédicatives et 
+incompatibilité fondamentale entre les propositions strictes de Lean et 
 l'égalité propositionnelle, et qu'il n'existe pas une stratégie plus 
 intelligente qui pourrait résoudre ce problème.
 
@@ -255,13 +255,13 @@ Les différents assistants à la preuve ont adopté des attitudes diverses en ce
 concerne l'imprédicativité. D'une part, 
 % 
 \sideremark{Dans sa version initiale, \Coq utilisait une sorte imprédicative
-  pour les types \emph{proof-relevant}, mais l'équipe de développement a 
+  pour les types non propositionnels, mais l'équipe de développement a 
   préféré abandonner cette fonctionnalité pour rester compatible avec les
   mathématiques classiques.}
 % 
 \Coq et \Lean ont tous deux adopté l'imprédicativité pour leur sorte des 
 propositions, qui cohabite avec la hiérarchie d'univers prédicatifs utilisée 
-pour les types \emph{proof-relevant}~\sidecite{Coq:manual,lean}.
+pour les types non propositionnels.~\sidecite{Coq:manual,lean}.
 % 
 D'autre part, l'assistant à la preuve \Agda a choisi de ne pas implémenter
 l'imprédicativité et utilise deux hiérarchies prédicatives à la place, une 
