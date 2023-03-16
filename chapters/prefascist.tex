@@ -205,7 +205,7 @@ managed to encode it nicely inside type theory:
 \ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{category}
 
 Furthermore, we assume that the unit laws and the associativity of
-composition in \( \cat{C} \) hold \emph{by definition}:
+composition in \( \cat{C} \) hold \emph{definitionally}:
 
 \ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{equations}
 
@@ -228,7 +228,7 @@ that we have an actual implementation of \( \cat{C} \) with instances of
 equations.
 % 
 It could be the case for instance if we managed to express \( \cat{C} \) as a 
-full subcategory of \func{Set}, in which case the morphisms are just 
+full subcategory of \func{Set}, in which case the morphisms are 
 functions, whose composition is associative by defintion.
 % 
 This might seem like an arbitrary and restrictive constraint on the category 
@@ -272,7 +272,7 @@ side:
 
 \begin{center}
     \sideremark{The horizontal equalities are instances of \field{F\_comp},
-        and the two vertical equalities hold by definition.}
+        and the two vertical equalities hold definitionally.}
 \tikzset{triple/.style={-,AgdaDatatype,preaction={draw,AgdaDatatype,double,double distance=2pt}}}
 \begin{tikzcd}
     \field{F₁}\ ((f\ \func{\circ}\ g)\ \func{\circ}\ h)
@@ -353,7 +353,7 @@ But this approach will not get us very far:
 a type of presheaves with superfluous 2-dimensional loops.
 % 
 Going further in this direction only leads us towards an infinite tower 
-of equalities of ever increasing dimensions, with no apparant way to make it 
+of equalities of ever increasing dimensions, with no apparent way to make it 
 fit into a finite definition.
 
 Here, we recognize a well-known pattern, as difficulties with infinite 
@@ -368,7 +368,7 @@ strictly increasing maps \( \Delta_+ \).
 % 
 As we will explain shortly, if our type theory supports strict propositions,
 \( \Delta_+ \) can be presented as a category that satisfies the composition
-and the unit laws by definition, which means that the definition of 
+and the unit laws definitionally, which means that the definition of 
 semi-simplicial sets is a special case of the problem we are trying to solve.
 % 
 This is bad news!
@@ -412,7 +412,7 @@ enforce the uniqueness of identity proofs, so that every type is a hset.
 % 
 For instance, in the observational type theory \SetoidCC from 
 \cref{ch:observational} identity types are strict propositions,
-which means all identity proofs are equal by definition.
+which means all identity proofs are definitionally equal.
 
 \SetoidCC gets very close to a type-theoretic account of constructive set 
 theory, so we can reasonably expect that doing mathematics with presheaves 
@@ -455,7 +455,7 @@ their properties.
 % 
 As with \cref{sec:intensional-problems}, we assume that we are working with a 
 \emph{strict} category, that is a category \( \cat{C} \) that satisfies the 
-associativity and unit laws by definition. 
+associativity and unit laws definitionally. 
 % 
 \sideremark{In \cref{ch:intro_english} we used \( \varsProp \) for the sort
  of strict propositions, and we reserved \( \varProp \) for the sort of 
@@ -469,7 +469,7 @@ It works just like the universe \func{Set}, except that any type \( A \)
 in \func{Prop} is proof-irrelevant, meaning that all terms with type 
 \( A \) are convertible.
 % 
-We also add a strict truncation operator \func{∥\_∥ₛ} that embeds 
+We also add a strict truncation operator \func{∥\_∥ₛ} that reflects 
 proof-relevant types in \func{Prop}.
 
 As an illustration for the use of \func{Prop}, we can use it to define the category
@@ -486,7 +486,7 @@ categories in this way.
 
 In order to arrive at a definition of prefascist types, we start by 
 investigating strict presheaves of types, \ie presheaves of types that satisfy 
-the functoriality equations by definition. 
+the functoriality equations definitionally. 
 % 
 Even though we do not have an internal definition for their type, we can still 
 assume we have an object \( F \) that satisfies the functoriality equations up 
@@ -502,9 +502,9 @@ definition.}
 Although we cannot define it internally in \MLTT, we will write 
 \( \catsPsh{\cat{C}} \) for the category of strict type-theoretic presheaves
 and strict natural transformations.
-An element of \( \catsPsh{\cat{C}} \) is given by two terms 
+An inhabitant of \( \catsPsh{\cat{C}} \) is given by two terms 
 \func{F₀} and \func{F₁} of \MLTT that satisfy the equations \func{F\_id} and 
-\func{F\_comp} by definition, and a morphism is defined in a similar way.
+\func{F\_comp} definitionally, and a morphism is defined in a similar way.
 Note that our category \( \catsPsh{\cat{C}} \) of type-theoretic presheaves 
 only contains \emph{internal presheaves}: we do not consider arbitrary 
 set-theoretic functors from \( \cat{C} \) to the
@@ -613,7 +613,7 @@ This definition might look daunting at first, but it simply imitates
 the definition of an element of \( G \) with an element of \( F \) in the 
 context: ``morphisms are generalized elements''. We invite the reader
 to check that morphisms are in fact strict natural transformations (meaning 
-that the naturality holds by definition).
+that the naturality holds definitionally).
 
 Thus, our prefascist types form a remarkable subcategory of \( \catsPsh{\cat{C}} \) that
 can be defined in a minor extension of \MLTT.
@@ -681,7 +681,7 @@ And its counit is derived from the identity morphism of \( \cat{C} \):
 \end{array}
 \]
 Since \( \cat{C} \) is a strict category, it follows that \( \iota^* \iota_* \) 
-satisfies the comonad equations by definition: the associativity of the 
+satisfies the comonad equations definitionally: the associativity of the 
 comultiplication corresponds to associativity of the composition in \( \cat{C} \) 
 and the unit laws for the comultiplication correspond to the unit laws for 
 \( \cat{C} \).
@@ -692,7 +692,7 @@ has the category of presheaves as its category of coalgebras.
 \begin{theorem}
   The category of strict type-theoretic presheaves \( \catsPsh{\cat{C}} \) is equivalent 
   to the category of strict type-theoretic
-  coalgebras of the the comonad \( \iota^* \iota_* \). In other words, \( \iota^* \dashv \iota_* \) is a 
+  coalgebras of the comonad \( \iota^* \iota_* \). In other words, \( \iota^* \dashv \iota_* \) is a 
   comonadic adjunction.
 \end{theorem}
 \begin{proof}
@@ -702,7 +702,7 @@ has the category of presheaves as its category of coalgebras.
   \[ 
      F(a) \to \AgdaSymbol{∀}\ b\ (f : \func{Hom}\ b\ a)\ \to\ F(b)
   \]
-  that satisfy the two coalgebra equations by definition, which are respectively the 
+  that satisfy the two coalgebra equations definitionally, which are respectively the 
   compatibility with composition and identities.
 \end{proof}
 This decomposition of the theory of presheaves into the adjunction 
@@ -719,7 +719,7 @@ However there is an important subcategory that we can define in type theory: the
 co-Kleisli category of the adjunction, which is equivalent to the category of 
 cofree coalgebras.
 %
-The objects of the co-Kleisli category are presheaves on \( \obj{\cat{C}_0} \), 
+The objects of the co-Kleisli category are presheaves on \( \cat{C}_0 \), 
 and the hom-types are given by
 \[
     \hom[\mathrm{coK}]{F}{G} := \AgdaSymbol{∀}\ a\ \to \iota^* \iota_* F(a) \to G(a).
@@ -728,7 +728,7 @@ The composition of two morphisms \( \theta \) and \( \xi \) in the co-Kleisli
 category is obtained by computing \( \theta \circ (\iota^* \iota_* \xi) \) in 
 \( \catsPsh{\cat{C}_0} \) and composing it with the comultiplication. This 
 composition is strictly associative, because all the laws of the comonad 
-\( \iota^* \iota_* \) hold by definition.
+\( \iota^* \iota_* \) hold definitionally.
 
 The subcategory of cofree presheaves is convenient to define and manipulate in 
 type theory, but it supports only a small portion of the structure
@@ -817,19 +817,33 @@ This seems a bit artificial: most categories we can encounter in the wild
 do not have such a strong property, and what good are our prefascist types if
 we can only define them on a very limited subset of categories?
 % 
-However in this section we show that any small category can be presented as
-a strict category, given that we have access to a sort \func{Prop} of strict
-propositions.
+However in this section we show that any small category whose morphism types
+are \emph{hsets} can be presented as a strict category, given that we have 
+access to a sort \func{Prop} of strict propositions.
 
-Assume we are given a non-strict category \( \cat{C} \) consisting of a type
-of objects \func{Obj}, a \emph{hset} of morphisms for any two objects \( a \) 
-and \( b \), and a composition and identities with equations that hold only
-up to a propositional equality.
+\begin{theorem}
+    Assume we are given a non-strict category \( \cat{C} \) whose hom-types 
+    are set-truncated.
+
+    Then we can define a strict category \( \cat{C}' \) with a faithful functor 
+    from \( \cat{C} \) to \( \cat{C}' \), and given some mild additional 
+    assumptions we can prove that this functor is in fact an equivalence of
+    categories.
+\end{theorem}
+
+\begin{proof}
+A non-strict category consists of a type of objects \func{Obj}, a \emph{hset} of 
+morphisms for any two objects \( a \) and \( b \), and a composition and 
+identities with equations that hold only up to a propositional equality:
+\sideremark{We do not risk any higher coherence issues by using
+    propositional equality, since we assumed that the morphism 
+    types of \( \cat{C} \) are set-truncated.}
 
 \ExecuteMetaData[chapters/literate-agda/Presheaf.tex]{nonstrictcategory}
 
-We can use the Yoneda lemma to replace the hom-set \( \func{Hom}\ a\ b \) with 
-the isomorphic hset \( \hom[\catPsh{\cat{C}}]{\yo(a)}{\yo(b)} \). This way,
+Informally, the idea is to use the Yoneda lemma to replace the hom-set 
+\( \func{Hom}\ a\ b \) with the isomorphic hset 
+\( \hom[\catPsh{\cat{C}}]{\yo(a)}{\yo(b)} \). This way,
 morphisms become natural transformations of presheaves, which can be written as
 dependent functions with a naturality condition in \func{Prop}. This trick allows
 us to define a strict category \( \cat{C}' \) from \( \cat{C} \) as follows:
@@ -853,19 +867,21 @@ us to define a strict category \( \cat{C}' \) from \( \cat{C} \) as follows:
 
 With this definition, composition of two morphisms becomes a composition
 of functions with a manipulation of proof-irrelevant conditions, which is 
-associative by definition. 
+definitionally associative. 
 Likewise, the unit laws correspond to composition with an identity function,
-which is unital by definition.
+which is definitionally unital.
 Therefore our replacement for \( \cat{C} \) is a strict category.
 
+It is easily checked that the Yoneda embedding is a faithful functor.
 But is \( \cat{C}' \) actually equivalent to \( \cat{C} \)?
 It is the case if we interpret types as classical sets, or as 
 \( \infty \)-groupoids.
 % 
-But proving the equivalence in the internal language of type theory is not
-possible in general, unless we have enough structure to recover a proof of 
+However, proving the equivalence in the internal language of type theory is not
+possible in general, because we need enough structure to recover a proof of 
 \( a\ \func{\equiv}\ b \) from a proof of \( \func{∥}\ a\ \func{\equiv}\ b\ \func{∥ₛ} \)
----for instance, if we are working in observational type theory.
+---for instance, it could be the case if we are working in observational type theory.
+\end{proof}
 
 \subsection{The Prefascist Translation}
 \label{sec:PMP_translation}
